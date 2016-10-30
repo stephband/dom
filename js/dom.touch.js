@@ -1,30 +1,13 @@
 (function(window) {
 	"use strict";
 
+	var Fn     = window.Fn;
 	var dom    = window.dom;
-	var assign = Object.assign;
 
 
 	// Number of pixels a pressed pointer travels before movestart
 	// event is fired.
 	var threshold = 8;
-
-	// Shim for requestAnimationFrame, falling back to timer. See:
-	// see http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-	var requestFrame = (function(){
-		return (
-			window.requestAnimationFrame ||
-			window.webkitRequestAnimationFrame ||
-			window.mozRequestAnimationFrame ||
-			window.oRequestAnimationFrame ||
-			window.msRequestAnimationFrame ||
-			function(fn, element){
-				return window.setTimeout(function(){
-					fn();
-				}, 25);
-			}
-		);
-	})();
 
 	var ignoreTags = {
 			textarea: true,
@@ -45,12 +28,9 @@
 		end:    'touchend'
 	};
 
-	var rspaces = /\s+/;
-
 
 	// Functions
 
-	var noop = Fn.noop;
 	var on              = dom.on;
 	var off             = dom.off;
 	var trigger         = dom.trigger;
@@ -202,9 +182,6 @@
 	// Handlers that control what happens following a movestart
 
 	function activeMousemove(e, data) {
-		//var timer  = data.timer;
-		var event  = data.event;
-
 		data.touch = e;
 		data.timeStamp = e.timeStamp;
 
@@ -213,19 +190,10 @@
 			y:    e.pageY - data.startY,
 			time: (e.timeStamp - data.startTime) / 1000
 		});
-
-		//event.path.push([
-		//	e.pageX - data.startX,
-		//	e.pageY - data.startY,
-		//	e.timeStamp - data.startTime
-		//]);
-
-		//timer.kick();
 	}
 
 	function activeMouseend(e, data) {
 		var target = data.target;
-		var event  = data.event;
 
 		removeActiveMouse();
 		data.stream.stop();
@@ -243,8 +211,6 @@
 	}
 
 	function activeTouchmove(e, data) {
-		var event = data.event;
-		//var timer = data.timer;
 		var touch = changedTouch(e, data);
 
 		if (!touch) { return; }
@@ -255,12 +221,14 @@
 		data.touch = touch;
 		data.timeStamp = e.timeStamp;
 
-		//timer.kick();
+		data.stream.push({
+			x:    touch.pageX - data.startX,
+			y:    touch.pageY - data.startY,
+			time: (touch.timeStamp - data.startTime) / 1000
+		});
 	}
 
 	function activeTouchend(e, data) {
-		var target = data.target;
-		var event  = data.event;
 		var touch  = identifiedTouch(e.changedTouches, data.identifier);
 
 		// This isn't the touch you're looking for.
@@ -313,7 +281,7 @@
 		}
 
 		return stream;
-	};
+	}
 
 	on(document, 'mousedown', mousedown);
 	on(document, 'touchstart', touchstart);

@@ -1,8 +1,6 @@
 (function(window) {
 	"use strict";
 
-	var debug = true;
-
 	// Import
 
 	var Fn             = window.Fn;
@@ -22,7 +20,7 @@
 
 	var assign = Object.assign;
 	var slice  = Function.prototype.call.bind(Array.prototype.slice);
-	var noop   = Fn.noop;
+
 
 	// TokenList constructor to emulate classList property. The get fn should
 	// take the arguments (node), and return a string of tokens. The set fn
@@ -198,7 +196,7 @@
 	}
 
 	function html(target, html) {
-		node.innerHTML = html;
+		target.innerHTML = html;
 	}
 
 	function empty(node) {
@@ -256,7 +254,7 @@
 	}
 
 	function Events(node, types, selector) {
-		var stream = Fn.Stream.of();
+		var stream = Stream.of();
 		var _stop = stream.stop;
 
 		function push(e) {
@@ -311,7 +309,7 @@
 	function trigger(node, type, properties) {
 		// Don't cache events. It prevents you from triggering an event of a
 		// given type from inside the handler of another event of that type.
-		event = Event(type, properties);
+		var event = Event(type, properties);
 		node.dispatchEvent(event);
 	}
 

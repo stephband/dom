@@ -4,7 +4,6 @@
 	var dom = window.dom;
 
 	var on      = dom.on;
-	var off     = dom.off;
 	var trigger = dom.trigger;
 	var closest = dom.closest;
 

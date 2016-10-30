@@ -24,6 +24,7 @@ title: jQuery.event.move
 	<link rel="stylesheet" type="text/css" href="http://stephband.github.com/css/docs.classes.css" />
 	<link rel="stylesheet" type="text/css" href="http://stephband.github.com/css/site.highlight.light.css" />
 	<link rel="stylesheet" type="text/css" href="css/demo.css" />
+	<link rel="stylesheet" type="text/css" href="css/slide.css" />
 </head>
 
 <body>
@@ -39,7 +40,7 @@ title: jQuery.event.move
 		<h1>dom</h1>
 	
 		<div class="test_wrap wrap">
-			<div class="test swipeable">
+			<div class="test swipeable moveable">
 			 <div class="resize"></div>
 			 <div class="rotate"></div>
 			</div>
@@ -54,77 +55,24 @@ title: jQuery.event.move
 			<li>Github: <a href="http://github.com/stephband/dom">github.com/stephband/dom</a></li>
 			<li>Issues: <a href="http://github.com/stephband/dom/issues">github.com/stephband/dom/issues</a></li>
 		</ul>
-		
-		<!--h2 id="how">How to use move events</h2>
-		
-		<div class="grid-block block">
-			<div class="grid-1/2 block">
-				<h3 class="text-4">Native DOM</h3>
-{% highlight js %}
-var node = document.querySelector('.mydiv');
+	</div>
 
-// A movestart event must be bound
-// and explicitly enabled
-node.addEventListener('movestart', function(e) {
-  e.enableMove();
-});
+	<div class="site_wrap wrap">
+		<h1>.slideable</h1>
 
-node.addEventListener('move', function(e) {
-  // move .mydiv horizontally
-  this.style.left = (e.startX + e.distX) + 'px';
-})
-
-node.addEventListener('moveend', function() {
-  // move is complete!
-});{% endhighlight %}
-				<p><code>.enableMove()</code> is a necessary performance optimisation
-				(that works around the DOM's lack of event inspection).</p>
-			</div
-
-			><div class="grid-1/2 block">
-				<h3 class="text-4">jQuery</h3>
-{% highlight js %}
-jQuery('.mydiv')
-.on('move', function(e) {
-  // move .mydiv horizontally
-  jQuery(this).css({ left: e.startX + e.distX });
-})
-.on('moveend', function() {
-  // move is complete!
-});{% endhighlight %}
-				<p>(jQuery's special event system does the work of enabling
-				move events so there is no need to explicitly bind to
-				<code>movestart</code>.)</p>
-			</div>
+		<div class="img_slides_wrap slides_wrap wrap slideable swipeable">
+			<img class="img_slide slide active switchable" id="slide1" src="https://lh5.googleusercontent.com/-MShhyv4lWuM/T4Si18g0XsI/AAAAAAAAANU/Nnnxh68myRA/s768/Norway_201241.png"
+			/><img class="img_slide slide switchable" id="slide2" src="https://lh6.googleusercontent.com/-BED5h574s1Q/T4Sji7_hmOI/AAAAAAAAAO8/JMChDngsCDk/s768/Norway_201284.png"
+			/><img class="img_slide slide switchable" id="slide3" src="https://lh6.googleusercontent.com/-n31QkVB4M9c/T4SjckZM1TI/AAAAAAAAAOs/H26JyEo9970/s768/Norway_201276.png"
+			/><img class="img_slide slide switchable" id="slide4" src="https://lh6.googleusercontent.com/-jti_dD8mDiQ/T4ShY14T5HI/AAAAAAAAAKE/-jF6OT_zmb4/s768/Norway_2012102.png" />
 		</div>
 
-		<h2 id="why1">Why not just use mouse or touch events?</h2>
-
-		<p>Well, yes, you can. But move events abstract away the details that need attention when writing this kind of interaction model with mouse and touch events:</p>
-
-		<ul>
-			<li>Supports mouse and touch devices, exposing the same event API for both</li>
-			<li>Throttles moves to animation frames, preventing unneccesary calls</li>
-			<li>Ignores the right mouse button and clicks with modifier keys</li>
-			<li>Prevents text selection while moving</li>
-			<li>Handles multiple touches</li>
-			<li>Deals with bug (Chrome, possibly all Android) where changedTouches includes touches that have not changed</li>
-			<li>Handles browser differences where touches in iOS are live objects, where in Android they are static</li>
-			<li>Does not bork interaction with form inputs inside moveable nodes</li>
-			<li>Suppresses drag and drop events</li>
+		<ul class="inline-index index">
+			<li><a class="slide_button button" href="#slide1">1</a></li>
+			<li><a class="slide_button button" href="#slide2">2</a></li>
+			<li><a class="slide_button button" href="#slide3">3</a></li>
+			<li><a class="slide_button button" href="#slide4">4</a></li>
 		</ul>
-	
-		<p>Move events are intended as 'building blocks' for helping to build interactions.
-		They track individual fingers or a single mouse, and expose properties on their event objects that are useful for detecting gestures.</p>
-		
-		
-		<h2 id="why2">What about drag events?</h2>
-		
-		<p>Move events are designed to compliment drag events, where the two have different meanings: drag events are for transferring data while move events are for making interactive interfaces.
-		That said, <code>movestart</code>, <code>move</code> and <code>moveend</code> events deliberately echo <code>dragstart</code>, <code>drag</code> and <code>dragend</code> events, with one main difference:
-		where the <code>drag</code> event fires continuously whether you have moved the pointer or not, the <code>move</code> event fires only after the pointer has been moved, and only on animation frames.</p>
-		
-		<p>Where both a <code>dragstart</code> and any move event are bound to the same node, drag events are suppressed.</p-->
 	</div>
 
 	<footer class="site_footer">
@@ -160,8 +108,11 @@ jQuery('.mydiv')
 	<script src="polyfills/window.customevent.js"></script>
 	<script src="fn/js/fn.js"></script>
 	<script src="js/dom.js"></script>
+	<script src="js/dom.activate.js"></script>
 	<script src="js/dom.touch.js"></script>
 	<script src="js/dom.swipe.js"></script>
+	<script src="js/dom.moveable.js"></script>
+	<script src="js/dom.slideable.js"></script>
 	<script>
 		function toDeg(n) { return n * 57.295779513; }
 		function toRad(n) { return n / 57.295779513; }

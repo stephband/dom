@@ -59,6 +59,12 @@
 			}
 
 			this.set(this.node, array.join(' '));
+		},
+		
+		contains: function(string) {
+			var tokens = this.get(this.node);
+			var array = tokens ? tokens.trim().split(rspaces) : [] ;
+			return array.indexOf(string) !== -1;
 		}
 	};
 

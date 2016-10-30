@@ -1,0 +1,51 @@
+
+.site_wrap > .slides_wrap {
+	margin-bottom: 1em;
+	margin-left: -8px;
+	margin-right: -8px;
+}
+
+.img_slides_wrap {
+	width: 784px;
+	border: 8px solid #333333;
+	background-color: #444444;
+	overflow: hidden;
+}
+
+.img_slide {
+	padding: 0;
+}
+
+.js .img_slide {
+	/* Overide template's height transitions. */
+	width: 100%;
+	height: auto;
+}
+
+.slide_buttons_index {
+	text-align: center;
+}
+
+.notransition,
+.notransition .slide {
+	-webkit-transition-duration: 0 !important;
+	   -moz-transition-duration: 0 !important;
+	    -ms-transition-duration: 0 !important;
+	        transition-duration: 0 !important;
+
+	-webkit-transition-delay: 0 !important;
+	   -moz-transition-delay: 0 !important;
+	    -ms-transition-delay: 0 !important;
+	        transition-delay: 0 !important;
+}
+
+@media screen and (max-width: 640px) {
+	.img_slides_wrap {
+		width: 100%;
+
+		-webkit-box-sizing: content-box;
+		   -moz-box-sizing: content-box;
+		    -ms-box-sizing: content-box;
+		        box-sizing: content-box;
+	}
+}

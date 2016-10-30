@@ -181,23 +181,23 @@
 
 	// DOM Mutation
 
-	function appendChild(node, child) {
-		node.appendChild(child);
+	function appendChild(target, node) {
+		target.appendChild(node);
 	}
 
-	function append(node, child) {
-		if (child instanceof Node || child instanceof SVGElement) {
-			return appendChild(node, child);
+	function append(target, node) {
+		if (node instanceof Node || node instanceof SVGElement) {
+			return appendChild(target, node);
 		}
 
-		if (child.length) {
-			Array.prototype.forEach.call(child, function(child) {
-				appendChild(node, child);
+		if (node.length) {
+			Array.prototype.forEach.call(node, function(node) {
+				appendChild(target, node);
 			});
 		}
 	}
 
-	function html(html, node) {
+	function html(target, html) {
 		node.innerHTML = html;
 	}
 

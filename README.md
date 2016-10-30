@@ -37,7 +37,7 @@ All functions are curried.
 ##### `.tag(node)`
 ##### `.classes(node)`
 ##### `.style(node)`
-##### `.html(html, node)`
+##### `.html(target, html)`
 ##### `.append(target, node)`
 ##### `.before(target, node)`
 ##### `.after(target, node)`

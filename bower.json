@@ -1,0 +1,18 @@
+{
+    "name": "dom",
+    "version": "0.1.0",
+    "author": {
+        "name": "Stephen Band",
+        "url": "http://stephen.band",
+        "twitter": "stephband"
+    },
+    "dependencies": {
+        "fn": ">=1.0.0"
+    },
+    "licenses": [{"url":"http://unlicense.org/"}],
+    "main": "js/dom.js",
+    "description": "A library of functional functions, DOM events and Event Streams for HTML and SVG.",
+    "keywords": ["touch","special","event","finger","move"],
+    "homepage": "http://stephen.band/dom",
+    "docs": "http://github.com/stephband/dom",
+}

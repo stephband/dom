@@ -113,7 +113,7 @@
 		return node.tagName.toLowerCase();
 	}
 
-	function getClasses(node) {
+	function classes(node) {
 		return node.classList || new TokenList(node, getClass, setClass);
 	}
 
@@ -132,7 +132,7 @@
 		}
 	}
 
-	function getStyle(name, node) {
+	function style(name, node) {
 		return window.getComputedStyle ?
 			window
 			.getComputedStyle(node, null)
@@ -255,6 +255,23 @@
 		return event;
 	}
 
+	function Events(node, types, selector) {
+		var stream = Fn.Stream.of();
+		var _stop = stream.stop;
+
+		function push(e) {
+			stream.push(e);
+		}
+
+		stream.on('done', function() {
+			_stop.apply(this);
+			off(node, types, push, selector);
+		});
+
+		on(node, types, push, selector);
+		return stream;
+	}
+
 	function on(node, types, fn, data, selector) {
 		types = types.split(rspaces);
 
@@ -311,23 +328,6 @@
 		};
 	}
 
-	function Events(node, types, selector) {
-		var stream = Fn.Stream.of();
-		var _stop = stream.stop;
-
-		function push(e) {
-			stream.push(e);
-		}
-
-		stream.on('done', function() {
-			_stop.apply(this);
-			off(node, types, push, selector);
-		});
-
-		on(node, types, push, selector);
-		return stream;
-	}
-
 
 	// DOM Fragments and Templates
 
@@ -349,7 +349,7 @@
 		var node = document.getElementById(id);
 		if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }
 
-		var tag = DOM.tag(node);
+		var tag = tag(node);
 		if (tag !== 'template' && tag !== 'script') { return; }
 
 		if (node.content) {
@@ -434,12 +434,12 @@
 
 	function getFontSize() {
 		return fontSize ||
-			(fontSize = parseFloat(getStyle("font-size", document.documentElement), 10));
+			(fontSize = parseFloat(style("font-size", document.documentElement), 10));
 	}
 
 	// DOM
 
-	function DOM(selector, node) {
+	function dom(selector, node) {
 		return typeof selector === "string" ?
 				A.slice.apply((node || document).querySelectorAll(selector)) :
 			Node.prototype.isPrototypeOf(selector) ?
@@ -447,7 +447,7 @@
 			A.slice.call(selector) ;
 	}
 
-	assign(DOM, {
+	assign(dom, {
 
 		// Nodes
 
@@ -459,8 +459,8 @@
 		create:         create,
 		clone:          clone,
 		tag:            tag,
-		classes:        getClasses,
-		style:          getStyle,
+		classes:        classes,
+		style:          Fn.curry(style),
 		append:         Fn.curry(append),
 		html:           Fn.curry(html),
 		before:         Fn.curry(before),
@@ -469,9 +469,6 @@
 		remove:         remove,
 		matches:        Fn.curry(matches),
 		closest:        Fn.curry(closest),
-
-		getClass:       getClass,
-		setClass:       setClass,
 		valueToPx:      valueToPx,
 		find:           find,
 		findOne:        findOne,
@@ -490,7 +487,6 @@
 
 		isPrimaryButton: isPrimaryButton,
 		preventDefault:  preventDefault,
-
 		Events:          Fn.curry(Events),
 		Event:           Event,
 		on:              on,
@@ -509,5 +505,5 @@
 
 	// Export
 
-	window.DOM = DOM;
+	window.dom = dom;
 })(this);

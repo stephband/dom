@@ -36,7 +36,13 @@ All functions are curried.
 ##### `.clone(node)`
 ##### `.tag(node)`
 ##### `.classes(node)`
-##### `.style(node)`
+
+Returns the classList of `node`.
+
+##### `.style(property, node)`
+
+Returns the computed style `property` of `node`.
+
 ##### `.html(target, html)`
 ##### `.append(target, node)`
 ##### `.before(target, node)`

@@ -1,7 +1,7 @@
 (function(window) {
 	"use strict";
 
-	var DOM    = window.DOM;
+	var dom    = window.dom;
 	var assign = Object.assign;
 
 
@@ -51,11 +51,11 @@
 	// Functions
 
 	var noop = Fn.noop;
-	var on              = DOM.on;
-	var off             = DOM.off;
-	var trigger         = DOM.trigger;
-	var isPrimaryButton = DOM.isPrimaryButton;
-	var preventDefault  = DOM.preventDefault;
+	var on              = dom.on;
+	var off             = dom.off;
+	var trigger         = dom.trigger;
+	var isPrimaryButton = dom.isPrimaryButton;
+	var preventDefault  = dom.preventDefault;
 
 	function isIgnoreTag(e) {
 		return !!ignoreTags[e.target.tagName.toLowerCase()];

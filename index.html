@@ -155,11 +155,13 @@ jQuery('.mydiv')
 		</div>
 	</footer>
 
-	<script src="jquery/jquery-3.1.1.js"></script>
-	<script src="../fn/js/fn.js"></script>
+	<script src="fn/polyfills/number.isnan.js"></script>
+	<script src="fn/polyfills/object.assign.js"></script>
+	<script src="polyfills/window.customevent.js"></script>
+	<script src="fn/js/fn.js"></script>
 	<script src="js/dom.js"></script>
-	<script src="js/dom.swipe.js"></script>
 	<script src="js/dom.touch.js"></script>
+	<script src="js/dom.swipe.js"></script>
 	<script>
 		function toDeg(n) { return n * 57.295779513; }
 		function toRad(n) { return n / 57.295779513; }
@@ -192,63 +194,58 @@ jQuery('.mydiv')
 		
 		// log event objects
 		function logEvent(e){ window.console && console.log(e.type, e); }
-		
-		jQuery(document)
-		//.bind('mousedown mouseup', logEvent)
-		.ready(function(){
-			var start;
-			var box        = jQuery('.test');
-			var resize     = jQuery('.resize');
-			var rotate     = jQuery('.rotate');
-			var centreMark = jQuery('.centre_mark');
-			var originMark = jQuery('.origin_mark');
 
-			// Test properties
 
-			// Test for correct deltaX and deltaY values
+		var box        = dom('.test');
+		var resize     = dom('.resize');
+		var rotate     = dom('.rotate');
+		var centreMark = dom('.centre_mark');
+		var originMark = dom('.origin_mark');
 
-			var distX = 0, distY = 0, pageX = 0, pageY = 0, startX = 0, startY = 0;
+		// Test properties
 
-			box[0].addEventListener('touch', function(e) {
-				var touch = e.detail();
+		// Test for correct deltaX and deltaY values
 
-				console.log('touch', e);
+		var distX = 0, distY = 0, pageX = 0, pageY = 0, startX = 0, startY = 0;
 
-				touch
-				.each(function(data) {
-					console.log(data);
+		dom.on(box[0], 'touch', function(e) {
+			console.log('touch', e);
 
-					//console.assert(data.startX === startX, 'e.startX property not correct. Expected:', startX, 'Actual:', data.startX);
-					//console.assert(data.startY === startY, 'e.startY property not correct. Expected:', startY, 'Actual:', data.startY);
-					//console.assert(data[0] === data.pageX - pageX, 'e.deltaX property not correct. e.startX:', data.startX, 'e.distX:', data.distX, 'e.deltaX:', data.deltaX, 'e.pageX:', data.pageX);
-					//console.assert(data[1] === data.pageY - pageY, 'e.deltaY property not correct. e.startY:', data.startY, 'e.distY:', data.distY, 'e.deltaY:', data.deltaY, 'e.pageY:', data.pageY);
-					//console.assert(data.distX === data.pageX - pageX, 'e.pageX  property not correct. e.startX:', data.startX, 'e.distX:', data.distX, 'e.deltaX:', data.deltaX, 'e.pageX:', data.pageX);
-					//console.assert(data.distY === data.pageY - pageY, 'e.pageY  property not correct. e.startY:', data.startY, 'e.distY:', data.distY, 'e.deltaY:', data.deltaY, 'e.pageY:', data.pageY);
-				});
+			e
+			.detail()
+			.each(function(data) {
+				console.log(data);
 
-				startX = e.pageX;
-				startY = e.pageY;
-				distX  = 0;
-				distY  = 0;
-				pageX  = e.pageX;
-				pageY  = e.pageY;
+				//console.assert(data.startX === startX, 'e.startX property not correct. Expected:', startX, 'Actual:', data.startX);
+				//console.assert(data.startY === startY, 'e.startY property not correct. Expected:', startY, 'Actual:', data.startY);
+				//console.assert(data[0] === data.pageX - pageX, 'e.deltaX property not correct. e.startX:', data.startX, 'e.distX:', data.distX, 'e.deltaX:', data.deltaX, 'e.pageX:', data.pageX);
+				//console.assert(data[1] === data.pageY - pageY, 'e.deltaY property not correct. e.startY:', data.startY, 'e.distY:', data.distY, 'e.deltaY:', data.deltaY, 'e.pageY:', data.pageY);
+				//console.assert(data.distX === data.pageX - pageX, 'e.pageX  property not correct. e.startX:', data.startX, 'e.distX:', data.distX, 'e.deltaX:', data.deltaX, 'e.pageX:', data.pageX);
+				//console.assert(data.distY === data.pageY - pageY, 'e.pageY  property not correct. e.startY:', data.startY, 'e.distY:', data.distY, 'e.deltaY:', data.deltaY, 'e.pageY:', data.pageY);
 			});
 
-			DOM.on(document, 'swipeleft', function(e) {
-				console.log('SWIPELEFT', e);
-			});
-			
-			DOM.on(document, 'swiperight', function(e) {
-				console.log('SWIPERIGHT', e);
-			});
-			
-			DOM.on(document, 'swipeup', function(e) {
-				console.log('SWIPEUP', e);
-			});
-			
-			DOM.on(document, 'swipedown', function(e) {
-				console.log('SWIPEDOWN', e);
-			});
+			startX = e.pageX;
+			startY = e.pageY;
+			distX  = 0;
+			distY  = 0;
+			pageX  = e.pageX;
+			pageY  = e.pageY;
+		});
+
+		dom.on(document, 'swipeleft', function(e) {
+			console.log('SWIPELEFT', e);
+		});
+
+		dom.on(document, 'swiperight', function(e) {
+			console.log('SWIPERIGHT', e);
+		});
+
+		dom.on(document, 'swipeup', function(e) {
+			console.log('SWIPEUP', e);
+		});
+
+		dom.on(document, 'swipedown', function(e) {
+			console.log('SWIPEDOWN', e);
 		});
 	</script>
 </body>

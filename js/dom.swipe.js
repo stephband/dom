@@ -1,12 +1,12 @@
 (function(window) {
 	"use strict";
 
-	var DOM = window.DOM;
+	var dom = window.dom;
 
-	var on      = DOM.on;
-	var off     = DOM.off;
-	var trigger = DOM.trigger;
-	var closest = DOM.closest;
+	var on      = dom.on;
+	var off     = dom.off;
+	var trigger = dom.trigger;
+	var closest = dom.closest;
 
 	var settings = {
 		// Ratio of distance over target finger must travel to be

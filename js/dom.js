@@ -338,9 +338,7 @@
 	}, function test() {
 		// Test that the last argument is a node
 		var node = arguments[arguments.length - 1];
-		return arguments.length > 3 ||
-			!!node.addEvent ||
-			!!node.addEventListener;
+		return arguments.length > 3 || !!node.addEventListener;
 	});
 
 	function on(node, types, fn, data) {
@@ -550,6 +548,10 @@
 	}
 
 	assign(dom, {
+		ready: Fn(new Promise(function(accept, reject) {
+			document.addEventListener("DOMContentLoaded", accept, false);
+			window.addEventListener("load", accept);
+		})),
 
 		// Nodes
 

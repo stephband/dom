@@ -285,6 +285,23 @@
 		};
 	})(['Khtml','O','Moz','Webkit','ms']);
 
+	function viewportLeft(elem) {
+		var body = document.body;
+		var html = document.documentElement;
+		var box  = elem.getBoundingClientRect();
+		var scrollLeft = window.pageXOffset || html.scrollLeft || body.scrollLeft;
+		var clientLeft = html.clientLeft || body.clientLeft || 0;
+		return (box.left + scrollLeft - clientLeft);
+	}
+
+	function viewportTop(elem) {
+		var body = document.body;
+		var html = document.documentElement;
+		var box  = elem.getBoundingClientRect();
+		var scrollTop = window.pageYOffset || html.scrollTop || body.scrollTop;
+		var clientTop = html.clientTop || body.clientTop || 0;
+		return box.top +  scrollTop - clientTop;
+	}
 
 	// DOM Events
 
@@ -548,10 +565,10 @@
 	}
 
 	assign(dom, {
-		ready: Fn(new Promise(function(accept, reject) {
+		ready: new Promise(function(accept, reject) {
 			document.addEventListener("DOMContentLoaded", accept, false);
 			window.addEventListener("load", accept);
-		})),
+		}),
 
 		// Nodes
 
@@ -578,6 +595,9 @@
 		valueToPx:      valueToPx,
 		find:           find,
 		findOne:        findOne,
+
+		viewportLeft:   viewportLeft,
+		viewportTop:    viewportTop,
 
 		// Fragments and Templates
 

@@ -40,7 +40,7 @@ title: jQuery.event.move
 		<h1>dom</h1>
 	
 		<div class="test_wrap wrap">
-			<div class="test swipeable moveable">
+			<div class="test">
 			 <div class="resize"></div>
 			 <div class="rotate"></div>
 			</div>
@@ -165,7 +165,112 @@ title: jQuery.event.move
 		var centreMark = dom('.centre_mark').shift();
 		var originMark = dom('.origin_mark').shift();
 
+
 		// Test properties
+
+		var on = dom.events.on;
+		var rotation = 0;
+
+		on(box, 'touch', function(e) {
+			if (e.defaultPrevented) { return; }
+			if (e.target !== e.currentTarget) { return; }
+
+			var node = e.target;
+			var transform = dom.style('transform', node);
+			transform = !transform || transform === 'none' ? '' : transform;
+
+			e
+			.detail()
+			.map(function(data) {
+				return 'translate(' + data.x + 'px, ' + data.y + 'px)';
+			})
+			.each(function(property) {
+				node.style.transform = transform + ' ' + property;
+			});
+		});
+
+		on(resize, 'touch', function(e) {
+			if (e.defaultPrevented) { return; }
+
+			var node = e.target;
+			var startWidth = box.offsetWidth;
+			var startHeight = box.offsetHeight;
+			var transform = dom.style('transform', node);
+			var start, rotatedOrigin, distX, distY;
+
+			transform = !transform || transform === 'none' ? '' : transform;
+
+			e
+			.detail()
+			.each(function(data) {
+				var polarDelta = toPolar([data.x, data.y]);
+
+				// Comments are useless. I can't describe what's going
+				// on here without a pencil and paper. Sorry, but basically,
+				// we're undoing the rotate transform to work out where
+				// the rotated origin lies.
+				polarDelta[1] += toRad(rotation);
+
+				var normalisedDelta = toCartesian(polarDelta);
+				var width  = startWidth + normalisedDelta[0];
+				var height = startHeight + normalisedDelta[1];
+
+				width  = width >= 0 ? width : 0;
+				height = height >= 0 ? height : 0;
+
+				var originDelta = [
+					data.x/2 - (width === 0  ? -startWidth/2  : normalisedDelta[0]/2),
+					data.y/2 - (height === 0 ? -startHeight/2 : normalisedDelta[1]/2)
+				];
+
+				// TODO: property just used to move the origin mark
+				var property = 'translate(' + originDelta[0] + 'px, ' + originDelta[1] + 'px)';
+
+				box.style.width     = width;
+				box.style.height    = height;
+			});
+		});
+
+		on(rotate, 'touch', function(e) {
+			if (e.defaultPrevented) { return; }
+
+			var node = e.target;
+			var pageX = e.pageX;
+			var pageY = e.pageY;
+			var transform = dom.style('transform', node);
+
+			transform = !transform || transform === 'none' ? '' : transform;
+
+			var positionParent = box.offsetParent;
+			var left = dom.viewportLeft(positionParent);
+			var top  = dom.viewportTop(positionParent);
+
+			var centre = {
+				x: parseFloat(dom.style('left', box)) + parseFloat(dom.style('width', box))/2,
+				y: parseFloat(dom.style('top', box)) + parseFloat(dom.style('height', box))/2
+			};
+
+			var startRotate = 0;
+			var startAngle = toPolar([pageX - left - centre.x, pageY - top - centre.y])[1];
+
+			e
+			.detail()
+			.each(function(data) {
+				var nowAngle = toPolar([data.x + pageX - left - centre.x, data.x + pageY - top - centre.y])[1];
+				var deltaRotate = nowAngle - startAngle;
+
+				rotation = parseInt(startRotate - toDeg(deltaRotate));
+				var rotate = 'rotate(' + rotation + 'deg)';
+				box.style.transform = transform + ' ' + rotate;
+			});
+		});
+
+
+
+
+
+
+
 
 		// Test for correct deltaX and deltaY values
 

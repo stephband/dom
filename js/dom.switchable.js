@@ -66,4 +66,9 @@
 	on(document, 'activate', activate);
 	on(document, 'deactivate', deactivate);
 
+
+	dom.ready.then(function() {
+		console.log('READY', arguments);
+	});
+
 })(this);

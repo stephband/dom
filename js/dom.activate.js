@@ -160,7 +160,7 @@
 
 	on(document, 'deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
-
+ 
 		var data = cacheData(e.target);
 
 		// Don't do anything if elem is already inactive
@@ -320,7 +320,7 @@
 
 	// Document setup
 
-	jQuery(document).ready(function() {
+	dom.ready.then(function() {
 		// Setup all things that should start out active.
 		dom('.' + activeClass)
 		.each(dom.trigger('activate'));

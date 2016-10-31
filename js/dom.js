@@ -113,6 +113,33 @@
 		return node.nodeType === 11;
 	}
 
+	function isExternalLink(node) {
+		var location = window.location;
+
+		// IE does not give us a .hostname for links to xxx.xxx.xxx.xxx URLs.
+		if (!node.hostname) { return false; }
+
+		// IE gives us the port on link.host, even where it is not specified.
+		// Use link.hostname.
+		if (location.hostname !== node.hostname) { return true; }
+
+		// IE gives us link.pathname without a leading slash, so add
+		// one before comparing.
+		if (location.pathname !== prefixSlash(node.pathname)) { return true; }
+	}
+
+	function identify(node) {
+		var id = node.id;
+
+		if (!id) {
+			do { id = Math.ceil(Math.random() * 100000); }
+			while (document.getElementById(id));
+			node.id = id;
+		}
+
+		return id;
+	}
+
 	function tag(node) {
 		return node.tagName.toLowerCase();
 	}
@@ -143,7 +170,6 @@
 			.getPropertyValue(name) :
 			0 ;
 	}
-
 
 	// DOM Traversal
 
@@ -181,7 +207,6 @@
 			 node :
 			 closest(selector, node.parentNode, root) ;
 	}
-
 
 	// DOM Mutation
 
@@ -231,6 +256,36 @@
 	}
 
 
+	// CSS
+
+	var prefix = (function(prefixes) {
+		var node = document.createElement('div');
+		var cache = {};		
+
+		function testPrefix(prop) {
+			if (prop in node.style) { return prop; }
+
+			var upper = prop.charAt(0).toUpperCase() + prop.slice(1);
+			var l = prefixes.length;
+			var prefixProp;
+
+			while (l--) {
+				prefixProp = prefixes[l] + upper;
+
+				if (prefixProp in node.style) {
+					return prefixProp;
+				}
+			}
+
+			return false;
+		}
+
+		return function prefix(prop){
+			return cache[prop] || (cache[prop] = testPrefix(prop));
+		};
+	})(['Khtml','O','Moz','Webkit','ms']);
+
+
 	// DOM Events
 
 	var eventOptions = { bubbles: true };
@@ -259,7 +314,11 @@
 		return event;
 	}
 
-	function Events(node, types, selector) {
+	var events = Fn.curryUntil(function events(types, selector, node) {
+		// Selector is an optional parameter
+		selector = arguments.length > 2 && selector ;
+		node     = arguments[arguments.length - 1];
+
 		var stream = Stream.of();
 		var _stop = stream.stop;
 
@@ -267,16 +326,24 @@
 			stream.push(e);
 		}
 
+		var fn = selector ? dom.delegate(selector, push) : push ;
+
 		stream.on('done', function() {
 			_stop.apply(this);
-			off(node, types, push, selector);
+			off(node, types, fn);
 		});
 
-		on(node, types, push, selector);
+		on(node, types, fn);
 		return stream;
-	}
+	}, function test() {
+		// Test that the last argument is a node
+		var node = arguments[arguments.length - 1];
+		return arguments.length > 3 ||
+			!!node.addEvent ||
+			!!node.addEventListener;
+	});
 
-	function on(node, types, fn, data, selector) {
+	function on(node, types, fn, data) {
 		types = types.split(rspaces);
 
 		var events = node[eventsSymbol] || (node[eventsSymbol] = {});
@@ -289,15 +356,17 @@
 			handlers.push([fn, handler]);
 			node.addEventListener(type, handler);
 		}
+
+		return node;
 	}
 
-	function off(node, types, fn, selector) {
+	function off(node, types, fn) {
 		types = types.split(rspaces);
 
 		var events = node[eventsSymbol];
 		var type, handlers, i;
 
-		if (!events) { return; }
+		if (!events) { return node; }
 
 		for (type of types) {
 			handlers = events[type];
@@ -310,6 +379,8 @@
 				}
 			}
 		}
+
+		return node;
 	}
 
 	function trigger(node, type, properties) {
@@ -331,6 +402,12 @@
 			return fn(e);
 		};
 	}
+
+	assign(events, {
+		on:      on,
+		off:     off,
+		trigger: trigger
+	});
 
 
 	// DOM Fragments and Templates
@@ -402,6 +479,27 @@
 		return result;
 	}
 
+	// Infer transitionend event from CSS transition prefix and add
+	// it's name as jQuery.support.transitionEnd.
+	
+	function testTransition() {
+		var prefixed = prefix('transition');
+		return prefixed || false;
+	}
+
+	function testTransitionEnd() {
+		var end = {
+			KhtmlTransition: false,
+			OTransition: 'oTransitionEnd',
+			MozTransition: 'transitionend',
+			WebkitTransition: 'webkitTransitionEnd',
+			msTransition: 'MSTransitionEnd',
+			transition: 'transitionend'
+		};
+
+		var prefixed = prefix('transition');
+		return prefixed && end[prefixed];
+	}
 
 	// Units
 
@@ -445,10 +543,10 @@
 
 	function dom(selector, node) {
 		return typeof selector === "string" ?
-				A.slice.apply((node || document).querySelectorAll(selector)) :
+				Fn((node || document).querySelectorAll(selector)) :
 			Node.prototype.isPrototypeOf(selector) ?
-				[selector] :
-			A.slice.call(selector) ;
+				Fn([selector]) :
+			Fn(selector) ;
 	}
 
 	assign(dom, {
@@ -459,9 +557,11 @@
 		isTextNode:     isTextNode,
 		isCommentNode:  isCommentNode,
 		isFragmentNode: isFragmentNode,
+		isExternalLink: isExternalLink,
 
 		create:         create,
 		clone:          clone,
+		identify:       identify,
 		tag:            tag,
 		classes:        classes,
 		style:          Fn.curry(style),
@@ -491,18 +591,46 @@
 
 		isPrimaryButton: isPrimaryButton,
 		preventDefault:  preventDefault,
-		Events:          Fn.curry(Events),
 		Event:           Event,
+		events:          events,
+
+		//on: function on(types, fn, data, node) {
+		//	var l = arguments.length;
+		//
+		//	if (l > 2 && dom.isElementNode(arguments[l - 1])) {
+		//		on(arguments[l - 1], types, fn);
+		//		return node;
+		//	}
+		//
+		//	return Fn.bind(arguments, on);
+		//},
+
 		on:              on,
 		off:             off,
-		trigger:         trigger,
+
+		trigger: function triggerNode(type, properties, node) {
+			var l = arguments.length;
+
+			node = arguments[l - 1];
+
+			if (dom.isElementNode(node) || node === document) {
+				trigger(node, type, l > 2 && properties);
+				return node;
+			}
+
+			return Fn.bind(arguments, triggerNode);
+		},
+
+
 		delegate:        delegate,
 
 		// Features
 
 		features: {
-			template: testTemplate(),
-			inputEventsOnDisabled: testEventDispatchOnDisabled()
+			template:              testTemplate(),
+			inputEventsOnDisabled: testEventDispatchOnDisabled(),
+			transition:            testTransition(),
+			transitionEnd:         testTransitionEnd()
 		}
 	});
 

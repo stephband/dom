@@ -58,6 +58,15 @@ title: jQuery.event.move
 	</div>
 
 	<div class="site_wrap wrap">
+		<h1>.toggleable</h1>
+
+		<a href="#toggle-demo">Toggle</a>
+		<div class="toggle-block block toggleable" id="toggle-demo">
+			Hello.
+		</div>
+	</div>
+
+	<div class="site_wrap wrap">
 		<h1>.slideable</h1>
 
 		<div class="img_slides_wrap slides_wrap wrap slideable swipeable">
@@ -103,6 +112,7 @@ title: jQuery.event.move
 		</div>
 	</footer>
 
+	<script src="jquery/jquery-3.1.1.js"></script>
 	<script src="fn/polyfills/number.isnan.js"></script>
 	<script src="fn/polyfills/object.assign.js"></script>
 	<script src="polyfills/window.customevent.js"></script>
@@ -111,6 +121,8 @@ title: jQuery.event.move
 	<script src="js/dom.activate.js"></script>
 	<script src="js/dom.touch.js"></script>
 	<script src="js/dom.swipe.js"></script>
+	<script src="js/dom.toggleable.js"></script>
+	<script src="js/dom.switchable.js"></script>
 	<script src="js/dom.moveable.js"></script>
 	<script src="js/dom.slideable.js"></script>
 	<script>
@@ -147,11 +159,11 @@ title: jQuery.event.move
 		function logEvent(e){ window.console && console.log(e.type, e); }
 
 
-		var box        = dom('.test');
-		var resize     = dom('.resize');
-		var rotate     = dom('.rotate');
-		var centreMark = dom('.centre_mark');
-		var originMark = dom('.origin_mark');
+		var box        = dom('.test').shift();
+		var resize     = dom('.resize').shift();
+		var rotate     = dom('.rotate').shift();
+		var centreMark = dom('.centre_mark').shift();
+		var originMark = dom('.origin_mark').shift();
 
 		// Test properties
 
@@ -159,7 +171,7 @@ title: jQuery.event.move
 
 		var distX = 0, distY = 0, pageX = 0, pageY = 0, startX = 0, startY = 0;
 
-		dom.on(box[0], 'touch', function(e) {
+		dom.on(box, 'touch', function(e) {
 			console.log('touch', e);
 
 			e

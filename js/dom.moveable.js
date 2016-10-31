@@ -1,8 +1,8 @@
 (function(window) {
 	"use strict";
 
-	var dom = window.dom;
-	var on      = dom.on;
+	var dom     = window.dom;
+	var on      = dom.events.on;
 	var closest = dom.closest;
 
 	on(document, 'touch', function(e) {

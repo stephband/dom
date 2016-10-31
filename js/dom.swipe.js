@@ -3,8 +3,8 @@
 
 	var dom = window.dom;
 
-	var on      = dom.on;
-	var trigger = dom.trigger;
+	var on      = dom.events.on;
+	var trigger = dom.events.trigger;
 	var closest = dom.closest;
 
 	var settings = {
@@ -61,6 +61,24 @@
 
 		touch.on('done', function() {
 			touchdone(swipeable, touch);
+		});
+	});
+
+	on(document, 'swipeleft', function(e) {
+		if (e.defaultPrevented) { return; }
+		Fn(dom('.active', e.target))
+		.map(Fn.get('nextElementSibling'))
+		.each(function(node) {
+			trigger(node, 'activate');
+		});
+	});
+
+	on(document, 'swiperight', function(e) {
+		if (e.defaultPrevented) { return; }
+		Fn(dom('.active', e.target))
+		.map(Fn.get('previousElementSibling'))
+		.each(function(node) {
+			trigger(node, 'activate');
 		});
 	});
 

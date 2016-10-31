@@ -1,9 +1,9 @@
 (function(window) {
 	"use strict";
 
-	var dom = window.dom;
-	var on      = dom.on;
-	var trigger = dom.trigger;
+	var dom     = window.dom;
+	var on      = dom.events.on;
+	var trigger = dom.events.trigger;
 	var closest = dom.closest;
 
 	on(document, 'touch', function(e) {
@@ -26,13 +26,5 @@
 		.each(function(transform) {
 			slideable.style.transform = transform;
 		});
-	});
-
-	on(document, 'swipeleft', function(e) {
-		if (e.defaultPrevented) { return; }
-
-		var active = dom('.active', e.target)[0];
-		var after  = active.nextSibling;
-		trigger(after, 'activate');
 	});
 })(this);

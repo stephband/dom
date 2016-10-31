@@ -31,9 +31,9 @@
 
 	// Functions
 
-	var on              = dom.on;
-	var off             = dom.off;
-	var trigger         = dom.trigger;
+	var on              = dom.events.on;
+	var off             = dom.events.off;
+	var trigger         = dom.events.trigger;
 	var isPrimaryButton = dom.isPrimaryButton;
 	var preventDefault  = dom.preventDefault;
 

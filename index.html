@@ -69,11 +69,13 @@ title: jQuery.event.move
 	<div class="site_wrap wrap">
 		<h1>.slideable</h1>
 
-		<div class="img_slides_wrap slides_wrap wrap slideable swipeable">
-			<img class="img_slide slide active switchable" id="slide1" src="https://lh5.googleusercontent.com/-MShhyv4lWuM/T4Si18g0XsI/AAAAAAAAANU/Nnnxh68myRA/s768/Norway_201241.png"
-			/><img class="img_slide slide switchable" id="slide2" src="https://lh6.googleusercontent.com/-BED5h574s1Q/T4Sji7_hmOI/AAAAAAAAAO8/JMChDngsCDk/s768/Norway_201284.png"
-			/><img class="img_slide slide switchable" id="slide3" src="https://lh6.googleusercontent.com/-n31QkVB4M9c/T4SjckZM1TI/AAAAAAAAAOs/H26JyEo9970/s768/Norway_201276.png"
-			/><img class="img_slide slide switchable" id="slide4" src="https://lh6.googleusercontent.com/-jti_dD8mDiQ/T4ShY14T5HI/AAAAAAAAAKE/-jF6OT_zmb4/s768/Norway_2012102.png" />
+		<div class="contain-block block">
+			<div class="swipe-block block slideable swipeable">
+				  <img draggable="false" class="inline-block block active switchable" id="slide1" src="https://lh5.googleusercontent.com/-MShhyv4lWuM/T4Si18g0XsI/AAAAAAAAANU/Nnnxh68myRA/s768/Norway_201241.png"
+				/><img draggable="false" class="inline-block block switchable" id="slide2" src="https://lh6.googleusercontent.com/-BED5h574s1Q/T4Sji7_hmOI/AAAAAAAAAO8/JMChDngsCDk/s768/Norway_201284.png"
+				/><img draggable="false" class="inline-block block switchable" id="slide3" src="https://lh6.googleusercontent.com/-n31QkVB4M9c/T4SjckZM1TI/AAAAAAAAAOs/H26JyEo9970/s768/Norway_201276.png"
+				/><img draggable="false" class="inline-block block switchable" id="slide4" src="https://lh6.googleusercontent.com/-jti_dD8mDiQ/T4ShY14T5HI/AAAAAAAAAKE/-jF6OT_zmb4/s768/Norway_2012102.png" />
+			</div>
 		</div>
 
 		<ul class="inline-index index">
@@ -117,6 +119,7 @@ title: jQuery.event.move
 	<script src="fn/polyfills/object.assign.js"></script>
 	<script src="polyfills/window.customevent.js"></script>
 	<script src="fn/js/fn.js"></script>
+	<script src="js/config.js"></script>
 	<script src="js/dom.js"></script>
 	<script src="js/dom.activate.js"></script>
 	<script src="js/dom.touch.js"></script>

@@ -564,11 +564,13 @@
 			Fn(selector) ;
 	}
 
+	var readyPromise = new Promise(function(accept, reject) {
+		document.addEventListener('DOMContentLoaded', accept);
+		window.addEventListener('load', accept);
+	});
+
 	assign(dom, {
-		ready: new Promise(function(accept, reject) {
-			document.addEventListener("DOMContentLoaded", accept, false);
-			window.addEventListener("load", accept);
-		}),
+		ready: readyPromise.then.bind(readyPromise),
 
 		// Nodes
 

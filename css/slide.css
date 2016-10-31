@@ -1,22 +1,29 @@
 
-.site_wrap > .slides_wrap {
-	margin-bottom: 1em;
-	margin-left: -8px;
-	margin-right: -8px;
-}
-
-.img_slides_wrap {
-	width: 784px;
+.contain-block {
 	border: 8px solid #333333;
 	background-color: #444444;
 	overflow: hidden;
 }
 
-.img_slide {
+.inline-block {
+	display: inline-block;
+}
+
+.site_wrap > .slides-block {
+	margin-bottom: 1em;
+	margin-left: -8px;
+	margin-right: -8px;
+}
+
+.slides-block {
+	white-space: nowrap;
+}
+
+.slide-block {
 	padding: 0;
 }
 
-.js .img_slide {
+.js .slide-block {
 	/* Overide template's height transitions. */
 	width: 100%;
 	height: auto;
@@ -26,21 +33,8 @@
 	text-align: center;
 }
 
-.notransition,
-.notransition .slide {
-	-webkit-transition-duration: 0 !important;
-	   -moz-transition-duration: 0 !important;
-	    -ms-transition-duration: 0 !important;
-	        transition-duration: 0 !important;
-
-	-webkit-transition-delay: 0 !important;
-	   -moz-transition-delay: 0 !important;
-	    -ms-transition-delay: 0 !important;
-	        transition-delay: 0 !important;
-}
-
 @media screen and (max-width: 640px) {
-	.img_slides_wrap {
+	.slides-block {
 		width: 100%;
 
 		-webkit-box-sizing: content-box;
@@ -48,4 +42,30 @@
 		    -ms-box-sizing: content-box;
 		        box-sizing: content-box;
 	}
+}
+
+.swipe-block {
+	white-space: nowrap;
+}
+
+.js .swipe-block {
+	z-index: 1;
+
+	-webkit-touch-callout: none;
+	  -webkit-user-select: none;
+	     -moz-user-select: none;
+	      -ms-user-select: none;
+	          user-select: none;
+
+	/* A nice bit of hardware acceleration should help the transitions run
+	   smoothly. */
+	-webkit-transform: translate3d(0,0,0);
+	        transform: translate3d(0,0,0);
+
+	-webkit-transition-property: -webkit-transform;
+	        transition-property: transform;
+	-webkit-transition-duration: 333ms;
+	        transition-duration: 333ms;
+	-webkit-transition-timing-function: cubic-bezier(0.1, 0.7, 0.7, 1);
+	        transition-timing-function: cubic-bezier(0.1, 0.7, 0.7, 1);
 }

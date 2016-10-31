@@ -17,69 +17,32 @@
 	};
 
 	function touchdone(node, touch) {
-		var e = touch.last().shift();
-		var x = e.x;
-		var y = e.y;
+		var data = touch.clone().last().shift();
+		var x = data.x;
+		var y = data.y;
 		var w = node.offsetWidth;
 		var h = node.offsetHeight;
+		var polar = toPolar([data.x, data.y]);
 
-		// Find out which of the four directions was swiped
-		if (x > y) {
-			if (x > -y) {
-				if (x/w > settings.threshold || e.velocityX * x/w * settings.sensitivity > 1) {
-					trigger(node, 'swiperight');
-				}
-			}
-			else {
-				if (-y/h > settings.threshold || e.velocityY * y/w * settings.sensitivity > 1) {
-					trigger(node, 'swipeup');
-				}
-			}
-		}
-		else {
-			if (x > -y) {
-				if (y/h > settings.threshold || e.velocityY * y/w * settings.sensitivity > 1) {
-					trigger(node, 'swipedown');
-				}
-			}
-			else {
-				if (-x/w > settings.threshold || e.velocityX * x/w * settings.sensitivity > 1) {
-					trigger(node, 'swipeleft');
-				}
-			}
-		}
+		// Todo: check if swipe has enough velocity and distance
+		//x/w > settings.threshold || e.velocityX * x/w * settings.sensitivity > 1
+
+		trigger(node, 'swipe', {
+			detail:   touch,
+			angle:    polar[1],
+			velocity: polar[0] / data.time
+		});
 	}
 
 	on(document, 'touch', function(e) {
 		if (e.defaultPrevented) { return; }
 
-		var swipeable = closest('.swipeable', e.target);
-
-		if (!swipeable) { return; }
+		var node = closest('.swipeable', e.target);
+		if (!node) { return; }
 
 		var touch = e.detail();
-
 		touch.on('done', function() {
-			touchdone(swipeable, touch);
+			touchdone(node, touch);
 		});
 	});
-
-	on(document, 'swipeleft', function(e) {
-		if (e.defaultPrevented) { return; }
-		Fn(dom('.active', e.target))
-		.map(Fn.get('nextElementSibling'))
-		.each(function(node) {
-			trigger(node, 'activate');
-		});
-	});
-
-	on(document, 'swiperight', function(e) {
-		if (e.defaultPrevented) { return; }
-		Fn(dom('.active', e.target))
-		.map(Fn.get('previousElementSibling'))
-		.each(function(node) {
-			trigger(node, 'activate');
-		});
-	});
-
 })(this);

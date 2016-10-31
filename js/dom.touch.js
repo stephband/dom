@@ -268,7 +268,7 @@
 			// Stop clicks from propagating during a move
 			on(node, 'click', preventDefault);
 			on(document, mouseevents.move, activeMousemove, data);
-			on(document, mouseevents.end, activeMouseend, data);
+			on(document, mouseevents.cancel, activeMouseend, data);
 		}
 		else {
 			// In order to unbind correct handlers they have to be unique

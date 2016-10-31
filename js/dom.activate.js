@@ -101,12 +101,15 @@
 
 	// Listen to activate events
 
-	function defaultActivate(e) {
+	function defaultActivate() {
 		var data = this.data || cacheData(e.target);
 		var node = data.node;
 		var buttons;
 
+		// Don't do anything if elem is already active
+		if (data.active) { return; }
 		data.active = true;
+		this.preventDefault();
 
 		if (debug) { console.log('[activate] default | target:', e.target.id, 'data:', data); }
 
@@ -121,7 +124,7 @@
 		}
 	}
 
-	function defaultDeactivate(e) {
+	function defaultDeactivate() {
 		var data = this.data || cacheData(e.target);
 		var node = data.node;
 		var buttons;
@@ -129,6 +132,7 @@
 		// Don't do anything if elem is already inactive
 		if (!data.active) { return; }
 		data.active = false;
+		this.preventDefault();
 		
 		if (debug) { console.log('[deactivate] default | target:', e.target.id, 'data:', data); }
 		
@@ -320,7 +324,7 @@
 
 	// Document setup
 
-	dom.ready.then(function() {
+	dom.ready(function() {
 		// Setup all things that should start out active.
 		dom('.' + activeClass)
 		.each(dom.trigger('activate'));

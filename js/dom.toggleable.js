@@ -33,6 +33,8 @@
 	}
 
 	function activate(e) {
+		// Use method detection - e.defaultPrevented is not set in time for
+		// subsequent listeners on the same node
 		if (!e.default) { return; }
 
 		var target = e.target;

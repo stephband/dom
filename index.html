@@ -37,37 +37,31 @@ title: jQuery.event.move
 	</header>
 
 	<div class="site_wrap wrap">
-		<h1>dom</h1>
-	
-		<div class="test_wrap wrap">
-			<div class="test">
-			 <div class="resize"></div>
-			 <div class="rotate"></div>
-			</div>
-			
-			<div class="centre_mark"></div>
-			<div class="origin_mark"></div>
-		</div>
-		
-		<h2>Project</h2>
-		
-		<ul>
-			<li>Github: <a href="http://github.com/stephband/dom">github.com/stephband/dom</a></li>
-			<li>Issues: <a href="http://github.com/stephband/dom/issues">github.com/stephband/dom/issues</a></li>
-		</ul>
-	</div>
-
-	<div class="site_wrap wrap">
 		<h1>.toggleable</h1>
+
+		<p>Activates and deactivates when any link pointing to it is clicked.</p>
 
 		<a href="#toggle-demo">Toggle</a>
 		<div class="toggle-block block toggleable" id="toggle-demo">
-			Hello.
+			Hello. A toggleable only goes away when it's button is clicked.
+		</div>
+	</div>
+
+	<div class="site_wrap wrap">
+		<h1>.popable</h1>
+
+		<p>A popable goes away when clicked outside.</p>
+
+		<a href="#pop-demo">Pop</a>
+		<div class="toggle-block block popable" id="pop-demo">
+			Hello. A popable goes away when clicked outside.
 		</div>
 	</div>
 
 	<div class="site_wrap wrap">
 		<h1>.slideable</h1>
+
+		<p>Slides horizontally with a touch or mouse.</p>
 
 		<div class="contain-block block">
 			<div class="swipe-block block slideable swipeable">
@@ -83,6 +77,52 @@ title: jQuery.event.move
 			<li><a class="slide_button button" href="#slide2">2</a></li>
 			<li><a class="slide_button button" href="#slide3">3</a></li>
 			<li><a class="slide_button button" href="#slide4">4</a></li>
+		</ul>
+	</div>
+
+	<div class="site_wrap wrap">
+		<h1>.switchable</h1>
+
+		<p>For any group of siblings with the class <code>switchable</code>,
+		only one can be <code>active</code> at any one time.</p>
+
+		<ul class="inline-index index">
+			<li><a class="tab-button button" href="#tab-1">1</a></li>
+			<li><a class="tab-button button" href="#tab-2">2</a></li>
+			<li><a class="tab-button button" href="#tab-3">3</a></li>
+		</ul>
+
+		<div class="tab-block block switchable" id="tab-1">
+			Tab 1
+		</div
+		
+		><div class="tab-block block switchable" id="tab-2">
+			Tab 2
+		</div
+		
+		><div class="tab-block block switchable" id="tab-3">
+			Tab 3
+		</div>
+	</div>
+
+	<div class="site_wrap wrap">
+		<h1>touch</h1>
+
+		<div class="test_wrap wrap">
+			<div class="test">
+				<div class="resize"></div>
+				<div class="rotate"></div>
+			</div>
+
+			<div class="centre_mark"></div>
+			<div class="origin_mark"></div>
+		</div>
+
+		<h2>Project</h2>
+
+		<ul>
+			<li>Github: <a href="http://github.com/stephband/dom">github.com/stephband/dom</a></li>
+			<li>Issues: <a href="http://github.com/stephband/dom/issues">github.com/stephband/dom/issues</a></li>
 		</ul>
 	</div>
 
@@ -121,9 +161,10 @@ title: jQuery.event.move
 	<script src="fn/js/fn.js"></script>
 	<script src="js/config.js"></script>
 	<script src="js/dom.js"></script>
-	<script src="js/dom.activate.js"></script>
-	<script src="js/dom.touch.js"></script>
-	<script src="js/dom.swipe.js"></script>
+	<script src="js/dom.event.activate.js"></script>
+	<script src="js/dom.event.touch.js"></script>
+	<script src="js/dom.event.swipe.js"></script>
+	<script src="js/dom.popable.js"></script>
 	<script src="js/dom.toggleable.js"></script>
 	<script src="js/dom.switchable.js"></script>
 	<script src="js/dom.moveable.js"></script>

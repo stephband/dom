@@ -67,7 +67,9 @@
 	});
 
 	on(document, 'activate', function(e) {
-		if (e.defaultPrevented) { return; }
+		// Use method detection - e.defaultPrevented is not set in time for
+		// subsequent listeners on the same node
+		if (!e.default) { return; }
 
 		var node   = e.target;
 		var parent = node.parentNode;

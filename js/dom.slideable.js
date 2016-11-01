@@ -7,25 +7,45 @@
 	var closest = dom.closest;
 	var tau     = Math.PI * 2;
 
+	var elasticDistance = 800;
+
+	function elasticEase(n) {
+		return Math.atan(n) / Math.PI ;
+	}
+
 	on(document, 'touch', function(e) {
 		if (e.defaultPrevented) { return; }
 
 		var node = closest('.slideable', e.target);
 		if (!node) { return; }
 
-		var transform = dom.style('transform', node);
-		transform = !transform || transform === 'none' ? '' : transform; 
-
-		var x = 0;
 		var classes = dom.classes(node);
+		var transform = dom.style('transform', node);
+
+		transform = !transform || transform === 'none' ? '' : transform ;
+
+		var x = dom.style('transform:translateX', node);
+		var last = dom(node.children)
+			.filter(dom.matches('.switchable'))
+			.last()
+			.shift();
+
+		// Get the right-most x of the last switchable child's right-most edge
+		var w1 = last.offsetLeft + last.clientWidth;
+		var w2 = node.parentNode.clientWidth;
+		var ws = w1 - w2;
 
 		classes.add('notransition');
 
 		// e.detail() is a stream of touch coordinates
 		e.detail()
-		.tap(function(data) { x = data.x; })
 		.map(function(data) {
-			return transform + ' translate(' + data.x + 'px, 0px)';
+			var ax = x + data.x;
+			var tx = ax > 0 ? elasticEase(ax / elasticDistance) * elasticDistance - x :
+				ax < -ws ? elasticEase((ax + ws) / elasticDistance) * elasticDistance - ws - x :
+				data.x ;
+
+			return transform + ' translate(' + tx + 'px, 0px)';
 		})
 		.each(function(transform) {
 			node.style.transform = transform;
@@ -43,15 +63,18 @@
 
 		var angle    = Fn.wrap(0, tau, e.angle || 0);
 		var velocity = e.velocity || 0;
-		var prop     = (angle > tau * 1/8 && angle < tau * 3/8) ?
+
+			// If angle is rightwards
+		var prop = (angle > tau * 1/8 && angle < tau * 3/8) ?
 				'previousElementSibling' :
+			// If angle is leftwards
 			(angle > tau * 5/8 && angle < tau * 7/8) ?
 				'nextElementSibling' :
 				false ;
 
 		if (!prop) { return; }
 
-		var active = dom('.slideable > .switchable', node)
+		var active = dom(node.children)
 		.filter(dom.matches('.active'))
 		.shift();
 

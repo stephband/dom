@@ -163,14 +163,6 @@
 		}
 	}
 
-	function style(name, node) {
-		return window.getComputedStyle ?
-			window
-			.getComputedStyle(node, null)
-			.getPropertyValue(name) :
-			0 ;
-	}
-
 	// DOM Traversal
 
 	function find(selector, node) {
@@ -258,6 +250,40 @@
 
 	// CSS
 
+	var styleParsers = {
+		"transform:translateX": function(node) {
+			var matrix = style('transform', node);
+			if (!matrix || matrix === "none") { return 0; }
+			var values = valuesFromCssFn(matrix);
+			return parseFloat(values[4]);
+		},
+
+		"transform:translateY": function(node) {
+			var matrix = style('transform', node);
+			if (!matrix || matrix === "none") { return 0; }
+			var values = valuesFromCssFn(matrix);
+			return parseFloat(values[5]);
+		},
+
+		"transform:scale": function(node) {
+			var matrix = style('transform', node);
+			if (!matrix || matrix === "none") { return 0; }
+			var values = valuesFromCssFn(matrix);
+			var a = parseFloat(values[0]);
+			var b = parseFloat(values[1]);
+			return Math.sqrt(a * a + b * b);
+		},
+
+		"transform:rotate": function(node) {
+			var matrix = style('transform', node);
+			if (!matrix || matrix === "none") { return 0; }
+			var values = valuesFromCssFn(matrix);
+			var a = parseFloat(values[0]);
+			var b = parseFloat(values[1]);
+			return Math.atan2(b, a);
+		}
+	};
+
 	var prefix = (function(prefixes) {
 		var node = document.createElement('div');
 		var cache = {};		
@@ -284,6 +310,18 @@
 			return cache[prop] || (cache[prop] = testPrefix(prop));
 		};
 	})(['Khtml','O','Moz','Webkit','ms']);
+
+	function valuesFromCssFn(string) {
+		return string.split('(')[1].split(')')[0].split(/\s*,\s*/);
+	}
+
+	function style(name, node) {
+		return window.getComputedStyle ?
+			window
+			.getComputedStyle(node, null)
+			.getPropertyValue(name) :
+			0 ;
+	}
 
 	function viewportLeft(elem) {
 		var body = document.body;
@@ -585,7 +623,9 @@
 		identify:       identify,
 		tag:            tag,
 		classes:        classes,
-		style:          Fn.curry(style),
+		style: Fn.curry(function(name, node) {
+			return styleParsers[name] ? styleParsers[name](node) : style(name, node) ;
+		}),
 		append:         Fn.curry(append),
 		html:           Fn.curry(html),
 		before:         Fn.curry(before),

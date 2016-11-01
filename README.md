@@ -28,56 +28,103 @@ All functions are curried.
 #### Nodes
 
 ##### `.isElementNode(node)`
+
+Return `true` if `node` is an element.
+
 ##### `.isTextNode(node)`
+
+Return `true` if `node` is a text node.
+
 ##### `.isCommentNode(node)`
+
+Return `true` if `node` is a comment.
+
 ##### `.isFragmentNode(node)`
 
+Return `true` if `node` is a fragment.
+
+##### `.isExternalLink(node)`
+
+Return `true` if the `href` of `node` points outside of the current domain.
+
 ##### `.create(tag, [text])`
+
+Returns a new node.
+If `tag` is `"text"` returns a text node with the text `text`.
+If `tag` is `"fragment"` returns a document fragment.
+If `tag` is `"comment"` returns a comment with the content `text`.
+Anything else returns an element `tag` with the html content `text`.
+
 ##### `.clone(node)`
+
+Returns a deep copy of `node`.
+
+##### `.identify(node)`
+
+Returns the id of `node`, or where there is no id a random id is generated,
+set on `node` and returned.
+
 ##### `.tag(node)`
+
+Returns the tag name of `node`.
+
 ##### `.classes(node)`
 
 Returns the classList of `node`.
 
+##### `.html(target, html)`
+
+Replaces the content of `target` with `html`.
+
+##### `.append(target, node)`
+
+Appends node to `target`.
+
+##### `.before(target, node)`
+
+Inserts `node` before target.
+
+##### `.after(target, node)`
+
+Inserts `node` after `target`.
+
+##### `.empty(node)`
+
+Removes content of `node`.
+
+##### `.remove(node)`
+
+Removes `node` from the DOM.
+
+##### `.matches(selector, node)`
+
+Returns `true` if `node` matches `selector`, otherwise `false`.
+
+##### `.closest(selector, node)`
+
+Returns the node itself, or the closest ancestor to match `selector`.
+
+#### Style
+
 ##### `.style(property, node)`
 
 Returns the computed style `property` of `node`.
+If `property` is of the form `"property:name"`, a named aspect of the property
+is returned.
 
-##### `.html(target, html)`
-##### `.append(target, node)`
-##### `.before(target, node)`
-##### `.after(target, node)`
-##### `.empty(node)`
-##### `.remove(node)`
-##### `.matches(selector, node)`
-##### `.closest(selector, node)`      
+    dom.style('transform:rotate', node);     // returns rotation, as a number, in radians
+    dom.style('transform:scale', node);      // returns scale, as a number
+    dom.style('transform:translateX', node); // returns translation, as a number, in px
+    dom.style('transform:translateY', node); // returns tranlsation, as a number, in px
+
 
 #### Events
 
-##### `.on(node, types, fn, data)`
+##### `.Event(type, properties)`
 
-Binds listener `fn` to events of type `types` on `node`. Listener `fn` is
-passed 2 arguments – the event object and optional `data` object:
+Creates a custom event of `type`. Properties are assigned to the event object.
 
-	function mouse(e, data) {
-    	// React to mouse events
-    }
-
-	var data = {
-		// Some data
-	};
-
-    dom.on(node, "mousedown mouseup", mouse, data);
-
-##### `.off(node, types, fn)`
-
-Unbinds listener `fn` from events of type `types` on `node`.
-
-##### `.trigger(node, type, properties)`
-
-Triggers event of `type`, with optional `properties`, on `node`.
-
-##### `.Events(types, node)`
+##### `.events(types, node)`
 
 Returns a stream of events heard on `node`.
 
@@ -94,6 +141,29 @@ Returns a stream of events heard on `node`.
 Stop the stream:
 
     events.stop();
+
+##### `.events.on(node, types, fn, data)`
+
+Binds listener `fn` to events of type `types` on `node`. Listener `fn` is
+passed 2 arguments – the event object and optional `data` object:
+
+	function mouse(e, data) {
+    	// React to mouse events
+    }
+
+	var data = {
+		// Some data
+	};
+
+    dom.on(node, "mousedown mouseup", mouse, data);
+
+##### `.events.off(node, types, fn)`
+
+Unbinds listener `fn` from events of type `types` on `node`.
+
+##### `.events.trigger(node, type, properties)`
+
+Triggers event of `type`, with optional `properties`, on `node`.
 
 ##### `.Event(type, properties)`
 

@@ -21,6 +21,13 @@
 	var assign = Object.assign;
 	var slice  = Function.prototype.call.bind(Array.prototype.slice);
 
+	function applyUntil(fn, test) {
+		return function curried() {
+			return test.apply(null, arguments) ?
+				fn.apply(null, arguments) :
+				Fn.bind(arguments, curried) ;
+		};
+	}
 
 	// TokenList constructor to emulate classList property. The get fn should
 	// take the arguments (node), and return a string of tokens. The set fn
@@ -387,7 +394,7 @@
 		return event;
 	}
 
-	var events = Fn.curryUntil(function events(types, selector, node) {
+	var events = applyUntil(function events(types, selector, node) {
 		// Selector is an optional parameter
 		selector = arguments.length > 2 && selector ;
 		node     = arguments[arguments.length - 1];

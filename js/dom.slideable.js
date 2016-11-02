@@ -101,8 +101,10 @@
 
 		if (!dom.matches('.slideable', parent)) { return; }
 
-		//var transform = dom.style('transform', parent);
-		//transform = !transform || transform === 'none' ? '' : transform; 
+		var classes = dom.classes(parent);
+		classes.remove('notransition');
+
+		var w = document.documentElement.clientWidth;
 
 		var l1 = dom.viewportLeft(node);
 		var l2 = dom.viewportLeft(parent);

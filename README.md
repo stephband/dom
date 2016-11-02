@@ -1,29 +1,42 @@
 # dom.js
 
-A small library of functions, custom events and event streams for HTML and SVG.
+A library of curried DOM functions, custom events and event streams
+for HTML and SVG.
 
 ## Demo and docs
 
 <a href="http://stephband.info/dom/">stephen.band/dom/</a>
 
-## dom(selector | nodes)
+## dom(selector)
 
-    var links = dom('a[href]');
+##### `dom(selector)`
 
-`links` is a functor - a mappable iterable - of links.
+Returns a functor - a mappable iterable. To log all urls in links:
 
-	links
-	.map(dom.attribute('href'))
-	.each(function(url) {
-		console.log(url);
-	});
+    dom('a[href]')
+	.map(dom.get('href'))
+	.each(console.log);
 
-`links` is also an iterator, so it can be looped over with `for...of`.
+To consume the functor as an array:
 
+    var urls = dom('a[href]')
+        .map(dom.get('href'))
+        .toArray();
+
+It can be looped over with `for...of`. Here's an equivalent using a loop:
+
+	var links = dom('a[href]');
 	var link;
+
 	for (link of links) {
-		console.log(link);
+		console.log(link.href);
 	}
+
+##### `dom(nodes)`
+
+`dom()` also accepts a collection of nodes.
+
+	var children = dom(document.body.childNodes);
 
 ## dom
 

@@ -71,23 +71,35 @@
 
 	// DOM Nodes
 
+	var testDiv = document.createElement('div');
+
+	var nodeTypes = {
+		comment: function(text) {
+			return document.createComment(text || '');
+		},
+
+		text: function(text) {
+			return document.createTextNode(text || '');
+		},
+
+		fragment: function(html) {
+			var fragment = document.createDocumentFragment();
+
+			if (html) {
+				testDiv.innerHTML = html;
+				append(fragment, testDiv.childNodes);
+				testDiv.innerHTML = '';
+			}
+
+			return fragment;
+		}
+	};
+
 	function create(name) {
-		// create('comment', 'Text');
-		if (name === 'comment' || name === '!') {
-			return document.createComment(arguments[1] || '');
+		if (nodeTypes[name]) {
+			return nodeTypes[name](arguments[1]);
 		}
 
-		// create('text', 'Text')
-		if (name === 'text') {
-			return document.createTextNode(arguments[1] || '');
-		}
-
-		// create('fragment')
-		if (name === 'fragment') {
-			return document.createDocumentFragment();
-		}
-
-		// create('div', 'HTML')
 		var node = document.createElement(name);
 		if (arguments[1]) { node.innerHTML = arguments[1]; }
 		return node;
@@ -144,14 +156,8 @@
 		return node.tagName.toLowerCase();
 	}
 
-	function classes(node) {
-		return node.classList || new TokenList(node, getClass, setClass);
-	}
-
-	function getClass(node) {
-		// node.className is an object in SVG. getAttribute
-		// is more consistent, if a tad slower.
-		return node.getAttribute('class');
+	function attribute(name, node) {
+		return node.getAttribute && node.getAttribute(name);
 	}
 
 	function setClass(node, classes) {
@@ -161,6 +167,10 @@
 		else {
 			node.className = classes;
 		}
+	}
+
+	function classes(node) {
+		return node.classList || new TokenList(node, attribute('class', node), setClass);
 	}
 
 	// DOM Traversal
@@ -204,20 +214,28 @@
 
 	function appendChild(target, node) {
 		target.appendChild(node);
+		// Use this fn as a reducer
+		return target;
 	}
 
 	function append(target, node) {
 		if (node instanceof Node || node instanceof SVGElement) {
-			return appendChild(target, node);
+			appendChild(target, node);
+			return node;
+		}
+
+		if (node.reduce) {
+			node.reduce(appendChild, target);
+			return node;
 		}
 
 		if (node.length) {
-			Array.prototype.forEach.call(node, function(node) {
-				appendChild(target, node);
-			});
+			A.reduce.call(node, appendChild, target);
+			return node;
 		}
 	}
 
+	// Todo: not sure I got this right, it should probably GET html
 	function html(target, html) {
 		target.innerHTML = html;
 	}
@@ -612,16 +630,17 @@
 
 		// Nodes
 
+		create:         create,
+		clone:          clone,
 		isElementNode:  isElementNode,
 		isTextNode:     isTextNode,
 		isCommentNode:  isCommentNode,
 		isFragmentNode: isFragmentNode,
 		isExternalLink: isExternalLink,
-
-		create:         create,
-		clone:          clone,
 		identify:       identify,
 		tag:            tag,
+		get:            Fn.get,
+		attribute:      Fn.curry(attribute),
 		classes:        classes,
 		style: Fn.curry(function(name, node) {
 			return styleParsers[name] ? styleParsers[name](node) : style(name, node) ;

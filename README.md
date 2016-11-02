@@ -1,35 +1,61 @@
-#DOM
+# dom.js
 
-A library of functional functions, custom events and Event Streams for HTML and SVG.
+A small library of functions, custom events and event streams for HTML and SVG.
 
-
-##Demo and docs
+## Demo and docs
 
 <a href="http://stephband.info/dom/">stephen.band/dom/</a>
 
+## dom(selector | nodes)
 
-##Install
+    var links = dom('a[href]');
 
-Install `dom`:
+`links` is a functor - a mappable iterable - of links.
 
-    git clone https://github.com/stephband/dom.git
-    cd dom/
-    npm install
+	links
+	.map(dom.attribute('href'))
+	.each(function(url) {
+		console.log(url);
+	});
 
-Lint the contents of `js/`:
+`links` is also an iterator, so it can be looped over with `for...of`.
 
-	npm run lint
+	var link;
+	for (link of links) {
+		console.log(link);
+	}
 
+## dom
 
-## DOM
+All functions on `dom` are curried functions. Many are designed to be used
+as map or filter functions.
 
-All functions are curried.
+	// Collect all links with or containing `.my-icon` and
+	// stick them in a fragment.
 
-#### Nodes
+	var fragment = dom.create('fragment');
+
+    dom('.my-icon')
+    .map(dom.closest('a'))
+    .each(dom.append(fragment));
+
+##### `.create(tag, text)`
+
+Returns a new node.
+
+- If `tag` is `"text"` returns a text node with the content `text`.
+- If `tag` is `"fragment"` returns a document fragment.
+- If `tag` is `"comment"` returns a comment `<!-- text -->`.
+- Anything else returns an element `<tag>text</tag>`, where `text` is inserted
+  as html.
+
+##### `.clone(node)`
+
+Returns a deep copy of `node`.
 
 ##### `.isElementNode(node)`
 
-Return `true` if `node` is an element.
+Return `true` if `node` is an element node.
 
 ##### `.isTextNode(node)`
 
@@ -47,38 +73,43 @@ Return `true` if `node` is a fragment.
 
 Return `true` if the `href` of `node` points outside of the current domain.
 
-##### `.create(tag, [text])`
-
-Returns a new node.
-If `tag` is `"text"` returns a text node with the text `text`.
-If `tag` is `"fragment"` returns a document fragment.
-If `tag` is `"comment"` returns a comment with the content `text`.
-Anything else returns an element `tag` with the html content `text`.
-
-##### `.clone(node)`
-
-Returns a deep copy of `node`.
-
 ##### `.identify(node)`
 
 Returns the id of `node`, or where there is no id a random id is generated,
 set on `node` and returned.
 
+    dom('button')
+    .map(dom.identify)
+    ...
+
+If you just want to get the id, us `Fn.get`.
+
+    dom('button')
+    .map(dom.get('id'))
+    ...
+
 ##### `.tag(node)`
 
 Returns the tag name of `node`.
+
+##### `.attribute(name, node)`
+
+Returns the string contents of attribute `name`, or if the attribute is boolean,
+returns `true` or `false`.
 
 ##### `.classes(node)`
 
 Returns the classList of `node`.
 
-##### `.html(target, html)`
-
-Replaces the content of `target` with `html`.
+//##### `.html(target, html)`
+//
+//Replaces the content of `target` with `html`.
 
 ##### `.append(target, node)`
 
 Appends node to `target`.
+
+If `node` is a collection of nodes, appends each node to `target`.
 
 ##### `.before(target, node)`
 
@@ -181,9 +212,11 @@ Calls `e.preventDefault()`.
 
 ##### `.features`
 
-Returns an object of feature detection results.
+An object of feature detection results.
 
 ## Events
+
+##### `activate`
 
 ##### `touch`
 
@@ -221,6 +254,18 @@ node with the class `swipeable`.
 	dom.on(document, "swipeleft", function(e) {
 		// e.target === <div class="swipeable">
     });
+
+##Install
+
+Install `dom`:
+
+    git clone https://github.com/stephband/dom.git
+    cd dom/
+    npm install
+
+Lint the contents of `js/`:
+
+	npm run lint
 
 ##History
 

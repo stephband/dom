@@ -14,6 +14,7 @@
 
 	var A = Array.prototype;
 	var rspaces = /\s+/;
+	var rpx     = /px$/;
 
 
 	// Utility functions
@@ -103,12 +104,37 @@
 	};
 
 	function create(name) {
+		// create(name)
+		// create(name, text)
+		// create(name, attributes)
+		// create(name, text, attributes)
+
 		if (nodeTypes[name]) {
 			return nodeTypes[name](arguments[1]);
 		}
 
 		var node = document.createElement(name);
-		if (arguments[1]) { node.innerHTML = arguments[1]; }
+		var attributes;
+
+		if (typeof arguments[1] === 'string') {
+			node.innerHTML = arguments[1];
+			attributes = arguments[2];
+		}
+		else {
+			attributes = arguments[1];
+		}
+
+		var names, n;
+
+		if (attributes) {
+			names = Object.keys(attributes);
+			n = names.length;
+
+			while (n--) {
+				node.setAttribute(names[n], attributes[name[n]]);
+			}
+		}
+
 		return node;
 	}
 
@@ -649,9 +675,15 @@
 		get:            Fn.get,
 		attribute:      Fn.curry(attribute),
 		classes:        classes,
+
 		style: Fn.curry(function(name, node) {
-			return styleParsers[name] ? styleParsers[name](node) : style(name, node) ;
+			if (styleParsers[name]) { return styleParsers[name](node); }
+			var value = style(name, node);
+			return typeof value === 'string' && rpx.test(value) ?
+				parseFloat(value) :
+				value ;
 		}),
+
 		append:         Fn.curry(append),
 		html:           Fn.curry(html),
 		before:         Fn.curry(before),

@@ -23,10 +23,22 @@
 	var slice  = Function.prototype.call.bind(Array.prototype.slice);
 
 	function applyUntil(fn, test) {
+		// Returns partially applied functions until some condition `test`
+		// is met, when `fn` is called
 		return function curried() {
 			return test.apply(null, arguments) ?
 				fn.apply(null, arguments) :
 				Fn.bind(arguments, curried) ;
+		};
+	}
+
+	function bindTail(fn) {
+		// Takes arguments 1 and up and appends them to arguments
+		// passed to fn.
+		var args = A.slice.call(arguments, 1);
+		return function() {
+			A.push.apply(arguments, args);
+			fn.apply(null, arguments);
 		};
 	}
 
@@ -230,7 +242,7 @@
 	}
 
 	function closest(selector, node) {
-		var root = arguments[3];
+		var root = arguments[2];
 
 		if (!node || node === document || node === root || node.nodeType === 11) { return; }
 
@@ -432,7 +444,7 @@
 			stream.push(e);
 		}
 
-		var fn = selector ? dom.delegate(selector, push) : push ;
+		var fn = selector ? delegate(selector, push) : push ;
 
 		stream.on('done', function() {
 			_stop.apply(this);
@@ -451,9 +463,8 @@
 		types = types.split(rspaces);
 
 		var events = node[eventsSymbol] || (node[eventsSymbol] = {});
+		var handler = bindTail(fn, data);
 		var handlers, type;
-
-		function handler(e) { fn(e, data); }
 
 		for (type of types) {
 			handlers = events[type] || (events[type] = []);
@@ -499,18 +510,18 @@
 		// to find selector.
 		return function handler(e) {
 			var node = closest(selector, e.target, e.currentTarget);
-
 			if (!node) { return; }
-
 			e.delegateTarget = node;
-			return fn(e);
+			fn(e);
+			e.delegateTarget = undefined;
 		};
 	}
 
 	assign(events, {
-		on:      on,
-		off:     off,
-		trigger: trigger
+		on:       on,
+		off:      off,
+		trigger:  trigger,
+		delegate: delegate
 	});
 
 

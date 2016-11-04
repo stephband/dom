@@ -107,8 +107,9 @@
 		// Activate events from inside a dialog should also activate the dialog
 		if (e.defaultPrevented) { return; }
 		if (e.target === e.delegateTarget) { return; }
+		var delegateTarget = e.delegateTarget;
 		requestAnimationFrame(function() {
-			trigger(e.delegateTarget, 'activate');
+			trigger(delegateTarget, 'activate');
 		});
 	}));
 

@@ -3,6 +3,7 @@
 	
 	var dom = window.dom;
 	var on  = dom.events.on;
+	var off = dom.events.off;
 	var trigger = dom.events.trigger;
 
 	function disableScroll(layer) {
@@ -40,7 +41,7 @@
 		// Enable gestures on touch devices
 		//remove(document, 'touchmove', preventDefaultOutside);
 	}
-	
+
 	function trapFocus(node, focusNode) {
 		// Trap focus as described by Nikolas Zachas:
 		// http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
@@ -68,11 +69,11 @@
 			document.addEventListener("focus", preventFocus, true);
 		}
 
-		add(node, 'deactivate', function deactivate() {
+		on(node, 'deactivate', function deactivate() {
 			// Set focus back to the thing that was last focused when the
 			// dialog was opened.
 			setTimeout(function() { focusNode.focus(); }, 0);
-			remove(node, 'deactivate', deactivate);
+			off(node, 'deactivate', deactivate);
 
 			if (document.addEventListener && document.removeEventListener) {
 				document.removeEventListener('focus', preventFocus);

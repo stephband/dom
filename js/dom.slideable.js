@@ -78,16 +78,17 @@
 		.filter(dom.matches('.active'))
 		.shift();
 
-		if (!active[prop]) {
-			var l1 = dom.viewportLeft(node);
-			var l2 = dom.viewportLeft(active);
-			// Round the translation - without rounding images and text become
-			// slightly fuzzy as they are antialiased.
-			var l  = Math.round(l1 - l2 - dom.style('margin-left', active) - 200);
-			node.style.transform = 'translate(' + l + 'px, 0px)';
+		if (active[prop]) {
+			trigger(active[prop], 'activate');
 		}
 		else {
-			trigger(active[prop], 'activate');
+			var l1 = dom.viewportLeft(node);
+			var l2 = dom.viewportLeft(active);
+
+			// Round the translation - without rounding images and text become
+			// slightly fuzzy as they are antialiased.
+			var l  = Math.round(l1 - l2 - dom.style('margin-left', active));
+			node.style.transform = 'translate(' + l + 'px, 0px)';
 		}
 	});
 

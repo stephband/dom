@@ -326,21 +326,22 @@
 	}
 
 	function activateHash(e) {
-		var id, node, data;
-
 		if (isIgnorable(e)) { return; }
 		if (dom.isExternalLink(e.currentTarget)) { return; }
 
 		// Does it point to an id?
-		id = getHash(e.delegateTarget);
+		var id = getHash(e.delegateTarget);
 		if (!id) { return; }
 
 		// Does it point to a node?
-		node = document.getElementById(id);
+		var node = document.getElementById(id);
 		if (!node) { return; }
 
-		//data = boltData(node);
-		//if (!data) { return; }
+		// Is the node popable, switchable or toggleable?
+		var classes = dom.classes(node);
+		if (!classes.contains('popable') &&
+			!classes.contains('switchable') &&
+			!classes.contains('toggleable')) { return; }
 
 		activate(e, node);
 	}

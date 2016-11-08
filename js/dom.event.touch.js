@@ -113,37 +113,38 @@
 		// That means we can't trust the touchstart object to stay the same,
 		// so we must copy the data. This object acts as a template for
 		// movestart, move and moveend event objects.
-		var data = {
+		var event = {
 			target:     touch.target,
 			pageX:      touch.pageX,
 			pageY:      touch.pageY,
 			identifier: touch.identifier,
 
 			// The only way to make handlers individually unbindable is by
-			// making them unique.
-			touchmove:  function(e, data) { touchmove(e, data); },
-			touchend:   function(e, data) { touchend(e, data); }
+			// making them unique. This is a crap place to put them, but it
+			// will work.
+			touchmove:  function() { touchmove.apply(this, arguments); },
+			touchend:   function() { touchend.apply(this, arguments); }
 		};
 
-		on(document, touchevents.move, data.touchmove, data);
-		on(document, touchevents.cancel, data.touchend, data);
+		on(document, touchevents.move, event.touchmove, [event]);
+		on(document, touchevents.cancel, event.touchend, [event]);
 	}
 
-	function touchmove(e, data) {
-		var touch = changedTouch(e, data);
+	function touchmove(e, events) {
+		var touch = changedTouch(e, events[0]);
 		if (!touch) { return; }
-		checkThreshold(e, data, touch, removeTouch);
+		checkThreshold(e, events, touch, removeTouch);
 	}
 
-	function touchend(e, data) {
-		var touch = identifiedTouch(e.changedTouches, data.identifier);
+	function touchend(e, events) {
+		var touch = identifiedTouch(e.changedTouches, events[0].identifier);
 		if (!touch) { return; }
-		removeTouch(data);
+		removeTouch(events);
 	}
 
-	function removeTouch(data) {
-		off(document, touchevents.move, data.touchmove);
-		off(document, touchevents.cancel, data.touchend);
+	function removeTouch(events) {
+		off(document, touchevents.move, events[0].touchmove);
+		off(document, touchevents.cancel, events[0].touchend);
 	}
 
 	function checkThreshold(e, events, touch, fn) {
@@ -153,10 +154,6 @@
 		// Do nothing if the threshold has not been crossed.
 		if ((distX * distX) + (distY * distY) < (threshold * threshold)) { return; }
 
-		triggerStart(e, events, touch, distX, distY, fn);
-	}
-
-	function triggerStart(e, events, touch, distX, distY, fn) {
 		var e0   = events[0];
 		var node = events[0].target;
 		var stream;

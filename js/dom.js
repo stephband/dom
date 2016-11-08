@@ -14,6 +14,7 @@
 
 	var A = Array.prototype;
 	var rspaces = /\s+/;
+	var rpx     = /px$/;
 
 
 	// Utility functions
@@ -22,10 +23,22 @@
 	var slice  = Function.prototype.call.bind(Array.prototype.slice);
 
 	function applyUntil(fn, test) {
+		// Returns partially applied functions until some condition `test`
+		// is met, when `fn` is called
 		return function curried() {
 			return test.apply(null, arguments) ?
 				fn.apply(null, arguments) :
 				Fn.bind(arguments, curried) ;
+		};
+	}
+
+	function bindTail(fn) {
+		// Takes arguments 1 and up and appends them to arguments
+		// passed to fn.
+		var args = A.slice.call(arguments, 1);
+		return function() {
+			A.push.apply(arguments, args);
+			fn.apply(null, arguments);
 		};
 	}
 
@@ -103,12 +116,37 @@
 	};
 
 	function create(name) {
+		// create(name)
+		// create(name, text)
+		// create(name, attributes)
+		// create(name, text, attributes)
+
 		if (nodeTypes[name]) {
 			return nodeTypes[name](arguments[1]);
 		}
 
 		var node = document.createElement(name);
-		if (arguments[1]) { node.innerHTML = arguments[1]; }
+		var attributes;
+
+		if (typeof arguments[1] === 'string') {
+			node.innerHTML = arguments[1];
+			attributes = arguments[2];
+		}
+		else {
+			attributes = arguments[1];
+		}
+
+		var names, n;
+
+		if (attributes) {
+			names = Object.keys(attributes);
+			n = names.length;
+
+			while (n--) {
+				node.setAttribute(names[n], attributes[name[n]]);
+			}
+		}
+
 		return node;
 	}
 
@@ -204,7 +242,7 @@
 	}
 
 	function closest(selector, node) {
-		var root = arguments[3];
+		var root = arguments[2];
 
 		if (!node || node === document || node === root || node.nodeType === 11) { return; }
 
@@ -406,7 +444,7 @@
 			stream.push(e);
 		}
 
-		var fn = selector ? dom.delegate(selector, push) : push ;
+		var fn = selector ? delegate(selector, push) : push ;
 
 		stream.on('done', function() {
 			_stop.apply(this);
@@ -425,9 +463,8 @@
 		types = types.split(rspaces);
 
 		var events = node[eventsSymbol] || (node[eventsSymbol] = {});
+		var handler = bindTail(fn, data);
 		var handlers, type;
-
-		function handler(e) { fn(e, data); }
 
 		for (type of types) {
 			handlers = events[type] || (events[type] = []);
@@ -473,18 +510,18 @@
 		// to find selector.
 		return function handler(e) {
 			var node = closest(selector, e.target, e.currentTarget);
-
 			if (!node) { return; }
-
 			e.delegateTarget = node;
-			return fn(e);
+			fn(e);
+			e.delegateTarget = undefined;
 		};
 	}
 
 	assign(events, {
-		on:      on,
-		off:     off,
-		trigger: trigger
+		on:       on,
+		off:      off,
+		trigger:  trigger,
+		delegate: delegate
 	});
 
 
@@ -649,9 +686,15 @@
 		get:            Fn.get,
 		attribute:      Fn.curry(attribute),
 		classes:        classes,
+
 		style: Fn.curry(function(name, node) {
-			return styleParsers[name] ? styleParsers[name](node) : style(name, node) ;
+			if (styleParsers[name]) { return styleParsers[name](node); }
+			var value = style(name, node);
+			return typeof value === 'string' && rpx.test(value) ?
+				parseFloat(value) :
+				value ;
 		}),
+
 		append:         Fn.curry(append),
 		html:           Fn.curry(html),
 		before:         Fn.curry(before),

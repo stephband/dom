@@ -1,7 +1,8 @@
 (function(window) {
 	"use strict";
 
-	var dom = window.dom;
+	var Fn      = window.Fn;
+	var dom     = window.dom;
 
 	var on      = dom.events.on;
 	var trigger = dom.events.trigger;
@@ -22,7 +23,7 @@
 		var y = data.y;
 		var w = node.offsetWidth;
 		var h = node.offsetHeight;
-		var polar = toPolar([data.x, data.y]);
+		var polar = Fn.toPolar([data.x, data.y]);
 
 		// Todo: check if swipe has enough velocity and distance
 		//x/w > settings.threshold || e.velocityX * x/w * settings.sensitivity > 1

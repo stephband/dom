@@ -180,14 +180,18 @@
 
 	// Listen to clicks
 
+	var nodeCache = {};
+
 	var targets = {
 		dialog: function(e) {
-			var href = e.currentTarget.getAttribute('data-href') || e.currentTarget.hash || e.currentTarget.href;
+			var href = e.delegateTarget.getAttribute('data-href') || e.currentTarget.hash || e.currentTarget.href;
+
+			//Todo: more reliable way of getting a hash ref
 			var id = href.substring(1);
 			var node, parts, item;
 
 			if (!id) { return loadResource(e, href); }
-		
+
 			if (parts = /([\w-]+)\/([\w-]+)/.exec(id)) {
 				id = parts[1];
 			}
@@ -233,7 +237,46 @@
 	var rImage = /\.(?:png|jpeg|jpg|gif|PNG|JPEG|JPG|GIF)$/;
 	var rYouTube = /youtube\.com/;
 
-	var nodeCache = {};
+	function loadResource(e, href) {
+		var link = e.currentTarget;
+		var path = link.pathname;
+		var node, elem, dialog;
+
+		if (rImage.test(link.pathname)) {
+			e.preventDefault();
+			img = new Image();
+			dialog = createDialog();
+			var classes = dom.classes(dialog);
+			classes.add('loading');
+			dom.append(dialog, img);
+			on(img, 'load', function() {
+				classes.remove('loading');
+			});
+			img.src = href;
+			return;
+		}
+
+		if (rYouTube.test(link.hostname)) {
+			e.preventDefault();
+
+			// We don't need a loading indicator because youtube comes with
+			// it's own.
+			elem = jQuery('<iframe class="youtube_iframe" width="560" height="315" src="' + href + '" frameborder="0" allowfullscreen></iframe>');
+			node = elem[0];
+
+			elem.dialog('lightbox');
+
+			return;
+		}
+	}
+
+	function createDialog(attributes) {
+		var dialog = dom.create('div', { class: 'dialog' });
+		var layer  = dom.create('div', { class: 'dialog-layer layer' });
+		dom.append(layer, dialog);
+		dom.append(document.body, layer);
+		return dialog;
+	}
 
 	function preventClick(e) {
 		// Prevent the click that follows the mousedown. The preventDefault
@@ -303,15 +346,12 @@
 	}
 
 	function activateTarget(e) {
-		var target = e.currentTarget.target;
+		var target = e.delegateTarget.target;
 
 		if (isIgnorable(e)) { return; }
 
 		// If the target is not listed, ignore
 		if (!targets[target]) { return; }
-
-		if (e.type === 'mousedown') { preventClick(e); }
-
 		return targets[target](e);
 	}
 

@@ -81,7 +81,9 @@
 		if (!active[prop]) {
 			var l1 = dom.viewportLeft(node);
 			var l2 = dom.viewportLeft(active);
-			var l  = l1 - l2;
+			// Round the translation - without rounding images and text become
+			// slightly fuzzy as they are antialiased.
+			var l  = Math.round(l1 - l2 - dom.style('margin-left', active) - 200);
 			node.style.transform = 'translate(' + l + 'px, 0px)';
 		}
 		else {
@@ -99,12 +101,13 @@
 
 		if (!dom.matches('.slideable', parent)) { return; }
 
-		//var transform = dom.style('transform', parent);
-		//transform = !transform || transform === 'none' ? '' : transform; 
+		var classes = dom.classes(parent);
+		classes.remove('notransition');
 
+		var w = document.documentElement.clientWidth;
 		var l1 = dom.viewportLeft(node);
 		var l2 = dom.viewportLeft(parent);
-		var l  = l1 - l2;
+		var l  = l1 - l2 - dom.style('margin-left', node);
 
 		parent.style.transform = 'translate(' + (-l) + 'px, 0px)';
 		e.preventDefault();

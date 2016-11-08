@@ -27,7 +27,7 @@
 
 	function sameOrigin() {
 		var node = this;
-		
+
 		//     IE gives us the port on node.host, even where it is not
 		//     specified. Use node.hostname.
 		return location.hostname === node.hostname &&
@@ -57,7 +57,7 @@
 
 		if (!data.node) { data.node = target; }
 		if (!data.buttons) { data.buttons = settings.cache && id && findButtons(id); }
-		
+
 		return data;
 	}
 
@@ -67,23 +67,23 @@
 
 	function addTransitionClass(node, classes, callback) {
 		if (debug) { console.log('jquery.addTransitionClass', classes, !!callback); }
-		
+
 		transition(node, function() {
 			dom.classes(node).add(classes);
 		}, callback);
 	};
-	
+
 	function removeTransitionClass(node, classes, callback) {
 		if (debug) { console.log('jquery.removeTransitionClass', classes, !!callback); }
-		
+
 		transition(node, function() {
 			dom.classes(node).remove(classes);
 		}, callback);
 	}
-	
+
 	function transition(node, fn, callback) {
 		if (debug) { console.log('jquery.transition', !!fn, !!callback); }
-		
+
 		if (callback && dom.features.transition) {
 			on(node, dom.features.transitionEnd, function transitionend(e) {
 				off(node, dom.features.transitionEnd, transitionend);
@@ -133,15 +133,15 @@
 		if (!data.active) { return; }
 		data.active = false;
 		this.preventDefault();
-		
+
 		if (debug) { console.log('[deactivate] default | target:', e.target.id, 'data:', data); }
-		
+
 		removeTransitionClass(node, activeClass, function() {
 			dom.trigger('deactivateend', node);
 		});
 
 		buttons = getButtons(data);
-		
+
 		if (buttons) {
 			buttons.removeClass(onClass);
 		}
@@ -164,7 +164,7 @@
 
 	on(document, 'deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
- 
+
 		var data = cacheData(e.target);
 
 		// Don't do anything if elem is already inactive
@@ -201,7 +201,7 @@
 			if (!node) { return loadResource(e, href); }
 
 			e.preventDefault();
-		
+
 			// If the node is html hidden inside a text/html script tag,
 			// extract the html.
 			if (node.getAttribute && node.getAttribute('type') === 'text/html') {
@@ -219,7 +219,7 @@
 			}
 
 			jQuery(node).dialog('lightbox');
-		
+
 			if (parts) {
 				item = jQuery('#' + parts[2]);
 
@@ -227,7 +227,7 @@
 				.addClass('notransition')
 				.trigger('activate')
 				.width();
-		
+
 				item
 				.removeClass('notransition');
 			}
@@ -296,7 +296,7 @@
 
 		// Ignore mousedowns on any button other than the left (or primary)
 		// mouse button, or when a modifier key is pressed.
-		if (e.type === 'mousedown' && !dom.isPrimaryButton(e)) { return true; }
+		if (!dom.isPrimaryButton(e)) { return true; }
 
 		// Ignore key presses other than the enter key
 		if ((e.type === 'keydown' || e.type === 'keyup') && e.keyCode !== 13) { return true; }
@@ -368,12 +368,12 @@
 		// Setup all things that should start out active.
 		dom('.' + activeClass)
 		.each(dom.trigger('activate'));
-		
+
 		// Activate the node that corresponds to the hashref in
 		// location.hash, checking if it's an alphanumeric id selector
 		// (not a hash bang).
 		if (!id || !(/^#\S+$/.test(id))) { return; }
-		
+
 		// The id may be perfectly valid, yet not be supported by jQuery,
 		// such as ids with a ':' character, so try...catch it.
 		try {

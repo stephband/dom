@@ -41,15 +41,13 @@
 		//var relatedTarget = e.relatedTarget;
 		//var relatedOffset = jQuery(relatedTarget).offset();
 
-		// TEMP
-		var elem = jQuery(node);
 		classes.add('notransition');
 
 		//node.style.marginTop = 0;
 		//node.style.marginLeft = 0;
 
-		var offset   = elem.offset();
-		var position = elem.position();
+		//var offset   = elem.offset();
+		//var position = elem.position();
 
 		//node.style.marginTop = '';
 		//node.style.marginLeft = '';
@@ -58,7 +56,7 @@
 		//node.style.top  = Math.floor(relatedOffset.top  + position.top  - offset.top);
 
 		// Bump render
-		elem.width();
+		node.clientWidth;
 		classes.remove('notransition');
 
 		requestAnimationFrame(function() {

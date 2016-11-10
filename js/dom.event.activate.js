@@ -37,9 +37,10 @@
 	}
 
 	function findButtons(id) {
-		return jQuery('a[href$="#' + id + '"]')
+		return dom('a[href$="#' + id + '"]')
 			.filter(sameOrigin)
-			.add('[data-href="#' + id + '"]');
+			.toArray();
+			//.add('[data-href="#' + id + '"]');
 	}
 
 	function getData(node) {
@@ -207,29 +208,27 @@
 			if (node.getAttribute && node.getAttribute('type') === 'text/html') {
 				// TODO: jQuery 1.9.1 and 2.0.0b2 are failing because html
 				// needs to be whitespace trimmed.
-				node = jQuery(node).html();
+				node = node.innerHTML;
 			}
 
 			// If it's a template...
 			if (node.tagName && node.tagName.toLowerCase() === 'template') {
 				// If it is not inert (like in IE), remove it from the DOM to
 				// stop ids in it clashing with ids in the rendered result.
-				if (!node.content) { jQuery(node).remove(); }
-				node = nodeCache[id] = jQuery(node).html();
+				if (!node.content) { dom.remove(node); }
+				node = nodeCache[id] = node.innerHTML;
 			}
 
-			jQuery(node).dialog('lightbox');
+			//jQuery(node).dialog('lightbox');
 
 			if (parts) {
-				item = jQuery('#' + parts[2]);
-
-				item
-				.addClass('notransition')
-				.trigger('activate')
-				.width();
-
-				item
-				.removeClass('notransition');
+				item = dom('#' + parts[2]).shift();
+				classes = dom.classes(item);
+				
+				classes.add('notransition');
+				trigger('activate', item);
+				item.clientWidth;
+				classes.remove('notransition');
 			}
 		}
 	};
@@ -261,11 +260,17 @@
 
 			// We don't need a loading indicator because youtube comes with
 			// it's own.
-			elem = jQuery('<iframe class="youtube_iframe" width="560" height="315" src="' + href + '" frameborder="0" allowfullscreen></iframe>');
+			elem = dom.create('iframe', {
+				src:             href,
+				class:           "youtube_iframe",
+				width:           "560",
+				height:          "315",
+				frameborder:     "0",
+				allowfullscreen: true
+			});
+
 			node = elem[0];
-
 			elem.dialog('lightbox');
-
 			return;
 		}
 	}

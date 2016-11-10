@@ -594,10 +594,8 @@
 		return result;
 	}
 
-	// Infer transitionend event from CSS transition prefix and add
-	// it's name as jQuery.support.transitionEnd.
-	
 	function testTransition() {
+		// Infer transitionend event from CSS transition prefix
 		var prefixed = prefix('transition');
 		return prefixed || false;
 	}

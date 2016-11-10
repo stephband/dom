@@ -42,6 +42,10 @@
 		};
 	}
 
+	function prefixSlash(str) {
+		// Prefixes a slash when there is not an existing one
+		return (/^\//.test(str) ? '' : '/') + str ;
+	}
 
 	// TokenList
 	// TokenList constructor to emulate classList property. The get fn should
@@ -172,19 +176,16 @@
 		return node.nodeType === 11;
 	}
 
-	function isExternalLink(node) {
+	function isInternalLink(node) {
 		var location = window.location;
 
-		// IE does not give us a .hostname for links to xxx.xxx.xxx.xxx URLs.
-		if (!node.hostname) { return false; }
-
-		// IE gives us the port on link.host, even where it is not specified.
-		// Use link.hostname.
-		if (location.hostname !== node.hostname) { return true; }
-
-		// IE gives us link.pathname without a leading slash, so add
-		// one before comparing.
-		if (location.pathname !== prefixSlash(node.pathname)) { return true; }
+		return node.hostname &&
+			// IE gives us the port on node.host, even where it is not
+			// specified. Use node.hostname.
+			location.hostname === node.hostname &&
+			// IE gives us node.pathname without a leading slash, so
+			// add one before comparing.
+			location.pathname === prefixSlash(node.pathname);
 	}
 
 	function identify(node) {
@@ -684,7 +685,7 @@
 		isTextNode:     isTextNode,
 		isCommentNode:  isCommentNode,
 		isFragmentNode: isFragmentNode,
-		isExternalLink: isExternalLink,
+		isInternalLink: isInternalLink,
 		identify:       identify,
 		tag:            tag,
 		get:            Fn.get,

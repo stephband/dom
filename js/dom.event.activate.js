@@ -20,25 +20,9 @@
 
 	var store     = new WeakMap();
 
-
-	function prefixSlash(str) {
-		return (/^\//.test(str) ? '' : '/') + str ;
-	}
-
-	function sameOrigin() {
-		var node = this;
-
-		//     IE gives us the port on node.host, even where it is not
-		//     specified. Use node.hostname.
-		return location.hostname === node.hostname &&
-		//     IE gives us node.pathname without a leading slash, so
-		//     add one before comparing.
-		       location.pathname === prefixSlash(node.pathname);
-	}
-
 	function findButtons(id) {
 		return dom('a[href$="#' + id + '"]')
-			.filter(sameOrigin)
+			.filter(dom.isInternalLink)
 			.toArray();
 			//.add('[data-href="#' + id + '"]');
 	}
@@ -121,7 +105,9 @@
 		buttons = getButtons(data);
 
 		if (buttons) {
-			buttons.addClass(onClass);
+			buttons.forEach(function(node) {
+				dom.classes(node).add(onClass);
+			});
 		}
 	}
 
@@ -144,7 +130,9 @@
 		buttons = getButtons(data);
 
 		if (buttons) {
-			buttons.removeClass(onClass);
+			buttons.forEach(function(node) {
+				dom.classes(node).remove(onClass);
+			});
 		}
 	}
 
@@ -332,7 +320,7 @@
 
 	function activateHash(e) {
 		if (isIgnorable(e)) { return; }
-		if (dom.isExternalLink(e.currentTarget)) { return; }
+		if (!dom.isInternalLink(e.delegateTarget)) { return; }
 
 		// Does it point to an id?
 		var id = getHash(e.delegateTarget);

@@ -82,7 +82,7 @@
 
 			this.set(this.node, array.join(' '));
 		},
-		
+
 		contains: function(string) {
 			var tokens = this.get(this.node);
 			var array = tokens ? tokens.trim().split(rspaces) : [] ;
@@ -351,7 +351,7 @@
 
 	var prefix = (function(prefixes) {
 		var node = document.createElement('div');
-		var cache = {};		
+		var cache = {};
 
 		function testPrefix(prop) {
 			if (prop in node.style) { return prop; }
@@ -468,7 +468,9 @@
 		var handler = bindTail(fn, data);
 		var handlers, type;
 
-		for (type of types) {
+		var n = -1;
+		while (n++ < types.length) {
+			type = types[n];
 			handlers = events[type] || (events[type] = []);
 			handlers.push([fn, handler]);
 			node.addEventListener(type, handler);
@@ -485,7 +487,9 @@
 
 		if (!events) { return node; }
 
-		for (type of types) {
+		var n = -1;
+		while (n++ < types.length) {
+			type = types[n];
 			handlers = events[type];
 			if (!handlers) { continue; }
 			i = handlers.length;
@@ -553,7 +557,7 @@
 		if (node.content) {
 			return fragmentFromContent(node);
 		}
-			
+
 		// In browsers where templates are not inert, ids used inside them
 		// conflict with ids in any rendered result. To go some way to
 		// tackling this, remove the node from the DOM.
@@ -598,7 +602,7 @@
 
 	// Infer transitionend event from CSS transition prefix and add
 	// it's name as jQuery.support.transitionEnd.
-	
+
 	function testTransition() {
 		var prefixed = prefix('transition');
 		return prefixed || false;

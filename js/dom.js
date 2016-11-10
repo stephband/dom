@@ -42,6 +42,8 @@
 		};
 	}
 
+
+	// TokenList
 	// TokenList constructor to emulate classList property. The get fn should
 	// take the arguments (node), and return a string of tokens. The set fn
 	// should take the arguments (node, string).

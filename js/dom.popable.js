@@ -5,29 +5,7 @@
 (function(windw) {
 
 	var name    = "popable";
-
-	var noop    = Fn.noop;
-	var on      = dom.events.on;
-	var off     = dom.events.off;
 	var trigger = dom.events.trigger;
-
-	var keymap = {
-		27: function escape(e) {
-			trigger(e.data, 'deactivate');
-		}
-	};
-
-	function click(e, data) {
-		if (data.contains(e.target) || e.data === e.target) { return; }
-		trigger(data, 'deactivate');
-	}
-
-	function keydown(e) {
-		var fn = keymap[e.keyCode];
-		if (!fn) { return; }
-		fn(e);
-		e.preventDefault();
-	}
 
 	function activate(e) {
 		// Use method detection - e.defaultPrevented is not set in time for
@@ -60,8 +38,28 @@
 		classes.remove('notransition');
 
 		requestAnimationFrame(function() {
-			on(document, 'click', click, e.target);
-			on(document, 'keydown', keydown, e.target);
+			function click(e) {
+				if (node.contains(e.target) || node === e.target) { return; }
+				trigger(node, 'deactivate');
+			}
+
+			function keydown(e) {
+				if (e.keyCode !== 27) { return; }
+				trigger(node, 'deactivate');
+				e.preventDefault();
+			}
+
+			function deactivate(e) {
+				if (node !== e.target) { return; }
+				if (e.defaultPrevented) { return; }
+				document.removeEventListener('click', click);
+				document.removeEventListener('keydown', keydown);
+				document.removeEventListener('deactivate', deactivate);
+			};
+
+			document.addEventListener('click', click);
+			document.addEventListener('keydown', keydown);
+			document.addEventListener('deactivate', deactivate);
 		});
 
 		e.default();
@@ -72,14 +70,10 @@
 
 		var target = e.target;
 		if (!dom.classes(target).contains(name)) { return; }
-
-		off(document, 'click', click);
-		off(document, 'keydown', keydown);
-
 		e.default();
 	}
 
-	on(document, 'activate', activate);
-	on(document, 'deactivate', deactivate);
+	document.addEventListener('activate', activate);
+	document.addEventListener('deactivate', deactivate);
 
 })(this);

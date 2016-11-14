@@ -1,22 +1,20 @@
 (function(window) {
 	"use strict";
 
+	var debug     = false;//true;
+
 	var Fn        = window.Fn;
 	var dom       = window.dom;
 	var on        = dom.events.on;
 	var off       = dom.events.off;
 	var trigger   = dom.events.trigger;
-
 	var isDefined = Fn.isDefined;
 
-	var debug     = false;//true;
 	var activeClass = "active";
 	var onClass   = "on";
 	var location  = window.location;
 	var id        = location.hash;
-	var settings  = {
-	    	cache: true
-	    };
+	var settings  = { cache: true };
 
 	var store     = new WeakMap();
 
@@ -171,32 +169,33 @@
 
 	var nodeCache = {};
 
+	var dialogs = {};
+
 	var targets = {
 		dialog: function(e) {
-			var href = e.delegateTarget.getAttribute('data-href') || e.currentTarget.hash || e.currentTarget.href;
+			var href = e.delegateTarget.getAttribute('data-href') || e.delegateTarget.hash || e.delegateTarget.href;
 
-			//Todo: more reliable way of getting a hash ref
+			//Todo: more reliable way of getting id from a hash ref
 			var id = href.substring(1);
-			var node, parts, item;
+			var parts, item, fragment;
 
-			if (!id) { return loadResource(e, href); }
+//			if (!id) { return loadResource(e, href); }
 
-			if (parts = /([\w-]+)\/([\w-]+)/.exec(id)) {
-				id = parts[1];
-			}
+//			if (parts = /([\w-]+)\/([\w-]+)/.exec(id)) {
+//				id = parts[1];
+//			}
 
-			node = nodeCache[id] || document.getElementById(id);
+			var node = nodeCache[id] || (nodeCache[id] = document.getElementById(id));
 
-			if (!node) { return loadResource(e, href); }
+//			if (!node) { return loadResource(e, href); }
 
 			e.preventDefault();
 
 			// If the node is html hidden inside a text/html script tag,
 			// extract the html.
 			if (node.getAttribute && node.getAttribute('type') === 'text/html') {
-				// TODO: jQuery 1.9.1 and 2.0.0b2 are failing because html
-				// needs to be whitespace trimmed.
-				node = node.innerHTML;
+				// Todo: trim whitespace from html?
+				fragment = dom.create('fragment', node.innerHTML);
 			}
 
 			// If it's a template...
@@ -204,72 +203,68 @@
 				// If it is not inert (like in IE), remove it from the DOM to
 				// stop ids in it clashing with ids in the rendered result.
 				if (!node.content) { dom.remove(node); }
-				node = nodeCache[id] = node.innerHTML;
+				fragment = dom.fragmentFromContent(node);
 			}
 
-			//jQuery(node).dialog('lightbox');
-
-			if (parts) {
-				item = dom('#' + parts[2]).shift();
-				classes = dom.classes(item);
-				
-				classes.add('notransition');
-				trigger('activate', item);
-				item.clientWidth;
-				classes.remove('notransition');
-			}
+			var dialog = dialogs[id] || (dialogs[id] = createDialog(fragment));
+			trigger(dialog, 'activate');
 		}
 	};
 
-	var rImage = /\.(?:png|jpeg|jpg|gif|PNG|JPEG|JPG|GIF)$/;
+	var rImage   = /\.(?:png|jpeg|jpg|gif|PNG|JPEG|JPG|GIF)$/;
 	var rYouTube = /youtube\.com/;
 
-	function loadResource(e, href) {
-		var link = e.currentTarget;
-		var path = link.pathname;
-		var node, elem, dialog;
+	function createDialog(content) {
+		var layer = dom.create('div', { class: 'dialog-layer layer' });
+		var dialog = dom.create('div', { class: 'dialog popable' });
+		var button = dom.create('button', { class: 'close-thumb thumb' });
 
-		if (rImage.test(link.pathname)) {
-			e.preventDefault();
-			img = new Image();
-			dialog = createDialog();
-			var classes = dom.classes(dialog);
-			classes.add('loading');
-			dom.append(dialog, img);
-			on(img, 'load', function() {
-				classes.remove('loading');
-			});
-			img.src = href;
-			return;
-		}
-
-		if (rYouTube.test(link.hostname)) {
-			e.preventDefault();
-
-			// We don't need a loading indicator because youtube comes with
-			// it's own.
-			elem = dom.create('iframe', {
-				src:             href,
-				class:           "youtube_iframe",
-				width:           "560",
-				height:          "315",
-				frameborder:     "0",
-				allowfullscreen: true
-			});
-
-			node = elem[0];
-			elem.dialog('lightbox');
-			return;
-		}
-	}
-
-	function createDialog(attributes) {
-		var dialog = dom.create('div', { class: 'dialog' });
-		var layer  = dom.create('div', { class: 'dialog-layer layer' });
+		dom.append(dialog, content);
 		dom.append(layer, dialog);
+		dom.append(layer, button);
 		dom.append(document.body, layer);
+
 		return dialog;
 	}
+
+//	function loadResource(e, href) {
+//		var link = e.currentTarget;
+//		var path = link.pathname;
+//		var node, elem, dialog;
+//
+//		if (rImage.test(link.pathname)) {
+//			e.preventDefault();
+//			img = new Image();
+//			dialog = createDialog();
+//			var classes = dom.classes(dialog);
+//			classes.add('loading');
+//			dom.append(dialog, img);
+//			on(img, 'load', function() {
+//				classes.remove('loading');
+//			});
+//			img.src = href;
+//			return;
+//		}
+//
+//		if (rYouTube.test(link.hostname)) {
+//			e.preventDefault();
+//
+//			// We don't need a loading indicator because youtube comes with
+//			// it's own.
+//			elem = dom.create('iframe', {
+//				src:             href,
+//				class:           "youtube_iframe",
+//				width:           "560",
+//				height:          "315",
+//				frameborder:     "0",
+//				allowfullscreen: true
+//			});
+//
+//			node = elem[0];
+//			elem.dialog('lightbox');
+//			return;
+//		}
+//	}
 
 	function preventClick(e) {
 		// Prevent the click that follows the mousedown. The preventDefault
@@ -340,6 +335,7 @@
 	}
 
 	function activateTarget(e) {
+		var target = e.delegateTarget;
 		var target = e.delegateTarget.target;
 
 		if (isIgnorable(e)) { return; }

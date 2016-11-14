@@ -149,7 +149,7 @@
 			n = names.length;
 
 			while (n--) {
-				node.setAttribute(names[n], attributes[name[n]]);
+				node.setAttribute(names[n], attributes[names[n]]);
 			}
 		}
 
@@ -537,9 +537,8 @@
 	var templates = {};
 
 	function fragmentFromChildren(node) {
-		var children = slice(node.childNodes);
 		var fragment = create('fragment');
-		return append(fragment, children);
+		return append(fragment, node.childNodes);
 	}
 
 	function fragmentFromContent(node) {

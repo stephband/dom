@@ -218,7 +218,7 @@
 	}
 
 	function classes(node) {
-		return node.classList || new TokenList(node, attribute('class', node), setClass);
+		return node.classList || new TokenList(node, dom.attribute('class'), setClass);
 	}
 
 	// DOM Traversal

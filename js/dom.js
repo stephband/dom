@@ -547,6 +547,14 @@
 		return node.content || fragmentFromChildren(node);
 	}
 
+	function fragmentFromHTML(html, tag) {
+		var fragment = document.createDocumentFragment();
+		var node     = document.createElement(tag || 'div');
+		node.innerHTML = html;
+		Fn(node.childNodes).each(dom.append(fragment));
+		return fragment;
+	}
+
 	function getTemplate(id) {
 		var node = document.getElementById(id);
 		if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }
@@ -722,7 +730,8 @@
 		},
 
 		fragmentFromTemplate: cloneTemplate,
-		fragmentFromContent: fragmentFromContent,
+		fragmentFromContent:  fragmentFromContent,
+		fragmentFromHTML:     fragmentFromHTML,
 
 		// Events
 

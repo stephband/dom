@@ -206,7 +206,7 @@
 	}
 
 	function tag(node) {
-		return node.tagName.toLowerCase();
+		return node.tagName && node.tagName.toLowerCase();
 	}
 
 	function attribute(name, node) {
@@ -246,7 +246,7 @@
 			node.msMatchesSelector ? node.msMatchesSelector(selector) :
 			node.oMatchesSelector ? node.oMatchesSelector(selector) :
 			// Dumb fall back to simple tag name matching.
-			node.tagName && node.tagName.toLowerCase() === selector ;
+			tag(node) === selector ;
 	}
 
 	function closest(selector, node) {

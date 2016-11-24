@@ -90,7 +90,6 @@
 
 	on(document, 'dom-activate', function(e) {
 		if (e.defaultPrevented) { return; }
-		console.log(e.target, e.target.parentNode, dom.tag(e.target.parentNode));
 		if (!dom.matches('.dialog-layer', e.target.parentNode)) { return; }
 		disableScroll(e.target.parentNode);
 		trapFocus(e.target.parentNode);
@@ -99,7 +98,6 @@
 
 	on(document, 'dom-deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
-		console.log(e.target, e.target.parentNode, dom.tag(e.target.parentNode));
 		if (!dom.matches('.dialog-layer', e.target.parentNode)) { return; }
 		enableScroll(e.target.parentNode);
 		trapFocus(e.target.parentNode);

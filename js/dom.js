@@ -245,8 +245,8 @@
 			node.mozMatchesSelector ? node.mozMatchesSelector(selector) :
 			node.msMatchesSelector ? node.msMatchesSelector(selector) :
 			node.oMatchesSelector ? node.oMatchesSelector(selector) :
-			// Fall back to simple tag name matching.
-			node.tagName.toLowerCase() === selector ;
+			// Dumb fall back to simple tag name matching.
+			node.tagName && node.tagName.toLowerCase() === selector ;
 	}
 
 	function closest(selector, node) {

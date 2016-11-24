@@ -69,11 +69,11 @@
 			document.addEventListener("focus", preventFocus, true);
 		}
 
-		on(node, 'deactivate', function deactivate() {
+		on(node, 'dom-deactivate', function deactivate() {
 			// Set focus back to the thing that was last focused when the
 			// dialog was opened.
 			setTimeout(function() { focusNode.focus(); }, 0);
-			off(node, 'deactivate', deactivate);
+			off(node, 'dom-deactivate', deactivate);
 
 			if (document.addEventListener && document.removeEventListener) {
 				document.removeEventListener('focus', preventFocus);
@@ -85,33 +85,34 @@
 		var focusNode = e.data;
 		
 		focusNode.focus();
-		remove(e.target, 'deactivate', deactivateFocus);
+		remove(e.target, 'dom-deactivate', deactivateFocus);
 	}
 
-	on(document, 'activate', function(e) {
+	on(document, 'dom-activate', function(e) {
 		if (e.defaultPrevented) { return; }
+		console.log(e.target, e.target.parentNode, dom.tag(e.target.parentNode));
 		if (!dom.matches('.dialog-layer', e.target.parentNode)) { return; }
 		disableScroll(e.target.parentNode);
 		trapFocus(e.target.parentNode);
 		dom.classes(e.target.parentNode).add('active');
 	});
 
-	on(document, 'deactivate', function(e) {
+	on(document, 'dom-deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
+		console.log(e.target, e.target.parentNode, dom.tag(e.target.parentNode));
 		if (!dom.matches('.dialog-layer', e.target.parentNode)) { return; }
 		enableScroll(e.target.parentNode);
 		trapFocus(e.target.parentNode);
 		dom.classes(e.target.parentNode).remove('active');
 	});
 
-	on(document, 'activate', dom.delegate('.dialog', function(e) {
+	on(document, 'dom-activate', dom.delegate('.dialog', function(e) {
 		// Activate events from inside a dialog should also activate the dialog
 		if (e.defaultPrevented) { return; }
 		if (e.target === e.delegateTarget) { return; }
 		var delegateTarget = e.delegateTarget;
 		requestAnimationFrame(function() {
-			trigger(delegateTarget, 'activate');
+			trigger(delegateTarget, 'dom-activate');
 		});
 	}));
-
 })(this);

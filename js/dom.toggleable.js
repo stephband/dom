@@ -25,7 +25,7 @@
 		var node = e.currentTarget;
 		if (!node) { return; }
 
-		trigger(activeTarget, 'deactivate', {
+		trigger(activeTarget, 'dom-deactivate', {
 			relatedTarget: e.target
 		});
 
@@ -66,7 +66,6 @@
 		e.default();
 	}
 
-	on(document, 'activate', activate);
-	on(document, 'deactivate', deactivate);
-
+	on(document, 'dom-activate', activate);
+	on(document, 'dom-deactivate', deactivate);
 })(this);

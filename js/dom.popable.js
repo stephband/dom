@@ -40,12 +40,12 @@
 		requestAnimationFrame(function() {
 			function click(e) {
 				if (node.contains(e.target) || node === e.target) { return; }
-				trigger(node, 'deactivate');
+				trigger(node, 'dom-deactivate');
 			}
 
 			function keydown(e) {
 				if (e.keyCode !== 27) { return; }
-				trigger(node, 'deactivate');
+				trigger(node, 'dom-deactivate');
 				e.preventDefault();
 			}
 
@@ -54,12 +54,12 @@
 				if (e.defaultPrevented) { return; }
 				document.removeEventListener('click', click);
 				document.removeEventListener('keydown', keydown);
-				document.removeEventListener('deactivate', deactivate);
+				document.removeEventListener('dom-deactivate', deactivate);
 			};
 
 			document.addEventListener('click', click);
 			document.addEventListener('keydown', keydown);
-			document.addEventListener('deactivate', deactivate);
+			document.addEventListener('dom-deactivate', deactivate);
 		});
 
 		e.default();
@@ -73,7 +73,6 @@
 		e.default();
 	}
 
-	document.addEventListener('activate', activate);
-	document.addEventListener('deactivate', deactivate);
-
+	document.addEventListener('dom-activate', activate);
+	document.addEventListener('dom-deactivate', deactivate);
 })(this);

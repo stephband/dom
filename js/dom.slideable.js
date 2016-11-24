@@ -79,7 +79,7 @@
 		.shift();
 
 		if (active[prop]) {
-			trigger(active[prop], 'activate');
+			trigger(active[prop], 'dom-activate');
 		}
 		else {
 			var l1 = dom.viewportLeft(node);
@@ -92,7 +92,7 @@
 		}
 	});
 
-	on(document, 'activate', function(e) {
+	on(document, 'dom-activate', function(e) {
 		// Use method detection - e.defaultPrevented is not set in time for
 		// subsequent listeners on the same node
 		if (!e.default) { return; }

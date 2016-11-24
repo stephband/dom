@@ -38,7 +38,7 @@
 		// Deactivate the previous active pane AFTER this pane has been
 		// activated. It's important for panes who's style depends on the
 		// current active pane, eg: .slide.active ~ .slide
-		Fn(active).each(dom.trigger('deactivate'));
+		Fn(active).each(dom.trigger('dom-deactivate'));
 	}
 
 	function deactivate(e) {
@@ -50,7 +50,6 @@
 		e.default();
 	}
 
-	on(document, 'activate', activate);
-	on(document, 'deactivate', deactivate);
-
+	on(document, 'dom-activate', activate);
+	on(document, 'dom-deactivate', deactivate);
 })(this);

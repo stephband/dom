@@ -97,7 +97,7 @@
 		if (debug) { console.log('[activate] default | target:', e.target.id, 'data:', data); }
 
 		addTransitionClass(node, activeClass, function() {
-			dom.trigger('activateend', node);
+			dom.trigger('dom-activateend', node);
 		});
 
 		buttons = getButtons(data);
@@ -122,7 +122,7 @@
 		if (debug) { console.log('[deactivate] default | target:', e.target.id, 'data:', data); }
 
 		removeTransitionClass(node, activeClass, function() {
-			dom.trigger('deactivateend', node);
+			dom.trigger('dom-deactivateend', node);
 		});
 
 		buttons = getButtons(data);
@@ -134,7 +134,7 @@
 		}
 	}
 
-	on(document, 'activate', function(e) {
+	on(document, 'dom-activate', function(e) {
 		if (e.defaultPrevented) { return; }
 
 		var data = cacheData(e.target);
@@ -149,7 +149,7 @@
 		e.default = defaultActivate;
 	});
 
-	on(document, 'deactivate', function(e) {
+	on(document, 'dom-deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
 
 		var data = cacheData(e.target);
@@ -207,7 +207,7 @@
 			}
 
 			var dialog = dialogs[id] || (dialogs[id] = createDialog(fragment));
-			trigger(dialog, 'activate');
+			trigger(dialog, 'dom-activate');
 		}
 	};
 
@@ -303,7 +303,7 @@
 		//	return;
 		//}
 
-		trigger(node, 'activate', { relatedTarget: e.currentTarget });
+		trigger(node, 'dom-activate', { relatedTarget: e.currentTarget });
 	}
 
 	function getHash(node) {
@@ -357,7 +357,7 @@
 	dom.ready(function() {
 		// Setup all things that should start out active.
 		dom('.' + activeClass)
-		.each(dom.trigger('activate'));
+		.each(dom.trigger('dom-activate'));
 
 		// Activate the node that corresponds to the hashref in
 		// location.hash, checking if it's an alphanumeric id selector
@@ -367,11 +367,10 @@
 		// The id may be perfectly valid, yet not be supported by jQuery,
 		// such as ids with a ':' character, so try...catch it.
 		try {
-			dom(id).each(dom.trigger('activate'));
+			dom(id).each(dom.trigger('dom-activate'));
 		}
 		catch (e) {
 			if (debug) console.log('Error caught: id hash ' + id + ' is throwing an error in jQuery');
 		}
 	});
-
 })(this);

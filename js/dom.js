@@ -566,18 +566,15 @@
 		var node = document.getElementById(id);
 		if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }
 
-		var tag = tag(node);
-		if (tag !== 'template' && tag !== 'script') { return; }
-
-		if (node.content) {
-			return fragmentFromContent(node);
-		}
+		var tg = tag(node);
+		if (tg !== 'template' && tg !== 'script') { return; }
+		if (node.content) { return node.content; }
 
 		// In browsers where templates are not inert, ids used inside them
 		// conflict with ids in any rendered result. To go some way to
 		// tackling this, remove the node from the DOM.
 		remove(node);
-		return fragmentFromContent(node);
+		return fragmentFromChildren(node);
 	}
 
 	function cloneTemplate(id) {

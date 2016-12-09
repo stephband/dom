@@ -9,8 +9,22 @@
 
 	var elasticDistance = 800;
 
+	var rspaces = /\s+/;
+
 	function elasticEase(n) {
 		return Math.atan(n) / Math.PI ;
+	}
+
+	function xMinFromChildren(node) {
+		var last = dom(node.children)
+			.filter(dom.matches('.switchable'))
+			.last()
+			.shift();
+		
+		// Get the right-most x of the last switchable child's right-most edge
+		var w1 = last.offsetLeft + last.clientWidth;
+		var w2 = node.parentNode.clientWidth;
+		return w2 - w1;
 	}
 
 	on(document, 'touch', function(e) {
@@ -25,24 +39,40 @@
 		transform = !transform || transform === 'none' ? '' : transform ;
 
 		var x = dom.style('transform:translateX', node);
-		var last = dom(node.children)
-			.filter(dom.matches('.switchable'))
-			.last()
-			.shift();
+console.log(x);
+		// Elastic flags and limits
+		var eMin = false;
+		var eMax = false;
+		var xMin = dom.attribute('data-slide-min', node);
+		var xMax = dom.attribute('data-slide-max', node);
 
-		// Get the right-most x of the last switchable child's right-most edge
-		var w1 = last.offsetLeft + last.clientWidth;
-		var w2 = node.parentNode.clientWidth;
-		var ws = w1 - w2;
+		if (!xMin && !xMax) {
+			eMin = true;
+			eMax = true;
+			xMin = xMinFromChildren(node);
+			xMax = 0;
+		}
+		else {
+			eMin = /elastic/.test(xMin);
+			eMax = /elastic/.test(xMax);
+			xMin = parseFloat(xMin) || 0;
+			xMax = parseFloat(xMax) || 0;
+		}
 
 		classes.add('notransition');
+
+		var ax = x;
 
 		// e.detail() is a stream of touch coordinates
 		e.detail()
 		.map(function(data) {
-			var ax = x + data.x;
-			var tx = ax > 0 ? elasticEase(ax / elasticDistance) * elasticDistance - x :
-				ax < -ws ? elasticEase((ax + ws) / elasticDistance) * elasticDistance - ws - x :
+			ax = x + data.x;
+			var tx = ax > 0 ?
+					eMax ? elasticEase(ax / elasticDistance) * elasticDistance - x :
+					xMax :
+				ax < xMin ?
+					eMin ? elasticEase((ax - xMin) / elasticDistance) * elasticDistance + xMin - x :
+					xMin :
 				data.x ;
 
 			return transform + ' translate(' + tx + 'px, 0px)';
@@ -52,6 +82,23 @@
 		})
 		.on('done', function() {
 			classes.remove('notransition');
+
+			// Todo: Watch out, this may interfere with slides
+			var xSnaps = dom.attribute('data-slide-snap', node);
+console.log(xSnaps)
+			if (!xSnaps) { return; }
+			xSnaps = xSnaps.split(rspaces).map(parseFloat);
+console.log(xSnaps)
+			// Get closest x from list of snaps
+			var tx = xSnaps.reduce(function(prev, curr) {
+				return Math.abs(curr - ax) < Math.abs(prev - ax) ?
+					curr : prev ;
+			});
+console.log(tx);
+
+			//requestAnimationFrame(function() {
+				node.style.transform = transform + ' translate(' + tx + 'px, 0px)';
+			//});
 		});
 	});
 

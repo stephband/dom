@@ -39,7 +39,7 @@
 		transform = !transform || transform === 'none' ? '' : transform ;
 
 		var x = dom.style('transform:translateX', node);
-console.log(x);
+
 		// Elastic flags and limits
 		var eMin = false;
 		var eMax = false;
@@ -85,16 +85,15 @@ console.log(x);
 
 			// Todo: Watch out, this may interfere with slides
 			var xSnaps = dom.attribute('data-slide-snap', node);
-console.log(xSnaps)
+
 			if (!xSnaps) { return; }
 			xSnaps = xSnaps.split(rspaces).map(parseFloat);
-console.log(xSnaps)
+
 			// Get closest x from list of snaps
 			var tx = xSnaps.reduce(function(prev, curr) {
 				return Math.abs(curr - ax) < Math.abs(prev - ax) ?
 					curr : prev ;
 			});
-console.log(tx);
 
 			//requestAnimationFrame(function() {
 				node.style.transform = transform + ' translate(' + tx + 'px, 0px)';

@@ -541,49 +541,42 @@
 
 	// DOM Fragments and Templates
 
-	var templates = {};
+	var templateFragments = {};
 
 	function fragmentFromChildren(node) {
 		var fragment = create('fragment');
 		return append(fragment, node.childNodes);
 	}
 
-	function fragmentFromContent(node) {
+	function fragmentFromHTML(html, tag) {
+		var node = document.createElement(tag || 'div');
+		node.innerHTML = html;
+		return fragmentFromChildren(node);
+	}
+
+	function fragmentFromTemplate(node) {
 		// A template tag has a content property that gives us a document
 		// fragment. If that doesn't exist we must make a document fragment.
 		return node.content || fragmentFromChildren(node);
 	}
 
-	function fragmentFromHTML(html, tag) {
-		var fragment = document.createDocumentFragment();
-		var node     = document.createElement(tag || 'div');
-		node.innerHTML = html;
-		Fn(node.childNodes).each(dom.append(fragment));
-		return fragment;
-	}
-
-	function getTemplate(id) {
-		var node = document.getElementById(id);
+	function fragmentFromId(id) {
+		var node = templateFragments[id] || document.getElementById(id);
 		if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }
 
 		var tg = tag(node);
-		if (tg !== 'template' && tg !== 'script') { return; }
-		if (node.content) { return node.content; }
 
 		// In browsers where templates are not inert, ids used inside them
 		// conflict with ids in any rendered result. To go some way to
 		// tackling this, remove the node from the DOM.
-		remove(node);
-		return fragmentFromChildren(node);
-	}
+		if (tg === 'template' && !node.content) {
+			templateFragments[id] = node;
+			remove(node);
+		}
 
-	function cloneTemplate(id) {
-		var template = templates[id] || (templates[id] = getTemplate(id));
-		return template && template.cloneNode(true);
-	}
-
-	function registerTemplate(id, node) {
-		templates[id] = node;
+		return tg === 'template' ? fragmentFromTemplate(node) :
+			tg === 'script' ? fragmentFromHTML(node.innerHTML, attribute('data-tag', node)) :
+			fragmentFromChildren(node) ;
 	}
 
 
@@ -728,14 +721,10 @@
 
 		// Fragments and Templates
 
-		template: function(id, node) {
-			if (node) { registerTemplate(id, node); }
-			else { return cloneTemplate(id); }
-		},
-
-		fragmentFromTemplate: cloneTemplate,
-		fragmentFromContent:  fragmentFromContent,
+		fragmentFromTemplate: fragmentFromTemplate,
+		fragmentFromChildren: fragmentFromChildren,
 		fragmentFromHTML:     fragmentFromHTML,
+		fragmentFromId:       fragmentFromId,
 
 		// Events
 

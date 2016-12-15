@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="author" content="">
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5">
+
+	<title>dom</title>	
+	<script>document.documentElement.className = 'js';</script>
+
+	<link rel="icon" type="image/png" href="images/favicon.png" />
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/bolt/package/css/bolt-0.9.8.css" />
+
+	<link rel="stylesheet" type="text/css" href="http://stephband.info/css/template.min.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephband.info/css/template.theme.min.css" />
+
+	<link rel="stylesheet" type="text/css" href="http://stephband.github.com/css/site.layout.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephband.github.com/css/docs.classes.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephband.github.com/css/site.highlight.light.css" />
+	<link rel="stylesheet" type="text/css" href="css/demo.css" />
+	<link rel="stylesheet" type="text/css" href="css/slide.css" />
+</head>
+
+<body>
+	<header class="site_header" id="page_header">
+		<div class="site_wrap wrap">
+			<a class="logo_thumb thumb" href="http://stephen.band" title="stephband" rel="index">
+				<h1>stephen.band</h1>
+			</a>
+		</div>
+	</header>
+
+	<div class="site_wrap wrap">
+		<h1>.toggleable</h1>
+
+		<p>Activates and deactivates when any link pointing to it is clicked.</p>
+
+		<a href="#toggle-demo">Toggle</a>
+		<div class="toggle-block block toggleable" id="toggle-demo">
+			Hello. A toggleable only goes away when it's button is clicked.
+		</div>
+	</div>
+
+	<div class="site_wrap wrap">
+		<h1>.popable</h1>
+
+		<p>A popable goes away when clicked outside.</p>
+
+		<a href="#pop-demo">Pop</a>
+		<div class="toggle-block block popable" id="pop-demo">
+			Hello. A popable goes away when clicked outside.
+		</div>
+	</div>
+
+	<div class="site_wrap wrap">
+		<h1>.slideable</h1>
+
+		<p>Slides horizontally with a touch or mouse.</p>
+
+		<div class="contain-block block">
+			<div class="swipe-block block slideable swipeable">
+				  <img draggable="false" class="inline-block block active switchable" id="slide1" src="images/lyngen-1.png"
+				/><img draggable="false" class="inline-block block switchable" id="slide2" src="images/lyngen-2.png"
+				/><img draggable="false" class="inline-block block switchable" id="slide3" src="images/lyngen-3.png"
+				/><img draggable="false" class="inline-block block switchable" id="slide4" src="images/lyngen-4.png" />
+			</div>
+		</div>
+
+		<ul class="inline-index index">
+			<li><a class="slide_button button" href="#slide1">1</a></li>
+			<li><a class="slide_button button" href="#slide2">2</a></li>
+			<li><a class="slide_button button" href="#slide3">3</a></li>
+			<li><a class="slide_button button" href="#slide4">4</a></li>
+		</ul>
+	</div>
+
+	<div class="site_wrap wrap">
+		<h1>.switchable</h1>
+
+		<p>For any group of siblings with the class <code>switchable</code>,
+		only one can be <code>active</code> at any one time.</p>
+
+		<ul class="inline-index index">
+			<li><a class="tab-button button" href="#tab-1">1</a></li>
+			<li><a class="tab-button button" href="#tab-2">2</a></li>
+			<li><a class="tab-button button" href="#tab-3">3</a></li>
+		</ul>
+
+		<div class="tab-block block switchable" id="tab-1">
+			Tab 1
+		</div
+		
+		><div class="tab-block block switchable" id="tab-2">
+			Tab 2
+		</div
+		
+		><div class="tab-block block switchable" id="tab-3">
+			Tab 3
+		</div>
+	</div>
+
+	<div class="site_wrap wrap">
+		<h1>touch</h1>
+
+		<div class="test_wrap wrap">
+			<div class="test">
+				<div class="resize"></div>
+				<div class="rotate"></div>
+			</div>
+
+			<div class="centre_mark"></div>
+			<div class="origin_mark"></div>
+		</div>
+
+		<h2>Project</h2>
+
+		<ul>
+			<li>Github: <a href="http://github.com/stephband/dom">github.com/stephband/dom</a></li>
+			<li>Issues: <a href="http://github.com/stephband/dom/issues">github.com/stephband/dom/issues</a></li>
+		</ul>
+	</div>
+
+	<footer class="site_footer">
+		<div class="full_wrap wrap">
+			<div class="bio_col col">
+				<h3>Who made this?</h3>
+				<p>I did. I come from Scotland and I live in Lausanne, Switzerland. I make web things at <a href="http://cruncher.ch">Cruncher</a>. I miss Branston Pickle. When I'm not glued to a screen I play music and hike mountains.</p>
+			</div
+			><div class="repo_col col">
+				<h3>More code</h3>
+				<ul class="repo_index index">
+					<li><a href="http://stephband.info/bolt">Bolt</a></li>
+					<li><a href="http://stephband.info/jparallax/">jQuery.parallax</a></li>
+					<li><a href="http://stephband.info/jquery.event.tap/">jQuery.event.tap</a></li>
+					<li><a href="http://stephband.info/jquery.event.move/">jQuery.event.move</a></li>
+					<li><a href="http://stephband.info/jquery.event.swipe/">jQuery.event.swipe</a></li>
+				</ul>
+			</div
+			><div class="social_col col">
+				<h3>Find me on...</h3>
+				<ul class="social_index index">
+					<li><a href="http://twitter.com/stephband">twitter</a></li>
+					<li><a href="http://github.com/stephband">github</a></li>
+					<li><a href="http://plus.google.com/114566808430966059989/photos">google+</a></li>
+					<li><a href="http://www.linkedin.com/profile/view?id=27013870">linkedin</a></li>
+				</ul>
+			</div>
+		</div>
+	</footer>
+
+	<script src="jquery/jquery-3.1.1.js"></script>
+	<script src="fn/polyfills/number.isnan.js"></script>
+	<script src="fn/polyfills/object.assign.js"></script>
+	<script src="polyfills/window.customevent.js"></script>
+	<script src="fn/js/fn.js"></script>
+	<script src="js/config.js"></script>
+	<script src="js/dom.js"></script>
+	<script src="js/dom.event.activate.js"></script>
+	<script src="js/dom.event.touch.js"></script>
+	<script src="js/dom.event.swipe.js"></script>
+	<script src="js/dom.popable.js"></script>
+	<script src="js/dom.toggleable.js"></script>
+	<script src="js/dom.switchable.js"></script>
+	<script src="js/dom.moveable.js"></script>
+	<script src="js/dom.slideable.js"></script>
+	<script>
+
+	</script>
+</body>
+</html>

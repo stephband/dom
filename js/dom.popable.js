@@ -2,8 +2,9 @@
 //
 // Extends the default behaviour of events for the .tip class.
 
-(function(windw) {
+(function(window) {
 
+	var dom     = window.dom;
 	var name    = "popable";
 	var trigger = dom.events.trigger;
 
@@ -55,7 +56,7 @@
 				document.removeEventListener('click', click);
 				document.removeEventListener('keydown', keydown);
 				document.removeEventListener('dom-deactivate', deactivate);
-			};
+			}
 
 			document.addEventListener('click', click);
 			document.addEventListener('keydown', keydown);

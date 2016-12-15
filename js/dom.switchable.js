@@ -6,19 +6,15 @@
 (function(window) {
 	"use strict";
 
+	// Import
+
 	var Fn      = window.Fn;
 	var dom     = window.dom;
 
 	// Define
 
 	var name = 'switchable';
-
-	// Functions
-
-	var noop            = Fn.noop;
-	var on              = dom.events.on;
-	var off             = dom.events.off;
-	var trigger         = dom.events.trigger;
+	var on   = dom.events.on;
 
 	function activate(e) {
 		if (!e.default) { return; }
@@ -26,7 +22,6 @@
 		var target = e.target;
 		if (!dom.classes(target).contains(name)) { return; }
 
-		var data  = e.data;
 		var nodes = dom('.switchable', target.parentNode).toArray();
 		var i     = nodes.indexOf(target);
 

@@ -19,10 +19,10 @@
 
 	function touchdone(node, touch) {
 		var data = touch.clone().last().shift();
-		var x = data.x;
-		var y = data.y;
-		var w = node.offsetWidth;
-		var h = node.offsetHeight;
+		//var x = data.x;
+		//var y = data.y;
+		//var w = node.offsetWidth;
+		//var h = node.offsetHeight;
 		var polar = Fn.toPolar([data.x, data.y]);
 
 		// Todo: check if swipe has enough velocity and distance

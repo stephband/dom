@@ -80,13 +80,6 @@
 			}
 		});
 	}
-	
-	function deactivateFocus(e) {
-		var focusNode = e.data;
-		
-		focusNode.focus();
-		remove(e.target, 'dom-deactivate', deactivateFocus);
-	}
 
 	on(document, 'dom-activate', function(e) {
 		if (e.defaultPrevented) { return; }

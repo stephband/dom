@@ -3,7 +3,6 @@
 (function(window) {
 	"use strict";
 
-	var Fn      = window.Fn;
 	var dom     = window.dom;
 
 	// Define
@@ -12,10 +11,9 @@
 
 	// Functions
 
-	var noop            = Fn.noop;
-	var on              = dom.events.on;
-	var off             = dom.events.off;
-	var trigger         = dom.events.trigger;
+	var on      = dom.events.on;
+	var off     = dom.events.off;
+	var trigger = dom.events.trigger;
 
 	function click(e, activeTarget) {
 		// A prevented default means this link has already been handled.

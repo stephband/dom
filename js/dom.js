@@ -18,6 +18,7 @@
 	// Var
 
 	var A = Array.prototype;
+
 	var rspaces = /\s+/;
 	var rpx     = /px$/;
 
@@ -25,7 +26,6 @@
 	// Utility functions
 
 	var assign = Object.assign;
-	var slice  = Function.prototype.call.bind(Array.prototype.slice);
 
 	function applyUntil(fn, test) {
 		// Returns partially applied functions until some condition `test`
@@ -269,6 +269,7 @@
 
 	function appendChild(target, node) {
 		target.appendChild(node);
+
 		// Use this fn as a reducer
 		return target;
 	}
@@ -279,15 +280,12 @@
 			return node;
 		}
 
-		if (node.reduce) {
-			node.reduce(appendChild, target);
-			return node;
-		}
+		if (!node.length) { return; }
 
-		if (node.length) {
-			A.reduce.call(node, appendChild, target);
-			return node;
-		}
+		var array = node.reduce ? node : A.slice.call(node) ;
+		array.reduce(appendChild, target);
+
+		return node;
 	}
 
 	// Todo: not sure I got this right, it should probably GET html
@@ -541,8 +539,6 @@
 
 	// DOM Fragments and Templates
 
-	var templateFragments = window.t = {};
-
 	function fragmentFromChildren(node) {
 		var fragment = create('fragment');
 		append(fragment, node.childNodes);
@@ -558,34 +554,26 @@
 	function fragmentFromTemplate(node) {
 		// A template tag has a content property that gives us a document
 		// fragment. If that doesn't exist we must make a document fragment.
-		return node.content || fragmentFromChildren(node).cloneNode(true);
+		return node.content || fragmentFromChildren(node);
 	}
 
 	function fragmentFromId(id) {
-		var fragment = templateFragments[id];
+		var node = document.getElementById(id);
 
-		if (!fragment) {
-			var node = document.getElementById(id);
+		if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }
 
-			if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }
+		var tg = tag(node);
 
-			var tg = tag(node);
-			
-			// In browsers where templates are not inert, ids used inside them
-			// conflict with ids in any rendered result. To go some way to
-			// tackling this, remove the node from the DOM.
-			if (tg === 'template' && !node.content) {
-				remove(node);
-			}
-console.log('FRAG NO', tg, attribute('data-parent-tag', node))
-			templateFragments[id] = tg === 'template' ? fragmentFromTemplate(node) :
-				tg === 'script' ? fragmentFromHTML(node.innerHTML, attribute('data-parent-tag', node)) :
-				fragmentFromChildren(node) ;
-
-			fragment = templateFragments[id];
+		// In browsers where templates are not inert, ids used inside them
+		// conflict with ids in any rendered result. To go some way to
+		// tackling this, remove the node from the DOM.
+		if (tg === 'template' && !node.content) {
+			remove(node);
 		}
-console.log(fragment, fragment.childNodes);
-		return fragment.cloneNode(true);
+
+		return tg === 'template' ? fragmentFromTemplate(node) :
+			tg === 'script' ? fragmentFromHTML(node.innerHTML, attribute('data-parent-tag', node)) :
+			fragmentFromChildren(node) ;
 	}
 
 

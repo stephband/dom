@@ -1,6 +1,7 @@
 (function(window) {
 	"use strict";
 
+	var Fn      = window.Fn;
 	var dom     = window.dom;
 	var on      = dom.events.on;
 	var trigger = dom.events.trigger;
@@ -101,14 +102,23 @@
 		});
 	});
 
+	function transform(node, active) {
+		var l1 = dom.viewportLeft(node);
+		var l2 = dom.viewportLeft(active);
+
+		// Round the translation - without rounding images and text become
+		// slightly fuzzy as they are antialiased.
+		var l  = Math.round(l1 - l2 - dom.style('margin-left', active));
+		node.style.transform = 'translate(' + l + 'px, 0px)';
+	}
+
 	on(document, 'swipe', function(e) {
 		if (e.defaultPrevented) { return; }
 
 		var node = closest('.slideable', e.target);
 		if (!node) { return; }
 
-		var angle    = Fn.wrap(0, tau, e.angle || 0);
-		var velocity = e.velocity || 0;
+		var angle = Fn.wrap(0, tau, e.angle || 0);
 
 			// If angle is rightwards
 		var prop = (angle > tau * 1/8 && angle < tau * 3/8) ?
@@ -128,13 +138,7 @@
 			trigger(active[prop], 'dom-activate');
 		}
 		else {
-			var l1 = dom.viewportLeft(node);
-			var l2 = dom.viewportLeft(active);
-
-			// Round the translation - without rounding images and text become
-			// slightly fuzzy as they are antialiased.
-			var l  = Math.round(l1 - l2 - dom.style('margin-left', active));
-			node.style.transform = 'translate(' + l + 'px, 0px)';
+			transform(node, active);
 		}
 	});
 
@@ -150,8 +154,8 @@
 
 		var classes = dom.classes(parent);
 		classes.remove('notransition');
+		document.documentElement.clientWidth;
 
-		var w = document.documentElement.clientWidth;
 		var l1 = dom.viewportLeft(node);
 		var l2 = dom.viewportLeft(parent);
 		var l  = l1 - l2 - dom.style('margin-left', node);

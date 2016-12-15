@@ -1,7 +1,7 @@
 (function(window) {
 	"use strict";
 
-	var debug     = false;//true;
+	var debug     = false;
 
 	var Fn        = window.Fn;
 	var dom       = window.dom;
@@ -49,24 +49,18 @@
 	}
 
 	function addTransitionClass(node, classes, callback) {
-		if (debug) { console.log('jquery.addTransitionClass', classes, !!callback); }
-
 		transition(node, function() {
 			dom.classes(node).add(classes);
 		}, callback);
-	};
+	}
 
 	function removeTransitionClass(node, classes, callback) {
-		if (debug) { console.log('jquery.removeTransitionClass', classes, !!callback); }
-
 		transition(node, function() {
 			dom.classes(node).remove(classes);
 		}, callback);
 	}
 
 	function transition(node, fn, callback) {
-		if (debug) { console.log('jquery.transition', !!fn, !!callback); }
-
 		if (callback && dom.features.transition) {
 			on(node, dom.features.transitionEnd, function transitionend(e) {
 				off(node, dom.features.transitionEnd, transitionend);
@@ -85,7 +79,7 @@
 	// Listen to activate events
 
 	function defaultActivate() {
-		var data = this.data || cacheData(e.target);
+		var data = this.data || cacheData(this.target);
 		var node = data.node;
 		var buttons;
 
@@ -94,7 +88,7 @@
 		data.active = true;
 		this.preventDefault();
 
-		if (debug) { console.log('[activate] default | target:', e.target.id, 'data:', data); }
+		if (debug) { console.log('[activate] default | target:', this.target.id, 'data:', data); }
 
 		addTransitionClass(node, activeClass, function() {
 			dom.trigger('dom-activateend', node);
@@ -110,7 +104,7 @@
 	}
 
 	function defaultDeactivate() {
-		var data = this.data || cacheData(e.target);
+		var data = this.data || cacheData(this.target);
 		var node = data.node;
 		var buttons;
 
@@ -119,7 +113,7 @@
 		data.active = false;
 		this.preventDefault();
 
-		if (debug) { console.log('[deactivate] default | target:', e.target.id, 'data:', data); }
+		if (debug) { console.log('[deactivate] default | target:', this.target.id, 'data:', data); }
 
 		removeTransitionClass(node, activeClass, function() {
 			dom.trigger('dom-deactivateend', node);
@@ -177,7 +171,7 @@
 
 			//Todo: more reliable way of getting id from a hash ref
 			var id = href.substring(1);
-			var parts, item, fragment;
+			var fragment;
 
 //			if (!id) { return loadResource(e, href); }
 
@@ -271,7 +265,7 @@
 		// handler unbinds itself as soon as the click is heard.
 		if (e.type === 'mousedown') {
 			on(e.currentTarget, 'click', function prevent(e) {
-				remove(e.currentTarget, 'click', prevent);
+				off(e.currentTarget, 'click', prevent);
 				e.preventDefault();
 			});
 		}
@@ -335,7 +329,6 @@
 	}
 
 	function activateTarget(e) {
-		var target = e.delegateTarget;
 		var target = e.delegateTarget.target;
 
 		if (isIgnorable(e)) { return; }

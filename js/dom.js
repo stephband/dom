@@ -412,6 +412,67 @@
 		return box.top +  scrollTop - clientTop;
 	}
 
+	function getPositionParent(node) {
+		var offsetParent = node.offsetParent;
+
+		while (offsetParent && style("position", offsetParent) === "static") {
+			offsetParent = offsetParent.offsetParent;
+		}
+
+		return offsetParent || document.documentElement;
+	}
+
+	function offset(node) {
+		// Pinched from jQuery.offset...
+	    // Return zeros for disconnected and hidden (display: none) elements (gh-2310)
+	    // Support: IE <=11 only
+	    // Running getBoundingClientRect on a
+	    // disconnected node in IE throws an error
+	    if (!node.getClientRects().length) { return [0, 0]; }
+
+	    var rect     = node.getBoundingClientRect();
+	    var document = node.ownerDocument;
+	    var window   = document.defaultView;
+	    var docElem  = document.documentElement;
+
+	    return [
+			 rect.left + window.pageXOffset - docElem.clientLeft,
+			 rect.top  + window.pageYOffset - docElem.clientTop
+	    ];
+	}
+
+	function position(node) {
+		var rect;
+
+	    // Fixed elements are offset from window (parentOffset = {top:0, left: 0},
+	    // because it is its only offset parent
+	    if (style('position', node) === 'fixed') {
+	        rect = node.getBoundingClientRect();
+
+	        return [
+		        rect.left - (parseFloat(style("marginLeft", node)) || 0),
+		        rest.top  - (parseFloat(style("marginTop", node)) || 0)
+	        ];
+	    }
+
+		// Get *real* offsetParent
+		var parent = getPositionParent(node);
+
+		// Get correct offsets
+		var nodeOffset = offset(node);
+		var parentOffset = tag(parent) !== "html" ? [0, 0] : offset(parent);
+
+		// Add parent borders
+		parentOffset[0] += parseFloat(style("borderLeftWidth", parent)) || 0;
+		parentOffset[1] += parseFloat(style("borderTopWidth", parent)) || 0;
+	
+	    // Subtract parent offsets and element margins
+		nodeOffset[0] -= (parentOffset[0] + (parseFloat(style("marginLeft", node)) || 0)),
+		nodeOffset[1] -= (parentOffset[1] + (parseFloat(style("marginTop", node)) || 0))
+
+		return nodeOffset;
+	}
+
 	// DOM Events
 
 	var eventOptions = { bubbles: true };
@@ -524,7 +585,7 @@
 			var node = closest(selector, e.target, e.currentTarget);
 			if (!node) { return; }
 			e.delegateTarget = node;
-			fn(e);
+			fn(e, node);
 			e.delegateTarget = undefined;
 		};
 	}
@@ -715,6 +776,8 @@
 
 		viewportLeft:   viewportLeft,
 		viewportTop:    viewportTop,
+		offset:         offset,
+		position:       position,
 
 		// Fragments and Templates
 

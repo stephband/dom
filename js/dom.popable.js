@@ -17,27 +17,6 @@
 		var classes = dom.classes(node);
 		if (!classes.contains(name)) { return; }
 
-		//var relatedTarget = e.relatedTarget;
-		//var relatedOffset = jQuery(relatedTarget).offset();
-
-		classes.add('notransition');
-
-		//node.style.marginTop = 0;
-		//node.style.marginLeft = 0;
-
-		//var offset   = elem.offset();
-		//var position = elem.position();
-
-		//node.style.marginTop = '';
-		//node.style.marginLeft = '';
-		// Round the number to get round a sub-pixel rendering error in Chrome
-		//node.style.left = Math.floor(relatedOffset.left + position.left - offset.left);
-		//node.style.top  = Math.floor(relatedOffset.top  + position.top  - offset.top);
-
-		// Bump render
-		node.clientWidth;
-		classes.remove('notransition');
-
 		requestAnimationFrame(function() {
 			function click(e) {
 				if (node.contains(e.target) || node === e.target) { return; }

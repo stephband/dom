@@ -161,6 +161,13 @@ is returned.
     dom.style('transform:translateX', node); // returns translation, as a number, in px
     dom.style('transform:translateY', node); // returns tranlsation, as a number, in px
 
+##### `.offset(node)`
+
+Returns array [x, y].
+
+##### `.position(node)`
+
+Returns array [x, y].
 
 #### Events
 

@@ -750,7 +750,6 @@
 		isInternalLink: isInternalLink,
 		identify:       identify,
 		tag:            tag,
-		get:            Fn.get,
 		attribute:      Fn.curry(attribute),
 		classes:        classes,
 
@@ -793,19 +792,41 @@
 		Event:           Event,
 		events:          events,
 
-		//on: function on(types, fn, data, node) {
-		//	var l = arguments.length;
-		//
-		//	if (l > 2 && dom.isElementNode(arguments[l - 1])) {
-		//		on(arguments[l - 1], types, fn);
-		//		return node;
-		//	}
-		//
-		//	return Fn.bind(arguments, on);
-		//},
+		EventStream: Fn.curry(function(types, node) {
+			types = types.split(rspaces);
 
-		on:              on,
-		off:             off,
+			var stream = Stream.of();
+			var push   = stream.push;
+			var n      = -1;
+			var type;
+
+			while (n++ < types.length) {
+				type = types[n];
+				node.addEventListener(type, push);
+			}
+
+			var _stop = stream.stop;
+			stream.stop = function() {
+				var n = -1;
+				
+				while (n++ < types.length) {
+					type = types[n];
+					node.removeEventListener(type, push);
+				}
+
+				_stop.apply(stream);
+			};
+			
+			return stream;
+		}),
+
+		on:  Fn.curry(function(types, fn, node) {
+			on(node, types, fn, data);
+		}),
+
+		off: Fn.curry(function(types, fn, node) {
+			off(node, types, fn);
+		}),
 
 		trigger: function triggerNode(type, properties, node) {
 			var l = arguments.length;
@@ -819,7 +840,6 @@
 
 			return Fn.bind(arguments, triggerNode);
 		},
-
 
 		delegate:        delegate,
 

@@ -230,14 +230,9 @@
 
 	// DOM Traversal
 
-	function find(selector, node) {
+	function query(selector, node) {
 		node = node || document;
 		return A.slice.apply(node.querySelectorAll(selector));
-	}
-
-	function findOne(selector, node) {
-		node = node || document;
-		return node.querySelector(selector);
 	}
 
 	function matches(selector, node) {
@@ -479,16 +474,6 @@
 
 	var eventsSymbol = Symbol('events');
 
-	function preventDefault(e) {
-		e.preventDefault();
-	}
-
-	function isPrimaryButton(e) {
-		// Ignore mousedowns on any button other than the left (or primary)
-		// mouse button, or when a modifier key is pressed.
-		return (e.which === 1 && !e.ctrlKey && !e.altKey);
-	}
-
 	function Event(type, properties) {
 		var options = Object.assign({}, eventOptions, properties);
 		var event   = new CustomEvent(type, options);
@@ -501,32 +486,43 @@
 		return event;
 	}
 
-	var events = applyUntil(function events(types, selector, node) {
-		// Selector is an optional parameter
-		selector = arguments.length > 2 && selector ;
-		node     = arguments[arguments.length - 1];
+	function EventStream(types, node) {
+		types = types.split(rspaces);
 
 		var stream = Stream.of();
-		var _stop = stream.stop;
+		var push   = stream.push;
+		var n      = -1;
+		var type;
 
-		function push(e) {
-			stream.push(e);
+		while (n++ < types.length) {
+			type = types[n];
+			node.addEventListener(type, push);
 		}
 
-		var fn = selector ? delegate(selector, push) : push ;
+		var _stop = stream.stop;
+		stream.stop = function() {
+			var n = -1;
+			
+			while (n++ < types.length) {
+				type = types[n];
+				node.removeEventListener(type, push);
+			}
 
-		stream.on('done', function() {
-			_stop.apply(this);
-			off(node, types, fn);
-		});
-
-		on(node, types, fn);
+			_stop.apply(stream);
+		};
+		
 		return stream;
-	}, function test() {
-		// Test that the last argument is a node
-		var node = arguments[arguments.length - 1];
-		return arguments.length > 3 || !!node.addEventListener;
-	});
+	}
+
+	function preventDefault(e) {
+		e.preventDefault();
+	}
+
+	function isPrimaryButton(e) {
+		// Ignore mousedowns on any button other than the left (or primary)
+		// mouse button, or when a modifier key is pressed.
+		return (e.which === 1 && !e.ctrlKey && !e.altKey);
+	}
 
 	function on(node, types, fn, data) {
 		types = types.split(rspaces);
@@ -589,13 +585,6 @@
 			e.delegateTarget = undefined;
 		};
 	}
-
-	assign(events, {
-		on:       on,
-		off:      off,
-		trigger:  trigger,
-		delegate: delegate
-	});
 
 
 	// DOM Fragments and Templates
@@ -725,107 +714,97 @@
 
 	function dom(selector, node) {
 		return typeof selector === "string" ?
-				Fn((node || document).querySelectorAll(selector)) :
+				Fn(query(selector, node || document)) :
 			Node.prototype.isPrototypeOf(selector) ?
-				Fn([selector]) :
+				Fn.of(selector) :
 			Fn(selector) ;
 	}
 
-	var readyPromise = new Promise(function(accept, reject) {
-		document.addEventListener('DOMContentLoaded', accept);
-		window.addEventListener('load', accept);
+	var ready = new Promise(function(accept, reject) {
+		function handle() {
+			document.removeEventListener('DOMContentLoaded', handle);
+			window.removeEventListener('load', handle);
+			accept();
+		}
+
+		document.addEventListener('DOMContentLoaded', handle);
+		window.addEventListener('load', handle);
 	});
 
 	assign(dom, {
-		ready: readyPromise.then.bind(readyPromise),
 
-		// Nodes
+		// DOM lifecycle
+
+		ready: ready.then.bind(ready),
+
+		// DOM traversal
+
+		query:          Fn.curry(query),
+		closest:        Fn.curry(closest),
+		matches:        Fn.curry(matches),
+
+		// DOM mutation
 
 		create:         create,
 		clone:          clone,
-		isElementNode:  isElementNode,
-		isTextNode:     isTextNode,
-		isCommentNode:  isCommentNode,
-		isFragmentNode: isFragmentNode,
-		isInternalLink: isInternalLink,
 		identify:       identify,
-		tag:            tag,
-		attribute:      Fn.curry(attribute),
-		classes:        classes,
-
-		style: Fn.curry(function(name, node) {
-			if (styleParsers[name]) { return styleParsers[name](node); }
-			var value = style(name, node);
-			return typeof value === 'string' && rpx.test(value) ?
-				parseFloat(value) :
-				value ;
-		}),
-
 		append:         Fn.curry(append),
 		html:           Fn.curry(html),
 		before:         Fn.curry(before),
 		after:          Fn.curry(after),
 		empty:          empty,
 		remove:         remove,
-		matches:        Fn.curry(matches),
-		closest:        Fn.curry(closest),
-		valueToPx:      valueToPx,
-		find:           find,
-		findOne:        findOne,
 
-		viewportLeft:   viewportLeft,
-		viewportTop:    viewportTop,
+		// DOM inspection
+
+		isElementNode:  isElementNode,
+		isTextNode:     isTextNode,
+		isCommentNode:  isCommentNode,
+		isFragmentNode: isFragmentNode,
+		isInternalLink: isInternalLink,
+
+		tag:            tag,
+		attribute:      Fn.curry(attribute),
 		offset:         offset,
 		position:       position,
+		classes:        classes,
 
-		// Fragments and Templates
+		style: Fn.curry(function(name, node) {
+			// If name corresponds to a custom property name in styleParsers...
+			if (styleParsers[name]) { return styleParsers[name](node); }
+
+			var value = style(name, node);
+
+			// Pixel values are converted to number type
+			return typeof value === 'string' && rpx.test(value) ?
+				parseFloat(value) :
+				value ;
+		}),
+
+		valueToPx:      valueToPx,
+		viewportLeft:   viewportLeft,
+		viewportTop:    viewportTop,
+
+		// DOM fragments and templates
 
 		fragmentFromTemplate: fragmentFromTemplate,
 		fragmentFromChildren: fragmentFromChildren,
 		fragmentFromHTML:     fragmentFromHTML,
 		fragmentFromId:       fragmentFromId,
 
-		// Events
+		// DOM events
+
+		// dom.events is both a function for constructing an event stream and a
+		// namespace for traditional uncurried event binding functions.
 
 		isPrimaryButton: isPrimaryButton,
 		preventDefault:  preventDefault,
 		Event:           Event,
-		events:          events,
 
-		EventStream: Fn.curry(function(types, node) {
-			types = types.split(rspaces);
-
-			var stream = Stream.of();
-			var push   = stream.push;
-			var n      = -1;
-			var type;
-
-			while (n++ < types.length) {
-				type = types[n];
-				node.addEventListener(type, push);
-			}
-
-			var _stop = stream.stop;
-			stream.stop = function() {
-				var n = -1;
-				
-				while (n++ < types.length) {
-					type = types[n];
-					node.removeEventListener(type, push);
-				}
-
-				_stop.apply(stream);
-			};
-			
-			return stream;
-		}),
-
-		on:  Fn.curry(function(types, fn, node) {
-			on(node, types, fn, data);
-		}),
-
-		off: Fn.curry(function(types, fn, node) {
-			off(node, types, fn);
+		events: assign(Fn.curry(EventStream), {
+			on:      on,
+			off:     off,
+			trigger: trigger
 		}),
 
 		trigger: function triggerNode(type, properties, node) {

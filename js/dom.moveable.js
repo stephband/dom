@@ -5,7 +5,7 @@
 	var on      = dom.events.on;
 	var closest = dom.closest;
 
-	on(document, 'touch', function(e) {
+	on(document, 'dom-touch', function(e) {
 		if (e.defaultPrevented) { return; }
 
 		var moveable = closest('.moveable', e.target);

@@ -28,14 +28,14 @@
 		// Todo: check if swipe has enough velocity and distance
 		//x/w > settings.threshold || e.velocityX * x/w * settings.sensitivity > 1
 
-		trigger(node, 'swipe', {
+		trigger(node, 'dom-swipe', {
 			detail:   touch,
 			angle:    polar[1],
 			velocity: polar[0] / data.time
 		});
 	}
 
-	on(document, 'touch', function(e) {
+	on(document, 'dom-touch', function(e) {
 		if (e.defaultPrevented) { return; }
 
 		var node = closest('.swipeable', e.target);

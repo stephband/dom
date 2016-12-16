@@ -3,6 +3,7 @@
 
 	var debug     = false;
 
+	var assign    = Object.assign;
 	var Fn        = window.Fn;
 	var dom       = window.dom;
 	var on        = dom.events.on;
@@ -343,7 +344,6 @@
 
 	// Clicks on buttons toggle activate on their targets
 	on(document, 'click', dom.delegate('a[target]', activateTarget));
-
 
 	// Document setup
 

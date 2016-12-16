@@ -162,7 +162,7 @@
 		fn(events);
 
 		// Trigger the touch event
-		trigger(events[0].target, 'touch', {
+		trigger(events[0].target, 'dom-touch', {
 			pageX:  e0.pageX,
 			pageY:  e0.pageY,
 			detail: function() {

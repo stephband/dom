@@ -28,7 +28,7 @@
 		return w2 - w1;
 	}
 
-	on(document, 'touch', function(e) {
+	on(document, 'dom-touch', function(e) {
 		if (e.defaultPrevented) { return; }
 
 		var node = closest('.slideable', e.target);
@@ -112,7 +112,7 @@
 		node.style.transform = 'translate(' + l + 'px, 0px)';
 	}
 
-	on(document, 'swipe', function(e) {
+	on(document, 'dom-swipe', function(e) {
 		if (e.defaultPrevented) { return; }
 
 		var node = closest('.slideable', e.target);

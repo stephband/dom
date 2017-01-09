@@ -52,15 +52,20 @@ as map or filter functions.
     .map(dom.closest('a'))
     .each(dom.append(fragment));
 
+
+##### `.query(selector, container)`
+
+Returns an array of all descendants of `container` that match `selector`.
+
 ##### `.create(tag, text)`
 
-Returns a new node.
+Returns a new DOM node.
 
 - If `tag` is `"text"` returns a text node with the content `text`.
 - If `tag` is `"fragment"` returns a document fragment.
 - If `tag` is `"comment"` returns a comment `<!-- text -->`.
 - Anything else returns an element `<tag>text</tag>`, where `text` is inserted
-  as html.
+  as inner html.
 
 ##### `.clone(node)`
 
@@ -88,7 +93,7 @@ Return `true` if the `href` of `node` points outside of the current domain.
 
 ##### `.identify(node)`
 
-Returns the id of `node`, or where there is no id a random id is generated,
+Returns the id of `node`. Where there is no id a random id is generated,
 set on `node` and returned.
 
     dom('button')
@@ -140,13 +145,18 @@ Removes content of `node`.
 
 Removes `node` from the DOM.
 
+##### `.swap(node)`
+
+Swaps `target` for `node`.
+
 ##### `.matches(selector, node)`
 
 Returns `true` if `node` matches `selector`, otherwise `false`.
 
 ##### `.closest(selector, node)`
 
-Returns the node itself, or the closest ancestor to match `selector`.
+Returns the node itself, or the closest ancestor that matches `selector`.
+
 
 #### Style
 
@@ -236,17 +246,25 @@ An object of feature detection results.
 
 ## Events
 
-##### `activate`
+##### `dom-activate`
 
-##### `touch`
+Requires `js/dom.event.activate.js`.
 
-Requires `js/dom.touch.js`.
+##### `dom-deactivate`
+
+Requires `js/dom.event.activate.js`.
+
+##### `dom-touch`
+
+Requires `js/dom.event.touch.js`.
 
 A `touch` event fires following a `mousedown` or `touchstart` and as soon as the
 pointer has moved more than a threshold 6px from it's start position. It carries
 a stream of coordinates for the finger as `e.detail()`.
 
-	dom.on(document, "touch", function(e) {
+	dom
+	.events("touch", document)
+	.each(function(e) {
 	    // Position at start of touch
     	var x = e.pageX;
     	var y = e.pageY;
@@ -262,9 +280,9 @@ a stream of coordinates for the finger as `e.detail()`.
 		});
     });
 
-##### `swipeleft`, `swiperight`, `swipeup`, `swipedown`
+##### `dom-swipe`
 
-Requires `js/dom.touch.js` and `js/dom.swipe.js`.
+Requires `js/dom.event.touch.js` and `js/dom.event.swipe.js`.
 
 A swipe event fires after a single touch has performed a swipe gesture in a
 node with the class `swipeable`.
@@ -290,6 +308,7 @@ Lint the contents of `js/`:
 ##History
 
 *0.1*: first import from jquery.event.move and Fn library
+*0.2*: API stabilised
 
 ##Tweet me
 

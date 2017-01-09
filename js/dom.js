@@ -313,6 +313,11 @@
 		target.parentNode && target.parentNode.insertBefore(node, target.nextSibling);
 	}
 
+	function swap(target, node) {
+		before(target, node);
+		remove(target);
+	}
+
 
 	// CSS
 
@@ -752,6 +757,7 @@
 		html:           Fn.curry(html),
 		before:         Fn.curry(before),
 		after:          Fn.curry(after),
+		swap:           Fn.curry(swap),
 		empty:          empty,
 		remove:         remove,
 

@@ -19,10 +19,9 @@
 	var store     = new WeakMap();
 
 	function findButtons(id) {
-		return dom('a[href$="#' + id + '"]')
-			.filter(dom.isInternalLink)
-			.toArray();
-			//.add('[data-href="#' + id + '"]');
+		return dom
+		.query('a[href$="#' + id + '"]', document)
+		.filter(dom.isInternalLink);
 	}
 
 	function getData(node) {
@@ -343,6 +342,7 @@
 
 	// Clicks on buttons toggle activate on their targets
 	on(document, 'click', dom.delegate('a[target]', activateTarget));
+
 
 	// Document setup
 

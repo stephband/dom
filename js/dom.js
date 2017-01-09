@@ -27,16 +27,6 @@
 
 	var assign = Object.assign;
 
-	function applyUntil(fn, test) {
-		// Returns partially applied functions until some condition `test`
-		// is met, when `fn` is called
-		return function curried() {
-			return test.apply(null, arguments) ?
-				fn.apply(null, arguments) :
-				Fn.bind(arguments, curried) ;
-		};
-	}
-
 	function bindTail(fn) {
 		// Takes arguments 1 and up and appends them to arguments
 		// passed to fn.
@@ -451,7 +441,7 @@
 
 	        return [
 		        rect.left - (parseFloat(style("marginLeft", node)) || 0),
-		        rest.top  - (parseFloat(style("marginTop", node)) || 0)
+		        rect.top  - (parseFloat(style("marginTop", node)) || 0)
 	        ];
 	    }
 

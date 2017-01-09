@@ -8,14 +8,14 @@
 	var trigger = dom.events.trigger;
 	var closest = dom.closest;
 
-	var settings = {
-		// Ratio of distance over target finger must travel to be
-		// considered a swipe.
-		threshold: 0.4,
-		// Faster fingers can travel shorter distances to be considered
-		// swipes. 'sensitivity' controls how much. Bigger is shorter.
-		sensitivity: 6
-	};
+//	var settings = {
+//		// Ratio of distance over target finger must travel to be
+//		// considered a swipe.
+//		threshold: 0.4,
+//		// Faster fingers can travel shorter distances to be considered
+//		// swipes. 'sensitivity' controls how much. Bigger is shorter.
+//		sensitivity: 6
+//	};
 
 	function touchdone(node, touch) {
 		var data = touch.clone().last().shift();

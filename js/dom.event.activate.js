@@ -3,7 +3,6 @@
 
 	var debug     = false;
 
-	var assign    = Object.assign;
 	var Fn        = window.Fn;
 	var dom       = window.dom;
 	var on        = dom.events.on;
@@ -206,8 +205,8 @@
 		}
 	};
 
-	var rImage   = /\.(?:png|jpeg|jpg|gif|PNG|JPEG|JPG|GIF)$/;
-	var rYouTube = /youtube\.com/;
+//	var rImage   = /\.(?:png|jpeg|jpg|gif|PNG|JPEG|JPG|GIF)$/;
+//	var rYouTube = /youtube\.com/;
 
 	function createDialog(content) {
 		var layer = dom.create('div', { class: 'dialog-layer layer' });

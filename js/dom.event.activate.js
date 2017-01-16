@@ -308,7 +308,7 @@
 
 	function activateHash(e) {
 		if (isIgnorable(e)) { return; }
-		if (!dom.isInternalLink(e.delegateTarget)) { return; }
+		if (e.delegateTarget.hostname && !dom.isInternalLink(e.delegateTarget)) { return; }
 
 		// Does it point to an id?
 		var id = getHash(e.delegateTarget);
@@ -338,7 +338,7 @@
 	}
 
 	// Clicks on buttons toggle activate on their hash
-	on(document, 'click', dom.delegate('[href]', activateHash));
+	on(document, 'click', dom.delegate('[href], [data-href]', activateHash));
 
 	// Clicks on buttons toggle activate on their targets
 	on(document, 'click', dom.delegate('a[target]', activateTarget));

@@ -675,9 +675,9 @@
 	var fontSize;
 
 	var toPx = Fn.overloadTypes({
-		number: function(n) { return n; },
+		'number': function(n) { return n; },
 
-		string: function(string) {
+		'string': function(string) {
 			var data, n;
 
 			data = rem.exec(string);

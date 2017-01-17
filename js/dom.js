@@ -674,7 +674,7 @@
 
 	var fontSize;
 
-	var valueTypes = {
+	var toPx = Fn.overloadTypes({
 		number: function(n) { return n; },
 
 		string: function(string) {
@@ -694,11 +694,13 @@
 
 			throw new Error('[window.breakpoint] \'' + string + '\' cannot be parsed as rem, em or %.');
 		}
-	};
+	});
 
-	function valueToPx(value) {
-		return valueTypes[typeof value](value);
-	}
+	var toRem = Fn.overloadTypes({
+		number: function(n) {
+			return n / getFontSize();
+		}
+	});
 
 	function getFontSize() {
 		return fontSize ||
@@ -777,7 +779,8 @@
 				value ;
 		}),
 
-		valueToPx:      valueToPx,
+		toPx:           toPx,
+		toRem:          toRem,
 		viewportLeft:   viewportLeft,
 		viewportTop:    viewportTop,
 

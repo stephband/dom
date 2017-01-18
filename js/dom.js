@@ -218,6 +218,11 @@
 		return node.classList || new TokenList(node, dom.attribute('class'), setClass);
 	}
 
+	function children(node) {
+		// In IE and Safari, document fragments do not have .children
+		return node.children || node.querySelectorAll('*');
+	}
+
 	// DOM Traversal
 
 	function query(selector, node) {
@@ -739,6 +744,7 @@
 		query:          Fn.curry(query),
 		closest:        Fn.curry(closest),
 		matches:        Fn.curry(matches),
+		children:       children,
 
 		// DOM mutation
 

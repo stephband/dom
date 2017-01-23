@@ -697,7 +697,7 @@
 			//	return width * n;
 			//}
 
-			throw new Error('[window.breakpoint] \'' + string + '\' cannot be parsed as rem, em or %.');
+			throw new Error('dom: ' + string + '\' cannot be parsed as rem, em or %.');
 		}
 	});
 

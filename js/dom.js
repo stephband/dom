@@ -612,20 +612,19 @@
 
 		if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }
 
-		var tg = tag(node);
+		var t = tag(node);
 
-		// In browsers where templates are not inert, ids used inside them
-		// conflict with ids in any rendered result. To go some way to
-		// tackling this, remove the node from the DOM.
-		if (tg === 'template' && !node.content) {
+		// In browsers where templates are not inert their content can clash
+		// with content in the DOM - ids, for example. Remove the template as
+		// a precaution.
+		if (t === 'template' && !dom.features.template) {
 			remove(node);
 		}
 
-		return tg === 'template' ? fragmentFromTemplate(node) :
-			tg === 'script' ? fragmentFromHTML(node.innerHTML, attribute('data-parent-tag', node)) :
+		return t === 'template' ? fragmentFromTemplate(node) :
+			t === 'script' ? fragmentFromHTML(node.innerHTML, attribute('data-parent-tag', node)) :
 			fragmentFromChildren(node) ;
 	}
-
 
 	// DOM Feature tests
 

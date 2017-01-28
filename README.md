@@ -119,9 +119,11 @@ returns `true` or `false`.
 
 Returns the classList of `node`.
 
-//##### `.html(target, html)`
-//
-//Replaces the content of `target` with `html`.
+<!--
+##### `.html(target, html)`
+
+Replaces the content of `target` with `html`.
+-->
 
 ##### `.append(target, node)`
 

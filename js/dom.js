@@ -23,7 +23,7 @@
 	var rpx     = /px$/;
 
 
-	// Utility functions
+	// Utilities
 
 	var assign = Object.assign;
 
@@ -223,6 +223,7 @@
 		return node.children || node.querySelectorAll('*');
 	}
 
+
 	// DOM Traversal
 
 	function query(selector, node) {
@@ -254,6 +255,7 @@
 			 node :
 			 closest(selector, node.parentNode, root) ;
 	}
+
 
 	// DOM Mutation
 
@@ -419,7 +421,7 @@
 
 	function offset(node) {
 		// Pinched from jQuery.offset...
-	    // Return zeros for disconnected and hidden (display: none) elements (gh-2310)
+	    // Return zeros for disconnected and hidden (display: none) elements
 	    // Support: IE <=11 only
 	    // Running getBoundingClientRect on a
 	    // disconnected node in IE throws an error
@@ -467,6 +469,7 @@
 
 		return nodeOffset;
 	}
+
 
 	// DOM Events
 
@@ -626,6 +629,7 @@
 			fragmentFromChildren(node) ;
 	}
 
+
 	// DOM Feature tests
 
 	var testEvent = Event('featuretest');
@@ -671,6 +675,7 @@
 		return prefixed && end[prefixed];
 	}
 
+
 	// Units
 
 	var rem = /(\d*\.?\d+)r?em/;
@@ -711,7 +716,49 @@
 			(fontSize = parseFloat(style("font-size", document.documentElement), 10));
 	}
 
-	// DOM
+
+	// Scroll
+
+	//if (!jQuery.easing['ease-out']) {
+	//	// eaeOutQuad
+	//	jQuery.easing['ease-out'] = function (x, t, b, c, d) {
+	//		return -c *(t/=d)*(t-2) + b;
+	//	};
+	//}
+
+
+	function animate(value, duration, name, object) {
+		var a = object[name];
+		var t;
+
+		function frame(time) {
+			if (object[name] === value) { return; }
+			if (t === undefined) { t = time; }
+
+			var progress = (time - t) / (duration * 1000);
+			var v = progress < 1 ?
+				a + progress * (value - a) :
+				value ;
+
+			object[name] = v;
+			requestAnimationFrame(frame);
+		}
+
+		requestAnimationFrame(frame);
+	}
+
+	function scrollTo(px, node) {
+		// Get scrollable node
+		node = node ||
+			(document.documentElement.scrollTop && document.documentElement) ||
+			(document.body.scrollTop && document.body) ||
+			document.body ;
+
+		animate(px, 0.6, 'scrollTop', node);
+	}
+
+
+	// dom
 
 	function dom(selector, node) {
 		return typeof selector === "string" ?
@@ -825,6 +872,10 @@
 		},
 
 		delegate:        delegate,
+
+		// DOM Animation
+
+		scrollTo:        scrollTo,
 
 		// Features
 

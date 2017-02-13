@@ -727,11 +727,11 @@
 
 	var easeInExponential = Fn.curry(function easeIn(e, p, v, w) {
 		return v + w * Math.pow(p, e);
-	};
+	});
 
 	var easeOutExponential = Fn.curry(function easeIn(e, p, v, w) {
 		//return v + w * Math.pow(p, e);
-	};
+	});
 
 	//var easeInQuad  = easeInExponential(2);
 	//var easeInCubic = easeInExponential(3);

@@ -719,13 +719,15 @@
 
 	// Scroll
 
-	//if (!jQuery.easing['ease-out']) {
-	//	// eaeOutQuad
-	//	jQuery.easing['ease-out'] = function (x, t, b, c, d) {
-	//		return -c *(t/=d)*(t-2) + b;
-	//	};
-	//}
+	// Easing functions
+	//
+	// p - progress in range 0-1
+	// v - value at start
+	// w - value diff from start to end
 
+	function easeOutQuad(p, v, w) {
+		return -w * p * (p - 2) + v;
+	}
 
 	function animate(value, duration, name, object) {
 		var a = object[name];
@@ -736,11 +738,11 @@
 			if (t === undefined) { t = time; }
 
 			var progress = (time - t) / (duration * 1000);
-			var v = progress < 1 ?
-				a + progress * (value - a) :
+
+			object[name] = progress < 1 ?
+				easeOutQuad(progress, a, value - a) :
 				value ;
 
-			object[name] = v;
 			requestAnimationFrame(frame);
 		}
 

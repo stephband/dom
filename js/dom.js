@@ -725,11 +725,42 @@
 	// v - value at start
 	// w - value diff from start to end
 
-	function easeOutQuad(p, v, w) {
-		return -w * p * (p - 2) + v;
-	}
+	var easeInExponential = Fn.curry(function easeIn(e, p, v, w) {
+		return v + w * Math.pow(p, e);
+	};
 
-	function animate(value, duration, name, object) {
+	var easeOutExponential = Fn.curry(function easeIn(e, p, v, w) {
+		//return v + w * Math.pow(p, e);
+	};
+
+	//var easeInQuad  = easeInExponential(2);
+	//var easeInCubic = easeInExponential(3);
+	//var easeInQuart = easeInExponential(4);
+	//var easeInQuint = easeInExponential(5);
+
+	//function easeOutQuad(p, v, w) {
+	//	return -w * p * (p - 2) + v;
+	//}
+	//
+	//function easeOutCubic(p, v, w) {
+	//	var p1 = p - 1;
+	//	return w * (p1 * p1 * p1 + 1) + v;
+	//}
+	//
+	//function easeOutQuart(p, v, w) {
+	//	var p1 = p - 1;
+	//	return -w * (p1 * p1 * p1 * p1 - 1) + v;
+	//}
+	//
+	//function easeInSine(p, v, w) {
+	//	return -w * Math.cos(p * (Math.PI/2)) + w + v;
+	//}
+	//
+	//function easeOutSine(p, v, w) {
+	//	return w * Math.sin(p * (Math.PI/2)) + v;
+	//}
+
+	function animate(ease, value, duration, name, object) {
 		var a = object[name];
 		var t;
 
@@ -740,7 +771,7 @@
 			var progress = (time - t) / (duration * 1000);
 
 			object[name] = progress < 1 ?
-				easeOutQuad(progress, a, value - a) :
+				ease(progress, a, value - a) :
 				value ;
 
 			requestAnimationFrame(frame);
@@ -756,7 +787,7 @@
 			(document.body.scrollTop && document.body) ||
 			document.body ;
 
-		animate(px, 0.6, 'scrollTop', node);
+		animate(easeInExponential(2), px, 0.6, 'scrollTop', node);
 	}
 
 

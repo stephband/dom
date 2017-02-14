@@ -706,7 +706,7 @@
 	});
 
 	var toRem = Fn.overloadTypes({
-		number: function(n) {
+		'number': function(n) {
 			return n / getFontSize();
 		}
 	});
@@ -721,37 +721,31 @@
 
 	// Easing functions
 	//
+	// e - exponent
 	// p - progress in range 0-1
 	// v - value at start
 	// w - value diff from start to end
+	//
+	// Exponential easing functions construct the common quad/cubic/quart
+	// easings, eg:
+	//
+	// var easeInQuad   = easeInExponential(2);
+	// var easeInCubic  = easeInExponential(3);
+	// var easeInQuart  = easeInExponential(4);
+	// var easeInQuint  = easeInExponential(5);
+	// var easeOutQuad  = easeOutExponential(2);
+	// var easeOutCubic = easeOutExponential(3);
+	// var easeOutQuart = easeOutExponential(4);
+	// var easeOutQuint = easeOutExponential(5);
 
-	var easeInExponential = Fn.curry(function easeIn(e, p, v, w) {
+	var easeInExponential = Fn.curry(function easeIn(e, v, w, p) {
 		return v + w * Math.pow(p, e);
 	});
 
-	var easeOutExponential = Fn.curry(function easeIn(e, p, v, w) {
-		//return v + w * Math.pow(p, e);
+	var easeOutExponential = Fn.curry(function easeOut(e, v, w, p) {
+		return v + w - w * Math.pow(1 - p, e);
 	});
 
-	//var easeInQuad  = easeInExponential(2);
-	//var easeInCubic = easeInExponential(3);
-	//var easeInQuart = easeInExponential(4);
-	//var easeInQuint = easeInExponential(5);
-
-	//function easeOutQuad(p, v, w) {
-	//	return -w * p * (p - 2) + v;
-	//}
-	//
-	//function easeOutCubic(p, v, w) {
-	//	var p1 = p - 1;
-	//	return w * (p1 * p1 * p1 + 1) + v;
-	//}
-	//
-	//function easeOutQuart(p, v, w) {
-	//	var p1 = p - 1;
-	//	return -w * (p1 * p1 * p1 * p1 - 1) + v;
-	//}
-	//
 	//function easeInSine(p, v, w) {
 	//	return -w * Math.cos(p * (Math.PI/2)) + w + v;
 	//}
@@ -762,19 +756,19 @@
 
 	function animate(ease, value, duration, name, object) {
 		var a = object[name];
-		var t;
+		var t = performance.now();
 
 		function frame(time) {
-			if (object[name] === value) { return; }
-			if (t === undefined) { t = time; }
+			// Progress from 0-1
+			var p = (time - t) / (duration * 1000);
 
-			var progress = (time - t) / (duration * 1000);
-
-			object[name] = progress < 1 ?
-				ease(progress, a, value - a) :
-				value ;
-
-			requestAnimationFrame(frame);
+			if (p < 1) {
+				object[name] = ease(a, value - a, p);
+				requestAnimationFrame(frame);
+			}
+			else {
+				object[name] = value;
+			}
 		}
 
 		requestAnimationFrame(frame);

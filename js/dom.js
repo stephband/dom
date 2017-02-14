@@ -226,6 +226,10 @@
 
 	// DOM Traversal
 
+	function find(id) {
+		return document.getElementById(id) || undefined;
+	}
+
 	function query(selector, node) {
 		node = node || document;
 		return A.slice.apply(node.querySelectorAll(selector));
@@ -814,6 +818,7 @@
 
 		// DOM traversal
 
+		find:           find,
 		query:          Fn.curry(query),
 		closest:        Fn.curry(closest),
 		matches:        Fn.curry(matches),

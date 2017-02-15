@@ -202,7 +202,7 @@
 	}
 
 	function attribute(name, node) {
-		return node.getAttribute && node.getAttribute(name);
+		return node.getAttribute && node.getAttribute(name) || undefined ;
 	}
 
 	function setClass(node, classes) {

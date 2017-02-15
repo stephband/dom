@@ -779,13 +779,8 @@
 	}
 
 	function scrollTo(px, node) {
-		// Get scrollable node
-		node = node ||
-			(document.documentElement.scrollTop && document.documentElement) ||
-			(document.body.scrollTop && document.body) ||
-			document.body ;
-
-		animate(easeInExponential(2), px, 0.6, 'scrollTop', node);
+		var ease = easeInExponential(2);
+		animate(ease, px, 0.6, 'scrollTop', node || dom.scrollingElement());
 	}
 
 
@@ -908,6 +903,13 @@
 		// DOM Animation
 
 		scrollTo:        scrollTo,
+
+		scrollingElement: function() {
+			return document.scrollingElement ||
+				(document.documentElement.scrollTop && document.documentElement) ||
+				(document.body.scrollTop && document.body) ||
+				document.body ;
+		},
 
 		// Features
 

@@ -780,7 +780,7 @@
 
 	function scrollTo(px, node) {
 		var ease = easeInExponential(2);
-		animate(ease, px, 0.6, 'scrollTop', node || dom.scrollingElement());
+		animate(ease, px, 0.6, 'scrollTop', node || dom.scrollElement());
 	}
 
 
@@ -904,7 +904,7 @@
 
 		scrollTo:        scrollTo,
 
-		scrollingElement: function() {
+		scrollElement: function() {
 			return document.scrollingElement ||
 				(document.documentElement.scrollTop && document.documentElement) ||
 				(document.body.scrollTop && document.body) ||

@@ -22,7 +22,7 @@
 		.each(function(transform) {
 			moveable.style.transform = transform;
 		})
-		.on('done', function() {
+		.on('stop', function() {
 			//moveable.style.transform = transform;
 		});
 	});

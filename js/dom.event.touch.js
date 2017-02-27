@@ -2,6 +2,7 @@
 	"use strict";
 
 	var Fn     = window.Fn;
+	var Stream = Fn.Stream;
 	var dom    = window.dom;
 
 
@@ -31,6 +32,7 @@
 
 	// Functions
 
+	var requestTick     = Fn.requestTick;
 	var on              = dom.events.on;
 	var off             = dom.events.off;
 	var trigger         = dom.events.trigger;
@@ -181,12 +183,7 @@
 	function activeMousemove(e, data) {
 		data.touch = e;
 		data.timeStamp = e.timeStamp;
-
-		data.stream.push({
-			x:    e.pageX - data.startX,
-			y:    e.pageY - data.startY,
-			time: (e.timeStamp - data.startTime) / 1000
-		});
+		data.stream.push(e);
 	}
 
 	function activeMouseend(e, data) {
@@ -197,9 +194,9 @@
 
 		// Unbind the click suppressor, waiting until after mouseup
 		// has been handled.
-		setTimeout(function(){
+		requestTick(function() {
 			off(target, 'click', preventDefault);
-		}, 0);
+		});
 	}
 
 	function removeActiveMouse() {
@@ -217,12 +214,7 @@
 
 		data.touch = touch;
 		data.timeStamp = e.timeStamp;
-
-		data.stream.push({
-			x:    touch.pageX - data.startX,
-			y:    touch.pageY - data.startY,
-			time: (touch.timeStamp - data.startTime) / 1000
-		});
+		data.stream.push(touch);
 	}
 
 	function activeTouchend(e, data) {
@@ -241,23 +233,19 @@
 	}
 
 	function TouchStream(node, events) {
-		var stream = Fn.Stream(events.map(function(e) {
+		var stream = Stream(events).map(function(e) {
 			return {
 				x:    e.pageX - events[0].pageX,
 				y:    e.pageY - events[0].pageY,
 				time: (e.timeStamp - events[0].timeStamp) / 1000
 			};
-		}));
+		});
 
 		var data = {
-			startX:     events[0].pageX,
-			startY:     events[0].pageY,
-			startTime:  events[0].timeStamp,
 			stream:     stream,
 			target:     node,
 			touch:      undefined,
-			identifier: events[0].identifier,
-			timeStamp:  events[0].timeStamp
+			identifier: events[0].identifier
 		};
 
 		if (data.identifier === undefined) {

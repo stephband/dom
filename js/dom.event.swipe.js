@@ -42,7 +42,7 @@
 		if (!node) { return; }
 
 		var touch = e.detail();
-		touch.on('done', function() {
+		touch.on('stop', function() {
 			touchdone(node, touch);
 		});
 	});

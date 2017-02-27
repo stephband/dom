@@ -81,7 +81,7 @@
 		.each(function(transform) {
 			node.style.transform = transform;
 		})
-		.on('done', function() {
+		.on('stop', function() {
 			classes.remove('notransition');
 
 			// Todo: Watch out, this may interfere with slides
@@ -114,7 +114,7 @@
 
 	on(document, 'dom-swipe', function(e) {
 		if (e.defaultPrevented) { return; }
-
+console.log('SWIPE');
 		var node = closest('.slideable', e.target);
 		if (!node) { return; }
 

@@ -1,6 +1,3 @@
----
-title: jQuery.event.move
----
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -154,12 +151,13 @@ title: jQuery.event.move
 		</div>
 	</footer>
 
-	<script src="jquery/jquery-3.1.1.js"></script>
-	<script src="fn/polyfills/number.isnan.js"></script>
-	<script src="fn/polyfills/object.assign.js"></script>
+	<script src="../fn/polyfills/number.isnan.js"></script>
+	<script src="../fn/polyfills/object.assign.js"></script>
+	<script src="../fn/js/fn.js"></script>
+
 	<script src="polyfills/window.customevent.js"></script>
-	<script src="fn/js/fn.js"></script>
-	<script src="js/config.js"></script>
+	<script src="test/config.js"></script>
+
 	<script src="js/dom.js"></script>
 	<script src="js/dom.event.activate.js"></script>
 	<script src="js/dom.event.touch.js"></script>
@@ -169,14 +167,15 @@ title: jQuery.event.move
 	<script src="js/dom.switchable.js"></script>
 	<script src="js/dom.moveable.js"></script>
 	<script src="js/dom.slideable.js"></script>
+
 	<script>
-		function toDeg(n) { return n * 57.295779513; }
-		function toRad(n) { return n / 57.295779513; }
+		var toDeg = Fn.multiply(57.295779513);
+		var toRad = Fn.multiply(1 / 57.295779513);
 
 		// FUNCTIONS
 				
-		var pi = Math.PI,
-				pi2 = pi * 2;
+		var pi  = Math.PI,
+		    pi2 = pi * 2;
 
 		// Converts cartesian [x, y] to polar [distance, angle] coordinates,
 		// downward, anti-clockwise, angle in radians.
@@ -320,7 +319,9 @@ title: jQuery.event.move
 
 		var distX = 0, distY = 0, pageX = 0, pageY = 0, startX = 0, startY = 0;
 
-		dom.on(box, 'touch', function(e) {
+		dom
+		.events('touch', box)
+		.each(function(e) {
 			console.log('touch', e);
 
 			e
@@ -342,22 +343,6 @@ title: jQuery.event.move
 			distY  = 0;
 			pageX  = e.pageX;
 			pageY  = e.pageY;
-		});
-
-		dom.on(document, 'swipeleft', function(e) {
-			console.log('SWIPELEFT', e);
-		});
-
-		dom.on(document, 'swiperight', function(e) {
-			console.log('SWIPERIGHT', e);
-		});
-
-		dom.on(document, 'swipeup', function(e) {
-			console.log('SWIPEUP', e);
-		});
-
-		dom.on(document, 'swipedown', function(e) {
-			console.log('SWIPEDOWN', e);
 		});
 	</script>
 </body>

@@ -885,6 +885,8 @@
 			trigger: trigger
 		}),
 
+		on: Fn.curry(EventStream),
+
 		trigger: function triggerNode(type, properties, node) {
 			var l = arguments.length;
 

@@ -23,6 +23,7 @@ To consume the functor as an array:
         .map(dom.get('href'))
         .toArray();
 
+<!--
 It can be looped over with `for...of`. Here's an equivalent using a loop:
 
 	var links = dom('a[href]');
@@ -31,6 +32,7 @@ It can be looped over with `for...of`. Here's an equivalent using a loop:
 	for (link of links) {
 		console.log(link.href);
 	}
+-->
 
 ##### `dom(nodes)`
 
@@ -41,7 +43,7 @@ It can be looped over with `for...of`. Here's an equivalent using a loop:
 ## dom
 
 All functions on `dom` are curried functions. Many are designed to be used
-as map or filter functions.
+as map or filter iterators.
 
 	// Collect all links with or containing `.my-icon` and
 	// stick them in a fragment.
@@ -73,23 +75,23 @@ Returns a deep copy of `node`.
 
 ##### `.isElementNode(node)`
 
-Return `true` if `node` is an element node.
+Returns `true` if `node` is an element node.
 
 ##### `.isTextNode(node)`
 
-Return `true` if `node` is a text node.
+Returns `true` if `node` is a text node.
 
 ##### `.isCommentNode(node)`
 
-Return `true` if `node` is a comment.
+Returns `true` if `node` is a comment.
 
 ##### `.isFragmentNode(node)`
 
-Return `true` if `node` is a fragment.
+Returns `true` if `node` is a fragment.
 
 ##### `.isExternalLink(node)`
 
-Return `true` if the `href` of `node` points outside of the current domain.
+Returns `true` if the `href` of `node` points outside of the current domain.
 
 ##### `.identify(node)`
 
@@ -100,10 +102,10 @@ set on `node` and returned.
     .map(dom.identify)
     ...
 
-If you just want to get the id, us `Fn.get`.
+If you just want to get the id, us `Fn.get()`.
 
     dom('button')
-    .map(dom.get('id'))
+    .map(Fn.get('id'))
     ...
 
 ##### `.tag(node)`
@@ -147,7 +149,7 @@ Removes content of `node`.
 
 Removes `node` from the DOM.
 
-##### `.swap(node)`
+##### `.swap(target, node)`
 
 Swaps `target` for `node`.
 
@@ -157,7 +159,8 @@ Returns `true` if `node` matches `selector`, otherwise `false`.
 
 ##### `.closest(selector, node)`
 
-Returns the node itself, or the closest ancestor that matches `selector`.
+Returns the node itself or the closest ancestor that matches `selector`.
+If no match is found, returns `undefined`.
 
 
 #### Style
@@ -171,7 +174,7 @@ is returned.
     dom.style('transform:rotate', node);     // returns rotation, as a number, in radians
     dom.style('transform:scale', node);      // returns scale, as a number
     dom.style('transform:translateX', node); // returns translation, as a number, in px
-    dom.style('transform:translateY', node); // returns tranlsation, as a number, in px
+    dom.style('transform:translateY', node); // returns translation, as a number, in px
 
 ##### `.offset(node)`
 
@@ -183,54 +186,28 @@ Returns array [x, y].
 
 #### Events
 
-##### `.Event(type, properties)`
+##### `.on(types, node)`
 
-Creates a custom event of `type`. Properties are assigned to the event object.
+Returns a stream of events heard on `node`:
 
-##### `.events(types, node)`
-
-Returns a stream of events heard on `node`.
-
-    var events = dom.Events(document.body, "click");
-
+    var events = dom.on('click', document.body);
+    
     events
-    .map(function(e) {
-        return e.timeStamp();
-    })
+    .map(Fn.get('timeStamp'))
     .each(function(timeStamp) {
         // Do something with times
     });
 
-Stop the stream:
+Stopping the stream removes event listeners from `node`:
 
     events.stop();
 
-##### `.events.on(node, types, fn, data)`
+##### `.trigger(type [,properties], node)`
 
-Binds listener `fn` to events of type `types` on `node`. Listener `fn` is
-passed 2 arguments – the event object and optional `data` object:
+Triggers event of `type` on `node`, with optional `properties` being
+assigned to the event object.
 
-	function mouse(e, data) {
-    	// React to mouse events
-    }
-
-	var data = {
-		// Some data
-	};
-
-    dom.on(node, "mousedown mouseup", mouse, data);
-
-##### `.events.off(node, types, fn)`
-
-Unbinds listener `fn` from events of type `types` on `node`.
-
-##### `.events.trigger(node, type, properties)`
-
-Triggers event of `type`, with optional `properties`, on `node`.
-
-##### `.Event(type, properties)`
-
-Returns a DOM event object with properties copied from `properties`.
+    dom.trigger('dom-activate', dom.find('toggle-id'));
 
 ##### `.isPrimaryButton(e)`
 
@@ -240,11 +217,35 @@ Returns boolean.
 
 Calls `e.preventDefault()`.
 
+##### `.events`
+
+An object containing some lower-level, uncurried event methods.
+
+    dom.events.on(node, types, fn, data)
+
+Binds listener `fn` to events of type `types` on `node`. Listener `fn` is
+passed 2 arguments – the event object and optional `data` object:
+
+    dom.events.off(node, types, fn)
+
+Unbinds listener `fn` from events of type `types` on `node`.
+
+    dom.events.trigger(node, type, properties)
+
+Triggers event of `type`, with optional `properties`, on `node`.
+
+##### `.Event(type, properties)`
+
+Creates a CustomEvent of type `type`.
+Additionally, `properties` are assigned to the event object.
+
+
 #### Feature detection
 
 ##### `.features`
 
 An object of feature detection results.
+
 
 ## Events
 
@@ -311,7 +312,3 @@ Lint the contents of `js/`:
 
 *0.1*: first import from jquery.event.move and Fn library
 *0.2*: API stabilised
-
-##Tweet me
-
-If you use DOM on something interesting, tweet me <a href="http://twitter.com/stephband">@stephband</a>.

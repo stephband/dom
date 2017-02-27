@@ -114,7 +114,7 @@
 
 	on(document, 'dom-swipe', function(e) {
 		if (e.defaultPrevented) { return; }
-console.log('SWIPE');
+
 		var node = closest('.slideable', e.target);
 		if (!node) { return; }
 

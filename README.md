@@ -301,7 +301,7 @@ node with the class `swipeable`.
 		// e.target === <div class="swipeable">
     });
 
-##Install
+## Install
 
 Install `dom`:
 
@@ -313,7 +313,7 @@ Lint the contents of `js/`:
 
 	npm run lint
 
-##History
+## History
 
 *0.1*: first import from jquery.event.move and Fn library
 *0.2*: API stabilised

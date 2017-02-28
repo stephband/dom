@@ -892,11 +892,16 @@
 		preventDefault:  preventDefault,
 		Event:           Event,
 
-		events: assign(Fn.curry(EventStream), {
+		events: assign(Fn.curry(function(types, node) {
+			console.warn('Deprecated: dom.events(types, node) is deprecated in favour of dom.on(types, node).')
+			return EventStream(types, node);
+		}), {
 			on:      on,
 			off:     off,
 			trigger: trigger
 		}),
+
+		on: Fn.curry(EventStream),
 
 		trigger: function triggerNode(type, properties, node) {
 			var l = arguments.length;

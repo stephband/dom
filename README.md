@@ -108,6 +108,11 @@ If you just want to get the id, us `Fn.get()`.
     .map(Fn.get('id'))
     ...
 
+##### `.type(node)`
+
+Returns `node` type as one of the strings `element`, `comment`, `text`,
+`fragment`, `document` or `doctype`.
+
 ##### `.tag(node)`
 
 Returns the tag name of `node`.
@@ -149,7 +154,7 @@ Removes content of `node`.
 
 Removes `node` from the DOM.
 
-##### `.swap(target, node)`
+##### `.replace(target, node)`
 
 Swaps `target` for `node`.
 

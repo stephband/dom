@@ -94,13 +94,22 @@
 
 	var testDiv = document.createElement('div');
 
-	var nodeTypes = {
-		comment: function(text) {
-			return document.createComment(text || '');
-		},
+	var types = {
+		1:  'element',
+		3:  'text',
+		8:  'comment',
+		9:  'document',
+		10: 'doctype',
+		11: 'fragment'
+	};
 
+	var constructors = {
 		text: function(text) {
 			return document.createTextNode(text || '');
+		},
+
+		comment: function(text) {
+			return document.createComment(text || '');
 		},
 
 		fragment: function(html) {
@@ -121,14 +130,14 @@
 		// create(name, text)
 		// create(name, attributes)
 		// create(name, text, attributes)
-
-		if (nodeTypes[name]) {
-			return nodeTypes[name](arguments[1]);
+	
+		if (constructors[name]) {
+			return constructors[name](arguments[1]);
 		}
-
+	
 		var node = document.createElement(name);
 		var attributes;
-
+	
 		if (typeof arguments[1] === 'string') {
 			node.innerHTML = arguments[1];
 			attributes = arguments[2];
@@ -136,19 +145,23 @@
 		else {
 			attributes = arguments[1];
 		}
-
+	
 		var names, n;
-
+	
 		if (attributes) {
 			names = Object.keys(attributes);
 			n = names.length;
-
+	
 			while (n--) {
 				node.setAttribute(names[n], attributes[names[n]]);
 			}
 		}
-
+	
 		return node;
+	}
+
+	function type(node) {
+		return types[node.nodeType];
 	}
 
 	function clone(node) {
@@ -314,11 +327,10 @@
 		target.parentNode && target.parentNode.insertBefore(node, target.nextSibling);
 	}
 
-	function swap(target, node) {
+	function replace(target, node) {
 		before(target, node);
 		remove(target);
 	}
-
 
 	// CSS
 
@@ -828,7 +840,7 @@
 		html:           Fn.curry(html),
 		before:         Fn.curry(before),
 		after:          Fn.curry(after),
-		swap:           Fn.curry(swap),
+		replace:        Fn.curry(replace),
 		empty:          empty,
 		remove:         remove,
 
@@ -840,6 +852,7 @@
 		isFragmentNode: isFragmentNode,
 		isInternalLink: isInternalLink,
 
+		type:           type,
 		tag:            tag,
 		attribute:      Fn.curry(attribute),
 		offset:         offset,
@@ -884,8 +897,6 @@
 			off:     off,
 			trigger: trigger
 		}),
-
-		on: Fn.curry(EventStream),
 
 		trigger: function triggerNode(type, properties, node) {
 			var l = arguments.length;

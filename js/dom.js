@@ -330,6 +330,7 @@
 	function replace(target, node) {
 		before(target, node);
 		remove(target);
+		return target;
 	}
 
 	// CSS

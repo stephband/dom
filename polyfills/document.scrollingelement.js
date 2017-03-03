@@ -1,4 +1,8 @@
-/*! https://mths.be/scrollingelement v1.5.2 by @diegoperini & @mathias | MIT license */
+
+// A reduced version of
+// https://mths.be/scrollingelement v1.5.2 by @diegoperini & @mathias | MIT license
+// Leaves out frameset detection and really old browsers
+
 if (!('scrollingElement' in document)) (function() {
 	// Note: standards mode / quirks mode can be toggled at runtime via
 	// `document.write`.

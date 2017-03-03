@@ -25,7 +25,10 @@
 
 	// Utilities
 
-	var assign = Object.assign;
+	var curry       = Fn.curry;
+	var exponential = Fn.exponential;
+	var denormalise = Fn.denormalise;
+	var assign      = Object.assign;
 
 	function bindTail(fn) {
 		// Takes arguments 1 and up and appends them to arguments
@@ -734,53 +737,18 @@
 	}
 
 
-	// Scroll
+	// Animation and scroll
 
-	// Easing functions
-	//
-	// e - exponent
-	// p - progress in range 0-1
-	// v - value at start
-	// w - value diff from start to end
-	//
-	// Exponential easing functions construct the common quad/cubic/quart
-	// easings, eg:
-	//
-	// var easeInQuad   = easeInExponential(2);
-	// var easeInCubic  = easeInExponential(3);
-	// var easeInQuart  = easeInExponential(4);
-	// var easeInQuint  = easeInExponential(5);
-	// var easeOutQuad  = easeOutExponential(2);
-	// var easeOutCubic = easeOutExponential(3);
-	// var easeOutQuart = easeOutExponential(4);
-	// var easeOutQuint = easeOutExponential(5);
-
-	var easeInExponential = Fn.curry(function easeIn(e, v, w, p) {
-		return v + w * Math.pow(p, e);
-	});
-
-	var easeOutExponential = Fn.curry(function easeOut(e, v, w, p) {
-		return v + w - w * Math.pow(1 - p, e);
-	});
-
-	//function easeInSine(p, v, w) {
-	//	return -w * Math.cos(p * (Math.PI/2)) + w + v;
-	//}
-	//
-	//function easeOutSine(p, v, w) {
-	//	return w * Math.sin(p * (Math.PI/2)) + v;
-	//}
-
-	function animate(ease, value, duration, name, object) {
-		var a = object[name];
+	function animate(fn, duration, value, name, object) {
 		var t = performance.now();
+		var scale = denormalise(object[name], value);
 
 		function frame(time) {
 			// Progress from 0-1
 			var p = (time - t) / (duration * 1000);
 
 			if (p < 1) {
-				object[name] = ease(a, value - a, p);
+				object[name] = scale(fn(p));
 				requestAnimationFrame(frame);
 			}
 			else {
@@ -791,9 +759,14 @@
 		requestAnimationFrame(frame);
 	}
 
+	function requestFrameN(n, fn) {
+		(function frame() {
+			return requestAnimationFrame(--n ? frame : fn);
+		}());
+	}
+
 	function scrollTo(px, node) {
-		var ease = easeInExponential(2);
-		animate(ease, px, 0.6, 'scrollTop', node || dom.scrollElement());
+		animate(exponential(2), 0.6, px, 'scrollTop', node || dom.scroller());
 	}
 
 
@@ -826,24 +799,24 @@
 
 		// DOM traversal
 
-		find:           find,
-		query:          Fn.curry(query),
-		closest:        Fn.curry(closest),
-		matches:        Fn.curry(matches),
-		children:       children,
+		find:     find,
+		query:    Fn.curry(query),
+		closest:  Fn.curry(closest),
+		matches:  Fn.curry(matches),
+		children: children,
 
 		// DOM mutation
 
-		create:         create,
-		clone:          clone,
-		identify:       identify,
-		append:         Fn.curry(append),
-		html:           Fn.curry(html),
-		before:         Fn.curry(before),
-		after:          Fn.curry(after),
-		replace:        Fn.curry(replace),
-		empty:          empty,
-		remove:         remove,
+		create:   create,
+		clone:    clone,
+		identify: identify,
+		append:   Fn.curry(append),
+		html:     Fn.curry(html),
+		before:   Fn.curry(before),
+		after:    Fn.curry(after),
+		replace:  Fn.curry(replace),
+		empty:    empty,
+		remove:   remove,
 
 		// DOM inspection
 
@@ -853,12 +826,12 @@
 		isFragmentNode: isFragmentNode,
 		isInternalLink: isInternalLink,
 
-		type:           type,
-		tag:            tag,
-		attribute:      Fn.curry(attribute),
-		offset:         offset,
-		position:       position,
-		classes:        classes,
+		type:      type,
+		tag:       tag,
+		attribute: Fn.curry(attribute),
+		offset:    offset,
+		position:  position,
+		classes:   classes,
 
 		style: Fn.curry(function(name, node) {
 			// If name corresponds to a custom property name in styleParsers...
@@ -893,7 +866,7 @@
 		preventDefault:  preventDefault,
 		Event:           Event,
 
-		events: assign(Fn.curry(function(types, node) {
+		events: assign(curry(function(types, node) {
 			console.warn('Deprecated: dom.events(types, node) is deprecated in favour of dom.on(types, node).')
 			return EventStream(types, node);
 		}), {
@@ -921,14 +894,27 @@
 
 		// DOM Animation
 
-		scrollTo:        scrollTo,
+		// animate(fn, duration, value, name, object)
+		//
+		// fn       - function that maps x (0-1) to y (0-1)
+		// duration - in seconds
+		// value    - target value
+		// name     - name of property to animate
+		// object   - object to animate
 
-		scrollElement: function() {
-			return document.scrollingElement ||
-				(document.documentElement.scrollTop && document.documentElement) ||
-				(document.body.scrollTop && document.body) ||
-				document.body ;
-		},
+		animate:  curry(animate),
+
+		// request(n, fn)
+		//
+		// calls fn on the nth requestAnimationFrame
+
+		requestFrameN: curry(requestFrameN),
+
+		// scrollTo(n)
+		//
+		// Animates scrollTop to n (in px)
+		
+		scrollTo: scrollTo,
 
 		// Features
 
@@ -937,6 +923,16 @@
 			inputEventsOnDisabled: testEventDispatchOnDisabled(),
 			transition:            testTransition(),
 			transitionEnd:         testTransitionEnd()
+		},
+
+		// Element shortcuts
+
+		root: document.documentElement,
+		head: document.head,
+		body: document.body,
+
+		scroller: function() {
+			return document.scrollingElement;
 		}
 	});
 

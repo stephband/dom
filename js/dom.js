@@ -6,6 +6,7 @@
 (function(window) {
 	"use strict";
 
+
 	// Import
 
 	var Fn             = window.Fn;
@@ -26,7 +27,7 @@
 	// Utilities
 
 	var curry       = Fn.curry;
-	var exponential = Fn.exponential;
+	var pow         = Fn.pow;
 	var denormalise = Fn.denormalise;
 	var assign      = Object.assign;
 
@@ -44,6 +45,7 @@
 		// Prefixes a slash when there is not an existing one
 		return (/^\//.test(str) ? '' : '/') + str ;
 	}
+
 
 	// TokenList
 	// TokenList constructor to emulate classList property. The get fn should
@@ -335,6 +337,7 @@
 		remove(target);
 		return target;
 	}
+
 
 	// CSS
 
@@ -766,7 +769,7 @@
 	}
 
 	function scrollTo(px, node) {
-		animate(exponential(2), 0.6, px, 'scrollTop', node || dom.scroller());
+		animate(pow(2), 0.6, px, 'scrollTop', node || dom.scroller());
 	}
 
 
@@ -800,9 +803,9 @@
 		// DOM traversal
 
 		find:     find,
-		query:    Fn.curry(query),
-		closest:  Fn.curry(closest),
-		matches:  Fn.curry(matches),
+		query:    curry(query),
+		closest:  curry(closest),
+		matches:  curry(matches),
 		children: children,
 
 		// DOM mutation
@@ -810,11 +813,11 @@
 		create:   create,
 		clone:    clone,
 		identify: identify,
-		append:   Fn.curry(append),
-		html:     Fn.curry(html),
-		before:   Fn.curry(before),
-		after:    Fn.curry(after),
-		replace:  Fn.curry(replace),
+		append:   curry(append),
+		html:     curry(html),
+		before:   curry(before),
+		after:    curry(after),
+		replace:  curry(replace),
 		empty:    empty,
 		remove:   remove,
 
@@ -828,12 +831,12 @@
 
 		type:      type,
 		tag:       tag,
-		attribute: Fn.curry(attribute),
+		attribute: curry(attribute),
 		offset:    offset,
 		position:  position,
 		classes:   classes,
 
-		style: Fn.curry(function(name, node) {
+		style: curry(function(name, node) {
 			// If name corresponds to a custom property name in styleParsers...
 			if (styleParsers[name]) { return styleParsers[name](node); }
 
@@ -875,7 +878,7 @@
 			trigger: trigger
 		}),
 
-		on: Fn.curry(EventStream),
+		on: curry(EventStream),
 
 		trigger: function triggerNode(type, properties, node) {
 			var l = arguments.length;
@@ -902,7 +905,7 @@
 		// name     - name of property to animate
 		// object   - object to animate
 
-		animate:  curry(animate),
+		animate: curry(animate),
 
 		// request(n, fn)
 		//

@@ -320,11 +320,18 @@
 
 		// Is the node popable, switchable or toggleable?
 		var classes = dom.classes(node);
-		if (!classes.contains('popable') &&
-			!classes.contains('switchable') &&
-			!classes.contains('toggleable')) { return; }
-
-		activate(e, node);
+		if (classes.contains('popable') ||
+			classes.contains('switchable') ||
+			classes.contains('toggleable')) {
+			activate(e, node);
+		}
+		// A bit of a fudge, but smooth scrolling is so project-dependent it is
+		// hard to design a consistent way of doing it. The function
+		// dom.activateOther() is an optional hook that allows otherwise
+		// inactivateable things to get some action.
+		else if (dom.activateOther) {
+			dom.activateOther(node);
+		}
 	}
 
 	function activateTarget(e) {

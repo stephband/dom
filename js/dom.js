@@ -798,7 +798,7 @@
 
 		// DOM lifecycle
 
-		ready: ready.then.bind(ready),
+		ready:    ready.then.bind(ready),
 
 		// DOM traversal
 

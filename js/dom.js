@@ -46,6 +46,20 @@
 		return (/^\//.test(str) ? '' : '/') + str ;
 	}
 
+	function toArray(object) {
+		// Speed test for array conversion:
+		// https://jsperf.com/nodelist-to-array/27
+
+		var array = [];
+		var l = array.length = object.length;
+		var i;
+
+		for (i = 0; i < l; i++) {
+			array[i] = object[i];
+		}
+
+		return array;
+	}
 
 	// TokenList
 	// TokenList constructor to emulate classList property. The get fn should
@@ -238,7 +252,7 @@
 
 	function children(node) {
 		// In IE and Safari, document fragments do not have .children
-		return node.children || node.querySelectorAll('*');
+		return toArray(node.children || node.querySelectorAll('*'));
 	}
 
 
@@ -250,7 +264,7 @@
 
 	function query(selector, node) {
 		node = node || document;
-		return A.slice.apply(node.querySelectorAll(selector));
+		return toArray(node.querySelectorAll(selector));
 	}
 
 	function matches(selector, node) {

@@ -787,6 +787,10 @@
 		animate(pow(2), 0.6, px, 'scrollTop', node || dom.scroller());
 	}
 
+	function scrollRatio(node) {
+		return node.scrollTop / (node.scrollHeight - node.clientHeight);
+	}
+
 
 	// dom
 
@@ -931,8 +935,9 @@
 		// scrollTo(n)
 		//
 		// Animates scrollTop to n (in px)
-		
+
 		scrollTo: scrollTo,
+		scrollRatio: scrollRatio,
 
 		// Features
 

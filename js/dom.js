@@ -528,6 +528,7 @@
 
 	function EventStream(types, node) {
 		types = types.split(rspaces);
+		node  = typeof node === 'string' ? document.getElementById(node) : node ;
 
 		var stream = Stream.of();
 		var push   = stream.push;

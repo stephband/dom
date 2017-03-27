@@ -667,6 +667,27 @@
 			fragmentFromChildren(node) ;
 	}
 
+	function parse(type, string) {
+		var mimetype = ({
+			xml:  'application/xml',
+			html: 'text/html',
+			svg:  'image/svg+xml'
+		})[type];
+
+		// From jQuery source...
+		try {
+			xml = (new window.DOMParser()).parseFromString(string, mimetype);
+		} catch (e) {
+			xml = undefined;
+		}
+
+		if (!xml || xml.getElementsByTagName("parsererror").length) {
+			throw new Error("dom: Invalid XML: " + string);
+		}
+
+		return xml;
+	}
+
 
 	// DOM Feature tests
 
@@ -878,6 +899,7 @@
 		fragmentFromChildren: fragmentFromChildren,
 		fragmentFromHTML:     fragmentFromHTML,
 		fragmentFromId:       fragmentFromId,
+		parse:                curry(parse),
 
 		// DOM events
 

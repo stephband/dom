@@ -9,11 +9,11 @@
 
 	// Import
 
-	var Fn             = window.Fn;
-	var Node           = window.Node;
-	var SVGElement     = window.SVGElement;
-	var CustomEvent    = window.CustomEvent;
-	var Stream         = Fn.Stream;
+	var Fn          = window.Fn;
+	var Node        = window.Node;
+	var SVGElement  = window.SVGElement;
+	var CustomEvent = window.CustomEvent;
+	var Stream      = window.Stream;
 
 
 	// Var
@@ -526,35 +526,6 @@
 		return event;
 	}
 
-	function EventStream(types, node) {
-		types = types.split(rspaces);
-		node  = typeof node === 'string' ? document.getElementById(node) : node ;
-
-		var stream = Stream.of();
-		var push   = stream.push;
-		var n      = -1;
-		var type;
-
-		while (n++ < types.length) {
-			type = types[n];
-			node.addEventListener(type, push);
-		}
-
-		var _stop = stream.stop;
-		stream.stop = function() {
-			var n = -1;
-			
-			while (n++ < types.length) {
-				type = types[n];
-				node.removeEventListener(type, push);
-			}
-
-			_stop.apply(stream);
-		};
-		
-		return stream;
-	}
-
 	function preventDefault(e) {
 		e.preventDefault();
 	}
@@ -910,16 +881,13 @@
 		preventDefault:  preventDefault,
 		Event:           Event,
 
-		events: assign(curry(function(types, node) {
-			console.warn('Deprecated: dom.events(types, node) is deprecated in favour of dom.on(types, node).')
-			return EventStream(types, node);
-		}), {
+		events: {
 			on:      on,
 			off:     off,
 			trigger: trigger
-		}),
+		},
 
-		on: curry(EventStream),
+		on: curry(Stream.Events),
 
 		trigger: function triggerNode(type, properties, node) {
 			var l = arguments.length;
@@ -975,6 +943,7 @@
 		root: document.documentElement,
 		head: document.head,
 		body: document.body,
+		viewport: document.scrollingElement,
 
 		scroller: function() {
 			return document.scrollingElement;

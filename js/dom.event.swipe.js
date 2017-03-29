@@ -41,8 +41,7 @@
 		var node = closest('.swipeable', e.target);
 		if (!node) { return; }
 
-		var touch = e.detail();
-		touch.on('stop', function() {
+		e.detail().on('stop', function() {
 			touchdone(node, touch);
 		});
 	});

@@ -173,6 +173,7 @@
 				}
 
 				return stream.clone();
+				//return stream;
 			}
 		});
 	}

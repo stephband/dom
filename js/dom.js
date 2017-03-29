@@ -13,7 +13,7 @@
 	var Node           = window.Node;
 	var SVGElement     = window.SVGElement;
 	var CustomEvent    = window.CustomEvent;
-	var Stream         = Fn.Stream;
+	var Stream         = window.Stream;
 
 
 	// Var

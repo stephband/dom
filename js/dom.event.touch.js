@@ -2,7 +2,7 @@
 	"use strict";
 
 	var Fn     = window.Fn;
-	var Stream = Fn.Stream;
+	var Stream = window.Stream;
 	var dom    = window.dom;
 
 

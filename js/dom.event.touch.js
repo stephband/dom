@@ -233,7 +233,7 @@
 	}
 
 	function TouchStream(node, events) {
-		var stream = Stream(events).map(function(e) {
+		var stream = Stream.from(events).map(function(e) {
 			return {
 				x:    e.pageX - events[0].pageX,
 				y:    e.pageY - events[0].pageY,

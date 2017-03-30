@@ -17,8 +17,9 @@
 //		sensitivity: 6
 //	};
 
-	function touchdone(node, touch) {
-		var data = touch.clone().last().shift();
+	function touchdone(node, data) {
+		data = data.shift();
+
 		//var x = data.x;
 		//var y = data.y;
 		//var w = node.offsetWidth;
@@ -29,7 +30,7 @@
 		//x/w > settings.threshold || e.velocityX * x/w * settings.sensitivity > 1
 
 		trigger(node, 'dom-swipe', {
-			detail:   touch,
+			detail:   data,
 			angle:    polar[1],
 			velocity: polar[0] / data.time
 		});
@@ -41,8 +42,11 @@
 		var node = closest('.swipeable', e.target);
 		if (!node) { return; }
 
-		e.detail().on('stop', function() {
-			touchdone(node, touch);
+		var touch = e.detail();
+		var data  = touch.clone().latest();
+
+		touch.on('stop', function() {
+			touchdone(node, data);
 		});
 	});
 })(this);

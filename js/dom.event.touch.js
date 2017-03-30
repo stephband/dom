@@ -172,8 +172,8 @@
 					stream = TouchStream(node, events);
 				}
 
-				return stream.clone();
-				//return stream;
+				//return stream.clone();
+				return stream;
 			}
 		});
 	}

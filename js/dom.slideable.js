@@ -81,7 +81,7 @@
 		.each(function(transform) {
 			node.style.transform = transform;
 		})
-		.on('stop', function() {
+		.then(function() {
 			classes.remove('notransition');
 
 			// Todo: Watch out, this may interfere with slides

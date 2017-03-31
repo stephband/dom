@@ -45,7 +45,7 @@
 		var touch = e.detail();
 		var data  = touch.clone().latest();
 
-		touch.on('stop', function() {
+		data.then(function() {
 			touchdone(node, data);
 		});
 	});

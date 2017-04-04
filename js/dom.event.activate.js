@@ -21,7 +21,8 @@
 	function findButtons(id) {
 		return dom
 		.query('a[href$="#' + id + '"]', document)
-		.filter(dom.isInternalLink);
+		.filter(dom.isInternalLink)
+		.concat(dom.query('[data-href="#' + id + '"]', document));
 	}
 
 	function getData(node) {
@@ -94,7 +95,7 @@
 		});
 
 		buttons = getButtons(data);
-
+console.log(buttons);
 		if (buttons) {
 			buttons.forEach(function(node) {
 				dom.classes(node).add(onClass);
@@ -306,14 +307,7 @@
 		).substring(1);
 	}
 
-	function activateHash(e) {
-		if (isIgnorable(e)) { return; }
-		if (e.delegateTarget.hostname && !dom.isInternalLink(e.delegateTarget)) { return; }
-
-		// Does it point to an id?
-		var id = getHash(e.delegateTarget);
-		if (!id) { return; }
-
+	function activateId(e, id) {
 		// Does it point to a node?
 		var node = document.getElementById(id);
 		if (!node) { return; }
@@ -334,6 +328,17 @@
 		}
 	}
 
+	function activateHref(e) {
+		if (isIgnorable(e)) { return; }
+		if (e.delegateTarget.hostname && !dom.isInternalLink(e.delegateTarget)) { return; }
+
+		// Does it point to an id?
+		var id = getHash(e.delegateTarget);
+		if (!id) { return; }
+		
+		activateId(e, id);
+	}
+
 	function activateTarget(e) {
 		var target = e.delegateTarget.target;
 
@@ -345,7 +350,7 @@
 	}
 
 	// Clicks on buttons toggle activate on their hash
-	on(document, 'click', dom.delegate('[href], [data-href]', activateHash));
+	on(document, 'click', dom.delegate('[href]', activateHref));
 
 	// Clicks on buttons toggle activate on their targets
 	on(document, 'click', dom.delegate('a[target]', activateTarget));

@@ -95,7 +95,7 @@
 		});
 
 		buttons = getButtons(data);
-console.log(buttons);
+
 		if (buttons) {
 			buttons.forEach(function(node) {
 				dom.classes(node).add(onClass);
@@ -355,9 +355,7 @@ console.log(buttons);
 	// Clicks on buttons toggle activate on their targets
 	on(document, 'click', dom.delegate('a[target]', activateTarget));
 
-
 	// Document setup
-
 	dom.ready(function() {
 		// Setup all things that should start out active.
 		dom('.' + activeClass)

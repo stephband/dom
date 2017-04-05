@@ -192,12 +192,6 @@
 
 		removeActiveMouse();
 		data.stream.stop();
-
-		// Unbind the click suppressor, waiting until after mouseup
-		// has been handled.
-		requestTick(function() {
-			off(target, 'click', preventDefault);
-		});
 	}
 
 	function removeActiveMouse() {
@@ -265,6 +259,15 @@
 			on(document, touchevents.move, data.activeTouchmove, data);
 			on(document, touchevents.end, data.activeTouchend, data);
 		}
+
+		stream.then(function() {
+			// Unbind the click suppressor, waiting until after mouseup
+			// has been handled. I don't know why it has to be any longer than
+			// a tick, but it does, in Chrome at least.
+			setTimeout(function() {
+				off(node, 'click', preventDefault);
+			}, 200);
+		});
 
 		return stream;
 	}

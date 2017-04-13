@@ -942,10 +942,13 @@
 
 		root: document.documentElement,
 		head: document.head,
-		body: document.body,
+		body: document.body
+	});
 
-		scroller: function() {
-			return document.scrollingElement;
+	Object.defineProperties(dom, {
+		viewport: {
+			get: function() { return document.scrollingElement; },
+			enumerable: true
 		}
 	});
 

@@ -814,9 +814,9 @@
 		// DOM traversal
 
 		find:     find,
-		query:    curry(query),
-		closest:  curry(closest),
-		matches:  curry(matches),
+		query:    curry(query,   2, false),
+		closest:  curry(closest, 2, false),
+		matches:  curry(matches, 2, false),
 		children: children,
 
 		// DOM mutation
@@ -824,11 +824,11 @@
 		create:   create,
 		clone:    clone,
 		identify: identify,
-		append:   curry(append),
+		append:   curry(append,  2, false),
 		html:     curry(html),
-		before:   curry(before),
-		after:    curry(after),
-		replace:  curry(replace),
+		before:   curry(before,  2, false),
+		after:    curry(after,   2, false),
+		replace:  curry(replace, 2, false),
 		empty:    empty,
 		remove:   remove,
 
@@ -842,7 +842,7 @@
 
 		type:      type,
 		tag:       tag,
-		attribute: curry(attribute),
+		attribute: curry(attribute, 2, false),
 		offset:    offset,
 		position:  position,
 		classes:   classes,
@@ -857,7 +857,7 @@
 			return typeof value === 'string' && rpx.test(value) ?
 				parseFloat(value) :
 				value ;
-		}),
+		}, 2, false),
 
 		toPx:           toPx,
 		toRem:          toRem,
@@ -887,7 +887,7 @@
 			trigger: trigger
 		},
 
-		on: curry(Stream.Events),
+		on: curry(Stream.Events, 2, false),
 
 		trigger: function triggerNode(type, properties, node) {
 			var l = arguments.length;
@@ -914,13 +914,13 @@
 		// name     - name of property to animate
 		// object   - object to animate
 
-		animate: curry(animate),
+		animate: curry(animate, 5, false),
 
 		// request(n, fn)
 		//
 		// calls fn on the nth requestAnimationFrame
 
-		requestFrameN: curry(requestFrameN),
+		requestFrameN: curry(requestFrameN, 2, false),
 
 		// scrollTo(n)
 		//

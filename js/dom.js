@@ -936,20 +936,15 @@
 			inputEventsOnDisabled: testEventDispatchOnDisabled(),
 			transition:            testTransition(),
 			transitionEnd:         testTransitionEnd()
-		},
-
-		// Element shortcuts
-
-		root: document.documentElement,
-		head: document.head,
-		body: document.body
+		}
 	});
 
 	Object.defineProperties(dom, {
-		viewport: {
-			get: function() { return document.scrollingElement; },
-			enumerable: true
-		}
+		// Element shortcuts
+		root: { value: document.documentElement, enumerable: true },
+		head: { value: document.head, enumerable: true },
+		body: { get: function() { return document.body; }, enumerable: true	},
+		viewport: { get: function() { return document.scrollingElement; }, enumerable: true }
 	});
 
 

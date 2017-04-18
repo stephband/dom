@@ -9,11 +9,18 @@
 
 	// Import
 
-	var Fn             = window.Fn;
-	var Node           = window.Node;
-	var SVGElement     = window.SVGElement;
-	var CustomEvent    = window.CustomEvent;
-	var Stream         = window.Stream;
+	var Fn          = window.Fn;
+	var Node        = window.Node;
+	var SVGElement  = window.SVGElement;
+	var CustomEvent = window.CustomEvent;
+	var Stream      = window.Stream;
+
+	var assign      = Object.assign;
+	var curry       = Fn.curry;
+	var denormalise = Fn.denormalise;
+	var overload    = Fn.overload;
+	var pow         = Fn.pow;
+	var toType      = Fn.toType;
 
 
 	// Var
@@ -25,11 +32,6 @@
 
 
 	// Utilities
-
-	var curry       = Fn.curry;
-	var pow         = Fn.pow;
-	var denormalise = Fn.denormalise;
-	var assign      = Object.assign;
 
 	function bindTail(fn) {
 		// Takes arguments 1 and up and appends them to arguments
@@ -60,6 +62,7 @@
 
 		return array;
 	}
+
 
 	// TokenList
 	// TokenList constructor to emulate classList property. The get fn should
@@ -713,7 +716,7 @@
 
 	var fontSize;
 
-	var toPx = Fn.overloadTypes({
+	var toPx = overload(toType, {
 		'number': function(n) { return n; },
 
 		'string': function(string) {
@@ -735,7 +738,7 @@
 		}
 	});
 
-	var toRem = Fn.overloadTypes({
+	var toRem = overload(toType, {
 		'number': function(n) {
 			return n / getFontSize();
 		}

@@ -3,7 +3,7 @@
 A library of curried DOM functions, custom events and event streams
 for HTML and SVG.
 
-## Demo and docs
+## Demo
 
 <a href="http://stephband.info/dom/">stephen.band/dom/</a>
 

@@ -789,12 +789,8 @@
 
 	// dom
 
-	function dom(selector, node) {
-		return typeof selector === "string" ?
-				Fn(query(selector, node || document)) :
-			Node.prototype.isPrototypeOf(selector) ?
-				Fn.of(selector) :
-			Fn(selector) ;
+	function dom(selector) {
+		return query(selector, document);
 	}
 
 	var ready = new Promise(function(accept, reject) {
@@ -817,9 +813,9 @@
 		// DOM traversal
 
 		find:     find,
-		query:    curry(query,   false),
-		closest:  curry(closest, false),
-		matches:  curry(matches, false),
+		query:    curry(query,   true),
+		closest:  curry(closest, true),
+		matches:  curry(matches, true),
 		children: children,
 
 		// DOM mutation
@@ -827,11 +823,11 @@
 		create:   create,
 		clone:    clone,
 		identify: identify,
-		append:   curry(append,  false),
+		append:   curry(append,  true),
 		//html:     curry(html),
-		before:   curry(before,  false),
-		after:    curry(after,   false),
-		replace:  curry(replace, false),
+		before:   curry(before,  true),
+		after:    curry(after,   true),
+		replace:  curry(replace, true),
 		empty:    empty,
 		remove:   remove,
 
@@ -845,7 +841,7 @@
 
 		type:      type,
 		tag:       tag,
-		attribute: curry(attribute, false),
+		attribute: curry(attribute, true),
 		offset:    offset,
 		position:  position,
 		classes:   classes,
@@ -860,7 +856,7 @@
 			return typeof value === 'string' && rpx.test(value) ?
 				parseFloat(value) :
 				value ;
-		}, false),
+		}, true),
 
 		toPx:           toPx,
 		toRem:          toRem,
@@ -890,7 +886,7 @@
 			trigger: trigger
 		},
 
-		on: curry(Stream.Events, false),
+		on: curry(Stream.Events, true),
 
 		trigger: function triggerNode(type, properties, node) {
 			var l = arguments.length;
@@ -917,13 +913,13 @@
 		// name     - name of property to animate
 		// object   - object to animate
 
-		animate: curry(animate, false),
+		animate: curry(animate, true),
 
 		// request(n, fn)
 		//
 		// calls fn on the nth requestAnimationFrame
 
-		requestFrameN: curry(requestFrameN, false),
+		requestFrameN: curry(requestFrameN, true),
 
 		// scrollTo(n)
 		//

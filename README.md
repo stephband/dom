@@ -11,53 +11,27 @@ for HTML and SVG.
 
 ##### `dom(selector)`
 
-Returns a functor - a mappable iterable. To log all urls in links:
-
-    dom('a[href]')
-	.map(dom.get('href'))
-	.each(console.log);
-
-To consume the functor as an array:
-
-    var urls = dom('a[href]')
-        .map(dom.get('href'))
-        .toArray();
-
-<!--
-It can be looped over with `for...of`. Here's an equivalent using a loop:
-
-	var links = dom('a[href]');
-	var link;
-
-	for (link of links) {
-		console.log(link.href);
-	}
--->
-
-##### `dom(nodes)`
-
-`dom()` also accepts a collection of nodes.
-
-	var children = dom(document.body.childNodes);
+Returns an array of matching nodes in `document`.
 
 ## dom
 
-All functions on `dom` are curried functions. Many are designed to be used
-as map or filter iterators.
+All functions on `dom` are curried. Many are designed to be used as map, filter
+or reduce iterators.
 
 	// Collect all links with or containing `.my-icon` and
 	// stick them in a fragment.
 
 	var fragment = dom.create('fragment');
 
-    dom('.my-icon')
+    Fn.from(dom('.my-icon'))
     .map(dom.closest('a'))
     .each(dom.append(fragment));
 
+##### `.ready(fn)`
 
 ##### `.query(selector, container)`
 
-Returns an array of all descendants of `container` that match `selector`.
+Returns an array of all descendants of `container` node that match `selector`.
 
 ##### `.create(tag, text)`
 
@@ -126,12 +100,6 @@ returns `true` or `false`.
 
 Returns the classList of `node`.
 
-<!--
-##### `.html(target, html)`
-
-Replaces the content of `target` with `html`.
--->
-
 ##### `.append(target, node)`
 
 Appends node to `target`.
@@ -191,7 +159,7 @@ Returns array [x, y].
 
 #### Events
 
-##### `.on(types, node)`
+##### `.on(type, node)`
 
 Returns a stream of events heard on `node`:
 
@@ -207,10 +175,9 @@ Stopping the stream removes event listeners from `node`:
 
     events.stop();
 
-##### `.trigger(type [,properties], node)`
+##### `.trigger(type, node)`
 
-Triggers event of `type` on `node`, with optional `properties` being
-assigned to the event object.
+Triggers event of `type` on `node`.
 
     dom.trigger('dom-activate', dom.find('toggle-id'));
 
@@ -245,6 +212,16 @@ Creates a CustomEvent of type `type`.
 Additionally, `properties` are assigned to the event object.
 
 
+#### DOM Animation
+
+##### `.animate(fn, duration, value, name, object)`
+
+##### `.requestFrameN(n, fn)`
+
+##### `.scrollTo(px, node)`
+
+##### `.scrollRatio(node)`
+
 #### Feature detection
 
 ##### `.features`
@@ -256,22 +233,22 @@ An object of feature detection results.
 
 ##### `dom-activate`
 
-Requires `js/dom.event.activate.js`.
+Requires `js/dom-activate.js`.
 
 ##### `dom-deactivate`
 
-Requires `js/dom.event.activate.js`.
+Requires `js/dom-activate.js`.
 
 ##### `dom-touch`
 
-Requires `js/dom.event.touch.js`.
+Requires `js/dom-touch.js`.
 
 A `touch` event fires following a `mousedown` or `touchstart` and as soon as the
 pointer has moved more than a threshold 6px from it's start position. It carries
 a stream of coordinates for the finger as `e.detail()`.
 
 	dom
-	.events("touch", document)
+	.on("dom-touch", document)
 	.each(function(e) {
 	    // Position at start of touch
     	var x = e.pageX;
@@ -290,14 +267,16 @@ a stream of coordinates for the finger as `e.detail()`.
 
 ##### `dom-swipe`
 
-Requires `js/dom.event.touch.js` and `js/dom.event.swipe.js`.
+Requires `js/dom-touch.js` and `js/dom-swipe.js`.
 
 A swipe event fires after a single touch has performed a swipe gesture in a
 node with the class `swipeable`.
 
 	<div class="swipeable">Swipe me</div>
 
-	dom.on(document, "swipeleft", function(e) {
+	dom
+	.on("dom-swipe", document)
+	.each(function(e) {
 		// e.target === <div class="swipeable">
     });
 

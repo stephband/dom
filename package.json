@@ -1,7 +1,7 @@
 {
     "name": "dom",
     "title": "dom",
-    "version": "0.2.0",
+    "version": "1.0.0",
     "author": {
         "name": "Stephen Band",
         "url": "http://stephen.band",
@@ -12,12 +12,19 @@
     },
     "licenses": [{"url":"http://unlicense.org/"}],
     "files": [
-    	"js/dom.js",
-		"js/dom.touch.js",
-		"js/dom.swipe.js"
+		"js/dom.js",
+		"js/dom-activate.js",
+		"js/dom-touch.js",
+		"js/dom-swipe.js",
+		"js/dom.popable.js",
+		"js/dom.toggleable.js",
+		"js/dom.switchable.js",
+		"js/dom.moveable.js",
+		"js/dom.slideable.js",
+		"js/dom.dialog.js"
     ],
     "main": "js/dom.js",
-    "description": "A library of functional functions, DOM events and Event Streams for HTML and SVG.",
+    "description": "A small library of functional functions, DOM events and Event Streams for HTML and SVG.",
     "keywords": ["DOM","html","browser","web","library","functional","stream","touch","event","finger","move"],
     "homepage": "http://stephen.band/dom",
     "docs": "http://github.com/stephband/dom",

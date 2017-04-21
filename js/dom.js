@@ -319,11 +319,6 @@
 		return node;
 	}
 
-	// Todo: not sure I got this right, it should probably GET html
-	function html(target, html) {
-		target.innerHTML = html;
-	}
-
 	function empty(node) {
 		while (node.lastChild) { node.removeChild(node.lastChild); }
 	}
@@ -717,7 +712,7 @@
 	var fontSize;
 
 	var toPx = overload(toType, {
-		'number': function(n) { return n; },
+		'number': Fn.id,
 
 		'string': function(string) {
 			var data, n;
@@ -779,6 +774,7 @@
 	}
 
 	function scrollTo(px, node) {
+		px = toPx(px);
 		animate(pow(2), 0.6, px, 'scrollTop', node || dom.scroller());
 	}
 
@@ -824,7 +820,6 @@
 		clone:    clone,
 		identify: identify,
 		append:   curry(append,  true),
-		//html:     curry(html),
 		before:   curry(before,  true),
 		after:    curry(after,   true),
 		replace:  curry(replace, true),
@@ -888,18 +883,10 @@
 
 		on: curry(Stream.Events, true),
 
-		trigger: function triggerNode(type, properties, node) {
-			var l = arguments.length;
-
-			node = arguments[l - 1];
-
-			if (dom.isElementNode(node) || node === document) {
-				trigger(node, type, l > 2 && properties);
-				return node;
-			}
-
-			return Fn.bind(arguments, triggerNode);
-		},
+		trigger: curry(function(type, node) {
+			trigger(node, type);
+			return node;
+		}, true),
 
 		delegate:        delegate,
 

@@ -4,6 +4,7 @@
 	var debug     = false;
 
 	var Fn        = window.Fn;
+	var nothing   = Fn.nothing;
 	var dom       = window.dom;
 	var on        = dom.events.on;
 	var off       = dom.events.off;

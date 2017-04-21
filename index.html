@@ -154,14 +154,15 @@
 	<script src="../fn/polyfills/number.isnan.js"></script>
 	<script src="../fn/polyfills/object.assign.js"></script>
 	<script src="../fn/js/fn.js"></script>
+	<script src="../fn/js/stream.js"></script>
 
 	<script src="polyfills/window.customevent.js"></script>
 	<script src="test/config.js"></script>
 
 	<script src="js/dom.js"></script>
-	<script src="js/dom.event.activate.js"></script>
-	<script src="js/dom.event.touch.js"></script>
-	<script src="js/dom.event.swipe.js"></script>
+	<script src="js/dom-activate.js"></script>
+	<script src="js/dom-touch.js"></script>
+	<script src="js/dom-swipe.js"></script>
 	<script src="js/dom.popable.js"></script>
 	<script src="js/dom.toggleable.js"></script>
 	<script src="js/dom.switchable.js"></script>
@@ -202,11 +203,11 @@
 		function logEvent(e){ window.console && console.log(e.type, e); }
 
 
-		var box        = dom('.test').shift();
-		var resize     = dom('.resize').shift();
-		var rotate     = dom('.rotate').shift();
-		var centreMark = dom('.centre_mark').shift();
-		var originMark = dom('.origin_mark').shift();
+		var box        = dom('.test')[0];
+		var resize     = dom('.resize')[0];
+		var rotate     = dom('.rotate')[0];
+		var centreMark = dom('.centre_mark')[0];
+		var originMark = dom('.origin_mark')[0];
 
 
 		// Test properties
@@ -320,7 +321,7 @@
 		var distX = 0, distY = 0, pageX = 0, pageY = 0, startX = 0, startY = 0;
 
 		dom
-		.events('touch', box)
+		.on('touch', box)
 		.each(function(e) {
 			console.log('touch', e);
 

@@ -22,7 +22,7 @@
 		var target = e.target;
 		if (!dom.classes(target).contains(name)) { return; }
 
-		var nodes = dom('.switchable', target.parentNode).toArray();
+		var nodes = dom.query('.switchable', target.parentNode);
 		var i     = nodes.indexOf(target);
 
 		nodes.splice(i, 1);

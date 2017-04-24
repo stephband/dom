@@ -868,11 +868,6 @@
 
 		// DOM events
 
-		// dom.events is both a function for constructing an event stream and a
-		// namespace for traditional uncurried event binding functions.
-
-		isPrimaryButton: isPrimaryButton,
-		preventDefault:  preventDefault,
 		Event:           Event,
 
 		events: {
@@ -881,14 +876,15 @@
 			trigger: trigger
 		},
 
+		delegate:        delegate,
+		isPrimaryButton: isPrimaryButton,
+		preventDefault:  preventDefault,
 		on: curry(Stream.Events, true),
 
 		trigger: curry(function(type, node) {
 			trigger(node, type);
 			return node;
 		}, true),
-
-		delegate:        delegate,
 
 		// DOM Animation
 

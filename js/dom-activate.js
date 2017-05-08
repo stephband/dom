@@ -4,6 +4,7 @@
 	var debug     = false;
 
 	var Fn        = window.Fn;
+	var nothing   = Fn.nothing;
 	var dom       = window.dom;
 	var on        = dom.events.on;
 	var off       = dom.events.off;
@@ -17,6 +18,7 @@
 	var settings  = { cache: true };
 
 	var store     = new WeakMap();
+
 
 	function findButtons(id) {
 		return dom
@@ -160,6 +162,8 @@
 
 
 	// Listen to clicks
+
+	var triggerActivate = dom.trigger('dom-activate');
 
 	var nodeCache = {};
 
@@ -358,21 +362,13 @@
 	// Document setup
 	dom.ready(function() {
 		// Setup all things that should start out active.
-		dom('.' + activeClass)
-		.each(dom.trigger('dom-activate'));
+		dom('.' + activeClass).forEach(triggerActivate);
 
 		// Activate the node that corresponds to the hashref in
 		// location.hash, checking if it's an alphanumeric id selector
 		// (not a hash bang).
 		if (!id || !(/^#\S+$/.test(id))) { return; }
 
-		// The id may be perfectly valid, yet not be supported by jQuery,
-		// such as ids with a ':' character, so try...catch it.
-		try {
-			dom(id).each(dom.trigger('dom-activate'));
-		}
-		catch (e) {
-			if (debug) console.log('Error caught: id hash ' + id + ' is throwing an error in jQuery');
-		}
+		dom(id).forEach(triggerActivate);
 	});
 })(this);

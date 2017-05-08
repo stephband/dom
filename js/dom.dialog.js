@@ -47,7 +47,7 @@
 		// http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
 		
 		// Find the first focusable thing.
-		var firstNode = dom('[tabindex], a, input, textarea, button', node).shift();
+		var firstNode = dom('[tabindex], a, input, textarea, button', node)[0];
 
 		if (!firstNode) { return; }
 

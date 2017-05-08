@@ -319,11 +319,6 @@
 		return node;
 	}
 
-	// Todo: not sure I got this right, it should probably GET html
-	function html(target, html) {
-		target.innerHTML = html;
-	}
-
 	function empty(node) {
 		while (node.lastChild) { node.removeChild(node.lastChild); }
 	}
@@ -717,7 +712,7 @@
 	var fontSize;
 
 	var toPx = overload(toType, {
-		'number': function(n) { return n; },
+		'number': Fn.id,
 
 		'string': function(string) {
 			var data, n;
@@ -779,6 +774,7 @@
 	}
 
 	function scrollTo(px, node) {
+		px = toPx(px);
 		animate(pow(2), 0.6, px, 'scrollTop', node || dom.scroller());
 	}
 
@@ -789,12 +785,8 @@
 
 	// dom
 
-	function dom(selector, node) {
-		return typeof selector === "string" ?
-				Fn(query(selector, node || document)) :
-			Node.prototype.isPrototypeOf(selector) ?
-				Fn.of(selector) :
-			Fn(selector) ;
+	function dom(selector) {
+		return query(selector, document);
 	}
 
 	var ready = new Promise(function(accept, reject) {
@@ -817,9 +809,9 @@
 		// DOM traversal
 
 		find:     find,
-		query:    curry(query,   2, false),
-		closest:  curry(closest, 2, false),
-		matches:  curry(matches, 2, false),
+		query:    curry(query,   true),
+		closest:  curry(closest, true),
+		matches:  curry(matches, true),
 		children: children,
 
 		// DOM mutation
@@ -827,11 +819,10 @@
 		create:   create,
 		clone:    clone,
 		identify: identify,
-		append:   curry(append,  2, false),
-		html:     curry(html),
-		before:   curry(before,  2, false),
-		after:    curry(after,   2, false),
-		replace:  curry(replace, 2, false),
+		append:   curry(append,  true),
+		before:   curry(before,  true),
+		after:    curry(after,   true),
+		replace:  curry(replace, true),
 		empty:    empty,
 		remove:   remove,
 
@@ -845,7 +836,7 @@
 
 		type:      type,
 		tag:       tag,
-		attribute: curry(attribute, 2, false),
+		attribute: curry(attribute, true),
 		offset:    offset,
 		position:  position,
 		classes:   classes,
@@ -860,7 +851,7 @@
 			return typeof value === 'string' && rpx.test(value) ?
 				parseFloat(value) :
 				value ;
-		}, 2, false),
+		}, true),
 
 		toPx:           toPx,
 		toRem:          toRem,
@@ -877,11 +868,6 @@
 
 		// DOM events
 
-		// dom.events is both a function for constructing an event stream and a
-		// namespace for traditional uncurried event binding functions.
-
-		isPrimaryButton: isPrimaryButton,
-		preventDefault:  preventDefault,
 		Event:           Event,
 
 		events: {
@@ -890,22 +876,15 @@
 			trigger: trigger
 		},
 
-		on: curry(Stream.Events, 2, false),
-
-		trigger: function triggerNode(type, properties, node) {
-			var l = arguments.length;
-
-			node = arguments[l - 1];
-
-			if (dom.isElementNode(node) || node === document) {
-				trigger(node, type, l > 2 && properties);
-				return node;
-			}
-
-			return Fn.bind(arguments, triggerNode);
-		},
-
 		delegate:        delegate,
+		isPrimaryButton: isPrimaryButton,
+		preventDefault:  preventDefault,
+		on: curry(Stream.Events, true),
+
+		trigger: curry(function(type, node) {
+			trigger(node, type);
+			return node;
+		}, true),
 
 		// DOM Animation
 
@@ -917,13 +896,13 @@
 		// name     - name of property to animate
 		// object   - object to animate
 
-		animate: curry(animate, 5, false),
+		animate: curry(animate, true),
 
 		// request(n, fn)
 		//
 		// calls fn on the nth requestAnimationFrame
 
-		requestFrameN: curry(requestFrameN, 2, false),
+		requestFrameN: curry(requestFrameN, true),
 
 		// scrollTo(n)
 		//

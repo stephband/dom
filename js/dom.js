@@ -1,6 +1,6 @@
 (function(window) {
 	if (!window.console || !window.console.log) { return; }
-	console.log('dom    – https://github.com/stephband/dom');
+	console.log('dom         – https://github.com/stephband/dom');
 })(this);
 
 (function(window) {

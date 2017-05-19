@@ -185,6 +185,10 @@ Triggers event of `type` on `node`.
 
 Returns boolean.
 
+##### `.toKey(e)`
+
+Returns key string corresponding to `e.keyCode`, or `undefined`.
+
 ##### `.preventDefault(e)`
 
 Calls `e.preventDefault()`.

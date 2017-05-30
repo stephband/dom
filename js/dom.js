@@ -27,6 +27,8 @@
 
 	var A = Array.prototype;
 
+	var svgNamespace = 'http://www.w3.org/2000/svg';
+
 	var rspaces = /\s+/;
 	var rpx     = /px$/;
 
@@ -125,6 +127,20 @@
 		11: 'fragment'
 	};
 
+	var svgs = [
+		'circle',
+		'ellipse',
+		'g',
+		'line',
+		'rect',
+		'text',
+		'use',
+		'path',
+		'polygon',
+		'polyline',
+		'svg'
+	];
+
 	var constructors = {
 		text: function(text) {
 			return document.createTextNode(text || '');
@@ -146,6 +162,32 @@
 			return fragment;
 		}
 	};
+
+	svgs.forEach(function(tag) {
+		constructors[tag] = function(attributes) {
+			var node = document.createElementNS(svgNamespace, tag);
+			if (attributes) { setSVGAttributes(node, attributes); }
+			return node;
+		};
+	});
+
+	function setHTMLAttributes(node, attributes) {
+		var names = Object.keys(attributes);
+		var n = names.length;
+	
+		while (n--) {
+			node.setAttribute(names[n], attributes[names[n]]);
+		}
+	}
+
+	function setSVGAttributes(node, attributes) {
+		var names = Object.keys(attributes);
+		var n = names.length;
+
+		while (n--) {
+			node.setAttributeNS(null, names[n], attributes[names[n]]);
+		}
+	}
 
 	function create(name) {
 		// create(name)
@@ -170,14 +212,7 @@
 	
 		var names, n;
 	
-		if (attributes) {
-			names = Object.keys(attributes);
-			n = names.length;
-	
-			while (n--) {
-				node.setAttribute(names[n], attributes[names[n]]);
-			}
-		}
+		if (attributes) { setHTMLAttributes(node, attributes); }
 	
 		return node;
 	}
@@ -848,7 +883,7 @@
 
 	function scrollTo(px, node) {
 		px = toPx(px);
-		animate(pow(2), 0.6, px, 'scrollTop', node || dom.scroller());
+		animate(pow(2), 0.6, px, 'scrollTop', node || dom.viewport);
 	}
 
 	function scrollRatio(node) {

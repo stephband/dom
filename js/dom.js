@@ -9,28 +9,109 @@
 
 	// Import
 
-	var Fn          = window.Fn;
-	var Node        = window.Node;
-	var SVGElement  = window.SVGElement;
-	var CustomEvent = window.CustomEvent;
-	var Stream      = window.Stream;
+	var Fn           = window.Fn;
+	var Node         = window.Node;
+	var SVGElement   = window.SVGElement;
+	var CustomEvent  = window.CustomEvent;
+	var Stream       = window.Stream;
 
-	var assign      = Object.assign;
-	var curry       = Fn.curry;
-	var denormalise = Fn.denormalise;
-	var overload    = Fn.overload;
-	var pow         = Fn.pow;
-	var toType      = Fn.toType;
+	var assign       = Object.assign;
+	var defineProperties = Object.defineProperties;
+	var cache        = Fn.cache;
+	var curry        = Fn.curry;
+	var denormalise  = Fn.denormalise;
+	var id           = Fn.id;
+	var overload     = Fn.overload;
+	var pow          = Fn.pow;
+	var toType       = Fn.toType;
 
 
 	// Var
 
-	var A = Array.prototype;
-
+	var A            = Array.prototype;
 	var svgNamespace = 'http://www.w3.org/2000/svg';
+	var rspaces      = /\s+/;
+	var rpx          = /px$/;
 
-	var rspaces = /\s+/;
-	var rpx     = /px$/;
+
+	// Features
+
+	var features = defineProperties({}, {
+		inputEventsOnDisabled: {
+			// FireFox won't dispatch any events on disabled inputs:
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
+
+			get: cache(function() {
+				var input     = document.createElement('input');
+				var testEvent = Event('featuretest');
+				var result    = false;
+			
+				appendChild(document.body, input);
+				input.disabled = true;
+				input.addEventListener('featuretest', function(e) { result = true; });
+				input.dispatchEvent(testEvent);
+				removeNode(input);
+			
+				return result;
+			}),
+
+			enumerable: true
+		},
+
+		template: {
+			get: cache(function() {
+				// Older browsers don't know about the content property of templates.
+				return 'content' in document.createElement('template');
+			}),
+
+			enumerable: true
+		},
+
+		textareaPlaceholderSet: {
+			// IE sets textarea innerHTML (but not value) to the placeholder
+			// when setting the attribute and cloning and so on. The twats have
+			// marked it "Won't fix":
+			//
+			// https://connect.microsoft.com/IE/feedback/details/781612/placeholder-text-becomes-actual-value-after-deep-clone-on-textarea
+
+			get: cache(function() {
+				var node = document.createElement('textarea');
+				node.setAttribute('placeholder', '---');
+				return node.innerHTML === '';
+			}),
+
+			enumerable: true
+		},
+
+		transition: {
+			get: cache(function testTransition() {
+				var prefixed = prefix('transition');
+				return prefixed || false;
+			}),
+
+			enumerable: true
+		},
+
+		transitionEnd: {
+			// Infer transitionend event from CSS transition prefix
+
+			get: cache(function() {
+				var end = {
+					KhtmlTransition: false,
+					OTransition: 'oTransitionEnd',
+					MozTransition: 'transitionend',
+					WebkitTransition: 'webkitTransitionEnd',
+					msTransition: 'MSTransitionEnd',
+					transition: 'transitionend'
+				};
+			
+				var prefixed = prefix('transition');
+				return prefixed && end[prefixed];
+			}),
+
+			enumerable: true
+		}
+	});
 
 
 	// Utilities
@@ -217,12 +298,34 @@
 		return node;
 	}
 
+	var clone = features.textareaPlaceholderSet ?
+
+		function clone(node) {
+			return node.cloneNode(true);
+		} :
+
+		function cloneWithHTML(node) {
+			// IE sets textarea innerHTML to the placeholder when cloning.
+			// Reset the resulting value.
+
+			var clone     = node.cloneNode(true);
+			var textareas = dom.query('textarea', node);
+			var n         = textareas.length;
+			var clones;
+
+			if (n) {
+				clones = dom.query('textarea', clone);
+
+				while (n--) {
+					clones[n].value = textareas[n].value;
+				}
+			}
+
+			return clone;
+		} ;
+
 	function type(node) {
 		return types[node.nodeType];
-	}
-
-	function clone(node) {
-		return node.cloneNode(true);
 	}
 
 	function isElementNode(node) {
@@ -735,7 +838,7 @@
 		// In browsers where templates are not inert their content can clash
 		// with content in the DOM - ids, for example. Remove the template as
 		// a precaution.
-		if (t === 'template' && !dom.features.template) {
+		if (t === 'template' && !features.template) {
 			remove(node);
 		}
 
@@ -766,52 +869,6 @@
 	}
 
 
-	// DOM Feature tests
-
-	var testEvent = Event('featuretest');
-
-	function testTemplate() {
-		// Older browsers don't know about the content property of templates.
-		return 'content' in document.createElement('template');
-	}
-
-	function testEventDispatchOnDisabled() {
-		// FireFox won't dispatch any events on disabled inputs:
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
-
-		var input = document.createElement('input');
-		var result = false;
-
-		appendChild(document.body, input);
-		input.disabled = true;
-		input.addEventListener('featuretest', function(e) { result = true; });
-		input.dispatchEvent(testEvent);
-		removeNode(input);
-
-		return result;
-	}
-
-	function testTransition() {
-		// Infer transitionend event from CSS transition prefix
-		var prefixed = prefix('transition');
-		return prefixed || false;
-	}
-
-	function testTransitionEnd() {
-		var end = {
-			KhtmlTransition: false,
-			OTransition: 'oTransitionEnd',
-			MozTransition: 'transitionend',
-			WebkitTransition: 'webkitTransitionEnd',
-			msTransition: 'MSTransitionEnd',
-			transition: 'transitionend'
-		};
-
-		var prefixed = prefix('transition');
-		return prefixed && end[prefixed];
-	}
-
-
 	// Units
 
 	var rem = /(\d*\.?\d+)r?em/;
@@ -820,7 +877,7 @@
 	var fontSize;
 
 	var toPx = overload(toType, {
-		'number': Fn.id,
+		'number': id,
 
 		'string': function(string) {
 			var data, n;
@@ -1022,12 +1079,7 @@
 
 		// Features
 
-		features: {
-			template:              testTemplate(),
-			inputEventsOnDisabled: testEventDispatchOnDisabled(),
-			transition:            testTransition(),
-			transitionEnd:         testTransitionEnd()
-		}
+		features: features
 	});
 
 	Object.defineProperties(dom, {

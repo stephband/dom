@@ -232,6 +232,12 @@ Additionally, `properties` are assigned to the event object.
 
 An object of feature detection results.
 
+    {
+        inputEventOnDisabled: true,   // false in FF, where disabled inputs don't trigger events
+        template: true,               // false in old browsers where template.content not found
+        textareaPLaceholderSet: true, // False in IE, where placeholder is also set on innerHTML
+    }
+
 
 ## Events
 

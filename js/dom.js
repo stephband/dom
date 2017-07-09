@@ -807,7 +807,6 @@
 	}
 
 
-
 	// DOM Fragments and Templates
 
 	function fragmentFromChildren(node) {
@@ -867,6 +866,18 @@
 
 		return xml;
 	}
+
+	var escape = (function() {
+		var pre = document.createElement('pre');
+		var text = document.createTextNode('');
+
+		pre.appendChild(text);
+
+		return function escape(value) {
+			text.textContent = value;
+			return pre.innerHTML;
+		};
+	})();
 
 
 	// Units
@@ -1029,6 +1040,7 @@
 		fragmentFromChildren: fragmentFromChildren,
 		fragmentFromHTML:     fragmentFromHTML,
 		fragmentFromId:       fragmentFromId,
+		escape:               escape,
 		parse:                curry(parse),
 
 		// DOM events

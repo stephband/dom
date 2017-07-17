@@ -809,6 +809,12 @@
 
 	// DOM Fragments and Templates
 
+	var mimetypes = {
+		xml:  'application/xml',
+		html: 'text/html',
+		svg:  'image/svg+xml'
+	};
+
 	function fragmentFromChildren(node) {
 		var fragment = create('fragment');
 		append(fragment, node.childNodes);
@@ -847,11 +853,8 @@
 	}
 
 	function parse(type, string) {
-		var mimetype = ({
-			xml:  'application/xml',
-			html: 'text/html',
-			svg:  'image/svg+xml'
-		})[type];
+		var mimetype = mimetypes[type];
+		var xml;
 
 		// From jQuery source...
 		try {

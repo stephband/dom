@@ -214,7 +214,7 @@
 		'g',
 		'line',
 		'rect',
-		'text',
+		//'text',
 		'use',
 		'path',
 		'polygon',
@@ -275,7 +275,7 @@
 		// create(name, text)
 		// create(name, attributes)
 		// create(name, text, attributes)
-	
+
 		if (constructors[name]) {
 			return constructors[name](arguments[1]);
 		}

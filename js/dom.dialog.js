@@ -81,9 +81,11 @@
 		});
 	}
 
+	var matches = dom.matches('.dialog-layer');
+
 	on(document, 'dom-activate', function(e) {
 		if (e.defaultPrevented) { return; }
-		if (!dom.matches('.dialog-layer', e.target.parentNode)) { return; }
+		if (!matches(e.target.parentNode)) { return; }
 		disableScroll(e.target.parentNode);
 		trapFocus(e.target.parentNode);
 		dom.classes(e.target.parentNode).add('active');
@@ -91,7 +93,7 @@
 
 	on(document, 'dom-deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
-		if (!dom.matches('.dialog-layer', e.target.parentNode)) { return; }
+		if (!matches(e.target.parentNode)) { return; }
 		enableScroll(e.target.parentNode);
 		trapFocus(e.target.parentNode);
 		dom.classes(e.target.parentNode).remove('active');

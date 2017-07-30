@@ -1,12 +1,14 @@
 (function(window) {
 	"use strict";
 
-	var Fn      = window.Fn;
-	var dom     = window.dom;
-	var on      = dom.events.on;
-	var trigger = dom.events.trigger;
-	var closest = dom.closest;
-	var tau     = Math.PI * 2;
+	var Fn       = window.Fn;
+	var last     = Fn.last;
+	var dom      = window.dom;
+	var children = dom.children;
+	var on       = dom.events.on;
+	var trigger  = dom.events.trigger;
+	var closest  = dom.closest;
+	var tau      = Math.PI * 2;
 
 	var elasticDistance = 800;
 
@@ -17,13 +19,10 @@
 	}
 
 	function xMinFromChildren(node) {
-		var last = dom(node.children)
-			.filter(dom.matches('.switchable'))
-			.last()
-			.shift();
-		
+		var child = last(children(node).filter(dom.matches('.switchable')));
+
 		// Get the right-most x of the last switchable child's right-most edge
-		var w1 = last.offsetLeft + last.clientWidth;
+		var w1 = child.offsetLeft + child.clientWidth;
 		var w2 = node.parentNode.clientWidth;
 		return w2 - w1;
 	}
@@ -81,7 +80,7 @@
 		.each(function(transform) {
 			node.style.transform = transform;
 		})
-		.on('stop', function() {
+		.then(function() {
 			classes.remove('notransition');
 
 			// Todo: Watch out, this may interfere with slides
@@ -130,7 +129,7 @@
 
 		if (!prop) { return; }
 
-		var active = dom(node.children)
+		var active = children(node)
 		.filter(dom.matches('.active'))
 		.shift();
 

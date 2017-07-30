@@ -41,7 +41,7 @@
 		var id = dom.identify(target);
 
 		dom('[href$="#' + id + '"]')
-		.each(function(node) {
+		.forEach(function(node) {
 			on(node, 'click', click, e.target);
 		});
 
@@ -57,7 +57,7 @@
 		var id = dom.identify(e.target);
 
 		dom('[href$="#' + id + '"]')
-		.each(function(node) {
+		.forEach(function(node) {
 			off(node, 'click', click);
 		});
 

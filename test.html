@@ -7,7 +7,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5">
 
 	<title>dom</title>	
-	<script>document.documentElement.className = 'js';</script>
+	<script>
+		document.documentElement.className = 'js';
+		window.DEBUG = true;
+	</script>
 
 	<link rel="icon" type="image/png" href="images/favicon.png" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -33,23 +36,36 @@
 		</div>
 	</header>
 
-	<script src="fn/polyfills/number.isnan.js"></script>
-	<script src="fn/polyfills/object.assign.js"></script>
+	<!-- Polyfills -->
+	<script src="../fn/polyfills/number.isnan.js"></script>
+	<script src="../fn/polyfills/object.assign.js"></script>
+	<script src="../fn/polyfills/promise.js"></script>
+	<script src="../fn/polyfills/symbol.js"></script>
 	<script src="polyfills/window.customevent.js"></script>
-	<script src="fn/js/fn.js"></script>
 
-	<script src="js/config.js"></script>
+	<!-- Dependencies -->
+	<script src="../fn/js/fn.js"></script>
+	<script src="../fn/js/stream.js"></script>
+
+	<!-- Library -->
 	<script src="js/dom.js"></script>
-	<script src="js/dom.event.activate.js"></script>
-	<script src="js/dom.event.touch.js"></script>
-	<script src="js/dom.event.swipe.js"></script>
+	<script src="js/dom-activate.js"></script>
+	<script src="js/dom-touch.js"></script>
+	<script src="js/dom-swipe.js"></script>
 	<script src="js/dom.popable.js"></script>
 	<script src="js/dom.toggleable.js"></script>
 	<script src="js/dom.switchable.js"></script>
 	<script src="js/dom.moveable.js"></script>
 	<script src="js/dom.slideable.js"></script>
 
-	<script src="fn/test/test.js"></script>
+	<!-- Tests -->
+	<script src="test/test.js"></script>
 	<script src="test/fragment.js"></script>
+
+	<template id="textarea-template">
+		<textarea placeholder="PLACEHOLDER"></textarea>
+	</template>
+
+	<script src="test/textarea.js"></script>
 </body>
 </html>

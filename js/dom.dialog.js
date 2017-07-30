@@ -47,7 +47,7 @@
 		// http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
 		
 		// Find the first focusable thing.
-		var firstNode = dom('[tabindex], a, input, textarea, button', node).shift();
+		var firstNode = dom('[tabindex], a, input, textarea, button', node)[0];
 
 		if (!firstNode) { return; }
 
@@ -81,9 +81,11 @@
 		});
 	}
 
+	var matches = dom.matches('.dialog-layer');
+
 	on(document, 'dom-activate', function(e) {
 		if (e.defaultPrevented) { return; }
-		if (!dom.matches('.dialog-layer', e.target.parentNode)) { return; }
+		if (!matches(e.target.parentNode)) { return; }
 		disableScroll(e.target.parentNode);
 		trapFocus(e.target.parentNode);
 		dom.classes(e.target.parentNode).add('active');
@@ -91,7 +93,7 @@
 
 	on(document, 'dom-deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
-		if (!dom.matches('.dialog-layer', e.target.parentNode)) { return; }
+		if (!matches(e.target.parentNode)) { return; }
 		enableScroll(e.target.parentNode);
 		trapFocus(e.target.parentNode);
 		dom.classes(e.target.parentNode).remove('active');

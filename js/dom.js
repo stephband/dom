@@ -1,6 +1,6 @@
 (function(window) {
 	if (!window.console || !window.console.log) { return; }
-	console.log('dom    – https://github.com/stephband/dom');
+	console.log('dom         – https://github.com/stephband/dom');
 })(this);
 
 (function(window) {
@@ -15,21 +15,106 @@
 	var CustomEvent = window.CustomEvent;
 	var Stream      = window.Stream;
 
+	var assign      = Object.assign;
+	var define      = Object.defineProperties;
+	var cache       = Fn.cache;
+	var curry       = Fn.curry;
+	var denormalise = Fn.denormalise;
+	var id          = Fn.id;
+	var overload    = Fn.overload;
+	var pow         = Fn.pow;
+	var toType      = Fn.toType;
+
 
 	// Var
 
-	var A = Array.prototype;
+	var A            = Array.prototype;
+	var svgNamespace = 'http://www.w3.org/2000/svg';
+	var rspaces      = /\s+/;
+	var rpx          = /px$/;
 
-	var rspaces = /\s+/;
-	var rpx     = /px$/;
+
+	// Features
+
+	var features = define({}, {
+		inputEventsOnDisabled: {
+			// FireFox won't dispatch any events on disabled inputs:
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
+
+			get: cache(function() {
+				var input     = document.createElement('input');
+				var testEvent = Event('featuretest');
+				var result    = false;
+			
+				appendChild(document.body, input);
+				input.disabled = true;
+				input.addEventListener('featuretest', function(e) { result = true; });
+				input.dispatchEvent(testEvent);
+				removeNode(input);
+			
+				return result;
+			}),
+
+			enumerable: true
+		},
+
+		template: {
+			get: cache(function() {
+				// Older browsers don't know about the content property of templates.
+				return 'content' in document.createElement('template');
+			}),
+
+			enumerable: true
+		},
+
+		textareaPlaceholderSet: {
+			// IE sets textarea innerHTML (but not value) to the placeholder
+			// when setting the attribute and cloning and so on. The twats have
+			// marked it "Won't fix":
+			//
+			// https://connect.microsoft.com/IE/feedback/details/781612/placeholder-text-becomes-actual-value-after-deep-clone-on-textarea
+
+			get: cache(function() {
+				var node = document.createElement('textarea');
+				node.setAttribute('placeholder', '---');
+				return node.innerHTML === '';
+			}),
+
+			enumerable: true
+		},
+
+		transition: {
+			get: cache(function testTransition() {
+				var prefixed = prefix('transition');
+				return prefixed || false;
+			}),
+
+			enumerable: true
+		},
+
+		transitionEnd: {
+			// Infer transitionend event from CSS transition prefix
+
+			get: cache(function() {
+				var end = {
+					KhtmlTransition: false,
+					OTransition: 'oTransitionEnd',
+					MozTransition: 'transitionend',
+					WebkitTransition: 'webkitTransitionEnd',
+					msTransition: 'MSTransitionEnd',
+					transition: 'transitionend'
+				};
+			
+				var prefixed = prefix('transition');
+				return prefixed && end[prefixed];
+			}),
+
+			enumerable: true
+		}
+	});
 
 
 	// Utilities
-
-	var curry       = Fn.curry;
-	var pow         = Fn.pow;
-	var denormalise = Fn.denormalise;
-	var assign      = Object.assign;
 
 	function bindTail(fn) {
 		// Takes arguments 1 and up and appends them to arguments
@@ -60,6 +145,7 @@
 
 		return array;
 	}
+
 
 	// TokenList
 	// TokenList constructor to emulate classList property. The get fn should
@@ -122,6 +208,20 @@
 		11: 'fragment'
 	};
 
+	var svgs = [
+		'circle',
+		'ellipse',
+		'g',
+		'line',
+		'rect',
+		//'text',
+		'use',
+		'path',
+		'polygon',
+		'polyline',
+		'svg'
+	];
+
 	var constructors = {
 		text: function(text) {
 			return document.createTextNode(text || '');
@@ -144,12 +244,38 @@
 		}
 	};
 
+	svgs.forEach(function(tag) {
+		constructors[tag] = function(attributes) {
+			var node = document.createElementNS(svgNamespace, tag);
+			if (attributes) { setSVGAttributes(node, attributes); }
+			return node;
+		};
+	});
+
+	function setHTMLAttributes(node, attributes) {
+		var names = Object.keys(attributes);
+		var n = names.length;
+	
+		while (n--) {
+			node.setAttribute(names[n], attributes[names[n]]);
+		}
+	}
+
+	function setSVGAttributes(node, attributes) {
+		var names = Object.keys(attributes);
+		var n = names.length;
+
+		while (n--) {
+			node.setAttributeNS(null, names[n], attributes[names[n]]);
+		}
+	}
+
 	function create(name) {
 		// create(name)
 		// create(name, text)
 		// create(name, attributes)
 		// create(name, text, attributes)
-	
+
 		if (constructors[name]) {
 			return constructors[name](arguments[1]);
 		}
@@ -167,24 +293,39 @@
 	
 		var names, n;
 	
-		if (attributes) {
-			names = Object.keys(attributes);
-			n = names.length;
-	
-			while (n--) {
-				node.setAttribute(names[n], attributes[names[n]]);
-			}
-		}
+		if (attributes) { setHTMLAttributes(node, attributes); }
 	
 		return node;
 	}
 
+	var clone = features.textareaPlaceholderSet ?
+
+		function clone(node) {
+			return node.cloneNode(true);
+		} :
+
+		function cloneWithHTML(node) {
+			// IE sets textarea innerHTML to the placeholder when cloning.
+			// Reset the resulting value.
+
+			var clone     = node.cloneNode(true);
+			var textareas = dom.query('textarea', node);
+			var n         = textareas.length;
+			var clones;
+
+			if (n) {
+				clones = dom.query('textarea', clone);
+
+				while (n--) {
+					clones[n].value = textareas[n].value;
+				}
+			}
+
+			return clone;
+		} ;
+
 	function type(node) {
 		return types[node.nodeType];
-	}
-
-	function clone(node) {
-		return node.cloneNode(true);
 	}
 
 	function isElementNode(node) {
@@ -314,11 +455,6 @@
 		array.reduce(appendChild, target);
 
 		return node;
-	}
-
-	// Todo: not sure I got this right, it should probably GET html
-	function html(target, html) {
-		target.innerHTML = html;
 	}
 
 	function empty(node) {
@@ -514,8 +650,76 @@
 
 	var eventsSymbol = Symbol('events');
 
+	var keyCodes = {
+		8:  'backspace',
+		9:  'tab',
+		13: 'enter',
+		16: 'shift',
+		17: 'ctrl',
+		18: 'alt',
+		27: 'escape',
+		32: 'space',
+		37: 'left',
+		38: 'up',
+		39: 'right',
+		40: 'down',
+		46: 'delete',
+		48: '0',
+		49: '1',
+		50: '2',
+		51: '3',
+		52: '4',
+		53: '5',
+		54: '6',
+		55: '7',
+		56: '8',
+		57: '9',
+		65: 'a',
+		66: 'b',
+		67: 'c',
+		68: 'd',
+		69: 'e',
+		70: 'f',
+		71: 'g',
+		72: 'h',
+		73: 'i',
+		74: 'j',
+		75: 'k',
+		76: 'l',
+		77: 'm',
+		78: 'n',
+		79: 'o',
+		80: 'p',
+		81: 'q',
+		82: 'r',
+		83: 's',
+		84: 't',
+		85: 'u',
+		86: 'v',
+		87: 'w',
+		88: 'x',
+		89: 'y',
+		90: 'z',
+		// Mac Chrome left CMD
+		91: 'cmd',
+		// Mac Chrome right CMD
+		93: 'cmd',
+		186: ';',
+		187: '=',
+		188: ',',
+		189: '-',
+		190: '.',
+		191: '/',
+		219: '[',
+		220: '\\',
+		221: ']',
+		222: '\'',
+		// Mac FF
+		224: 'cmd'
+	};
+
 	function Event(type, properties) {
-		var options = Object.assign({}, eventOptions, properties);
+		var options = assign({}, eventOptions, properties);
 		var event   = new CustomEvent(type, options);
 
 		if (properties) {
@@ -534,6 +738,10 @@
 		// Ignore mousedowns on any button other than the left (or primary)
 		// mouse button, or when a modifier key is pressed.
 		return (e.which === 1 && !e.ctrlKey && !e.altKey && !e.shiftKey);
+	}
+
+	function toKey(e) {
+		return keyCodes[e.keyCode];
 	}
 
 	function on(node, types, fn, data) {
@@ -601,6 +809,12 @@
 
 	// DOM Fragments and Templates
 
+	var mimetypes = {
+		xml:  'application/xml',
+		html: 'text/html',
+		svg:  'image/svg+xml'
+	};
+
 	function fragmentFromChildren(node) {
 		var fragment = create('fragment');
 		append(fragment, node.childNodes);
@@ -629,7 +843,7 @@
 		// In browsers where templates are not inert their content can clash
 		// with content in the DOM - ids, for example. Remove the template as
 		// a precaution.
-		if (t === 'template' && !dom.features.template) {
+		if (t === 'template' && !features.template) {
 			remove(node);
 		}
 
@@ -639,11 +853,8 @@
 	}
 
 	function parse(type, string) {
-		var mimetype = ({
-			xml:  'application/xml',
-			html: 'text/html',
-			svg:  'image/svg+xml'
-		})[type];
+		var mimetype = mimetypes[type];
+		var xml;
 
 		// From jQuery source...
 		try {
@@ -659,51 +870,17 @@
 		return xml;
 	}
 
+	var escape = (function() {
+		var pre = document.createElement('pre');
+		var text = document.createTextNode('');
 
-	// DOM Feature tests
+		pre.appendChild(text);
 
-	var testEvent = Event('featuretest');
-
-	function testTemplate() {
-		// Older browsers don't know about the content property of templates.
-		return 'content' in document.createElement('template');
-	}
-
-	function testEventDispatchOnDisabled() {
-		// FireFox won't dispatch any events on disabled inputs:
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
-
-		var input = document.createElement('input');
-		var result = false;
-
-		appendChild(document.body, input);
-		input.disabled = true;
-		input.addEventListener('featuretest', function(e) { result = true; });
-		input.dispatchEvent(testEvent);
-		removeNode(input);
-
-		return result;
-	}
-
-	function testTransition() {
-		// Infer transitionend event from CSS transition prefix
-		var prefixed = prefix('transition');
-		return prefixed || false;
-	}
-
-	function testTransitionEnd() {
-		var end = {
-			KhtmlTransition: false,
-			OTransition: 'oTransitionEnd',
-			MozTransition: 'transitionend',
-			WebkitTransition: 'webkitTransitionEnd',
-			msTransition: 'MSTransitionEnd',
-			transition: 'transitionend'
+		return function escape(value) {
+			text.textContent = value;
+			return pre.innerHTML;
 		};
-
-		var prefixed = prefix('transition');
-		return prefixed && end[prefixed];
-	}
+	})();
 
 
 	// Units
@@ -713,8 +890,8 @@
 
 	var fontSize;
 
-	var toPx = Fn.overloadTypes({
-		'number': function(n) { return n; },
+	var toPx = overload(toType, {
+		'number': id,
 
 		'string': function(string) {
 			var data, n;
@@ -735,7 +912,7 @@
 		}
 	});
 
-	var toRem = Fn.overloadTypes({
+	var toRem = overload(toType, {
 		'number': function(n) {
 			return n / getFontSize();
 		}
@@ -776,7 +953,8 @@
 	}
 
 	function scrollTo(px, node) {
-		animate(pow(2), 0.6, px, 'scrollTop', node || dom.scroller());
+		px = toPx(px);
+		animate(pow(2), 0.6, px, 'scrollTop', node || dom.viewport);
 	}
 
 	function scrollRatio(node) {
@@ -786,12 +964,8 @@
 
 	// dom
 
-	function dom(selector, node) {
-		return typeof selector === "string" ?
-				Fn(query(selector, node || document)) :
-			Node.prototype.isPrototypeOf(selector) ?
-				Fn.of(selector) :
-			Fn(selector) ;
+	function dom(selector) {
+		return query(selector, document);
 	}
 
 	var ready = new Promise(function(accept, reject) {
@@ -814,9 +988,9 @@
 		// DOM traversal
 
 		find:     find,
-		query:    curry(query),
-		closest:  curry(closest),
-		matches:  curry(matches),
+		query:    curry(query,   true),
+		closest:  curry(closest, true),
+		matches:  curry(matches, true),
 		children: children,
 
 		// DOM mutation
@@ -824,11 +998,10 @@
 		create:   create,
 		clone:    clone,
 		identify: identify,
-		append:   curry(append),
-		html:     curry(html),
-		before:   curry(before),
-		after:    curry(after),
-		replace:  curry(replace),
+		append:   curry(append,  true),
+		before:   curry(before,  true),
+		after:    curry(after,   true),
+		replace:  curry(replace, true),
 		empty:    empty,
 		remove:   remove,
 
@@ -842,7 +1015,7 @@
 
 		type:      type,
 		tag:       tag,
-		attribute: curry(attribute),
+		attribute: curry(attribute, true),
 		offset:    offset,
 		position:  position,
 		classes:   classes,
@@ -857,7 +1030,7 @@
 			return typeof value === 'string' && rpx.test(value) ?
 				parseFloat(value) :
 				value ;
-		}),
+		}, true),
 
 		toPx:           toPx,
 		toRem:          toRem,
@@ -870,15 +1043,11 @@
 		fragmentFromChildren: fragmentFromChildren,
 		fragmentFromHTML:     fragmentFromHTML,
 		fragmentFromId:       fragmentFromId,
+		escape:               escape,
 		parse:                curry(parse),
 
 		// DOM events
 
-		// dom.events is both a function for constructing an event stream and a
-		// namespace for traditional uncurried event binding functions.
-
-		isPrimaryButton: isPrimaryButton,
-		preventDefault:  preventDefault,
 		Event:           Event,
 
 		events: {
@@ -887,22 +1056,17 @@
 			trigger: trigger
 		},
 
-		on: curry(Stream.Events),
-
-		trigger: function triggerNode(type, properties, node) {
-			var l = arguments.length;
-
-			node = arguments[l - 1];
-
-			if (dom.isElementNode(node) || node === document) {
-				trigger(node, type, l > 2 && properties);
-				return node;
-			}
-
-			return Fn.bind(arguments, triggerNode);
-		},
-
 		delegate:        delegate,
+		isPrimaryButton: isPrimaryButton,
+		preventDefault:  preventDefault,
+		toKey:           toKey,
+
+		on: curry(Stream.Events, true),
+
+		trigger: curry(function(type, node) {
+			trigger(node, type);
+			return node;
+		}, true),
 
 		// DOM Animation
 
@@ -914,13 +1078,13 @@
 		// name     - name of property to animate
 		// object   - object to animate
 
-		animate: curry(animate),
+		animate: curry(animate, true),
 
 		// request(n, fn)
 		//
 		// calls fn on the nth requestAnimationFrame
 
-		requestFrameN: curry(requestFrameN),
+		requestFrameN: curry(requestFrameN, true),
 
 		// scrollTo(n)
 		//
@@ -931,23 +1095,15 @@
 
 		// Features
 
-		features: {
-			template:              testTemplate(),
-			inputEventsOnDisabled: testEventDispatchOnDisabled(),
-			transition:            testTransition(),
-			transitionEnd:         testTransitionEnd()
-		},
+		features: features
+	});
 
+	define(dom, {
 		// Element shortcuts
-
-		root: document.documentElement,
-		head: document.head,
-		body: document.body,
-		viewport: document.scrollingElement,
-
-		scroller: function() {
-			return document.scrollingElement;
-		}
+		root: { value: document.documentElement, enumerable: true },
+		head: { value: document.head, enumerable: true },
+		body: { get: function() { return document.body; }, enumerable: true	},
+		viewport: { get: function() { return document.scrollingElement; }, enumerable: true }
 	});
 
 

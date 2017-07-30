@@ -15,6 +15,7 @@
 
 	var name = 'switchable';
 	var on   = dom.events.on;
+	var triggerDeactivate = dom.trigger('dom-deactivate');
 
 	function activate(e) {
 		if (!e.default) { return; }
@@ -22,7 +23,7 @@
 		var target = e.target;
 		if (!dom.classes(target).contains(name)) { return; }
 
-		var nodes = dom('.switchable', target.parentNode).toArray();
+		var nodes = dom.query('.switchable', target.parentNode);
 		var i     = nodes.indexOf(target);
 
 		nodes.splice(i, 1);
@@ -33,7 +34,7 @@
 		// Deactivate the previous active pane AFTER this pane has been
 		// activated. It's important for panes who's style depends on the
 		// current active pane, eg: .slide.active ~ .slide
-		Fn(active).each(dom.trigger('dom-deactivate'));
+		Fn.from(active).each(triggerDeactivate);
 	}
 
 	function deactivate(e) {

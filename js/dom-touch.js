@@ -2,7 +2,7 @@
 	"use strict";
 
 	var Fn     = window.Fn;
-	var Stream = Fn.Stream;
+	var Stream = window.Stream;
 	var dom    = window.dom;
 
 
@@ -172,7 +172,8 @@
 					stream = TouchStream(node, events);
 				}
 
-				return stream.clone();
+				//return stream.clone();
+				return stream;
 			}
 		});
 	}
@@ -191,12 +192,6 @@
 
 		removeActiveMouse();
 		data.stream.stop();
-
-		// Unbind the click suppressor, waiting until after mouseup
-		// has been handled.
-		requestTick(function() {
-			off(target, 'click', preventDefault);
-		});
 	}
 
 	function removeActiveMouse() {
@@ -233,7 +228,7 @@
 	}
 
 	function TouchStream(node, events) {
-		var stream = Stream(events).map(function(e) {
+		var stream = Stream.from(events).map(function(e) {
 			return {
 				x:    e.pageX - events[0].pageX,
 				y:    e.pageY - events[0].pageY,
@@ -264,6 +259,15 @@
 			on(document, touchevents.move, data.activeTouchmove, data);
 			on(document, touchevents.end, data.activeTouchend, data);
 		}
+
+		stream.then(function() {
+			// Unbind the click suppressor, waiting until after mouseup
+			// has been handled. I don't know why it has to be any longer than
+			// a tick, but it does, in Chrome at least.
+			setTimeout(function() {
+				off(node, 'click', preventDefault);
+			}, 200);
+		});
 
 		return stream;
 	}

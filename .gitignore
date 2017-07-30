@@ -1,5 +1,5 @@
 .testswarm
-archived/
+archive/
 node_modules/*
 .DS_Store
 temp/*

@@ -21,9 +21,9 @@
 		})
 		.each(function(transform) {
 			moveable.style.transform = transform;
-		})
-		.on('stop', function() {
-			//moveable.style.transform = transform;
 		});
+		//.on('stop', function() {
+		//	//moveable.style.transform = transform;
+		//});
 	});
 })(this);

@@ -433,6 +433,14 @@
 			 closest(selector, node.parentNode, root) ;
 	}
 
+	function next(node) {
+		return node.nextElementSibling || undefined;
+	}
+
+	function previous(node) {
+		return node.previousElementSibling || undefined;
+	}
+
 
 	// DOM Mutation
 
@@ -992,6 +1000,8 @@
 		closest:  curry(closest, true),
 		matches:  curry(matches, true),
 		children: children,
+		next:     next,
+		previous: previous,
 
 		// DOM mutation
 

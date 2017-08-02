@@ -1,6 +1,8 @@
 (function(window) {
 	"use strict";
 
+var A = Array.prototype;
+
 var names = [
 //	"align-content",
 //	"align-items",
@@ -373,6 +375,31 @@ var names = [
 	"z-index"
 ];
 
+function postpad(chars, n, string) {
+	while (string.length < n) {
+		string = string + chars;
+	}
+
+	return string.slice(0, n);
+}
+
+function createObject(node, selector) {
+	return {
+		node:  node,
+		tag:   node.tagName.toLowerCase(),
+		class: node.getAttribute('class') || '',
+		style: node.getAttribute('style') || '',
+		styles: [],
+		selector: (selector ? selector + ' > ' : '') +
+			(node.id ?
+				'#' + node.id :
+			node.getAttribute('class') ?
+				'.' + node.getAttribute('class').trim().split(/\s+/).join('.') :
+				node.tagName.toLowerCase()
+			)
+	};
+}
+
 function getStyle(name, node) {
 	return window.getComputedStyle ?
 		window
@@ -381,42 +408,47 @@ function getStyle(name, node) {
 		0 ;
 }
 
-function getStyles(results, node) {
-	var object = {
-		node:  node,
-		tag:   node.tagName,
-		class: node.getAttribute('class') || '',
-		style: node.getAttribute('style') || '',
-		hierarchy: 
-		styles: []
-	};
+function propertyReducer(object, name) {
+	var node   = object.node;
+	var styles = object.styles;
+	var value  = getStyle(name, node);
 
-	names.reduce(function(object, name) {
-		var node   = object.node;
-		var styles = object.styles;
-		var value  = getStyle(name, node);
-
-		if (value) {
-			styles.push({
-				property: name,
-				value:    value
-			});
-		}
-
-		return object;
-	}, object);
-
-	if (object.styles.length) {
-		results.push(object);
+	if (value) {
+		styles.push({
+			property: name,
+			value:    value
+		});
 	}
 
-	var children = Array.prototype.slice.apply(node.children);
-	children.reduce(getStyles, results);
-	return results;
+	return object;
+}
+
+function getStyles(results, node, selector) {
+	var object = createObject(node, selector);
+	names.reduce(propertyReducer, object);
+	results.push(object);
+
+	return A.slice
+	.apply(node.children)
+	.reduce(function(results, child) {
+		return getStyles(results, child, object.selector);
+	}, results);
 }
 
 window.styler = function(node) {
-	return getStyles([], node);
+	return getStyles([], node, '');
+};
+
+function printStyle(css, style) {
+	return css + ' ' + postpad(' ', 96, style.property + ': ' + style.value + ';');
+}
+
+function printStyles(css, object) {
+	return css + '\n' + postpad(' ', 128, object.selector) + ' {' + object.styles.reduce(printStyle, '') + '}';
+}
+
+styler.toCSS = function(styles) {
+	return styles.reduce(printStyles, '');
 };
 
 })(this);

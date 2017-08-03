@@ -868,7 +868,12 @@
 	};
 
 	function fragmentFromChildren(node) {
+		if (node.domFragmentFromChildren) {
+			return node.domFragmentFromChildren;
+		}
+
 		var fragment = create('fragment');
+		node.domFragmentFromChildren = fragment;
 		append(fragment, node.childNodes);
 		return fragment;
 	}

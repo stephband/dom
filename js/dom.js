@@ -21,8 +21,10 @@
 	var curry        = Fn.curry;
 	var denormalise  = Fn.denormalise;
 	var id           = Fn.id;
+	var noop         = Fn.noop;
 	var overload     = Fn.overload;
 	var pow          = Fn.pow;
+	var requestTick  = Fn.requestTick;
 	var toType       = Fn.toType;
 
 
@@ -725,6 +727,8 @@
 		// Mac FF
 		224: 'cmd'
 	};
+	
+	var untrap = noop;
 
 	function Event(type, properties) {
 		var options = Object.assign({}, eventOptions, properties);
@@ -811,6 +815,46 @@
 			e.delegateTarget = node;
 			fn(e, node);
 			e.delegateTarget = undefined;
+		};
+	}
+
+	function trap(node) {
+		// Trap focus as described by Nikolas Zachas:
+		// http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
+
+		// If there is an existing focus trap, remove it
+		untrap();
+
+		// Cache the currently focused node
+		var focusNode = document.activeElement || document.body;
+
+		function resetFocus() {
+			var focusable = dom.query('[tabindex], a, input, textarea, button', node)[0];
+			if (focusable) { focusable.focus(); }
+		}
+
+		function preventFocus(e) {
+			if (node.contains(e.target)) { return; }
+
+			// If trying to focus outside node, set the focus back
+			// to the first thing inside.
+			resetFocus();
+			e.stopPropagation();
+		}
+
+		// Prevent focus in capture phase
+		document.addEventListener("focus", preventFocus, true);
+
+		// Move focus into node
+		requestTick(resetFocus);
+
+		return untrap = function untrap() {
+			untrap = noop;
+			document.removeEventListener('focus', preventFocus);
+
+			// Set focus back to the thing that was last focused when the
+			// dialog was opened.
+			requestTick(focusNode);
 		};
 	}
 
@@ -932,7 +976,7 @@
 	}
 
 
-	// Animation and scroll
+	// Animation
 
 	function animate(fn, duration, value, name, object) {
 		var t = performance.now();
@@ -960,6 +1004,9 @@
 		}());
 	}
 
+
+	// Scrolling
+
 	function scrollTo(px, node) {
 		px = toPx(px);
 		animate(pow(2), 0.6, px, 'scrollTop', node || dom.viewport);
@@ -967,6 +1014,44 @@
 
 	function scrollRatio(node) {
 		return node.scrollTop / (node.scrollHeight - node.clientHeight);
+	}
+
+	function disableScroll(node) {
+		node = node || document.documentElement;
+
+		var scrollLeft = node.scrollLeft;
+		var scrollTop  = node.scrollTop;
+
+		// Remove scrollbars from the documentElement
+		//docElem.css({ overflow: 'hidden' });
+		node.style.overflow = 'hidden';
+
+		// FF has a nasty habit of linking the scroll parameters
+		// of document with the documentElement, causing the page
+		// to jump when overflow is hidden on the documentElement.
+		// Reset the scroll position.
+		if (scrollTop)  { node.scrollTop = scrollTop; }
+		if (scrollLeft) { node.scrollLeft = scrollLeft; }
+
+		// Disable gestures on touch devices
+		//add(document, 'touchmove', preventDefaultOutside, layer);
+	}
+	
+	function enableScroll(node) {
+		node = node || document.documentElement;
+
+		var scrollLeft = node.scrollLeft;
+		var scrollTop  = node.scrollTop;
+
+		// Put scrollbars back onto docElem
+		node.style.overflow = '';
+
+		// FF fix. Reset the scroll position.
+		if (scrollTop) { node.scrollTop = scrollTop; }
+		if (scrollLeft) { node.scrollLeft = scrollLeft; }
+
+		// Enable gestures on touch devices
+		//remove(document, 'touchmove', preventDefaultOutside);
 	}
 
 
@@ -1070,6 +1155,8 @@
 		isPrimaryButton: isPrimaryButton,
 		preventDefault:  preventDefault,
 		toKey:           toKey,
+		trap:            trap,
+
 		on: curry(Stream.Events, true),
 
 		trigger: curry(function(type, node) {
@@ -1077,7 +1164,7 @@
 			return node;
 		}, true),
 
-		// DOM Animation
+		// DOM animation
 
 		// animate(fn, duration, value, name, object)
 		//
@@ -1095,12 +1182,16 @@
 
 		requestFrameN: curry(requestFrameN, true),
 
+		// Scrolling
+
 		// scrollTo(n)
 		//
-		// Animates scrollTop to n (in px)
+		// Animate scrollTop to n (in px)
 
-		scrollTo: scrollTo,
-		scrollRatio: scrollRatio,
+		scrollTo:      scrollTo,
+		scrollRatio:   scrollRatio,
+		disableScroll: disableScroll,
+		enableScroll:  enableScroll,
 
 		// Features
 

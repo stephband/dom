@@ -21,6 +21,7 @@
 	var curry       = Fn.curry;
 	var denormalise = Fn.denormalise;
 	var id          = Fn.id;
+	var noop        = Fn.noop;
 	var overload    = Fn.overload;
 	var pow         = Fn.pow;
 	var toType      = Fn.toType;

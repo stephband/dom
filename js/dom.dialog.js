@@ -19,8 +19,8 @@
 		if (e.defaultPrevented) { return; }
 		if (!matches(e.target.parentNode)) { return; }
 
-		disableScroll(e.target.parentNode);
-		untrap = trap(e.target.parentNode);
+		disableScroll(dom.root);
+		untrap = trap(e.target);
 		dom.classes(e.target.parentNode).add('active');
 	});
 
@@ -28,20 +28,8 @@
 		if (e.defaultPrevented) { return; }
 		if (!matches(e.target.parentNode)) { return; }
 
-		enableScroll(e.target.parentNode);
+		enableScroll(dom.root);
 		untrap && untrap();
 		dom.classes(e.target.parentNode).remove('active');
 	});
-
-	on(document, 'dom-activate', dom.delegate('.dialog', function(e) {
-		// Activate events from inside a dialog should also activate the dialog
-
-		if (e.defaultPrevented) { return; }
-		if (e.target === e.delegateTarget) { return; }
-		var delegateTarget = e.delegateTarget;
-
-		requestAnimationFrame(function() {
-			trigger(delegateTarget, 'dom-activate');
-		});
-	}));
 })(this);

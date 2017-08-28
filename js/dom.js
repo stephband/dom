@@ -24,6 +24,7 @@
 	var noop        = Fn.noop;
 	var overload    = Fn.overload;
 	var pow         = Fn.pow;
+	var requestTick = Fn.requestTick;
 	var toType      = Fn.toType;
 
 

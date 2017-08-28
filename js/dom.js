@@ -254,7 +254,7 @@
 		};
 	});
 
-	function setHTMLAttributes(node, attributes) {
+	function assignAttributes(node, attributes) {
 		var names = Object.keys(attributes);
 		var n = names.length;
 	
@@ -295,7 +295,7 @@
 	
 		var names, n;
 	
-		if (attributes) { setHTMLAttributes(node, attributes); }
+		if (attributes) { assignAttributes(node, attributes); }
 	
 		return node;
 	}
@@ -1095,6 +1095,7 @@
 
 		// DOM mutation
 
+		assign:   curry(assignAttributes,  true),
 		create:   create,
 		clone:    clone,
 		identify: identify,

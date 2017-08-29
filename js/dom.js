@@ -728,7 +728,7 @@
 		224: 'cmd'
 	};
 	
-	var untrap = noop;
+	var untrapFocus = noop;
 
 	function Event(type, properties) {
 		var options = assign({}, eventOptions, properties);
@@ -818,12 +818,12 @@
 		};
 	}
 
-	function trap(node) {
+	function trapFocus(node) {
 		// Trap focus as described by Nikolas Zachas:
 		// http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
 
 		// If there is an existing focus trap, remove it
-		untrap();
+		untrapFocus();
 
 		// Cache the currently focused node
 		var focusNode = document.activeElement || document.body;
@@ -839,6 +839,7 @@
 			// If trying to focus outside node, set the focus back
 			// to the first thing inside.
 			resetFocus();
+			e.preventDefault();
 			e.stopPropagation();
 		}
 
@@ -848,13 +849,15 @@
 		// Move focus into node
 		requestTick(resetFocus);
 
-		return untrap = function() {
-			untrap = noop;
-			document.removeEventListener('focus', preventFocus);
+		return untrapFocus = function() {
+			untrapFocus = noop;
+			document.removeEventListener('focus', preventFocus, true);
 
 			// Set focus back to the thing that was last focused when the
 			// dialog was opened.
-			requestTick(focusNode);
+			requestTick(function() {
+				focusNode.focus();
+			});
 		};
 	}
 
@@ -1161,7 +1164,8 @@
 		isPrimaryButton: isPrimaryButton,
 		preventDefault:  preventDefault,
 		toKey:           toKey,
-		trap:            trap,
+		trapFocus:       trapFocus,
+		trap:            Fn.deprecate(trapFocus, 'dom.trap() is now dom.trapFocus()'),
 
 		on: curry(Stream.Events, true),
 

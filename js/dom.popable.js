@@ -17,28 +17,22 @@
 		var classes = dom.classes(node);
 		if (!classes.contains(name)) { return; }
 
+		// Make user actions outside node deactivat the node
+
 		requestAnimationFrame(function() {
 			function click(e) {
 				if (node.contains(e.target) || node === e.target) { return; }
 				trigger(node, 'dom-deactivate');
 			}
 
-			function keydown(e) {
-				if (e.keyCode !== 27) { return; }
-				trigger(node, 'dom-deactivate');
-				e.preventDefault();
-			}
-
 			function deactivate(e) {
 				if (node !== e.target) { return; }
 				if (e.defaultPrevented) { return; }
 				document.removeEventListener('click', click);
-				document.removeEventListener('keydown', keydown);
 				document.removeEventListener('dom-deactivate', deactivate);
 			}
 
 			document.addEventListener('click', click);
-			document.addEventListener('keydown', keydown);
 			document.addEventListener('dom-deactivate', deactivate);
 		});
 

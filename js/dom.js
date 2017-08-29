@@ -1123,6 +1123,7 @@
 		offset:    offset,
 		position:  position,
 		classes:   classes,
+		prefix:    prefix,
 
 		style: curry(function(name, node) {
 			// If name corresponds to a custom property name in styleParsers...

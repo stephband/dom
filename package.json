@@ -20,7 +20,7 @@
 		"js/dom.toggleable.js",
 		"js/dom.switchable.js",
 		"js/dom.moveable.js",
-		"js/dom.slideable.js",
+		"js/dom.swipeable.js",
 		"js/dom.dialog.js"
     ],
     "main": "js/dom.js",

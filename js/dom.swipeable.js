@@ -30,7 +30,7 @@
 	on(document, 'dom-touch', function(e) {
 		if (e.defaultPrevented) { return; }
 
-		var node = closest('.slideable', e.target);
+		var node = closest('.swipeable', e.target);
 		if (!node) { return; }
 
 		var classes = dom.classes(node);
@@ -114,7 +114,7 @@
 	on(document, 'dom-swipe', function(e) {
 		if (e.defaultPrevented) { return; }
 
-		var node = closest('.slideable', e.target);
+		var node = closest('.swipeable', e.target);
 		if (!node) { return; }
 
 		var angle = Fn.wrap(0, tau, e.angle || 0);
@@ -149,7 +149,7 @@
 		var node   = e.target;
 		var parent = node.parentNode;
 
-		if (!dom.matches('.slideable', parent)) { return; }
+		if (!dom.matches('.swipeable', parent)) { return; }
 
 		var classes = dom.classes(parent);
 		classes.remove('notransition');

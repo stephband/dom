@@ -9,7 +9,7 @@ Styleguide: zutilities.transition
 */
 
 .notransition,
-.notransition .slideable,
+.notransition .swipeable,
 .notransition .switchable,
 .notransition .popable,
 .notransition .toggleable {

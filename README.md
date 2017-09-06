@@ -193,6 +193,12 @@ Returns key string corresponding to `e.keyCode`, or `undefined`.
 
 Calls `e.preventDefault()`.
 
+##### `.trap(node)`
+
+Traps focus to only focusable elements inside <code>node</code>.
+Returns a function that removes the trap.
+Creating a new trap also removes the existing trap.
+
 ##### `.events`
 
 An object containing some lower-level, uncurried event methods.
@@ -225,6 +231,10 @@ Additionally, `properties` are assigned to the event object.
 ##### `.scrollTo(px, node)`
 
 ##### `.scrollRatio(node)`
+
+##### `.enableScroll(node)`
+
+##### `.disableScroll(node)`
 
 #### Feature detection
 

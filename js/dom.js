@@ -9,21 +9,23 @@
 
 	// Import
 
-	var Fn           = window.Fn;
-	var Node         = window.Node;
-	var SVGElement   = window.SVGElement;
-	var CustomEvent  = window.CustomEvent;
-	var Stream       = window.Stream;
+	var Fn          = window.Fn;
+	var Node        = window.Node;
+	var SVGElement  = window.SVGElement;
+	var CustomEvent = window.CustomEvent;
+	var Stream      = window.Stream;
 
-	var assign       = Object.assign;
-	var defineProperties = Object.defineProperties;
-	var cache        = Fn.cache;
-	var curry        = Fn.curry;
-	var denormalise  = Fn.denormalise;
-	var id           = Fn.id;
-	var overload     = Fn.overload;
-	var pow          = Fn.pow;
-	var toType       = Fn.toType;
+	var assign      = Object.assign;
+	var define      = Object.defineProperties;
+	var cache       = Fn.cache;
+	var curry       = Fn.curry;
+	var denormalise = Fn.denormalise;
+	var id          = Fn.id;
+	var noop        = Fn.noop;
+	var overload    = Fn.overload;
+	var pow         = Fn.pow;
+	var requestTick = Fn.requestTick;
+	var toType      = Fn.toType;
 
 
 	// Var
@@ -36,7 +38,7 @@
 
 	// Features
 
-	var features = defineProperties({}, {
+	var features = define({}, {
 		inputEventsOnDisabled: {
 			// FireFox won't dispatch any events on disabled inputs:
 			// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
@@ -252,7 +254,7 @@
 		};
 	});
 
-	function setHTMLAttributes(node, attributes) {
+	function assignAttributes(node, attributes) {
 		var names = Object.keys(attributes);
 		var n = names.length;
 	
@@ -293,7 +295,7 @@
 	
 		var names, n;
 	
-		if (attributes) { setHTMLAttributes(node, attributes); }
+		if (attributes) { assignAttributes(node, attributes); }
 	
 		return node;
 	}
@@ -408,6 +410,14 @@
 		return toArray(node.querySelectorAll(selector));
 	}
 
+	function contains(child, node) {
+		return node.contains ?
+			node.contains(child) :
+		child.parentNode ?
+			child.parentNode === node || contains(child.parentNode, node) :
+		false ;
+	}
+
 	function matches(selector, node) {
 		return node.matches ? node.matches(selector) :
 			node.matchesSelector ? node.matchesSelector(selector) :
@@ -415,7 +425,7 @@
 			node.mozMatchesSelector ? node.mozMatchesSelector(selector) :
 			node.msMatchesSelector ? node.msMatchesSelector(selector) :
 			node.oMatchesSelector ? node.oMatchesSelector(selector) :
-			// Dumb fall back to simple tag name matching.
+			// Dumb fall back to simple tag name matching. Nigh-on useless.
 			tag(node) === selector ;
 	}
 
@@ -433,12 +443,12 @@
 			 closest(selector, node.parentNode, root) ;
 	}
 
-	function contains(child, node) {
-		return node.contains ?
-			node.contains(child) :
-		child.parentNode ?
-			child.parentNode === node || contains(child.parentNode, node) :
-		false ;
+	function next(node) {
+		return node.nextElementSibling || undefined;
+	}
+
+	function previous(node) {
+		return node.previousElementSibling || undefined;
 	}
 
 
@@ -667,6 +677,10 @@
 		18: 'alt',
 		27: 'escape',
 		32: 'space',
+		33: 'pageup',
+		34: 'pagedown',
+		35: 'pageright',
+		36: 'pageleft',
 		37: 'left',
 		38: 'up',
 		39: 'right',
@@ -725,9 +739,11 @@
 		// Mac FF
 		224: 'cmd'
 	};
+	
+	var untrapFocus = noop;
 
 	function Event(type, properties) {
-		var options = Object.assign({}, eventOptions, properties);
+		var options = assign({}, eventOptions, properties);
 		var event   = new CustomEvent(type, options);
 
 		if (properties) {
@@ -845,6 +861,49 @@
 		});
 	}
 
+	function trapFocus(node) {
+		// Trap focus as described by Nikolas Zachas:
+		// http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
+
+		// If there is an existing focus trap, remove it
+		untrapFocus();
+
+		// Cache the currently focused node
+		var focusNode = document.activeElement || document.body;
+
+		function resetFocus() {
+			var focusable = dom.query('[tabindex], a, input, textarea, button', node)[0];
+			if (focusable) { focusable.focus(); }
+		}
+
+		function preventFocus(e) {
+			if (node.contains(e.target)) { return; }
+
+			// If trying to focus outside node, set the focus back
+			// to the first thing inside.
+			resetFocus();
+			e.preventDefault();
+			e.stopPropagation();
+		}
+
+		// Prevent focus in capture phase
+		document.addEventListener("focus", preventFocus, true);
+
+		// Move focus into node
+		requestTick(resetFocus);
+
+		return untrapFocus = function() {
+			untrapFocus = noop;
+			document.removeEventListener('focus', preventFocus, true);
+
+			// Set focus back to the thing that was last focused when the
+			// dialog was opened.
+			requestTick(function() {
+				focusNode.focus();
+			});
+		};
+	}
+
 
 	// DOM Fragments and Templates
 
@@ -855,7 +914,12 @@
 	};
 
 	function fragmentFromChildren(node) {
+		if (node.domFragmentFromChildren) {
+			return node.domFragmentFromChildren;
+		}
+
 		var fragment = create('fragment');
+		node.domFragmentFromChildren = fragment;
 		append(fragment, node.childNodes);
 		return fragment;
 	}
@@ -963,7 +1027,7 @@
 	}
 
 
-	// Animation and scroll
+	// Animation
 
 	function animate(fn, duration, value, name, object) {
 		var t = performance.now();
@@ -991,6 +1055,9 @@
 		}());
 	}
 
+
+	// Scrolling
+
 	function scrollTo(px, node) {
 		px = toPx(px);
 		animate(pow(2), 0.6, px, 'scrollTop', node || dom.viewport);
@@ -998,6 +1065,44 @@
 
 	function scrollRatio(node) {
 		return node.scrollTop / (node.scrollHeight - node.clientHeight);
+	}
+
+	function disableScroll(node) {
+		node = node || document.documentElement;
+
+		var scrollLeft = node.scrollLeft;
+		var scrollTop  = node.scrollTop;
+
+		// Remove scrollbars from the documentElement
+		//docElem.css({ overflow: 'hidden' });
+		node.style.overflow = 'hidden';
+
+		// FF has a nasty habit of linking the scroll parameters
+		// of document with the documentElement, causing the page
+		// to jump when overflow is hidden on the documentElement.
+		// Reset the scroll position.
+		if (scrollTop)  { node.scrollTop = scrollTop; }
+		if (scrollLeft) { node.scrollLeft = scrollLeft; }
+
+		// Disable gestures on touch devices
+		//add(document, 'touchmove', preventDefaultOutside, layer);
+	}
+	
+	function enableScroll(node) {
+		node = node || document.documentElement;
+
+		var scrollLeft = node.scrollLeft;
+		var scrollTop  = node.scrollTop;
+
+		// Put scrollbars back onto docElem
+		node.style.overflow = '';
+
+		// FF fix. Reset the scroll position.
+		if (scrollTop) { node.scrollTop = scrollTop; }
+		if (scrollLeft) { node.scrollLeft = scrollLeft; }
+
+		// Enable gestures on touch devices
+		//remove(document, 'touchmove', preventDefaultOutside);
 	}
 
 
@@ -1033,9 +1138,12 @@
 		contains: curry(contains, true),
 		matches:  curry(matches,  true),
 		children: children,
+		next:     next,
+		previous: previous,
 
 		// DOM mutation
 
+		assign:   curry(assignAttributes,  true),
 		create:   create,
 		clone:    clone,
 		identify: identify,
@@ -1060,6 +1168,7 @@
 		offset:    offset,
 		position:  position,
 		classes:   classes,
+		prefix:    prefix,
 
 		style: curry(function(name, node) {
 			// If name corresponds to a custom property name in styleParsers...
@@ -1094,6 +1203,8 @@
 		isPrimaryButton: isPrimaryButton,
 		preventDefault:  preventDefault,
 		toKey:           toKey,
+		trapFocus:       trapFocus,
+		trap:            Fn.deprecate(trapFocus, 'dom.trap() is now dom.trapFocus()'),
 
 		events: {
 			on:      on,
@@ -1102,14 +1213,15 @@
 		},
 
 		on:     Fn.deprecate(curry(event, true), 'dom.on() is now dom.event()'),
-		event: curry(event, true),
 
 		trigger: curry(function(type, node) {
 			trigger(node, type);
 			return node;
 		}, true),
 
-		// DOM Animation
+		event: curry(event, true),
+
+		// DOM animation
 
 		// animate(fn, duration, value, name, object)
 		//
@@ -1127,19 +1239,23 @@
 
 		requestFrameN: curry(requestFrameN, true),
 
+		// Scrolling
+
 		// scrollTo(n)
 		//
-		// Animates scrollTop to n (in px)
+		// Animate scrollTop to n (in px)
 
-		scrollTo: scrollTo,
-		scrollRatio: scrollRatio,
+		scrollTo:      scrollTo,
+		scrollRatio:   scrollRatio,
+		disableScroll: disableScroll,
+		enableScroll:  enableScroll,
 
 		// Features
 
 		features: features
 	});
 
-	Object.defineProperties(dom, {
+	define(dom, {
 		// Element shortcuts
 		root: { value: document.documentElement, enumerable: true },
 		head: { value: document.head, enumerable: true },

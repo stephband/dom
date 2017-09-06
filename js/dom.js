@@ -399,7 +399,7 @@
 
 	// DOM Traversal
 
-	function find(id) {
+	function get(id) {
 		return document.getElementById(id) || undefined;
 	}
 
@@ -431,6 +431,14 @@
 		return matches(selector, node) ?
 			 node :
 			 closest(selector, node.parentNode, root) ;
+	}
+
+	function contains(child, node) {
+		return node.contains ?
+			node.contains(child) :
+		child.parentNode ?
+			child.parentNode === node || contains(child.parentNode, node) :
+		false ;
 	}
 
 
@@ -806,6 +814,37 @@
 		};
 	}
 
+	function event(types, node) {
+		types = types.split(rspaces);
+
+		return new Stream(function setup(notify, stop) {
+			var buffer = [];
+	
+			function update(value) {
+				buffer.push(value);
+				notify('push');
+			}
+
+			types.forEach(function(type) {
+				node.addEventListener(type, update);
+			});
+
+			return {
+				shift: function() {
+					return buffer.shift();
+				},
+
+				stop: function stop() {
+					types.forEach(function(type) {
+						node.removeEventListener(type, update);
+					});
+
+					stop(buffer.length);
+				}
+			};
+		});
+	}
+
 
 	// DOM Fragments and Templates
 
@@ -987,10 +1026,12 @@
 
 		// DOM traversal
 
-		find:     find,
-		query:    curry(query,   true),
-		closest:  curry(closest, true),
-		matches:  curry(matches, true),
+		find:     Fn.deprecate(get, 'dom.find(id) is now dom.get(id)'),
+		get:      get,
+		query:    curry(query,    true),
+		closest:  curry(closest,  true),
+		contains: curry(contains, true),
+		matches:  curry(matches,  true),
 		children: children,
 
 		// DOM mutation
@@ -1049,6 +1090,10 @@
 		// DOM events
 
 		Event:           Event,
+		delegate:        delegate,
+		isPrimaryButton: isPrimaryButton,
+		preventDefault:  preventDefault,
+		toKey:           toKey,
 
 		events: {
 			on:      on,
@@ -1056,11 +1101,8 @@
 			trigger: trigger
 		},
 
-		delegate:        delegate,
-		isPrimaryButton: isPrimaryButton,
-		preventDefault:  preventDefault,
-		toKey:           toKey,
-		on: curry(Stream.Events, true),
+		on:     Fn.deprecate(curry(event, true), 'dom.on() is now dom.event()'),
+		event: curry(event, true),
 
 		trigger: curry(function(type, node) {
 			trigger(node, type);

@@ -47,13 +47,13 @@
 				var input     = document.createElement('input');
 				var testEvent = Event('featuretest');
 				var result    = false;
-			
+
 				appendChild(document.body, input);
 				input.disabled = true;
 				input.addEventListener('featuretest', function(e) { result = true; });
 				input.dispatchEvent(testEvent);
 				removeNode(input);
-			
+
 				return result;
 			}),
 
@@ -106,7 +106,7 @@
 					msTransition: 'MSTransitionEnd',
 					transition: 'transitionend'
 				};
-			
+
 				var prefixed = prefix('transition');
 				return prefixed && end[prefixed];
 			}),
@@ -257,7 +257,7 @@
 	function assignAttributes(node, attributes) {
 		var names = Object.keys(attributes);
 		var n = names.length;
-	
+
 		while (n--) {
 			node.setAttribute(names[n], attributes[names[n]]);
 		}
@@ -281,10 +281,10 @@
 		if (constructors[name]) {
 			return constructors[name](arguments[1]);
 		}
-	
+
 		var node = document.createElement(name);
 		var attributes;
-	
+
 		if (typeof arguments[1] === 'string') {
 			node.innerHTML = arguments[1];
 			attributes = arguments[2];
@@ -292,11 +292,11 @@
 		else {
 			attributes = arguments[1];
 		}
-	
+
 		var names, n;
-	
+
 		if (attributes) { assignAttributes(node, attributes); }
-	
+
 		return node;
 	}
 
@@ -609,7 +609,7 @@
 
 		return offsetParent || document.documentElement;
 	}
-
+/*
 	function offset(node) {
 		// Pinched from jQuery.offset...
 	    // Return zeros for disconnected and hidden (display: none) elements
@@ -653,12 +653,38 @@
 		// Add parent borders
 		parentOffset[0] += parseFloat(style("borderLeftWidth", parent)) || 0;
 		parentOffset[1] += parseFloat(style("borderTopWidth", parent)) || 0;
-	
+
 	    // Subtract parent offsets and element margins
 		nodeOffset[0] -= (parentOffset[0] + (parseFloat(style("marginLeft", node)) || 0)),
 		nodeOffset[1] -= (parentOffset[1] + (parseFloat(style("marginTop", node)) || 0))
 
 		return nodeOffset;
+	}
+*/
+
+	function rectangle(node) {
+		return node.getClientRects()[0];
+	}
+
+	function bounds(node) {
+		return node.getBoundingClientRect();
+	}
+
+	function position(node) {
+		var rect = rectangle(node);
+		return [rect.left, rect.top];
+	}
+
+	function dimensions(node) {
+		var rect = rectangle(node);
+		return [rect.width, rect.height];
+	}
+
+	function offset(node) {
+		var rect = rectangle(node);
+		var scrollX = window.scrollX === undefined ? window.pageXOffset : window.scrollX ;
+		var scrollY = window.scrollY === undefined ? window.pageYOffset : window.scrollY ;
+		return [rect.left + scrollX, rect.top + scrollY];
 	}
 
 
@@ -739,7 +765,7 @@
 		// Mac FF
 		224: 'cmd'
 	};
-	
+
 	var untrapFocus = noop;
 
 	function Event(type, properties) {
@@ -835,7 +861,7 @@
 
 		return new Stream(function setup(notify, stop) {
 			var buffer = [];
-	
+
 			function update(value) {
 				buffer.push(value);
 				notify('push');
@@ -1087,7 +1113,7 @@
 		// Disable gestures on touch devices
 		//add(document, 'touchmove', preventDefaultOutside, layer);
 	}
-	
+
 	function enableScroll(node) {
 		node = node || document.documentElement;
 
@@ -1162,13 +1188,16 @@
 		isFragmentNode: isFragmentNode,
 		isInternalLink: isInternalLink,
 
-		type:      type,
-		tag:       tag,
-		attribute: curry(attribute, true),
-		offset:    offset,
-		position:  position,
-		classes:   classes,
-		prefix:    prefix,
+		type:        type,
+		tag:         tag,
+		attribute:   curry(attribute, true),
+		bounds:      bounds,
+		rectangle:   rectangle,
+		offset:      offset,
+		position:    position,
+		dimensions:  dimensions,
+		classes:     classes,
+		prefix:      prefix,
 
 		style: curry(function(name, node) {
 			// If name corresponds to a custom property name in styleParsers...

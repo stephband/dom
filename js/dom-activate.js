@@ -4,7 +4,6 @@
 	var debug     = false;
 
 	var Fn        = window.Fn;
-	var nothing   = Fn.nothing;
 	var dom       = window.dom;
 	var on        = dom.events.on;
 	var off       = dom.events.off;
@@ -320,7 +319,9 @@
 		var classes = dom.classes(node);
 		if (classes.contains('popable') ||
 			classes.contains('switchable') ||
-			classes.contains('toggleable')) {
+			classes.contains('toggleable') ||
+			classes.contains('focusable') ||
+			classes.contains('removeable')) {
 			activate(e, node);
 		}
 		// A bit of a fudge, but smooth scrolling is so project-dependent it is
@@ -339,7 +340,7 @@
 		// Does it point to an id?
 		var id = getHash(e.delegateTarget);
 		if (!id) { return; }
-		
+
 		activateId(e, id);
 	}
 
@@ -361,14 +362,16 @@
 
 	// Document setup
 	dom.ready(function() {
-		// Setup all things that should start out active.
+		// Setup all things that should start out active
 		dom('.' + activeClass).forEach(triggerActivate);
 
 		// Activate the node that corresponds to the hashref in
 		// location.hash, checking if it's an alphanumeric id selector
-		// (not a hash bang).
+		// (not a hash bang)
 		if (!id || !(/^#\S+$/.test(id))) { return; }
 
-		dom(id).forEach(triggerActivate);
+		// Catch errors, as id may nonetheless be an invalid selector
+		try { dom(id).forEach(triggerActivate); }
+		catch(e) {}
 	});
 })(this);

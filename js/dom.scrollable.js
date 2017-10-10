@@ -93,7 +93,7 @@ console.log('DEACTIVATE', target);
     }
 
     on(document, 'dom-activate', activate);
-	on(document, 'dom-deactivate', deactivate);
+    on(document, 'dom-deactivate', deactivate);
     on(window,   'scroll', update);
     update();
 })(this);

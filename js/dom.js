@@ -18,8 +18,10 @@
 	var assign      = Object.assign;
 	var define      = Object.defineProperties;
 	var cache       = Fn.cache;
+	var compose     = Fn.compose;
 	var curry       = Fn.curry;
 	var denormalise = Fn.denormalise;
+	var deprecate   = Fn.deprecate;
 	var id          = Fn.id;
 	var noop        = Fn.noop;
 	var overload    = Fn.overload;
@@ -293,9 +295,9 @@
 			attributes = arguments[1];
 		}
 
-		var names, n;
-
-		if (attributes) { assignAttributes(node, attributes); }
+		if (attributes) {
+			assignAttributes(node, attributes);
+		}
 
 		return node;
 	}
@@ -391,6 +393,22 @@
 
 	function classes(node) {
 		return node.classList || new TokenList(node, dom.attribute('class'), setClass);
+	}
+
+	function addClass(string, node) {
+		classes(node).add(string);
+	}
+
+	function removeClass(string, node) {
+		classes(node).remove(string);
+	}
+
+	function flashClass(string, node) {
+		var list = classes(node);
+		list.add(string);
+		requestAnimationFrame(function() {
+			list.remove(string);
+		});
 	}
 
 	function children(node) {
@@ -600,16 +618,17 @@
 		return box.top +  scrollTop - clientTop;
 	}
 
-	function getPositionParent(node) {
-		var offsetParent = node.offsetParent;
-
-		while (offsetParent && style("position", offsetParent) === "static") {
-			offsetParent = offsetParent.offsetParent;
-		}
-
-		return offsetParent || document.documentElement;
-	}
 /*
+function getPositionParent(node) {
+	var offsetParent = node.offsetParent;
+
+	while (offsetParent && style("position", offsetParent) === "static") {
+		offsetParent = offsetParent.offsetParent;
+	}
+
+	return offsetParent || document.documentElement;
+}
+
 	function offset(node) {
 		// Pinched from jQuery.offset...
 	    // Return zeros for disconnected and hidden (display: none) elements
@@ -662,8 +681,10 @@
 	}
 */
 
-	function rectangle(node) {
-		return node.getClientRects()[0];
+	var box = compose(get('0'), boxes);
+
+	function boxes(node) {
+		return node.getClientRects();
 	}
 
 	function bounds(node) {
@@ -671,20 +692,26 @@
 	}
 
 	function position(node) {
-		var rect = rectangle(node);
+		var rect = box(node);
 		return [rect.left, rect.top];
 	}
 
 	function dimensions(node) {
-		var rect = rectangle(node);
+		var rect = box(node);
 		return [rect.width, rect.height];
 	}
 
-	function offset(node) {
-		var rect = rectangle(node);
-		var scrollX = window.scrollX === undefined ? window.pageXOffset : window.scrollX ;
-		var scrollY = window.scrollY === undefined ? window.pageYOffset : window.scrollY ;
-		return [rect.left + scrollX, rect.top + scrollY];
+	//function offset(node) {
+	//	var rect = box(node);
+	//	var scrollX = window.scrollX === undefined ? window.pageXOffset : window.scrollX ;
+	//	var scrollY = window.scrollY === undefined ? window.pageYOffset : window.scrollY ;
+	//	return [rect.left + scrollX, rect.top + scrollY];
+	//}
+
+	function offset(node1, node2) {
+		var box1 = box(node1);
+		var box2 = box(node2);
+		return [box2.left - box1.left, box2.top - box1.top];
 	}
 
 
@@ -1191,14 +1218,21 @@
 		type:        type,
 		tag:         tag,
 		attribute:   curry(attribute, true),
+		classes:     classes,
+		addClass:    curry(addClass,    true),
+		removeClass: curry(removeClass, true),
+		flashClass:  curry(flashClass,  true),
+
+		box:         box,
+		boxes:       boxes,
 		bounds:      bounds,
-		rectangle:   rectangle,
-		offset:      offset,
+		rectangle:   deprecate(box, 'dom.rectangle(node) now dom.box(node)'),
+
+		offset:      curry(offset, true),
 		position:    position,
 		dimensions:  dimensions,
-		classes:     classes,
-		prefix:      prefix,
 
+		prefix:      prefix,
 		style: curry(function(name, node) {
 			// If name corresponds to a custom property name in styleParsers...
 			if (styleParsers[name]) { return styleParsers[name](node); }

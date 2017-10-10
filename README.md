@@ -149,9 +149,9 @@ is returned.
     dom.style('transform:translateX', node); // returns translation, as a number, in px
     dom.style('transform:translateY', node); // returns translation, as a number, in px
 
-##### `.offset(node)`
+##### `.offset(node1, node2)`
 
-Returns array `[x, y]` representing the document coordinates of `node`.
+Returns array `[x, y]` representing the vector from `node1` to `node2`.
 
 ##### `.position(node)`
 
@@ -161,13 +161,18 @@ Returns array `[x, y]` representing the screen coordinates of `node`.
 
 Returns array `[width, height]` representing the dimensions of `node`.
 
-##### `.rectangle(node)`
+##### `.box(node)`
 
-Returns a `DOMRect` object describing the rectangle of `node`.
+Returns a `DOMRect` object describing the box of `node`.
+
+##### `.boxes(node)`
+
+Returns an array of `DOMRect` objects describing the boxes of `node` and its
+descendants.
 
 ##### `.bounds(node)`
 
-Returns a `DOMRect` object describing the bounding rectangle of `node` and its
+Returns a `DOMRect` object describing the bounding box of `node` and its
 descendants.
 
 #### Events

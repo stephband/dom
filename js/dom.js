@@ -820,7 +820,7 @@
 	}
 
 
-	// Animation and scroll
+	// Animation and scrolling
 
 	function schedule(duration, fn) {
 		var t0 = performance.now() / 1000;

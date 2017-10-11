@@ -18,6 +18,7 @@
 	var assign      = Object.assign;
 	var curry       = Fn.curry;
 	var denormalise = Fn.denormalise;
+	var deprecate   = Fn.deprecate;
 	var overload    = Fn.overload;
 	var pipe        = Fn.pipe;
 	var pow         = Fn.pow;
@@ -844,7 +845,8 @@
 	}
 
 	function animate(duration, transform, name, object, value) {
-		return schedule(pipe(transform, denormalise(object[name], value), set(name, object)), duration);
+debugger
+		return schedule(duration, pipe(transform, denormalise(object[name], value), set(name, object)));
 	}
 
 	function scrollTo(value, node) {

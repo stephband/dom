@@ -9,6 +9,9 @@
 
     var by      = Fn.by;
     var now     = Fn.now;
+    var pow     = Fn.pow;
+    var animate = dom.animate;
+    var offset  = dom.offset;
     var on      = dom.events.on;
 
     var name    = "scrollable";
@@ -35,9 +38,12 @@
         e.default();
         activeScrollable = target;
 
+        var pos;
+
         // If we are not currently scrolling (TODO: test on iOS)
-        if (now() > scrollTime + 0.3) {
-            
+        if (performance.now() > scrollTime + 500) {
+            pos = offset(dom.viewport, target);
+            animate(0.6, pow(2), 'scrollTop', dom.viewport, pos[1]);
         }
 	}
 

@@ -12,7 +12,6 @@
 	// Functions
 
 	var on      = dom.events.on;
-	var off     = dom.events.off;
 
 	function activate(e) {
 		// Use method detection - e.defaultPrevented is not set in time for
@@ -22,7 +21,7 @@
 		var target = e.target;
 		if (!dom.classes(target).contains(name)) { return; }
 
-		var id = dom.identify(target);
+		//dom.identify(target);
 		e.default();
 	}
 
@@ -32,7 +31,7 @@
 		var target = e.target;
 		if (!dom.classes(target).contains(name)) { return; }
 
-		var id = dom.identify(e.target);
+		//dom.identify(target);
 		e.default();
 	}
 

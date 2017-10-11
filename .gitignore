@@ -1,6 +1,6 @@
 .testswarm
-archived/
+archive/
 node_modules/*
 .DS_Store
 temp/*
-npm-debug.log
+npm-debug.logtest/styles.js

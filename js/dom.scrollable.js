@@ -8,7 +8,6 @@
     var dom     = window.dom;
 
     var by      = Fn.by;
-    var now     = Fn.now;
     var pow     = Fn.pow;
     var animate = dom.animate;
     var offset  = dom.offset;

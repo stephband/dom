@@ -149,13 +149,31 @@ is returned.
     dom.style('transform:translateX', node); // returns translation, as a number, in px
     dom.style('transform:translateY', node); // returns translation, as a number, in px
 
-##### `.offset(node)`
+##### `.offset(node1, node2)`
 
-Returns array [x, y].
+Returns array `[x, y]` representing the vector from `node1` to `node2`.
 
 ##### `.position(node)`
 
-Returns array [x, y].
+Returns array `[x, y]` representing the screen coordinates of `node`.
+
+##### `.dimensions(node)`
+
+Returns array `[width, height]` representing the dimensions of `node`.
+
+##### `.box(node)`
+
+Returns a `DOMRect` object describing the box of `node`.
+
+##### `.boxes(node)`
+
+Returns an array of `DOMRect` objects describing the boxes of `node` and its
+descendants.
+
+##### `.bounds(node)`
+
+Returns a `DOMRect` object describing the bounding box of `node` and its
+descendants.
 
 #### Events
 
@@ -164,7 +182,7 @@ Returns array [x, y].
 Returns a stream of events heard on `node`:
 
     var events = dom.on('click', document.body);
-    
+
     events
     .map(Fn.get('timeStamp'))
     .each(function(timeStamp) {
@@ -192,6 +210,12 @@ Returns key string corresponding to `e.keyCode`, or `undefined`.
 ##### `.preventDefault(e)`
 
 Calls `e.preventDefault()`.
+
+##### `.trap(node)`
+
+Traps focus to only focusable elements inside <code>node</code>.
+Returns a function that removes the trap.
+Creating a new trap also removes the existing trap.
 
 ##### `.events`
 
@@ -226,11 +250,21 @@ Additionally, `properties` are assigned to the event object.
 
 ##### `.scrollRatio(node)`
 
+##### `.enableScroll(node)`
+
+##### `.disableScroll(node)`
+
 #### Feature detection
 
 ##### `.features`
 
 An object of feature detection results.
+
+    {
+        inputEventOnDisabled: true,   // false in FF, where disabled inputs don't trigger events
+        template: true,               // false in old browsers where template.content not found
+        textareaPLaceholderSet: true, // False in IE, where placeholder is also set on innerHTML
+    }
 
 
 ## Events

@@ -16,22 +16,108 @@
 	var Stream      = window.Stream;
 
 	var assign      = Object.assign;
+	var define      = Object.defineProperties;
+	var cache       = Fn.cache;
+	var compose     = Fn.compose;
 	var curry       = Fn.curry;
 	var denormalise = Fn.denormalise;
 	var deprecate   = Fn.deprecate;
+	var id          = Fn.id;
+	var noop        = Fn.noop;
 	var overload    = Fn.overload;
 	var pipe        = Fn.pipe;
 	var pow         = Fn.pow;
 	var set         = Fn.set;
+	var requestTick = Fn.requestTick;
 	var toType      = Fn.toType;
 
 
 	// Var
 
-	var A = Array.prototype;
+	var A            = Array.prototype;
+	var svgNamespace = 'http://www.w3.org/2000/svg';
+	var rspaces      = /\s+/;
+	var rpx          = /px$/;
 
-	var rspaces = /\s+/;
-	var rpx     = /px$/;
+
+	// Features
+
+	var features = define({}, {
+		inputEventsOnDisabled: {
+			// FireFox won't dispatch any events on disabled inputs:
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
+
+			get: cache(function() {
+				var input     = document.createElement('input');
+				var testEvent = Event('featuretest');
+				var result    = false;
+
+				appendChild(document.body, input);
+				input.disabled = true;
+				input.addEventListener('featuretest', function(e) { result = true; });
+				input.dispatchEvent(testEvent);
+				removeNode(input);
+
+				return result;
+			}),
+
+			enumerable: true
+		},
+
+		template: {
+			get: cache(function() {
+				// Older browsers don't know about the content property of templates.
+				return 'content' in document.createElement('template');
+			}),
+
+			enumerable: true
+		},
+
+		textareaPlaceholderSet: {
+			// IE sets textarea innerHTML (but not value) to the placeholder
+			// when setting the attribute and cloning and so on. The twats have
+			// marked it "Won't fix":
+			//
+			// https://connect.microsoft.com/IE/feedback/details/781612/placeholder-text-becomes-actual-value-after-deep-clone-on-textarea
+
+			get: cache(function() {
+				var node = document.createElement('textarea');
+				node.setAttribute('placeholder', '---');
+				return node.innerHTML === '';
+			}),
+
+			enumerable: true
+		},
+
+		transition: {
+			get: cache(function testTransition() {
+				var prefixed = prefix('transition');
+				return prefixed || false;
+			}),
+
+			enumerable: true
+		},
+
+		transitionEnd: {
+			// Infer transitionend event from CSS transition prefix
+
+			get: cache(function() {
+				var end = {
+					KhtmlTransition: false,
+					OTransition: 'oTransitionEnd',
+					MozTransition: 'transitionend',
+					WebkitTransition: 'webkitTransitionEnd',
+					msTransition: 'MSTransitionEnd',
+					transition: 'transitionend'
+				};
+
+				var prefixed = prefix('transition');
+				return prefixed && end[prefixed];
+			}),
+
+			enumerable: true
+		}
+	});
 
 
 	// Utilities
@@ -128,6 +214,20 @@
 		11: 'fragment'
 	};
 
+	var svgs = [
+		'circle',
+		'ellipse',
+		'g',
+		'line',
+		'rect',
+		//'text',
+		'use',
+		'path',
+		'polygon',
+		'polyline',
+		'svg'
+	];
+
 	var constructors = {
 		text: function(text) {
 			return document.createTextNode(text || '');
@@ -150,6 +250,32 @@
 		}
 	};
 
+	svgs.forEach(function(tag) {
+		constructors[tag] = function(attributes) {
+			var node = document.createElementNS(svgNamespace, tag);
+			if (attributes) { setSVGAttributes(node, attributes); }
+			return node;
+		};
+	});
+
+	function assignAttributes(node, attributes) {
+		var names = Object.keys(attributes);
+		var n = names.length;
+
+		while (n--) {
+			node.setAttribute(names[n], attributes[names[n]]);
+		}
+	}
+
+	function setSVGAttributes(node, attributes) {
+		var names = Object.keys(attributes);
+		var n = names.length;
+
+		while (n--) {
+			node.setAttributeNS(null, names[n], attributes[names[n]]);
+		}
+	}
+
 	function create(name) {
 		// create(name)
 		// create(name, text)
@@ -171,26 +297,41 @@
 			attributes = arguments[1];
 		}
 
-		var names, n;
-
 		if (attributes) {
-			names = Object.keys(attributes);
-			n = names.length;
-
-			while (n--) {
-				node.setAttribute(names[n], attributes[names[n]]);
-			}
+			assignAttributes(node, attributes);
 		}
 
 		return node;
 	}
 
+	var clone = features.textareaPlaceholderSet ?
+
+		function clone(node) {
+			return node.cloneNode(true);
+		} :
+
+		function cloneWithHTML(node) {
+			// IE sets textarea innerHTML to the placeholder when cloning.
+			// Reset the resulting value.
+
+			var clone     = node.cloneNode(true);
+			var textareas = dom.query('textarea', node);
+			var n         = textareas.length;
+			var clones;
+
+			if (n) {
+				clones = dom.query('textarea', clone);
+
+				while (n--) {
+					clones[n].value = textareas[n].value;
+				}
+			}
+
+			return clone;
+		} ;
+
 	function type(node) {
 		return types[node.nodeType];
-	}
-
-	function clone(node) {
-		return node.cloneNode(true);
 	}
 
 	function isElementNode(node) {
@@ -256,6 +397,22 @@
 		return node.classList || new TokenList(node, dom.attribute('class'), setClass);
 	}
 
+	function addClass(string, node) {
+		classes(node).add(string);
+	}
+
+	function removeClass(string, node) {
+		classes(node).remove(string);
+	}
+
+	function flashClass(string, node) {
+		var list = classes(node);
+		list.add(string);
+		requestAnimationFrame(function() {
+			list.remove(string);
+		});
+	}
+
 	function children(node) {
 		// In IE and Safari, document fragments do not have .children
 		return toArray(node.children || node.querySelectorAll('*'));
@@ -264,13 +421,17 @@
 
 	// DOM Traversal
 
-	function find(id) {
-		return document.getElementById(id) || undefined;
-	}
-
 	function query(selector, node) {
 		node = node || document;
 		return toArray(node.querySelectorAll(selector));
+	}
+
+	function contains(child, node) {
+		return node.contains ?
+			node.contains(child) :
+		child.parentNode ?
+			child.parentNode === node || contains(child.parentNode, node) :
+		false ;
 	}
 
 	function matches(selector, node) {
@@ -280,7 +441,7 @@
 			node.mozMatchesSelector ? node.mozMatchesSelector(selector) :
 			node.msMatchesSelector ? node.msMatchesSelector(selector) :
 			node.oMatchesSelector ? node.oMatchesSelector(selector) :
-			// Dumb fall back to simple tag name matching.
+			// Dumb fall back to simple tag name matching. Nigh-on useless.
 			tag(node) === selector ;
 	}
 
@@ -296,6 +457,14 @@
 		return matches(selector, node) ?
 			 node :
 			 closest(selector, node.parentNode, root) ;
+	}
+
+	function next(node) {
+		return node.nextElementSibling || undefined;
+	}
+
+	function previous(node) {
+		return node.previousElementSibling || undefined;
 	}
 
 
@@ -447,15 +616,16 @@
 		return box.top +  scrollTop - clientTop;
 	}
 
-	function getPositionParent(node) {
-		var offsetParent = node.offsetParent;
+/*
+function getPositionParent(node) {
+	var offsetParent = node.offsetParent;
 
-		while (offsetParent && style("position", offsetParent) === "static") {
-			offsetParent = offsetParent.offsetParent;
-		}
-
-		return offsetParent || document.documentElement;
+	while (offsetParent && style("position", offsetParent) === "static") {
+		offsetParent = offsetParent.offsetParent;
 	}
+
+	return offsetParent || document.documentElement;
+}
 
 	function offset(node) {
 		// Pinched from jQuery.offset...
@@ -507,6 +677,40 @@
 
 		return nodeOffset;
 	}
+*/
+
+	var box = compose(Fn.get('0'), boxes);
+
+	function boxes(node) {
+		return node.getClientRects();
+	}
+
+	function bounds(node) {
+		return node.getBoundingClientRect();
+	}
+
+	function position(node) {
+		var rect = box(node);
+		return [rect.left, rect.top];
+	}
+
+	function dimensions(node) {
+		var rect = box(node);
+		return [rect.width, rect.height];
+	}
+
+	//function offset(node) {
+	//	var rect = box(node);
+	//	var scrollX = window.scrollX === undefined ? window.pageXOffset : window.scrollX ;
+	//	var scrollY = window.scrollY === undefined ? window.pageYOffset : window.scrollY ;
+	//	return [rect.left + scrollX, rect.top + scrollY];
+	//}
+
+	function offset(node1, node2) {
+		var box1 = box(node1);
+		var box2 = box(node2);
+		return [box2.left - box1.left, box2.top - box1.top];
+	}
 
 
 	// DOM Events
@@ -524,6 +728,10 @@
 		18: 'alt',
 		27: 'escape',
 		32: 'space',
+		33: 'pageup',
+		34: 'pagedown',
+		35: 'pageright',
+		36: 'pageleft',
 		37: 'left',
 		38: 'up',
 		39: 'right',
@@ -575,7 +783,7 @@
 		189: '-',
 		190: '.',
 		191: '/',
-		220: '[',
+		219: '[',
 		220: '\\',
 		221: ']',
 		222: '\'',
@@ -583,8 +791,10 @@
 		224: 'cmd'
 	};
 
+	var untrapFocus = noop;
+
 	function Event(type, properties) {
-		var options = Object.assign({}, eventOptions, properties);
+		var options = assign({}, eventOptions, properties);
 		var event   = new CustomEvent(type, options);
 
 		if (properties) {
@@ -671,12 +881,96 @@
 		};
 	}
 
+	function event(types, node) {
+		types = types.split(rspaces);
+
+		return new Stream(function setup(notify, stop) {
+			var buffer = [];
+
+			function update(value) {
+				buffer.push(value);
+				notify('push');
+			}
+
+			types.forEach(function(type) {
+				node.addEventListener(type, update);
+			});
+
+			return {
+				shift: function() {
+					return buffer.shift();
+				},
+
+				stop: function stop() {
+					types.forEach(function(type) {
+						node.removeEventListener(type, update);
+					});
+
+					stop(buffer.length);
+				}
+			};
+		});
+	}
+
+	function trapFocus(node) {
+		// Trap focus as described by Nikolas Zachas:
+		// http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
+
+		// If there is an existing focus trap, remove it
+		untrapFocus();
+
+		// Cache the currently focused node
+		var focusNode = document.activeElement || document.body;
+
+		function resetFocus() {
+			var focusable = dom.query('[tabindex], a, input, textarea, button', node)[0];
+			if (focusable) { focusable.focus(); }
+		}
+
+		function preventFocus(e) {
+			if (node.contains(e.target)) { return; }
+
+			// If trying to focus outside node, set the focus back
+			// to the first thing inside.
+			resetFocus();
+			e.preventDefault();
+			e.stopPropagation();
+		}
+
+		// Prevent focus in capture phase
+		document.addEventListener("focus", preventFocus, true);
+
+		// Move focus into node
+		requestTick(resetFocus);
+
+		return untrapFocus = function() {
+			untrapFocus = noop;
+			document.removeEventListener('focus', preventFocus, true);
+
+			// Set focus back to the thing that was last focused when the
+			// dialog was opened.
+			requestTick(function() {
+				focusNode.focus();
+			});
+		};
+	}
 
 
 	// DOM Fragments and Templates
 
+	var mimetypes = {
+		xml:  'application/xml',
+		html: 'text/html',
+		svg:  'image/svg+xml'
+	};
+
 	function fragmentFromChildren(node) {
+		if (node.domFragmentFromChildren) {
+			return node.domFragmentFromChildren;
+		}
+
 		var fragment = create('fragment');
+		node.domFragmentFromChildren = fragment;
 		append(fragment, node.childNodes);
 		return fragment;
 	}
@@ -703,7 +997,7 @@
 		// In browsers where templates are not inert their content can clash
 		// with content in the DOM - ids, for example. Remove the template as
 		// a precaution.
-		if (t === 'template' && !dom.features.template) {
+		if (t === 'template' && !features.template) {
 			remove(node);
 		}
 
@@ -713,11 +1007,8 @@
 	}
 
 	function parse(type, string) {
-		var mimetype = ({
-			xml:  'application/xml',
-			html: 'text/html',
-			svg:  'image/svg+xml'
-		})[type];
+		var mimetype = mimetypes[type];
+		var xml;
 
 		// From jQuery source...
 		try {
@@ -733,51 +1024,17 @@
 		return xml;
 	}
 
+	var escape = (function() {
+		var pre = document.createElement('pre');
+		var text = document.createTextNode('');
 
-	// DOM Feature tests
+		pre.appendChild(text);
 
-	var testEvent = Event('featuretest');
-
-	function testTemplate() {
-		// Older browsers don't know about the content property of templates.
-		return 'content' in document.createElement('template');
-	}
-
-	function testEventDispatchOnDisabled() {
-		// FireFox won't dispatch any events on disabled inputs:
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
-
-		var input = document.createElement('input');
-		var result = false;
-
-		appendChild(document.body, input);
-		input.disabled = true;
-		input.addEventListener('featuretest', function(e) { result = true; });
-		input.dispatchEvent(testEvent);
-		removeNode(input);
-
-		return result;
-	}
-
-	function testTransition() {
-		// Infer transitionend event from CSS transition prefix
-		var prefixed = prefix('transition');
-		return prefixed || false;
-	}
-
-	function testTransitionEnd() {
-		var end = {
-			KhtmlTransition: false,
-			OTransition: 'oTransitionEnd',
-			MozTransition: 'transitionend',
-			WebkitTransition: 'webkitTransitionEnd',
-			msTransition: 'MSTransitionEnd',
-			transition: 'transitionend'
+		return function escape(value) {
+			text.textContent = value;
+			return pre.innerHTML;
 		};
-
-		var prefixed = prefix('transition');
-		return prefixed && end[prefixed];
-	}
+	})();
 
 
 	// Units
@@ -788,7 +1045,7 @@
 	var fontSize;
 
 	var toPx = overload(toType, {
-		'number': Fn.id,
+		'number': id,
 
 		'string': function(string) {
 			var data, n;
@@ -845,16 +1102,53 @@
 	}
 
 	function animate(duration, transform, name, object, value) {
-debugger
 		return schedule(duration, pipe(transform, denormalise(object[name], value), set(name, object)));
 	}
 
-	function scrollTo(value, node) {
-		return animate(0.6, pow(2), 'scrollTop', node || dom.scroller(), toPx(value));
+	function animateScroll(value) {
+		return animate(0.6, pow(2), 'scrollTop', dom.viewport, toPx(value));
 	}
 
 	function scrollRatio(node) {
 		return node.scrollTop / (node.scrollHeight - node.clientHeight);
+	}
+
+	function disableScroll(node) {
+		node = node || document.documentElement;
+
+		var scrollLeft = node.scrollLeft;
+		var scrollTop  = node.scrollTop;
+
+		// Remove scrollbars from the documentElement
+		//docElem.css({ overflow: 'hidden' });
+		node.style.overflow = 'hidden';
+
+		// FF has a nasty habit of linking the scroll parameters
+		// of document with the documentElement, causing the page
+		// to jump when overflow is hidden on the documentElement.
+		// Reset the scroll position.
+		if (scrollTop)  { node.scrollTop = scrollTop; }
+		if (scrollLeft) { node.scrollLeft = scrollLeft; }
+
+		// Disable gestures on touch devices
+		//add(document, 'touchmove', preventDefaultOutside, layer);
+	}
+
+	function enableScroll(node) {
+		node = node || document.documentElement;
+
+		var scrollLeft = node.scrollLeft;
+		var scrollTop  = node.scrollTop;
+
+		// Put scrollbars back onto docElem
+		node.style.overflow = '';
+
+		// FF fix. Reset the scroll position.
+		if (scrollTop) { node.scrollTop = scrollTop; }
+		if (scrollLeft) { node.scrollLeft = scrollLeft; }
+
+		// Enable gestures on touch devices
+		//remove(document, 'touchmove', preventDefaultOutside);
 	}
 
 
@@ -883,14 +1177,25 @@ debugger
 
 		// DOM traversal
 
-		find:     find,
-		query:    curry(query,   true),
-		closest:  curry(closest, true),
-		matches:  curry(matches, true),
+		get: function get(id) {
+			return document.getElementById(id) || undefined;
+		},
+
+		find:     Fn.deprecate(function get(id) {
+			return document.getElementById(id) || undefined;
+		}, 'dom.find(id) is now dom.get(id)'),
+
+		query:    curry(query,    true),
+		closest:  curry(closest,  true),
+		contains: curry(contains, true),
+		matches:  curry(matches,  true),
 		children: children,
+		next:     next,
+		previous: previous,
 
 		// DOM mutation
 
+		assign:   curry(assignAttributes,  true),
 		create:   create,
 		clone:    clone,
 		identify: identify,
@@ -909,13 +1214,24 @@ debugger
 		isFragmentNode: isFragmentNode,
 		isInternalLink: isInternalLink,
 
-		type:      type,
-		tag:       tag,
-		attribute: curry(attribute, true),
-		offset:    offset,
-		position:  position,
-		classes:   classes,
+		type:        type,
+		tag:         tag,
+		attribute:   curry(attribute, true),
+		classes:     classes,
+		addClass:    curry(addClass,    true),
+		removeClass: curry(removeClass, true),
+		flashClass:  curry(flashClass,  true),
 
+		box:         box,
+		boxes:       boxes,
+		bounds:      bounds,
+		rectangle:   deprecate(box, 'dom.rectangle(node) now dom.box(node)'),
+
+		offset:      curry(offset, true),
+		position:    position,
+		dimensions:  dimensions,
+
+		prefix:      prefix,
 		style: curry(function(name, node) {
 			// If name corresponds to a custom property name in styleParsers...
 			if (styleParsers[name]) { return styleParsers[name](node); }
@@ -939,11 +1255,18 @@ debugger
 		fragmentFromChildren: fragmentFromChildren,
 		fragmentFromHTML:     fragmentFromHTML,
 		fragmentFromId:       fragmentFromId,
+		escape:               escape,
 		parse:                curry(parse),
 
 		// DOM events
 
 		Event:           Event,
+		delegate:        delegate,
+		isPrimaryButton: isPrimaryButton,
+		preventDefault:  preventDefault,
+		toKey:           toKey,
+		trapFocus:       trapFocus,
+		trap:            Fn.deprecate(trapFocus, 'dom.trap() is now dom.trapFocus()'),
 
 		events: {
 			on:      on,
@@ -951,18 +1274,16 @@ debugger
 			trigger: trigger
 		},
 
-		delegate:        delegate,
-		isPrimaryButton: isPrimaryButton,
-		preventDefault:  preventDefault,
-		toKey:           toKey,
-		on: curry(Stream.Events, true),
+		on:     Fn.deprecate(curry(event, true), 'dom.on() is now dom.event()'),
 
 		trigger: curry(function(type, node) {
 			trigger(node, type);
 			return node;
 		}, true),
 
-		// DOM Animation
+		event: curry(event, true),
+
+		// DOM animation adn scrolling
 
 		// schedule(duration, fn)
 		//
@@ -982,14 +1303,32 @@ debugger
 
 		animate: curry(animate, true),
 
-		// scrollTo(n)
+		// animateScroll(n)
 		//
-		// Animates scrollTop to n (in px)
+		// Animate scrollTop of scrollingElement to n (in px)
 
-		scrollTo:    scrollTo,
+		animateScroll: animateScroll,
+		scrollTo: deprecate(animateScroll, 'scrollTo(px, node) renamed to animateScroll(px)'),
+
+		// scrollRatio(node)
+		//
+		// Returns scrollTop as ratio of scrollHeight
+
 		scrollRatio: scrollRatio,
 
-		// request(n, fn)
+		// disableScroll(node)
+		//
+		// Disables scrolling without causing node's content to jump
+
+		disableScroll: disableScroll,
+
+		// enableScroll(node)
+		//
+		// Ensables scrolling without causing node's content to jump
+
+		enableScroll:  enableScroll,
+
+		// requestFrameN(n, fn)
 		//
 		// calls fn on the nth requestAnimationFrame
 
@@ -1001,15 +1340,10 @@ debugger
 
 		// Features
 
-		features: {
-			template:              testTemplate(),
-			inputEventsOnDisabled: testEventDispatchOnDisabled(),
-			transition:            testTransition(),
-			transitionEnd:         testTransitionEnd()
-		}
+		features: features
 	});
 
-	Object.defineProperties(dom, {
+	define(dom, {
 		// Element shortcuts
 		root: { value: document.documentElement, enumerable: true },
 		head: { value: document.head, enumerable: true },

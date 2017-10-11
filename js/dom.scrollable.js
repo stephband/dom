@@ -4,10 +4,14 @@
 
 (function(window) {
 
+    var Fn      = window.Fn;
     var dom     = window.dom;
-    var name    = "scrollable";
+
+    var by      = Fn.by;
+    var now     = Fn.now;
     var on      = dom.events.on;
-    var trigger = dom.events.trigger;
+
+    var name    = "scrollable";
 
     var activeScrollable;
 
@@ -27,9 +31,14 @@
 
             dom.trigger('dom-deactivate', activeScrollable);
         }
-console.log('ACTIVATE', target);
+
         e.default();
         activeScrollable = target;
+
+        // If we are not currently scrolling (TODO: test on iOS)
+        if (now() > scrollTime + 0.3) {
+            
+        }
 	}
 
 	function deactivate(e) {
@@ -37,7 +46,6 @@ console.log('ACTIVATE', target);
 
         var target = e.target;
         if (!dom.classes(target).contains(name)) { return; }
-console.log('DEACTIVATE', target);
         e.default();
 
         // If node is already active, ignore
@@ -56,28 +64,37 @@ console.log('DEACTIVATE', target);
 
     function windowBox() {
         return {
-            left: 0,
-            top:  0,
+            left:   0,
+            top:    0,
+            right:  window.innerWidth,
+            bottom: window.innerHeight,
             width:  window.innerWidth,
             height: window.innerHeight
         };
     }
 
-    function update() {
+    var scrollTime = 0;
+
+    function record(e) {
+        scrollTime = e.timeStamp;
+    }
+
+    function update(e) {
         var scrollables = dom('.scrollable');
-        var boxes       = scrollables.map(box);
+        var boxes       = scrollables.map(box).sort(by('top'));
         var winBox      = windowBox();
 
         var n = -1;
         while (boxes[++n]) {
-            if (boxes[n].top < winBox.height / 2 && boxes[n].bottom > winBox.height / 2) {
+            // Stop on scrollable lower than the break
+            if (boxes[n].top > winBox.height / 2) {
                 break;
             }
         }
+        --n;
 
-        if (n >= boxes.length) {
-            return;
-        }
+        if (n < 0) { return; }
+        if (n >= boxes.length) { return; }
 
         var scrollable = scrollables[n];
 
@@ -94,6 +111,7 @@ console.log('DEACTIVATE', target);
 
     on(document, 'dom-activate', activate);
     on(document, 'dom-deactivate', deactivate);
+    on(window,   'scroll', record);
     on(window,   'scroll', update);
     update();
 })(this);

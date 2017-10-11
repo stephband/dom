@@ -19,7 +19,9 @@
 	var curry       = Fn.curry;
 	var denormalise = Fn.denormalise;
 	var overload    = Fn.overload;
+	var pipe        = Fn.pipe;
 	var pow         = Fn.pow;
+	var set         = Fn.set;
 	var toType      = Fn.toType;
 
 
@@ -152,14 +154,14 @@
 		// create(name, text)
 		// create(name, attributes)
 		// create(name, text, attributes)
-	
+
 		if (constructors[name]) {
 			return constructors[name](arguments[1]);
 		}
-	
+
 		var node = document.createElement(name);
 		var attributes;
-	
+
 		if (typeof arguments[1] === 'string') {
 			node.innerHTML = arguments[1];
 			attributes = arguments[2];
@@ -167,18 +169,18 @@
 		else {
 			attributes = arguments[1];
 		}
-	
+
 		var names, n;
-	
+
 		if (attributes) {
 			names = Object.keys(attributes);
 			n = names.length;
-	
+
 			while (n--) {
 				node.setAttribute(names[n], attributes[names[n]]);
 			}
 		}
-	
+
 		return node;
 	}
 
@@ -497,7 +499,7 @@
 		// Add parent borders
 		parentOffset[0] += parseFloat(style("borderLeftWidth", parent)) || 0;
 		parentOffset[1] += parseFloat(style("borderTopWidth", parent)) || 0;
-	
+
 	    // Subtract parent offsets and element margins
 		nodeOffset[0] -= (parentOffset[0] + (parseFloat(style("marginLeft", node)) || 0)),
 		nodeOffset[1] -= (parentOffset[1] + (parseFloat(style("marginTop", node)) || 0))
@@ -820,35 +822,33 @@
 
 	// Animation and scroll
 
-	function animate(fn, duration, value, name, object) {
-		var t = performance.now();
-		var scale = denormalise(object[name], value);
+	function schedule(duration, fn) {
+		var t0 = performance.now() / 1000;
 
-		function frame(time) {
+		function frame(t1) {
 			// Progress from 0-1
-			var p = (time - t) / (duration * 1000);
+			var progress = (t1 - t0) / (duration * 1000);
 
-			if (p < 1) {
-				object[name] = scale(fn(p));
+			if (progress < 1) {
+				if (progress > 0) {
+					fn(progress);
+				}
 				requestAnimationFrame(frame);
 			}
 			else {
-				object[name] = value;
+				fn(1);
 			}
 		}
 
 		requestAnimationFrame(frame);
 	}
 
-	function requestFrameN(n, fn) {
-		(function frame() {
-			return requestAnimationFrame(--n ? frame : fn);
-		}());
+	function animate(duration, transform, name, object, value) {
+		return schedule(pipe(transform, denormalise(object[name], value), set(name, object)), duration);
 	}
 
-	function scrollTo(px, node) {
-		px = toPx(px);
-		animate(pow(2), 0.6, px, 'scrollTop', node || dom.scroller());
+	function scrollTo(value, node) {
+		return animate(0.6, pow(2), 'scrollTop', node || dom.scroller(), toPx(value));
 	}
 
 	function scrollRatio(node) {
@@ -962,28 +962,40 @@
 
 		// DOM Animation
 
-		// animate(fn, duration, value, name, object)
+		// schedule(duration, fn)
 		//
-		// fn       - function that maps x (0-1) to y (0-1)
-		// duration - in seconds
-		// value    - target value
-		// name     - name of property to animate
-		// object   - object to animate
+		// duration  - duration seconds
+		// fn        - callback that is called with a float representing
+		//             progress in the range 0-1
+
+		schedule: curry(schedule, true),
+
+		// animate(duration, transform, value, name, object)
+		//
+		// duration  - in seconds
+		// transform - function that maps x (0-1) to y (0-1)
+		// name      - name of property to animate
+		// object    - object to animate
+		// value     - target value
 
 		animate: curry(animate, true),
-
-		// request(n, fn)
-		//
-		// calls fn on the nth requestAnimationFrame
-
-		requestFrameN: curry(requestFrameN, true),
 
 		// scrollTo(n)
 		//
 		// Animates scrollTop to n (in px)
 
-		scrollTo: scrollTo,
+		scrollTo:    scrollTo,
 		scrollRatio: scrollRatio,
+
+		// request(n, fn)
+		//
+		// calls fn on the nth requestAnimationFrame
+
+		requestFrameN: curry(deprecate(function requestFrameN(n, fn) {
+			(function frame() {
+				return requestAnimationFrame(--n ? frame : fn);
+			}());
+		}, 'requestFrameN() will be removed soon'), true),
 
 		// Features
 

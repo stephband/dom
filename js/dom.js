@@ -43,7 +43,7 @@
 	// Features
 
 	var features = define({}, {
-		inputEventsOnDisabled: {
+		inputEventsWhileDisabled: {
 			// FireFox won't dispatch any events on disabled inputs:
 			// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
 
@@ -98,7 +98,7 @@
 			enumerable: true
 		},
 
-		transitionEnd: {
+		transitionend: {
 			// Infer transitionend event from CSS transition prefix
 
 			get: cache(function() {
@@ -822,7 +822,7 @@ function getPositionParent(node) {
 	function on(node, types, fn, data) {
 		types = types.split(rspaces);
 
-		var events = node[eventsSymbol] || (node[eventsSymbol] = {});
+		var events  = node[eventsSymbol] || (node[eventsSymbol] = {});
 		var handler = bindTail(fn, data);
 		var handlers, type;
 
@@ -867,6 +867,24 @@ function getPositionParent(node) {
 		// given type from inside the handler of another event of that type.
 		var event = Event(type, properties);
 		node.dispatchEvent(event);
+	}
+
+	function end(e, fn) {
+		off(e.currentTarget, features.transitionend, end);
+		fn(e.timeStamp);
+	}
+
+	function requestEvent(type, fn, node) {
+		if (type === 'transitionend') {
+			if (!features.transition) {
+				fn(performance.now());
+				return;
+			}
+
+			type = features.transitionend;
+		}
+
+		on(node, type, end, fn);
 	}
 
 	function delegate(selector, fn) {
@@ -1081,7 +1099,7 @@ function getPositionParent(node) {
 	// Animation and scrolling
 
 	function schedule(duration, fn) {
-		var t0 = performance.now() / 1000;
+		var t0 = performance.now();
 
 		function frame(t1) {
 			// Progress from 0-1
@@ -1091,18 +1109,25 @@ function getPositionParent(node) {
 				if (progress > 0) {
 					fn(progress);
 				}
-				requestAnimationFrame(frame);
+				id = requestAnimationFrame(frame);
 			}
 			else {
 				fn(1);
 			}
 		}
 
-		requestAnimationFrame(frame);
+		var id = requestAnimationFrame(frame);
+
+		return function cancel() {
+			cancelAnimationFrame(id);
+		};
 	}
 
 	function animate(duration, transform, name, object, value) {
-		return schedule(duration, pipe(transform, denormalise(object[name], value), set(name, object)));
+		return schedule(
+			duration,
+			pipe(transform, denormalise(object[name], value), set(name, object))
+		);
 	}
 
 	function animateScroll(value) {
@@ -1324,13 +1349,15 @@ function getPositionParent(node) {
 
 		// enableScroll(node)
 		//
-		// Ensables scrolling without causing node's content to jump
+		// Enables scrolling without causing node's content to jump
 
-		enableScroll:  enableScroll,
+		enableScroll: enableScroll,
 
-		// requestFrameN(n, fn)
-		//
-		// calls fn on the nth requestAnimationFrame
+		// requestEvent(type, fn, node)
+
+		requestEvent: requestEvent,
+
+		requestFrame: requestAnimationFrame.bind(null),
 
 		requestFrameN: curry(deprecate(function requestFrameN(n, fn) {
 			(function frame() {
@@ -1340,7 +1367,17 @@ function getPositionParent(node) {
 
 		// Features
 
-		features: features
+		features: features,
+
+		// Safe visible area
+
+		safe: define({
+			left: 0
+		}, {
+			right:  { get: function() { return window.innerWidth; }, enumerable: true, configurable: true },
+			top:    { get: function() { return style('padding-top', document.body); }, enumerable: true, configurable: true },
+			bottom: { get: function() { return window.innerHeight; }, enumerable: true, configurable: true }
+		})
 	});
 
 	define(dom, {

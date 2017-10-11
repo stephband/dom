@@ -49,34 +49,6 @@
 		return (settings.cache && data.buttons) || (data.node.id && findButtons(data.node.id));
 	}
 
-	function addTransitionClass(node, classes, callback) {
-		transition(node, function() {
-			dom.classes(node).add(classes);
-		}, callback);
-	}
-
-	function removeTransitionClass(node, classes, callback) {
-		transition(node, function() {
-			dom.classes(node).remove(classes);
-		}, callback);
-	}
-
-	function transition(node, fn, callback) {
-		if (callback && dom.features.transition) {
-			on(node, dom.features.transitionEnd, function transitionend(e) {
-				off(node, dom.features.transitionEnd, transitionend);
-				callback.apply(node);
-			});
-		}
-
-		fn.apply(this);
-
-		if (callback && !dom.features.transition) {
-			callback.apply(node);
-		}
-	}
-
-
 	// Listen to activate events
 
 	function defaultActivate() {
@@ -90,10 +62,6 @@
 		this.preventDefault();
 
 		if (debug) { console.log('[activate] default | target:', this.target.id, 'data:', data); }
-
-		addTransitionClass(node, activeClass, function() {
-			dom.trigger('dom-activateend', node);
-		});
 
 		buttons = getButtons(data);
 
@@ -115,10 +83,6 @@
 		this.preventDefault();
 
 		if (debug) { console.log('[deactivate] default | target:', this.target.id, 'data:', data); }
-
-		removeTransitionClass(node, activeClass, function() {
-			dom.trigger('dom-deactivateend', node);
-		});
 
 		buttons = getButtons(data);
 
@@ -321,7 +285,8 @@
 			classes.contains('switchable') ||
 			classes.contains('toggleable') ||
 			classes.contains('focusable') ||
-			classes.contains('removeable')) {
+			classes.contains('removeable') ||
+			classes.contains('locateable')) {
 			activate(e, node);
 		}
 		// A bit of a fudge, but smooth scrolling is so project-dependent it is

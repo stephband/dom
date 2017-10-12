@@ -5,6 +5,7 @@
 
 	var Fn        = window.Fn;
 	var dom       = window.dom;
+	var classes   = dom.classes;
 	var on        = dom.events.on;
 	var off       = dom.events.off;
 	var trigger   = dom.events.trigger;
@@ -63,6 +64,7 @@ console.log('FOOO', node, data.active)
 
 		if (debug) { console.log('[activate] default | target:', this.target.id, 'data:', data); }
 
+		classes(node).add(activeClass);
 		buttons = getButtons(data);
 
 		if (buttons) {
@@ -84,6 +86,7 @@ console.log('FOOO', node, data.active)
 
 		if (debug) { console.log('[deactivate] default | target:', this.target.id, 'data:', data); }
 
+		classes(node).remove(activeClass);
 		buttons = getButtons(data);
 
 		if (buttons) {

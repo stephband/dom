@@ -34,7 +34,7 @@
 		// Use method detection - e.defaultPrevented is not set in time for
 		// subsequent listeners on the same node
 		if (!e.default) { return; }
-
+console.log('HEYHEY')
 		var target = e.target;
 		if (!dom.classes(target).contains(name)) { return; }
 
@@ -44,7 +44,7 @@
 		.forEach(function(node) {
 			on(node, 'click', click, e.target);
 		});
-
+console.log('FART')
 		e.default();
 	}
 

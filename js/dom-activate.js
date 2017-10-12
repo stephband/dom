@@ -55,7 +55,7 @@
 		var data = this.data || cacheData(this.target);
 		var node = data.node;
 		var buttons;
-
+console.log('FOOO', node, data.active)
 		// Don't do anything if elem is already active
 		if (data.active) { return; }
 		data.active = true;

@@ -8,7 +8,7 @@
 	var name    = "positionable";
 
 	function alignPosition(target, node, classes) {
-		var targetOffset = dom.offset(target);
+		var targetOffset = dom.offset(window, target);
 
 		classes = classes || dom.classes(node);
 		classes.add('notransition');
@@ -16,7 +16,7 @@
 		node.style.marginTop = '0px';
 		node.style.marginLeft = '0px';
 
-		var offset   = dom.offset(node);
+		var offset   = dom.offset(window, node);
 		var position = dom.position(node);
 
 		node.style.marginTop = '';

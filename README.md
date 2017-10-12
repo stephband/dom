@@ -256,6 +256,12 @@ Animates property `name` of object to `value` over `duration` seconds, using the
 function `transform` as an easing function. Updates the object on animation
 frames.
 
+<!--
+##### `.animateScroll(value)`
+
+Helper for animating scrollTop of main view.
+-->
+
 ##### `.requestFrame(fn)`
 
 Alias of window.requestAnimationFrame.
@@ -263,8 +269,6 @@ Alias of window.requestAnimationFrame.
 ##### `.requestEvent(type, fn, node)`
 
 Calls fn once on the next event of `type`.
-
-##### `.scrollTo(px, node)`
 
 ##### `.scrollRatio(node)`
 

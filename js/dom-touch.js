@@ -40,7 +40,8 @@
 	var preventDefault  = dom.preventDefault;
 
 	function isIgnoreTag(e) {
-		return !!ignoreTags[e.target.tagName.toLowerCase()];
+		var tag = e.target.tagName;
+		return tag && !!ignoreTags[tag.toLowerCase()];
 	}
 
 	function identifiedTouch(touchList, id) {
@@ -49,13 +50,13 @@
 		if (touchList.identifiedTouch) {
 			return touchList.identifiedTouch(id);
 		}
-		
+
 		// touchList.identifiedTouch() does not exist in
 		// webkit yet… we must do the search ourselves...
-		
+
 		i = -1;
 		l = touchList.length;
-		
+
 		while (++i < l) {
 			if (touchList[i].identifier === id) {
 				return touchList[i];
@@ -79,7 +80,7 @@
 
 
 	// Handlers that decide when the first movestart is triggered
-	
+
 	function mousedown(e){
 		// Ignore non-primary buttons
 		if (!isPrimaryButton(e)) { return; }

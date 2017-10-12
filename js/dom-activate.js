@@ -53,7 +53,6 @@
 
 	function defaultActivate() {
 		var data = this.data || cacheData(this.target);
-		var node = data.node;
 		var buttons;
 
 		// Don't do anything if elem is already active
@@ -74,7 +73,6 @@
 
 	function defaultDeactivate() {
 		var data = this.data || cacheData(this.target);
-		var node = data.node;
 		var buttons;
 
 		// Don't do anything if elem is already inactive

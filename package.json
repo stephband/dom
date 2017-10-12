@@ -1,7 +1,7 @@
 {
     "name": "dom",
     "title": "dom",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "author": {
         "name": "Stephen Band",
         "url": "http://stephen.band",
@@ -21,6 +21,7 @@
 		"js/dom.switchable.js",
 		"js/dom.moveable.js",
 		"js/dom.swipeable.js",
+		"js/dom.locateable.js",
 		"js/dom.dialog.js"
     ],
     "main": "js/dom.js",

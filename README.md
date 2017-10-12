@@ -23,9 +23,9 @@ or reduce iterators.
 
 	var fragment = dom.create('fragment');
 
-    Fn.from(dom('.my-icon'))
+    dom('.my-icon')
     .map(dom.closest('a'))
-    .each(dom.append(fragment));
+    .forEach(dom.append(fragment));
 
 ##### `.ready(fn)`
 
@@ -69,17 +69,17 @@ Returns `true` if the `href` of `node` points outside of the current domain.
 
 ##### `.identify(node)`
 
-Returns the id of `node`. Where there is no id a random id is generated,
-set on `node` and returned.
+Returns the id of `node`, or where `node` has no id, a random id is generated,
+set on `node` and returned:
 
     dom('button')
     .map(dom.identify)
     ...
 
-If you just want to get the id, us `Fn.get()`.
+If you just want to get an existing id rather than generate a new one:
 
     dom('button')
-    .map(Fn.get('id'))
+    .map(get('id'))
     ...
 
 ##### `.type(node)`
@@ -163,35 +163,37 @@ Returns array `[width, height]` representing the dimensions of `node`.
 
 ##### `.box(node)`
 
-Returns a `DOMRect` object describing the box of `node`.
-
-##### `.boxes(node)`
-
-Returns an array of `DOMRect` objects describing the boxes of `node` and its
-descendants.
+Returns a `DOMRect` object describing the draw box of `node`.
+(If `node` is `window` a plain object is returned).
 
 ##### `.bounds(node)`
 
 Returns a `DOMRect` object describing the bounding box of `node` and its
 descendants.
 
+<!--
+##### `.safe`
+
+A box object describing a safe viewing area. This property is to be updated or
+replaced by your project. Used by locateable.
+-->
+
 #### Events
 
-##### `.on(type, node)`
+##### `.event(type, node)`
 
 Returns a stream of events heard on `node`:
 
-    var events = dom.on('click', document.body);
-
-    events
-    .map(Fn.get('timeStamp'))
-    .each(function(timeStamp) {
+    var stream = dom
+	.event('click', document.body);
+    .map(get('timeStamp'))
+    .each(function(time) {
         // Do something with times
     });
 
 Stopping the stream removes event listeners from `node`:
 
-    events.stop();
+    stream.stop();
 
 ##### `.trigger(type, node)`
 
@@ -211,7 +213,7 @@ Returns key string corresponding to `e.keyCode`, or `undefined`.
 
 Calls `e.preventDefault()`.
 
-##### `.trap(node)`
+##### `.trapFocus(node)`
 
 Traps focus to only focusable elements inside <code>node</code>.
 Returns a function that removes the trap.
@@ -240,13 +242,33 @@ Creates a CustomEvent of type `type`.
 Additionally, `properties` are assigned to the event object.
 
 
-#### DOM Animation
+#### DOM Animation and scrolling
 
-##### `.animate(fn, duration, value, name, object)`
+##### `.schedule(duration, fn)`
 
-##### `.requestFrameN(n, fn)`
+Calls `fn` on each animation frame until `duration` seconds has elapsed. `fn` is
+passed a single argument, `progress`, a number in the range 0-1 indicating
+progress through the duration.
 
-##### `.scrollTo(px, node)`
+##### `.animate(duration, transform, name, object, value)`
+
+Animates property `name` of object to `value` over `duration` seconds, using the
+function `transform` as an easing function. Updates the object on animation
+frames.
+
+<!--
+##### `.animateScroll(value)`
+
+Helper for animating scrollTop of main view.
+-->
+
+##### `.requestFrame(fn)`
+
+Alias of window.requestAnimationFrame.
+
+##### `.requestEvent(type, fn, node)`
+
+Calls fn once on the next event of `type`.
 
 ##### `.scrollRatio(node)`
 
@@ -261,9 +283,11 @@ Additionally, `properties` are assigned to the event object.
 An object of feature detection results.
 
     {
-        inputEventOnDisabled: true,   // false in FF, where disabled inputs don't trigger events
-        template: true,               // false in old browsers where template.content not found
-        textareaPLaceholderSet: true, // False in IE, where placeholder is also set on innerHTML
+        inputEventOnDisabled: true,    // false in FF, where disabled inputs don't trigger events
+        template: true,                // false in old browsers where template.content not found
+        textareaPlaceholderSet: true,  // false in IE, where placeholder is also set on innerHTML
+		transition: true,              // false in older browsers where transitions not supported
+		transitionend: 'transitionend' // Name of transitionend event with prefix
     }
 
 
@@ -334,3 +358,6 @@ Lint the contents of `js/`:
 
 *0.1*: first import from jquery.event.move and Fn library
 *0.2*: API stabilised
+...
+*1.0*: Fixed method names
+*1.1*: Improves box and animation functions

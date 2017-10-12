@@ -63,7 +63,7 @@
 
 		if (debug) { console.log('[activate] default | target:', this.target.id, 'data:', data); }
 
-		classes(node).add(activeClass);
+		classes(data.node).add(activeClass);
 		buttons = getButtons(data);
 
 		if (buttons) {
@@ -84,7 +84,7 @@
 
 		if (debug) { console.log('[deactivate] default | target:', this.target.id, 'data:', data); }
 
-		classes(node).remove(activeClass);
+		classes(data.node).remove(activeClass);
 		buttons = getButtons(data);
 
 		if (buttons) {

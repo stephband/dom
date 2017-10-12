@@ -679,10 +679,19 @@ function getPositionParent(node) {
 	}
 */
 
-	var box = compose(Fn.get('0'), boxes);
+	function windowBox() {
+		return {
+			left:   0,
+			top:    0,
+			width:  window.innerWidth,
+			height: window.innerHeight
+		};
+	}
 
-	function boxes(node) {
-		return node.getClientRects();
+	function box(node) {
+		return node === window ?
+			windowBox() :
+			node.getClientRects()[0] ;
 	}
 
 	function bounds(node) {
@@ -1043,7 +1052,7 @@ function getPositionParent(node) {
 	}
 
 	var escape = (function() {
-		var pre = document.createElement('pre');
+		var pre  = document.createElement('pre');
 		var text = document.createTextNode('');
 
 		pre.appendChild(text);
@@ -1248,7 +1257,6 @@ function getPositionParent(node) {
 		flashClass:  curry(flashClass,  true),
 
 		box:         box,
-		boxes:       boxes,
 		bounds:      bounds,
 		rectangle:   deprecate(box, 'dom.rectangle(node) now dom.box(node)'),
 

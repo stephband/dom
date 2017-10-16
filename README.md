@@ -199,7 +199,7 @@ Stopping the stream removes event listeners from `node`:
 
 Triggers event of `type` on `node`.
 
-    dom.trigger('dom-activate', dom.find('toggle-id'));
+    dom.trigger('dom-activate', dom.get('toggle-id'));
 
 ##### `.isPrimaryButton(e)`
 

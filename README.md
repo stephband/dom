@@ -290,7 +290,7 @@ Takes number in pixels and returns a string of the form '10rem'.
 Returns array `[width, height]` representing the dimensions of `node`.
 
 
-#### Animation and scrolling
+## Animation and scrolling
 
 ##### `.animate(duration, transform, name, object, value)`
 

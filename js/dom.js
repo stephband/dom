@@ -703,11 +703,6 @@ function getPositionParent(node) {
 		return [rect.left, rect.top];
 	}
 
-	function dimensions(node) {
-		var rect = box(node);
-		return [rect.width, rect.height];
-	}
-
 	//function offset(node) {
 	//	var rect = box(node);
 	//	var scrollX = window.scrollX === undefined ? window.pageXOffset : window.scrollX ;
@@ -1262,7 +1257,6 @@ function getPositionParent(node) {
 
 		offset:      curry(offset, true),
 		position:    position,
-		dimensions:  dimensions,
 
 		prefix:      prefix,
 		style: curry(function(name, node) {

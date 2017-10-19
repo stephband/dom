@@ -1102,7 +1102,7 @@ function getPositionParent(node) {
 
 	// Animation and scrolling
 
-	function schedule(duration, fn) {
+	function transition(duration, fn) {
 		var t0 = performance.now();
 
 		function frame(t1) {
@@ -1128,7 +1128,7 @@ function getPositionParent(node) {
 	}
 
 	function animate(duration, transform, name, object, value) {
-		return schedule(
+		return transition(
 			duration,
 			pipe(transform, denormalise(object[name], value), set(name, object))
 		);
@@ -1312,13 +1312,14 @@ function getPositionParent(node) {
 
 		// DOM animation adn scrolling
 
-		// schedule(duration, fn)
+		// transition(duration, fn)
 		//
 		// duration  - duration seconds
 		// fn        - callback that is called with a float representing
 		//             progress in the range 0-1
 
-		schedule: curry(schedule, true),
+		transition: curry(transition, true),
+		schedule:   deprecate(transition, 'dom: .schedule() is now .transition()'),
 
 		// animate(duration, transform, value, name, object)
 		//

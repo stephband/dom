@@ -75,11 +75,11 @@ Returns `true` if `node` matches `selector`, otherwise `false`.
 
 ##### `.next(node)`
 
-Returns the next sibling element node.
+Returns the next sibling element node, or `undefined`.
 
 ##### `.previous(node)`
 
-Returns the previous sibling element node.
+Returns the previous sibling element node, or `undefined`.
 
 ##### `.query(selector, node)`
 
@@ -90,7 +90,9 @@ Returns an array of all descendants of `node` that match `selector`.
 
 ##### `.attribute(name, node)`
 
-Returns the string contents of attribute `name`, or if the attribute is known boolean, returns `true` or `false`.
+Returns the string contents of attribute `name`, or if the attribute is known
+boolean, returns `true` or `false`. If the attribute is not set, returns
+`undefined`.
 
 ##### `.classes(node)`
 
@@ -167,6 +169,10 @@ Returns a deep copy of `node`.
 
 Removes content of `node`.
 
+##### `.escape(string)`
+
+Escapes `string` for setting safely as HTML.
+
 ##### `.fragmentFromTemplate(node)`
 
 Returns a DOM fragment containing the content of the template `node`.
@@ -174,9 +180,6 @@ Returns a DOM fragment containing the content of the template `node`.
 ##### `.fragmentFromHTML(string)`
 
 Returns a DOM fragment of the parsed html `string`.
-
-escape:               escape,
-parse:                curry(parse),
 
 ##### `.identify(node)`
 

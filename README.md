@@ -43,17 +43,8 @@ Returns an array of elements matching `selector` in `document` (alias of
 ## DOM Nodes
 
 ##### `.root`
-
-The root `<html>` node.
-
 ##### `.head`
-
-The `<head>` node.
-
 ##### `.body`
-
-The `<body>` node.
-
 ##### `.view`
 
 The main scrolling 'view' element, either the `<head>` or the `<body>`

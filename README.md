@@ -324,13 +324,17 @@ Shortcut helper for animating scrollTop of main view.
 
 Alias of window.requestAnimationFrame.
 
-##### `.schedule(duration, fn)`
+##### `.transition(duration, fn)`
 
-WARNING: new addition. Method name may change.
+Calls `fn` on each frame until `duration` seconds has elapsed. `fn` is passed a
+single argument `progress`, a number that ramps from 0-1 over the duration of
+the transition.
 
-Calls `fn` on each animation frame until `duration` seconds has elapsed. `fn` is
-passed a single argument, `progress`, a number in the range 0-1 indicating
-progress through the duration.
+    dom.transition(3, function(progress) {
+        // Called every frame for 3 seconds
+    });
+
+The `.animate()` function uses `.transition()` behind the scenes.
 
 ##### `.disableScroll(node)`
 

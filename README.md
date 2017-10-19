@@ -20,6 +20,7 @@ Clone the repo:
 
     git clone git@github.com/stephband/dom.git
     cd dom/
+    git submodule update --init
 
 Install node modules:
 

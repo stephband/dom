@@ -31,6 +31,8 @@ Build <code>dist/dom.js</code>:
     npm run build-nodeps    // Omit dependencies
     npm run build           // Include dependencies
 
+
+
 ## dom
 
 ##### `dom(selector)`
@@ -38,11 +40,14 @@ Build <code>dist/dom.js</code>:
 Returns an array of elements matching `selector` in `document` (alias of
 `dom.query(selector, document)`).
 
+
+
 ## DOM lifecycle
 
 ##### `.ready(fn)`
 
 Calls `fn` on DOM content load.
+
 
 
 ## DOM traversal
@@ -71,6 +76,7 @@ Returns the previous sibling element node.
 ##### `.query(selector, node)`
 
 Returns an array of all descendants of `node` that match `selector`.
+
 
 
 ## DOM inspection
@@ -111,6 +117,7 @@ Returns the tag name of `node`.
 
 Returns `node` type as one of the strings `element`, `comment`, `text`,
 `fragment`, `document` or `doctype`.
+
 
 
 ## DOM mutation
@@ -194,6 +201,7 @@ Removes `class` from the classList of `node`.
 Swaps `target` for `node`.
 
 
+
 ## DOM Events
 
 ##### `.Event(type, properties)`
@@ -264,6 +272,7 @@ Triggers event of `type`, with optional `properties`, on `node`.
 -->
 
 
+
 ## Style
 
 ##### `.box(node)`
@@ -308,17 +317,14 @@ Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in p
 Takes number in pixels and returns a string of the form '10rem'.
 
 
-## Animation and scrolling
+
+## Animation
 
 ##### `.animate(duration, transform, name, object, value)`
 
 Animates property `name` of `object` to `value` over `duration` seconds, using
 the `transform` function as an easing function. Updates the object on animation
 frames.
-
-##### `.animateScroll(value)`
-
-Shortcut helper for animating scrollTop of main view.
 
 ##### `.requestFrame(fn)`
 
@@ -335,6 +341,14 @@ the transition.
     });
 
 The `.animate()` function uses `.transition()` behind the scenes.
+
+
+
+## Scrolling
+
+##### `.animateScroll(value)`
+
+Shortcut helper for animating scrollTop of main view.
 
 ##### `.disableScroll(node)`
 
@@ -356,6 +370,7 @@ replaced by your project. Used by locateable.
 -->
 
 
+
 ## Feature detection
 
 ##### `.features`
@@ -366,7 +381,7 @@ An object of feature detection results.
         inputEventsWhileDisabled: true, // false in FF, where disabled inputs don't trigger events
         template: true,                 // false in old browsers where template.content not found
         textareaPlaceholderSet: true,   // false in IE, where placeholder is also set on innerHTML
-        transition: true,               // false in older browsers where transitions not supported
+        transition: true                // false in older browsers where transitions not supported
     }
 
 

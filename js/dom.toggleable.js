@@ -40,7 +40,7 @@
 
 		var id = dom.identify(target);
 
-		dom('[href$="#' + id + '"]')
+		dom('a[href$="#' + id + '"]')
 		.forEach(function(node) {
 			on(node, 'click', click, e.target);
 		});
@@ -54,9 +54,9 @@
 		var target = e.target;
 		if (!dom.classes(target).contains(name)) { return; }
 
-		var id = dom.identify(e.target);
+		var id = e.target.id;
 
-		dom('[href$="#' + id + '"]')
+		dom('a[href$="#' + id + '"]')
 		.forEach(function(node) {
 			off(node, 'click', click);
 		});

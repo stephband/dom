@@ -33,38 +33,54 @@
 	</header>
 
 	<div class="site_wrap wrap">
-		<h1>.toggleable</h1>
-
-		<p>Activates and deactivates when any link pointing to it is clicked.</p>
-
-		<a href="#toggle-demo">Toggle</a>
-		<div class="toggle-block block toggleable" id="toggle-demo">
-			Hello. A toggleable only goes away when it's button is clicked.
-		</div>
-	</div>
-
-	<div class="site_wrap wrap">
 		<h1>.popable</h1>
 
 		<p>A popable goes away when clicked outside.</p>
 
-		<a href="#pop-demo">Pop</a>
+		<a class="toggle-button button" href="#pop-demo">Popable block</a>
+
 		<div class="toggle-block block popable" id="pop-demo">
 			Hello. A popable goes away when clicked outside.
+		</div>
+
+		<a class="button" href="#popable-dialog">Popable dialog</a>
+	</div>
+
+	<div class="dialog-layer layer fixed" href="#popable-dialog">
+		<div class="dialog popable focusable" id="popable-dialog" style="max-width: 30rem;">
+			<p>Hello. A popable goes away when clicked outside of, so you can click
+			on the background layer to close this dialog.</p>
+			<label>How many?</label>
+			<input/>
+			<label>Uh.. HOW many?</label>
+			<input/>
 		</div>
 	</div>
 
 	<div class="site_wrap wrap">
-		<a class="button" href="#test-dialog-1">Dialog 1</a>
-		<a class="button" href="#test-dialog-2">Dialog 2</a>
+		<h1>.toggleable</h1>
+
+		<p>Activates and deactivates when any link pointing to it is clicked.</p>
+
+		<a class="toggle-button button" href="#toggle-demo">Toggleable block</a>
+
+		<div class="toggle-block block toggleable" id="toggle-demo">
+			Hello. A toggleable only goes away when it's button is clicked.
+		</div>
+
+		<a class="button" href="#toggleable-dialog">Toggleable dialog</a>
 	</div>
 
-	<a class="dialog-layer layer fixed" href="#test-dialog-1">
-		<div class="dialog toggleable focusable" id="test-dialog-1">Hello 1. <input/></div>
-	</a>
-
-	<div class="dialog-layer layer fixed" href="#test-dialog-2">
-		<div class="dialog popable focusable" id="test-dialog-2">Hello 2. <input/></div>
+	<div class="dialog-layer layer fixed" href="#toggleable-dialog">
+		<div class="dialog toggleable focusable" id="toggleable-dialog" style="max-width: 30rem;">
+			<p>Hello. A toggleable only goes away when a link to it is clicked,
+			so you can't close this dialog by clicking on the background layer.</p>
+			<label>How many?</label>
+			<input/>
+			<label>Uh.. HOW many?</label>
+			<input/>
+			<a class="button" href="#toggleable-dialog">Close</a>
+		</div>
 	</div>
 
 	<div class="site_wrap wrap">

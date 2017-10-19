@@ -40,7 +40,7 @@ Returns an array of elements matching `selector` in `document` (alias of
 `dom.query(selector, document)`).
 
 
-## Nodes
+## DOM Nodes
 
 ##### `.root`
 

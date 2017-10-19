@@ -116,7 +116,8 @@ Returns `true` if `node` is a text node.
 
 ##### `.isInternalLink(node)`
 
-Returns `true` if the `href` of `node` points to a resource on the same domain as the current document.
+Returns `true` if the `href` of `node` points to a resource on the same domain
+as the current document.
 
 ##### `.tag(node)`
 
@@ -159,7 +160,8 @@ Returns a new DOM node.
 - If `tag` is `"text"` returns a text node with the content `text`.
 - If `tag` is `"fragment"` returns a document fragment.
 - If `tag` is `"comment"` returns a comment `<!-- text -->`.
-- Anything else returns an element `<tag>text</tag>`, where `text` is inserted as inner html.
+- Anything else returns an element `<tag>text</tag>`, where `text` is inserted
+  as inner html.
 
 ##### `.clone(node)`
 
@@ -168,18 +170,6 @@ Returns a deep copy of `node`.
 ##### `.empty(node)`
 
 Removes content of `node`.
-
-##### `.escape(string)`
-
-Escapes `string` for setting safely as HTML.
-
-##### `.fragmentFromTemplate(node)`
-
-Returns a DOM fragment containing the content of the template `node`.
-
-##### `.fragmentFromHTML(string)`
-
-Returns a DOM fragment of the parsed html `string`.
 
 ##### `.identify(node)`
 
@@ -192,10 +182,6 @@ If you just want to get an existing id rather than generate a new one, use the
 Fn library's `get` function:
 
     dom('button').map(Fn.get('id'))...
-
-##### `.parse(type, string)`
-
-Returns a document parsed from `string`, where `type` is one of `'xml'`, `'html'` or `'svg'`.
 
 ##### `.remove(node)`
 
@@ -211,11 +197,6 @@ Swaps `target` for `node`.
 
 
 ## DOM Events
-
-##### `.Event(type, properties)`
-
-Creates a CustomEvent of type `type`.
-Additionally, `properties` are assigned to the event object.
 
 ##### `.event(type, node)`
 
@@ -250,7 +231,8 @@ Triggers event of `type` on `node`.
 
 ##### `.isPrimaryButton(e)`
 
-Returns `true` if user event is from the primary (normally the left or only) button of an input device. Use this to avoid listening to right-clicks.
+Returns `true` if user event is from the primary (normally the left or only)
+button of an input device. Use this to avoid listening to right-clicks.
 
 ##### `.preventDefault(e)`
 
@@ -259,6 +241,11 @@ Calls `e.preventDefault()`.
 ##### `.toKey(e)`
 
 Returns key string corresponding to `e.keyCode`, or `undefined`.
+
+##### `.Event(type, properties)`
+
+Creates a CustomEvent of type `type`.
+Additionally, `properties` are assigned to the event object.
 
 <!--
 ##### `.events`
@@ -299,10 +286,6 @@ Returns array `[x, y]` representing the vector from `node1` to `node2`.
 ##### `.position(node)`
 
 Returns array `[x, y]` representing the screen coordinates of `node`.
-
-##### `.prefix(string)`
-
-Returns a prefixed CSS property name where a prefix is required in the current browser.
 
 ##### `.style(property, node)`
 
@@ -357,7 +340,8 @@ Shortcut helper for animating scrollTop of main view.
 
 ##### `.disableScroll(node)`
 
-Disables scrolling by setting `overflow: hidden` on `node` while maintaining the current scrollTop, effectively causing the node to 'freeze'.
+Disables scrolling by setting `overflow: hidden` on `node` while maintaining the
+current scrollTop, effectively causing the node to 'freeze'.
 
 ##### `.enableScroll(node)`
 
@@ -373,6 +357,31 @@ Return the ratio of scrollTop to scrollHeight.
 A box object describing a safe viewing area. This property is to be updated or
 replaced by your project. Used by locateable.
 -->
+
+
+## HTML
+
+##### `.escape(string)`
+
+Escapes `string` for setting safely as HTML.
+
+##### `.fragmentFromHTML(string)`
+
+Returns a DOM fragment of the parsed html `string`.
+
+##### `.fragmentFromTemplate(node)`
+
+Returns a DOM fragment containing the content of the template `node`.
+
+##### `.parse(type, string)`
+
+Returns a document parsed from `string`, where `type` is one of `'xml'`,
+`'html'` or `'svg'`.
+
+##### `.prefix(string)`
+
+Returns a prefixed CSS property name where a prefix is required in the current
+browser.
 
 
 ## Feature detection

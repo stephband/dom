@@ -2591,10 +2591,10 @@
 
 	function CustomEvent(event, params) {
 		params = params || defaults;
-
+		
 		var e = document.createEvent('CustomEvent');
 		e.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-
+		
 		return e;
 	};
 
@@ -3750,7 +3750,7 @@ function getPositionParent(node) {
 
 	// Animation and scrolling
 
-	function schedule(duration, fn) {
+	function transition(duration, fn) {
 		var t0 = performance.now();
 
 		function frame(t1) {
@@ -3776,7 +3776,7 @@ function getPositionParent(node) {
 	}
 
 	function animate(duration, transform, name, object, value) {
-		return schedule(
+		return transition(
 			duration,
 			pipe(transform, denormalise(object[name], value), set(name, object))
 		);
@@ -3960,13 +3960,14 @@ function getPositionParent(node) {
 
 		// DOM animation adn scrolling
 
-		// schedule(duration, fn)
+		// transition(duration, fn)
 		//
 		// duration  - duration seconds
 		// fn        - callback that is called with a float representing
 		//             progress in the range 0-1
 
-		schedule: curry(schedule, true),
+		transition: curry(transition, true),
+		schedule:   deprecate(transition, 'dom: .schedule() is now .transition()'),
 
 		// animate(duration, transform, value, name, object)
 		//
@@ -4051,10 +4052,12 @@ function getPositionParent(node) {
 	var Fn        = window.Fn;
 	var dom       = window.dom;
 	var classes   = dom.classes;
+	var tag       = dom.tag;
 	var on        = dom.events.on;
 	var off       = dom.events.off;
 	var trigger   = dom.events.trigger;
 	var isDefined = Fn.isDefined;
+	var overload  = Fn.overload;
 
 	var activeClass = "active";
 	var onClass   = "on";
@@ -4067,8 +4070,11 @@ function getPositionParent(node) {
 
 	function findButtons(id) {
 		return dom
-		.query('a[href$="#' + id + '"]', document)
-		.filter(dom.isInternalLink)
+		.query('[href$="#' + id + '"]', dom.body)
+		.filter(overload(tag, {
+			a:       dom.isInternalLink,
+			default: function() { return true; }
+		}))
 		.concat(dom.query('[data-href="#' + id + '"]', document));
 	}
 
@@ -5056,7 +5062,7 @@ function getPositionParent(node) {
 })(this);
 (function(window) {
 	"use strict";
-
+	
 	var Fn      = window.Fn;
 	var dom     = window.dom;
 
@@ -5306,23 +5312,4 @@ function getPositionParent(node) {
     on(document, 'dom-deactivate', deactivate);
     on(window, 'scroll', scroll);
     update();
-})(this);
-(function(window) {
-	"use strict";
-
-	var dom     = window.dom;
-	var on      = dom.events.on;
-	var matches = dom.matches('.dialog-layer');
-
-	on(document, 'dom-activate', function(e) {
-		if (e.defaultPrevented) { return; }
-		if (!matches(e.target.parentNode)) { return; }
-		dom.classes(e.target.parentNode).add('active');
-	});
-
-	on(document, 'dom-deactivate', function(e) {
-		if (e.defaultPrevented) { return; }
-		if (!matches(e.target.parentNode)) { return; }
-		dom.classes(e.target.parentNode).remove('active');
-	});
 })(this);

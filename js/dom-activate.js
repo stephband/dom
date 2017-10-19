@@ -6,10 +6,12 @@
 	var Fn        = window.Fn;
 	var dom       = window.dom;
 	var classes   = dom.classes;
+	var tag       = dom.tag;
 	var on        = dom.events.on;
 	var off       = dom.events.off;
 	var trigger   = dom.events.trigger;
 	var isDefined = Fn.isDefined;
+	var overload  = Fn.overload;
 
 	var activeClass = "active";
 	var onClass   = "on";
@@ -22,8 +24,11 @@
 
 	function findButtons(id) {
 		return dom
-		.query('a[href$="#' + id + '"]', document)
-		.filter(dom.isInternalLink)
+		.query('[href$="#' + id + '"]', dom.body)
+		.filter(overload(tag, {
+			a:       dom.isInternalLink,
+			default: function() { return true; }
+		}))
 		.concat(dom.query('[data-href="#' + id + '"]', document));
 	}
 

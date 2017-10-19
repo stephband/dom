@@ -9,7 +9,7 @@ SVG.
 <a href="http://stephband.info/dom/">stephen.band/dom/</a>-->
 
 
-## Latest build 1.1.1
+## Latest build 1.1.2
 
 * <a href="http://stephen.band/dom/dist/dom.js">http://stephen.band/dom/dist/dom.js</a> (~120k, includes dependencies)
 * <a href="http://stephen.band/dom/dist/dom.min.js">http://stephen.band/bolt/dist/dom.min.js</a> (~50k, includes dependencies)

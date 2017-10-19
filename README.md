@@ -1,23 +1,47 @@
+
 # dom.js
 
-A library of curried DOM functions, custom events and event streams
-for HTML and SVG.
+A library of curried DOM functions for building reactive interfaces in HTML and
+SVG.
 
 <!--## Demo
 
 <a href="http://stephband.info/dom/">stephen.band/dom/</a>-->
 
+
+## Latest build 1.1.1
+
+* <a href="http://stephen.band/dom/dist/dom.js">http://stephen.band/dom/dist/dom.js</a> (~120k, includes dependencies)
+* <a href="http://stephen.band/dom/dist/dom.min.js">http://stephen.band/bolt/dist/dom.min.js</a> (~50k, includes dependencies)
+
+## Getting started
+
+Clone the repo:
+
+    git clone git@github.com/stephband/dom.git
+    cd dom/
+
+Install node modules:
+
+    npm install
+
+Build <code>dist/dom.js</code>:
+
+    npm run build-nodeps    // Omit dependencies
+    npm run build           // Include dependencies
+
 ## dom
 
 ##### `dom(selector)`
 
-Returns an array of elements matching `selector` in `document`.
+Returns an array of elements matching `selector` in `document` (alias of
+`dom.query(selector, document)`).
 
 ## DOM lifecycle
 
 ##### `.ready(fn)`
 
-Calls `fn` when page loads.
+Calls `fn` on DOM content load.
 
 
 ## DOM traversal
@@ -145,19 +169,16 @@ parse:                curry(parse),
 Returns the id of `node`, or where `node` has no id, a random id is generated,
 set on `node` and returned:
 
-    dom('button')
-    .map(dom.identify)
-    ...
+    dom('button').map(dom.identify)...
 
-If you just want to get an existing id rather than generate a new one:
+If you just want to get an existing id rather than generate a new one, use the
+Fn library's `get` function:
 
-    dom('button')
-    .map(get('id'))
-    ...
+    dom('button').map(Fn.get('id'))...
 
 ##### `parse(type, string)`
 
-Returns a document parsed from `string`, where `type` is one of 'xml', 'html' or 'svg'.
+Returns a document parsed from `string`, where `type` is one of `'xml'`, `'html'` or `'svg'`.
 
 ##### `.remove(node)`
 
@@ -181,16 +202,16 @@ Additionally, `properties` are assigned to the event object.
 
 ##### `.event(type, node)`
 
-Returns a stream of events heard on `node`:
+Returns a mappable stream of events heard on `node`:
 
     var stream = dom
-    .event('click', document.body);
-    .map(get('timeStamp'))
+    .event('click', dom.body);
+    .map(Fn.get('timeStamp'))
     .each(function(time) {
         // Do something with times
     });
 
-Stopping the stream removes event listeners from `node`:
+Stopping the stream removes the event listeners:
 
     stream.stop();
 
@@ -262,7 +283,7 @@ Returns array `[x, y]` representing the vector from `node1` to `node2`.
 
 Returns array `[x, y]` representing the screen coordinates of `node`.
 
-##### `.prefix(node)`
+##### `.prefix(string)`
 
 Returns a prefixed CSS property name where a prefix is required in the current browser.
 
@@ -284,10 +305,6 @@ Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in p
 ##### `.toRem(value)`
 
 Takes number in pixels and returns a string of the form '10rem'.
-
-##### `.dimensions(node)`
-
-Returns array `[width, height]` representing the dimensions of `node`.
 
 
 ## Animation and scrolling

@@ -19,10 +19,11 @@
 		"js/dom.popable.js",
 		"js/dom.toggleable.js",
 		"js/dom.switchable.js",
-		"js/dom.moveable.js",
 		"js/dom.swipeable.js",
+        "js/dom.focusable.js",
+        "js/dom.removeable.js",
 		"js/dom.locateable.js",
-		"js/dom.dialog.js"
+		"js/dom.dialog-layer.js"
     ],
     "main": "js/dom.js",
     "description": "A small library of functional functions, DOM events and Event Streams for HTML and SVG.",
@@ -33,6 +34,14 @@
         "eslint": "^3.6.1"
     },
     "scripts": {
-        "lint": "eslint js/*.js"
+        "build":         "cat
+
+
+js/dom.js js/dom-activate.js js/dom-touch.js js/dom-swipe.js js/dom.popable.js js/dom.toggleable.js js/dom.switchable.js js/dom.moveable.js js/dom.swipeable.js js/dom.locateable.js js/dom.dialog.j
+
+         > dist/dom.js && minify dist/dom.js",
+        "build-version": "npm run build && cp dist/dom.css dist/-1.1.1.css && cp dist/dom.min.css dist/dom-2.0.0.min.css",
+        "publish":       "git pull origin master && npm run build-version && git add dist/* && git commit -am 'Build version 1.1.1' && git push",
+        "styleguide":    "kss --config kss.json"
     }
 }

@@ -312,8 +312,8 @@ Takes number in pixels and returns a string of the form '10rem'.
 
 ##### `.animate(duration, transform, name, object, value)`
 
-Animates property `name` of object to `value` over `duration` seconds, using the
-function `transform` as an easing function. Updates the object on animation
+Animates property `name` of `object` to `value` over `duration` seconds, using
+the `transform` function as an easing function. Updates the object on animation
 frames.
 
 ##### `.animateScroll(value)`

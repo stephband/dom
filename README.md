@@ -32,7 +32,6 @@ Build <code>dist/dom.js</code>:
     npm run build           // Include dependencies
 
 
-
 ## dom
 
 ##### `dom(selector)`
@@ -41,13 +40,31 @@ Returns an array of elements matching `selector` in `document` (alias of
 `dom.query(selector, document)`).
 
 
+## Nodes
+
+##### `.root`
+
+The root `<html>` node.
+
+##### `.head`
+
+The `<head>` node.
+
+##### `.body`
+
+The `<body>` node.
+
+##### `.view`
+
+The main scrolling 'view' element, either the `<head>` or the `<body>`
+(alias of `document.scrollingElement`).
+
 
 ## DOM lifecycle
 
 ##### `.ready(fn)`
 
 Calls `fn` on DOM content load.
-
 
 
 ## DOM traversal
@@ -76,7 +93,6 @@ Returns the previous sibling element node.
 ##### `.query(selector, node)`
 
 Returns an array of all descendants of `node` that match `selector`.
-
 
 
 ## DOM inspection
@@ -117,7 +133,6 @@ Returns the tag name of `node`.
 
 Returns `node` type as one of the strings `element`, `comment`, `text`,
 `fragment`, `document` or `doctype`.
-
 
 
 ## DOM mutation
@@ -201,7 +216,6 @@ Removes `class` from the classList of `node`.
 Swaps `target` for `node`.
 
 
-
 ## DOM Events
 
 ##### `.Event(type, properties)`
@@ -272,7 +286,6 @@ Triggers event of `type`, with optional `properties`, on `node`.
 -->
 
 
-
 ## Style
 
 ##### `.box(node)`
@@ -317,7 +330,6 @@ Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in p
 Takes number in pixels and returns a string of the form '10rem'.
 
 
-
 ## Animation
 
 ##### `.animate(duration, transform, name, object, value)`
@@ -341,7 +353,6 @@ the transition.
     });
 
 The `.animate()` function uses `.transition()` behind the scenes.
-
 
 
 ## Scrolling
@@ -368,7 +379,6 @@ Return the ratio of scrollTop to scrollHeight.
 A box object describing a safe viewing area. This property is to be updated or
 replaced by your project. Used by locateable.
 -->
-
 
 
 ## Feature detection

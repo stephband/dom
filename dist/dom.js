@@ -4372,7 +4372,7 @@ function getPositionParent(node) {
 	}
 
 	// Clicks on buttons toggle activate on their hash
-	on(document, 'click', dom.delegate('[href]', activateHref));
+	on(document, 'click', dom.delegate('a[href]', activateHref));
 
 	// Clicks on buttons toggle activate on their targets
 	on(document, 'click', dom.delegate('a[target]', activateTarget));
@@ -4817,7 +4817,7 @@ function getPositionParent(node) {
 
 		var id = dom.identify(target);
 
-		dom('[href$="#' + id + '"]')
+		dom('a[href$="#' + id + '"]')
 		.forEach(function(node) {
 			on(node, 'click', click, e.target);
 		});
@@ -4831,9 +4831,9 @@ function getPositionParent(node) {
 		var target = e.target;
 		if (!dom.classes(target).contains(name)) { return; }
 
-		var id = dom.identify(e.target);
+		var id = e.target.id;
 
-		dom('[href$="#' + id + '"]')
+		dom('a[href$="#' + id + '"]')
 		.forEach(function(node) {
 			off(node, 'click', click);
 		});

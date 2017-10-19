@@ -10,38 +10,50 @@
     "dependencies": {
         "fn": ">=1.0.0"
     },
-    "licenses": [{"url":"http://unlicense.org/"}],
+    "licenses": [
+        {
+            "url": "http://unlicense.org/"
+        }
+    ],
     "files": [
-		"js/dom.js",
-		"js/dom-activate.js",
-		"js/dom-touch.js",
-		"js/dom-swipe.js",
-		"js/dom.popable.js",
-		"js/dom.toggleable.js",
-		"js/dom.switchable.js",
-		"js/dom.swipeable.js",
+        "js/dom.js",
+        "js/dom-activate.js",
+        "js/dom-touch.js",
+        "js/dom-swipe.js",
+        "js/dom.popable.js",
+        "js/dom.toggleable.js",
+        "js/dom.switchable.js",
+        "js/dom.swipeable.js",
         "js/dom.focusable.js",
         "js/dom.removeable.js",
-		"js/dom.locateable.js",
-		"js/dom.dialog-layer.js"
+        "js/dom.locateable.js",
+        "js/dom.dialog-layer.js"
     ],
     "main": "js/dom.js",
     "description": "A small library of functional functions, DOM events and Event Streams for HTML and SVG.",
-    "keywords": ["DOM","html","browser","web","library","functional","stream","touch","event","finger","move"],
+    "keywords": [
+        "DOM",
+        "html",
+        "browser",
+        "web",
+        "library",
+        "functional",
+        "stream",
+        "touch",
+        "event",
+        "finger",
+        "move"
+    ],
     "homepage": "http://stephen.band/dom",
     "docs": "http://github.com/stephband/dom",
     "devDependencies": {
-        "eslint": "^3.6.1"
+        "eslint": "^3.6.1",
+        "minifier": "^0.8.1"
     },
     "scripts": {
-        "build":         "cat
-
-
-js/dom.js js/dom-activate.js js/dom-touch.js js/dom-swipe.js js/dom.popable.js js/dom.toggleable.js js/dom.switchable.js js/dom.moveable.js js/dom.swipeable.js js/dom.locateable.js js/dom.dialog.j
-
-         > dist/dom.js && minify dist/dom.js",
-        "build-version": "npm run build && cp dist/dom.css dist/-1.1.1.css && cp dist/dom.min.css dist/dom-2.0.0.min.css",
-        "publish":       "git pull origin master && npm run build-version && git add dist/* && git commit -am 'Build version 1.1.1' && git push",
-        "styleguide":    "kss --config kss.json"
+        "build-nodeps":  "cat js/dom.js js/dom-activate.js js/dom-touch.js js/dom-swipe.js js/dom.popable.js js/dom.toggleable.js js/dom.switchable.js js/dom.swipeable.js js/dom.focusable.js js/dom.removeable.js js/dom.locateable.js js/dom.dialog-layer.js > dist/dom-nodeps.js && minify dist/dom-nodeps.js",
+        "build":         "npm run build-nodeps && cat fn/js/fn.js fn/js/stream.js polyfills/customevent.js polyfills/document.scrollingelement.js dist/dom-nodeps.js > dist/dom.js && minify dist/dom.js && cat css/dom.css > dist/dom.css",
+        "build-version": "npm run build && cp dist/dom.js dist/dom-1.1.1.js && cp dist/dom.min.js dist/dom-1.1.1.min.js && cp dist/dom.css dist/dom-1.1.1.css",
+        "publish":       "git pull origin master && npm run build-version && git add dist/* && git commit -am 'Build version 1.1.1' && git push"
     }
 }

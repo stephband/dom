@@ -2591,10 +2591,10 @@
 
 	function CustomEvent(event, params) {
 		params = params || defaults;
-		
+
 		var e = document.createEvent('CustomEvent');
 		e.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-		
+
 		return e;
 	};
 
@@ -5056,7 +5056,7 @@ function getPositionParent(node) {
 })(this);
 (function(window) {
 	"use strict";
-	
+
 	var Fn      = window.Fn;
 	var dom     = window.dom;
 
@@ -5309,7 +5309,7 @@ function getPositionParent(node) {
 })(this);
 (function(window) {
 	"use strict";
-	
+
 	var dom     = window.dom;
 	var on      = dom.events.on;
 	var matches = dom.matches('.dialog-layer');

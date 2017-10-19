@@ -6,20 +6,19 @@
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5">
 
-	<title>dom</title>	
+	<title>dom</title>
 	<script>document.documentElement.className = 'js';</script>
 
 	<link rel="icon" type="image/png" href="images/favicon.png" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/bolt/package/css/bolt-0.9.8.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/bolt/dist/bolt-2.0.0.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/template.theme.min.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.layout.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/docs.classes.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.highlight.light.css" />
 
-	<link rel="stylesheet" type="text/css" href="http://stephband.info/css/template.min.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephband.info/css/template.theme.min.css" />
-
-	<link rel="stylesheet" type="text/css" href="http://stephband.github.com/css/site.layout.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephband.github.com/css/docs.classes.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephband.github.com/css/site.highlight.light.css" />
+	<link rel="stylesheet" type="text/css" href="css/dom.css" />
 	<link rel="stylesheet" type="text/css" href="css/demo.css" />
 	<link rel="stylesheet" type="text/css" href="css/slide.css" />
 </head>
@@ -92,11 +91,11 @@
 		<div class="tab-block block switchable" id="tab-1">
 			Tab 1
 		</div
-		
+
 		><div class="tab-block block switchable" id="tab-2">
 			Tab 2
 		</div
-		
+
 		><div class="tab-block block switchable" id="tab-3">
 			Tab 3
 		</div>
@@ -156,7 +155,8 @@
 	<script src="../fn/js/fn.js"></script>
 	<script src="../fn/js/stream.js"></script>
 
-	<script src="polyfills/window.customevent.js"></script>
+	<script src="polyfills/requestanimationframe.js"></script>
+	<script src="polyfills/customevent.js"></script>
 	<script src="test/config.js"></script>
 
 	<script src="js/dom.js"></script>
@@ -174,7 +174,7 @@
 		var toRad = Fn.multiply(1 / 57.295779513);
 
 		// FUNCTIONS
-				
+
 		var pi  = Math.PI,
 		    pi2 = pi * 2;
 
@@ -183,22 +183,22 @@
 		function toPolar(cart) {
 			var x = cart[0],
 					y = cart[1];
-			
+
 			// Detect quadrant and work out vector
 			if (y === 0) 	{ return x === 0 ? [0, 0] : x > 0 ? [x, 0.5 * pi] : [-x, 1.5 * pi] ; }
 			if (y < 0) 		{ return x === 0 ? [-y, pi] : [Math.sqrt(x*x + y*y), Math.atan(x/y) + pi] ; }
 			if (y > 0) 		{ return x === 0 ? [y, 0] : [Math.sqrt(x*x + y*y), (x > 0) ? Math.atan(x/y) : pi2 + Math.atan(x/y)] ; }
 		}
-		
+
 		// Converts [distance, angle] vector to cartesian [x, y] coordinates.
 		function toCartesian(vect) {
 			var d = vect[0],
 					a = vect[1];
-			
+
 			// Work out cartesian coordinates
 			return [ Math.sin(a) * d, Math.cos(a) * d ];
 		}
-		
+
 		// log event objects
 		function logEvent(e){ window.console && console.log(e.type, e); }
 
@@ -321,7 +321,7 @@
 		var distX = 0, distY = 0, pageX = 0, pageY = 0, startX = 0, startY = 0;
 
 		dom
-		.on('touch', box)
+		.event('dom-touch', box)
 		.each(function(e) {
 			console.log('touch', e);
 

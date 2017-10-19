@@ -190,7 +190,7 @@ Fn library's `get` function:
 
     dom('button').map(Fn.get('id'))...
 
-##### `parse(type, string)`
+##### `.parse(type, string)`
 
 Returns a document parsed from `string`, where `type` is one of `'xml'`, `'html'` or `'svg'`.
 

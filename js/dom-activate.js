@@ -326,7 +326,7 @@
 	}
 
 	// Clicks on buttons toggle activate on their hash
-	on(document, 'click', dom.delegate('[href]', activateHref));
+	on(document, 'click', dom.delegate('a[href]', activateHref));
 
 	// Clicks on buttons toggle activate on their targets
 	on(document, 'click', dom.delegate('a[target]', activateTarget));

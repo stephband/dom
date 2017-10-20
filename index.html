@@ -23,11 +23,12 @@
 	<link rel="stylesheet" type="text/css" href="css/demo.css" />
 	<link rel="stylesheet" type="text/css" href="css/slide.css" />
 
-	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" rel="stylesheet">
 <style>
 	body {
 		padding-top: 1.5rem;
-		padding-bottom: 2.25rem;;
+		padding-bottom: 2.25rem;
+		color: #141B1E;
 	}
 
 	@media (min-width: 84em) {
@@ -57,10 +58,10 @@
 	.toggle-block::before {
 		content: '';
 		position: absolute;
-		top: 4px;
+		top: 5px;
 		bottom: 15px;
-		width: 1px;
-		left: 2px;
+		width: 3px;
+		left: 0;
 		background-color: transparent;
 		transition:
 			background-color 0.8s linear,
@@ -69,8 +70,8 @@
 
 	.toggle-block.active::before {
 		content: '';
-		bottom: 4px;
-		background-color: #999999;
+		bottom: 5px;
+		background-color: #c4cfd2;
 	}
 
 	.toggle-block > .block {
@@ -81,7 +82,7 @@
 		margin-top: 0;
 	}
 
-	.text-8,  body { font-size: 1rem; line-height: 1.5rem; }
+	.text-8,  body { font-size: 0.9375rem; line-height: 1.5rem; font-weight: 300; }
 	.text-10, code {
 		font-family: 'Roboto Mono', monospace;
 		font-size: 1.0625rem;
@@ -92,34 +93,96 @@
 		text-decoration: none;
 	}
 
+	a.block:hover {
+		border-bottom: 1px solid #999999;
+	}
+
+	.js.block {
+		font-size: 0.75rem;
+		margin-left: -0.8125rem;
+		padding-left: 0.8125rem;
+		padding-top: 9px;
+		padding-bottom: 9px;
+		padding-right: 0.75rem;
+		width: calc(100% + 0.75rem + 0.9375rem);
+		color: white;
+		background-color: #141B1E;
+		border-radius: 0;
+		border-bottom-left-radius: 0;
+		margin-top: 18px;
+		overflow: auto;
+		box-shadow: inset -18px 4px 110px -20px rgba(0,0,0,0.1);
+	}
+
+	.js.block + p {
+		margin-top: 1.125rem;
+	}
+
 	code {
-		font-size: 0.9375rem;
-		color: #444;
-		background-color: #efefef;
+		font-size: 14px;
+		font-weight: 400;
+		color:#5e686d;
+		background-color: #e9eaea;
 		padding-left: 3px;
 		padding-right: 3px;
-		margin-left: -2px;
+		margin-left: -1px;
 		margin-right: -2px;
 		padding-bottom: 2px;
-		padding-top: 1px;
-		border-radius: 0.3125rem;
+		padding-top: 0px;
+		border-radius: 4px;
+		word-spacing: -0.125em;
+		letter-spacing: -0.0125em;
 	}
 
 	.text-5 {
+		font-size:   1rem;
 		line-height: 1.5rem;
 	}
 
-	.text-5 > code {
-		font-size: 0.9375rem;
+	a {
+		text-decoration: none;
+		padding-bottom: 2px;
+		border-bottom: 2px solid transparent;
+		transition: border-bottom-color 0.333s linear;
+	}
+
+	a:focus {
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: none;
+		padding-bottom: 2px;
+		border-bottom: 2px solid #ababab;
+		transition-duration: 0.120s;
+	}
+
+	.keyboard a:focus {
+		border-bottom: 1px solid #999999;
+	}
+
+	.text-5 code {
+		font-size: inherit;
+		font-weight: 400;
 		color: #444;
 		background-color: transparent;
 		padding: 0;
 		margin: 0;
+		word-spacing: -0.25em;
+		letter-spacing: -0.0125em;
+	}
+
+	h5, .text-5 {
+		margin-bottom: 0.75rem;
 	}
 
 	.spaced-grid-block > .block {
 		margin-top: 1.125rem;
 		margin-bottom: 1.125rem;
+	}
+
+	pre {
+		white-space: pre;
 	}
 </style>
 </head>
@@ -134,38 +197,38 @@
 			<h2 class="block">selection.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="closest">
-				<a class="block text-5" href="#closest"><code>closest(selector, node)</code></a>
+				<h3 class="text-5"><a href="#closest"><code class="js">closest(selector, node)</code></a></h3>
 
 				Returns <code class="js">node</code> or the closest ancestor that matches <code>selector</code>.
 				If no match is found, returns <code class="js">undefined</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="children">
-				<a class="block text-5" href="#children"><code>children(node)</code></a>
+				<h3 class="text-5"><a href="#children"><code class="js">children(node)</code></a></h3>
 
 				Returns an array of child elements of <code class="js">node</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="matches">
-				<a class="block text-5" href="#matches"><code>matches(selector, node)</code></a>
+				<h3 class="text-5"><a href="#matches"><code class="js">matches(selector, node)</code></a></h3>
 
 				Returns <code class="js">true</code> if <code class="js">node</code> matches <code class="js">selector</code>, otherwise <code class="js">false</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="next">
-				<a class="block text-5" href="#next"><code>next(node)</code></a>
+				<h3 class="text-5"><a href="#next"><code class="js">next(node)</code></a></h3>
 
 				Returns the next sibling element node, or <code class="js">undefined</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="previous">
-				<a class="block text-5" href="#previous"><code>previous(node)</code></a>
+				<h3 class="text-5"><a href="#previous"><code class="js">previous(node)</code></a></h3>
 
 				Returns the previous sibling element node, or <code class="js">undefined</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="query">
-				<a class="block text-5" href="#query"><code>query(selector, node)</code></a>
+				<h3 class="text-5"><a href="#query"><code class="js">query(selector, node)</code></a></h3>
 
 				Returns an array of all descendants of <code class="js">node</code> that match <code class="js">selector</code>.
 			</div>
@@ -175,7 +238,7 @@
 			<h2 class="block">inspection.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="attribute">
-				<a class="block text-5" href="#attribute"><code>attribute(name, node)</code></a>
+				<h3 class="text-5"><a href="#attribute"><code class="js">attribute(name, node)</code></a></h3>
 
 				Returns the string contents of attribute <code class="js">name</code>, or if the attribute is known
 				boolean, returns <code class="js">true</code> or <code class="js">false</code>. If the attribute is not set, returns
@@ -183,53 +246,53 @@
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="classes">
-				<a class="block text-5" href="#classes"><code>classes(node)</code></a>
+				<h3 class="text-5"><a href="#classes"><code class="js">classes(node)</code></a></h3>
 
 				Returns the classList of <code class="js">node</code>.
 			</div>
 
-			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isCommentNode">
-				<a class="block text-5" href="#isCommentNode"><code>isCommentNode(node)</code></a>
-
-				Returns <code class="js">true</code> if <code class="js">node</code> is a comment.
-			</div>
-
-			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isElementNode">
-				<a class="block text-5" href="#isElementNode"><code>isElementNode(node)</code></a>
-
-			Returns <code class="js">true</code> if <code class="js">node</code> is an element node.
-			</div>
-
-			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isFragmentNode">
-				<a class="block text-5" href="#isFragmentNode"><code>isFragmentNode(node)</code></a>
-
-			Returns <code class="js">true</code> if <code class="js">node</code> is a fragment.
-			</div>
-
-			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isTextNode">
-				<a class="block text-5" href="#isTextNode"><code>isTextNode(node)</code></a>
-
-			Returns <code class="js">true</code> if <code class="js">node</code> is a text node.
-			</div>
-
-			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isInternalLink">
-				<a class="block text-5" href="#isInternalLink"><code>isInternalLink(node)</code></a>
-
-			Returns <code class="js">true</code> if the <code class="js">href</code> of <code class="js">node</code> points to a resource on the same domain
-			as the current document.
-			</div>
-
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="tag">
-				<a class="block text-5" href="#tag"><code>tag(node)</code></a>
+				<h3 class="text-5"><a href="#tag"><code class="js">tag(node)</code></a></h3>
 
 			Returns the tag name of <code class="js">node</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="type">
-				<a class="block text-5" href="#type"><code>type(node)</code></a>
+				<h3 class="text-5"><a href="#type"><code class="js">type(node)</code></a></h3>
 
 			Returns <code class="js">node</code> type as one of the strings <code class="js">element</code>, <code class="js">comment</code>, <code class="js">text</code>,
 			<code class="js">fragment</code>, <code class="js">document</code> or <code class="js">doctype</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isCommentNode">
+				<h3 class="text-5"><a href="#isCommentNode"><code class="js">isCommentNode(node)</code></a></h3>
+
+				Returns <code class="js">true</code> if <code class="js">node</code> is a comment.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isElementNode">
+				<h3 class="text-5"><a href="#isElementNode"><code class="js">isElementNode(node)</code></a></h3>
+
+			Returns <code class="js">true</code> if <code class="js">node</code> is an element node.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isFragmentNode">
+				<h3 class="text-5"><a href="#isFragmentNode"><code class="js">isFragmentNode(node)</code></a></h3>
+
+			Returns <code class="js">true</code> if <code class="js">node</code> is a fragment.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isTextNode">
+				<h3 class="text-5"><a href="#isTextNode"><code class="js">isTextNode(node)</code></a></h3>
+
+			Returns <code class="js">true</code> if <code class="js">node</code> is a text node.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isInternalLink">
+				<h3 class="text-5"><a href="#isInternalLink"><code class="js">isInternalLink(node)</code></a></h3>
+
+			Returns <code class="js">true</code> if the <code class="js">href</code> of <code class="js">node</code> points to a resource on the same domain
+			as the current document.
 			</div>
 		</article
 
@@ -237,19 +300,19 @@
 			<h2 class="block">mutation.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="addClass">
-				<a class="block text-5" href="#addClass"><code>addClass(class, node)</code></a>
+				<h3 class="text-5"><a href="#addClass"><code class="js">addClass(class, node)</code></a></h3>
 
 			Adds <code class="js">class</code> to the classList of <code class="js">node</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="after">
-				<a class="block text-5" href="#after"><code>after(target, node)</code></a>
+				<h3 class="text-5"><a href="#after"><code class="js">after(target, node)</code></a></h3>
 
 			Inserts <code class="js">node</code> after <code class="js">target</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="append">
-				<a class="block text-5" href="#append"><code>append(target, node)</code></a>
+				<h3 class="text-5"><a href="#append"><code class="js">append(target, node)</code></a></h3>
 
 			Appends node to <code class="js">target</code>.
 
@@ -257,43 +320,43 @@
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="assign">
-				<a class="block text-5" href="#assign"><code>assign(node, attributes)</code></a>
+				<h3 class="text-5"><a href="#assign"><code class="js">assign(node, attributes)</code></a></h3>
 
 			Sets the key-value pairs of the object <code class="js">attributes</code> as attributes on <code class="js">node</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="before">
-				<a class="block text-5" href="#before"><code>before(target, node)</code></a>
+				<h3 class="text-5"><a href="#before"><code class="js">before(target, node)</code></a></h3>
 
 			Inserts <code class="js">node</code> before target.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="create">
-				<a class="block text-5" href="#create"><code>create(tag, text)</code></a>
+				<h3 class="text-5"><a href="#create"><code class="js">create(tag, text)</code></a></h3>
 
 			Returns a new DOM node.
 
 			- If <code class="js">tag</code> is <code class="js">"text"</code> returns a text node with the content <code class="js">text</code>.
 			- If <code class="js">tag</code> is <code class="js">"fragment"</code> returns a document fragment.
-			- If <code class="js">tag</code> is <code class="js">"comment"</code> returns a comment `<!-- text -->`.
-			- Anything else returns an element `<tag>text</tag>`, where <code class="js">text</code> is inserted
+			- If <code class="js">tag</code> is <code class="js">"comment"</code> returns a comment <code class="js"><!-- text --></code>.
+			- Anything else returns an element <code class="js">&lt;tag&gt;text&lt;/tag&gt;</code>, where <code class="js">text</code> is inserted
 			  as inner html.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="clone">
-				<a class="block text-5" href="#clone"><code>clone(node)</code></a>
+				<h3 class="text-5"><a href="#clone"><code class="js">clone(node)</code></a></h3>
 
-			Returns a deep copy of <code class="js">node</code>.
+				<p>Returns a deep copy of <code class="js">node</code>.</p>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="empty">
-				<a class="block text-5" href="#empty"><code>empty(node)</code></a>
+				<h3 class="text-5"><a href="#empty"><code class="js">empty(node)</code></a></h3>
 
 			Removes content of <code class="js">node</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="identify">
-				<a class="block text-5" href="#identify"><code>identify(node)</code></a>
+				<h3 class="text-5"><a href="#identify"><code class="js">identify(node)</code></a></h3>
 
 			Returns the id of <code class="js">node</code>, or where <code class="js">node</code> has no id, a random id is generated,
 			set on <code class="js">node</code> and returned:
@@ -307,19 +370,19 @@
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="remove">
-				<a class="block text-5" href="#remove"><code>remove(node)</code></a>
+				<h3 class="text-5"><a href="#remove"><code class="js">remove(node)</code></a></h3>
 
 			Removes <code class="js">node</code> from the DOM.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="removeClass">
-				<a class="block text-5" href="#removeClass"><code>removeClass(class, node)</code></a>
+				<h3 class="text-5"><a href="#removeClass"><code class="js">removeClass(class, node)</code></a></h3>
 
 			Removes <code class="js">class</code> from the classList of <code class="js">node</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="replace">
-				<a class="block text-5" href="#replace"><code>replace(target, node)</code></a>
+				<h3 class="text-5"><a href="#replace"><code class="js">replace(target, node)</code></a></h3>
 
 			Swaps <code class="js">target</code> for <code class="js">node</code>.
 			</div>
@@ -329,7 +392,7 @@
 			<h2 class="block">events.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="event">
-				<a class="block text-5" href="#event"><code>event(type, node)</code></a>
+				<h3 class="text-5"><a href="#event"><code class="js">event(type, node)</code></a></h3>
 
 			Returns a mappable stream of events heard on <code class="js">node</code>:
 
@@ -346,13 +409,13 @@
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="requestEvent">
-				<a class="block text-5" href="#requestEvent"><code>requestEvent(type, fn, node)</code></a>
+				<h3 class="text-5"><a href="#requestEvent"><code class="js">requestEvent(type, fn, node)</code></a></h3>
 
 			Calls fn once on the next event of <code class="js">type</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="trapFocus">
-				<a class="block text-5" href="#trapFocus"><code>trapFocus(node)</code></a>
+				<h3 class="text-5"><a href="#trapFocus"><code class="js">trapFocus(node)</code></a></h3>
 
 			Constrains focus to focusable elements inside <code class="js">node</code>.
 			Returns a function that removes the trap.
@@ -360,7 +423,7 @@
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="trigger">
-				<a class="block text-5" href="#trigger"><code>trigger(type, node)</code></a>
+				<h3 class="text-5"><a href="#trigger"><code class="js">trigger(type, node)</code></a></h3>
 
 			Triggers event of <code class="js">type</code> on <code class="js">node</code>.
 
@@ -368,26 +431,26 @@
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isPrimaryButton">
-				<a class="block text-5" href="#isPrimaryButton"><code>isPrimaryButton(e)</code></a>
+				<h3 class="text-5"><a href="#isPrimaryButton"><code class="js">isPrimaryButton(e)</code></a></h3>
 
 			Returns <code class="js">true</code> if user event is from the primary (normally the left or only)
 			button of an input device. Use this to avoid listening to right-clicks.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="preventDefault">
-				<a class="block text-5" href="#preventDefault"><code>preventDefault(e)</code></a>
+				<h3 class="text-5"><a href="#preventDefault"><code class="js">preventDefault(e)</code></a></h3>
 
-			Calls `e.preventDefault()`.
+			Calls <code class="js">e.preventDefault()</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="toKey">
-				<a class="block text-5" href="#toKey"><code>toKey(e)</code></a>
+				<h3 class="text-5"><a href="#toKey"><code class="js">toKey(e)</code></a></h3>
 
-			Returns key string corresponding to `e.keyCode`, or <code class="js">undefined</code>.
+			Returns key string corresponding to <code class="js">e.keyCode</code>, or <code class="js">undefined</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="Event">
-				<a class="block text-5" href="#Event"><code>Event(type, properties)</code></a>
+				<h3 class="text-5"><a href="#Event"><code class="js">Event(type, properties)</code></a></h3>
 
 			Creates a CustomEvent of type <code class="js">type</code>.
 			Additionally, <code class="js">properties</code> are assigned to the event object.
@@ -398,36 +461,36 @@
 			<h2 class="block">style.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="box">
-				<a class="block text-5" href="#box"><code>box(node)</code></a>
+				<h3 class="text-5"><a href="#box"><code class="js">box(node)</code></a></h3>
 
 			Returns a <code class="js">DOMRect</code> object describing the draw box of <code class="js">node</code>.
 			(If <code class="js">node</code> is <code class="js">window</code> a plain object is returned).
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="bounds">
-				<a class="block text-5" href="#bounds"><code>bounds(node)</code></a>
+				<h3 class="text-5"><a href="#bounds"><code class="js">bounds(node)</code></a></h3>
 
 			Returns a <code class="js">DOMRect</code> object describing the bounding box of <code class="js">node</code> and its
 			descendants.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="offset">
-				<a class="block text-5" href="#offset"><code>offset(node1, node2)</code></a>
+				<h3 class="text-5"><a href="#offset"><code class="js">offset(node1, node2)</code></a></h3>
 
-			Returns array `[x, y]` representing the vector from <code class="js">node1</code> to <code class="js">node2</code>.
+			Returns array <code class="js">[x, y]</code> representing the vector from <code class="js">node1</code> to <code class="js">node2</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="position">
-				<a class="block text-5" href="#position"><code>position(node)</code></a>
+				<h3 class="text-5"><a href="#position"><code class="js">position(node)</code></a></h3>
 
-			Returns array `[x, y]` representing the screen coordinates of <code class="js">node</code>.
+			Returns array <code class="js">[x, y]</code> representing the screen coordinates of <code class="js">node</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="style">
-				<a class="block text-5" href="#style"><code>style(property, node)</code></a>
+				<h3 class="text-5"><a href="#style"><code class="js">style(property, node)</code></a></h3>
 
 			Returns the computed style <code class="js">property</code> of <code class="js">node</code>.
-			If <code class="js">property</code> is of the form `"property:name"`, a named aspect of the property
+			If <code class="js">property</code> is of the form <code class="js">"property:name"</code>, a named aspect of the property
 			is returned.
 
 			    dom.style('transform:rotate', node);     // returns rotation, as a number, in radians
@@ -437,13 +500,13 @@
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="toPx">
-				<a class="block text-5" href="#toPx"><code>toPx(value)</code></a>
+				<h3 class="text-5"><a href="#toPx"><code class="js">toPx(value)</code></a></h3>
 
 			Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in pixels.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="toRem">
-				<a class="block text-5" href="#toRem"><code>toRem(value)</code></a>
+				<h3 class="text-5"><a href="#toRem"><code class="js">toRem(value)</code></a></h3>
 
 			Takes number in pixels and returns a string of the form '10rem'.
 			</div>
@@ -453,31 +516,27 @@
 			<h2 class="block">animation.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="animate">
-				<a class="block text-5" href="#animate"><code>animate(duration, transform, name, object, value)</code></a>
+				<h3 class="text-5"><a href="#animate"><code class="js">animate(dur, map, name, object, value)</code></a></h3>
 
-			Animates property <code class="js">name</code> of <code class="js">object</code> to <code class="js">value</code> over <code class="js">duration</code> seconds, using
-			the <code class="js">transform</code> function as an easing function. Updates the object on animation
-			frames.
+				<p>Animates property <code class="js">name</code> of <code class="js">object</code> to <code class="js">value</code> over <code class="js">dur</code> seconds, using the <code class="js">map</code> function as an easing function. Updates the object on animation frames.</p>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="requestFrame">
-				<a class="block text-5" href="#requestFrame"><code>requestFrame(fn)</code></a>
+				<h3 class="text-5"><a href="#requestFrame"><code class="js">requestFrame(fn)</code></a></h3>
 
-			Alias of window.requestAnimationFrame.
+				<p>Alias of window.requestAnimationFrame.</p>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="transition">
-				<a class="block text-5" href="#transition"><code>transition(duration, fn)</code></a>
+				<h3 class="text-5"><a href="#transition"><code class="js">transition(duration, fn)</code></a></h3>
 
-			Calls <code class="js">fn</code> on each frame until <code class="js">duration</code> seconds has elapsed. <code class="js">fn</code> is passed a
-			single argument <code class="js">progress</code>, a number that ramps from 0-1 over the duration of
-			the transition.
+				<p>Calls <code class="js">fn</code> on each frame until <code class="js">duration</code> seconds has elapsed. <code class="js">fn</code> is passed a single argument <code class="js">progress</code>, a number that ramps from 0-1 over the duration of the transition.</p>
 
-			    dom.transition(3, function(progress) {
-			        // Called every frame for 3 seconds
-			    });
+			    <code class="js block"><pre>dom.transition(3, function(progress) {
+  // Called every frame for 3 seconds
+});</pre></code>
 
-			The `.animate()` function uses `.transition()` behind the scenes.
+				<p>The <code class="js">.animate()</code> function uses <code class="js">.transition()</code> behind the scenes.</p>
 			</div>
 		</article
 
@@ -485,26 +544,26 @@
 			<h2 class="block">scrolling.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="animateScroll">
-				<a class="block text-5" href="#animateScroll"><code>animateScroll(value)</code></a>
+				<h3 class="text-5"><a href="#animateScroll"><code class="js">animateScroll(value)</code></a></h3>
 
 			Shortcut helper for animating scrollTop of main view.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="disableScroll">
-				<a class="block text-5" href="#disableScroll"><code>disableScroll(node)</code></a>
+				<h3 class="text-5"><a href="#disableScroll"><code class="js">disableScroll(node)</code></a></h3>
 
-			Disables scrolling by setting `overflow: hidden` on <code class="js">node</code> while maintaining the
+			Disables scrolling by setting <code class="js">overflow: hidden</code> on <code class="js">node</code> while maintaining the
 			current scrollTop, effectively causing the node to 'freeze'.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="enableScroll">
-				<a class="block text-5" href="#enableScroll"><code>enableScroll(node)</code></a>
+				<h3 class="text-5"><a href="#enableScroll"><code class="js">enableScroll(node)</code></a></h3>
 
-			Enables scrolling by removing `overflow: hidden` on <code class="js">node</code>.
+			Enables scrolling by removing <code class="js">overflow: hidden</code> on <code class="js">node</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="scrollRatio">
-				<a class="block text-5" href="#scrollRatio"><code>scrollRatio(node)</code></a>
+				<h3 class="text-5"><a href="#scrollRatio"><code class="js">scrollRatio(node)</code></a></h3>
 
 			Return the ratio of scrollTop to scrollHeight.
 			</div>
@@ -514,32 +573,32 @@
 			<h2 class="block">HTML.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="escape">
-				<a class="block text-5" href="#escape"><code>escape(string)</code></a>
+				<h3 class="text-5"><a href="#escape"><code class="js">escape(string)</code></a></h3>
 
 			Escapes <code class="js">string</code> for setting safely as HTML.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="fragmentFromHTML">
-				<a class="block text-5" href="#fragmentFromHTML"><code>fragmentFromHTML(string)</code></a>
+				<h3 class="text-5"><a href="#fragmentFromHTML"><code class="js">fragmentFromHTML(string)</code></a></h3>
 
 			Returns a DOM fragment of the parsed html <code class="js">string</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="fragmentFromTemplate">
-				<a class="block text-5" href="#fragmentFromTemplate"><code>fragmentFromTemplate(node)</code></a>
+				<h3 class="text-5"><a href="#fragmentFromTemplate"><code class="js">fragmentFromTemplate(node)</code></a></h3>
 
 			Returns a DOM fragment containing the content of the template <code class="js">node</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="parse">
-				<a class="block text-5" href="#parse"><code>parse(type, string)</code></a>
+				<h3 class="text-5"><a href="#parse"><code class="js">parse(type, string)</code></a></h3>
 
-			Returns a document parsed from <code class="js">string</code>, where <code class="js">type</code> is one of `'xml'`,
-			`'html'` or `'svg'`.
+			Returns a document parsed from <code class="js">string</code>, where <code class="js">type</code> is one of <code class="js">'xml'</code>,
+			<code class="js">'html'</code> or <code class="js">'svg'</code>.
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="prefix">
-				<a class="block text-5" href="#prefix"><code>prefix(string)</code></a>
+				<h3 class="text-5"><a href="#prefix"><code class="js">prefix(string)</code></a></h3>
 
 			Returns a prefixed CSS property name where a prefix is required in the current
 			browser.

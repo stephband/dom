@@ -13,27 +13,547 @@
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
 	<link rel="stylesheet" type="text/css" href="http://stephen.band/bolt/dist/bolt.min.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/template.theme.min.css" />
+	<!--link rel="stylesheet" type="text/css" href="http://stephen.band/css/template.theme.min.css" />
 	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.layout.css" />
 	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/docs.classes.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.highlight.light.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.highlight.light.css" /-->
 
+	<link rel="stylesheet" type="text/css" href="css/grid.css" />
 	<link rel="stylesheet" type="text/css" href="css/dom.css" />
 	<link rel="stylesheet" type="text/css" href="css/demo.css" />
 	<link rel="stylesheet" type="text/css" href="css/slide.css" />
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+<style>
+	body {
+		padding-top: 1.5rem;
+		padding-bottom: 2.25rem;;
+	}
+
+	@media (min-width: 84em) {
+		body {
+			padding-top: 1.875rem;
+			padding-bottom: 3.75rem;
+		}
+	}
+
+	body > .grid-block + .grid-block {
+		margin-top: 72px;
+	}
+
+	.toggle-block {
+		opacity: 1;
+		visibility: visible;
+		min-height: 2.25rem;
+		padding-left: 0.9375rem;
+		padding-right: 0.9375rem;
+		color: #444444;
+	}
+
+	.toggle-block.active {
+		margin-bottom: 2.25rem;
+	}
+
+	.toggle-block::before {
+		content: '';
+		position: absolute;
+		top: 4px;
+		bottom: 15px;
+		width: 1px;
+		left: 2px;
+		background-color: transparent;
+		transition:
+			background-color 0.8s linear,
+			bottom 0.6s linear;
+	}
+
+	.toggle-block.active::before {
+		content: '';
+		bottom: 4px;
+		background-color: #999999;
+	}
+
+	.toggle-block > .block {
+		margin-bottom: 0.75rem;
+	}
+
+	.toggle-block + .toggle-block {
+		margin-top: 0;
+	}
+
+	.text-8,  body { font-size: 1rem; line-height: 1.5rem; }
+	.text-10, code {
+		font-family: 'Roboto Mono', monospace;
+		font-size: 1.0625rem;
+	}
+
+	a.block {
+		position: relative;
+		text-decoration: none;
+	}
+
+	code {
+		font-size: 0.9375rem;
+		color: #444;
+		background-color: #efefef;
+		padding-left: 3px;
+		padding-right: 3px;
+		margin-left: -2px;
+		margin-right: -2px;
+		padding-bottom: 2px;
+		padding-top: 1px;
+		border-radius: 0.3125rem;
+	}
+
+	.text-5 {
+		line-height: 1.5rem;
+	}
+
+	.text-5 > code {
+		font-size: 0.9375rem;
+		color: #444;
+		background-color: transparent;
+		padding: 0;
+		margin: 0;
+	}
+
+	.spaced-grid-block > .block {
+		margin-top: 1.125rem;
+		margin-bottom: 1.125rem;
+	}
+</style>
 </head>
 
 <body>
-	<header class="site_header" id="page_header">
-		<div class="site_wrap wrap">
-			<a class="logo_thumb thumb" href="http://stephen.band" title="stephband" rel="index">
-				<h1>stephen.band</h1>
-			</a>
-		</div>
+	<header class="grid-block block">
+		<h1 class="block @2-grid-left-1/15 @3-grid-left-1/9">dom.</h1>
 	</header>
 
-	<div class="site_wrap wrap">
-		<h1>.popable</h1>
+	<div class="spaced-grid-block grid-block block">
+		<article class="grid-block block @2-span-4/15 @2-span-left-1/15 @3-span-2/9 @3-span-left-1/9">
+			<h2 class="block">selection.</h2>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="closest">
+				<a class="block text-5" href="#closest"><code>closest(selector, node)</code></a>
+
+				Returns <code class="js">node</code> or the closest ancestor that matches <code>selector</code>.
+				If no match is found, returns <code class="js">undefined</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="children">
+				<a class="block text-5" href="#children"><code>children(node)</code></a>
+
+				Returns an array of child elements of <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="matches">
+				<a class="block text-5" href="#matches"><code>matches(selector, node)</code></a>
+
+				Returns <code class="js">true</code> if <code class="js">node</code> matches <code class="js">selector</code>, otherwise <code class="js">false</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="next">
+				<a class="block text-5" href="#next"><code>next(node)</code></a>
+
+				Returns the next sibling element node, or <code class="js">undefined</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="previous">
+				<a class="block text-5" href="#previous"><code>previous(node)</code></a>
+
+				Returns the previous sibling element node, or <code class="js">undefined</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="query">
+				<a class="block text-5" href="#query"><code>query(selector, node)</code></a>
+
+				Returns an array of all descendants of <code class="js">node</code> that match <code class="js">selector</code>.
+			</div>
+		</article
+
+		><article class="grid-block block @2-span-4/15 @3-span-2/9">
+			<h2 class="block">inspection.</h2>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="attribute">
+				<a class="block text-5" href="#attribute"><code>attribute(name, node)</code></a>
+
+				Returns the string contents of attribute <code class="js">name</code>, or if the attribute is known
+				boolean, returns <code class="js">true</code> or <code class="js">false</code>. If the attribute is not set, returns
+				<code class="js">undefined</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="classes">
+				<a class="block text-5" href="#classes"><code>classes(node)</code></a>
+
+				Returns the classList of <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isCommentNode">
+				<a class="block text-5" href="#isCommentNode"><code>isCommentNode(node)</code></a>
+
+				Returns <code class="js">true</code> if <code class="js">node</code> is a comment.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isElementNode">
+				<a class="block text-5" href="#isElementNode"><code>isElementNode(node)</code></a>
+
+			Returns <code class="js">true</code> if <code class="js">node</code> is an element node.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isFragmentNode">
+				<a class="block text-5" href="#isFragmentNode"><code>isFragmentNode(node)</code></a>
+
+			Returns <code class="js">true</code> if <code class="js">node</code> is a fragment.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isTextNode">
+				<a class="block text-5" href="#isTextNode"><code>isTextNode(node)</code></a>
+
+			Returns <code class="js">true</code> if <code class="js">node</code> is a text node.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isInternalLink">
+				<a class="block text-5" href="#isInternalLink"><code>isInternalLink(node)</code></a>
+
+			Returns <code class="js">true</code> if the <code class="js">href</code> of <code class="js">node</code> points to a resource on the same domain
+			as the current document.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="tag">
+				<a class="block text-5" href="#tag"><code>tag(node)</code></a>
+
+			Returns the tag name of <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="type">
+				<a class="block text-5" href="#type"><code>type(node)</code></a>
+
+			Returns <code class="js">node</code> type as one of the strings <code class="js">element</code>, <code class="js">comment</code>, <code class="js">text</code>,
+			<code class="js">fragment</code>, <code class="js">document</code> or <code class="js">doctype</code>.
+			</div>
+		</article
+
+		><article class="grid-block block @2-span-4/15 @3-span-2/9">
+			<h2 class="block">mutation.</h2>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="addClass">
+				<a class="block text-5" href="#addClass"><code>addClass(class, node)</code></a>
+
+			Adds <code class="js">class</code> to the classList of <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="after">
+				<a class="block text-5" href="#after"><code>after(target, node)</code></a>
+
+			Inserts <code class="js">node</code> after <code class="js">target</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="append">
+				<a class="block text-5" href="#append"><code>append(target, node)</code></a>
+
+			Appends node to <code class="js">target</code>.
+
+			If <code class="js">node</code> is a collection of nodes, appends each node to <code class="js">target</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="assign">
+				<a class="block text-5" href="#assign"><code>assign(node, attributes)</code></a>
+
+			Sets the key-value pairs of the object <code class="js">attributes</code> as attributes on <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="before">
+				<a class="block text-5" href="#before"><code>before(target, node)</code></a>
+
+			Inserts <code class="js">node</code> before target.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="create">
+				<a class="block text-5" href="#create"><code>create(tag, text)</code></a>
+
+			Returns a new DOM node.
+
+			- If <code class="js">tag</code> is <code class="js">"text"</code> returns a text node with the content <code class="js">text</code>.
+			- If <code class="js">tag</code> is <code class="js">"fragment"</code> returns a document fragment.
+			- If <code class="js">tag</code> is <code class="js">"comment"</code> returns a comment `<!-- text -->`.
+			- Anything else returns an element `<tag>text</tag>`, where <code class="js">text</code> is inserted
+			  as inner html.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="clone">
+				<a class="block text-5" href="#clone"><code>clone(node)</code></a>
+
+			Returns a deep copy of <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="empty">
+				<a class="block text-5" href="#empty"><code>empty(node)</code></a>
+
+			Removes content of <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="identify">
+				<a class="block text-5" href="#identify"><code>identify(node)</code></a>
+
+			Returns the id of <code class="js">node</code>, or where <code class="js">node</code> has no id, a random id is generated,
+			set on <code class="js">node</code> and returned:
+
+			    dom('button').map(dom.identify)...
+
+			If you just want to get an existing id rather than generate a new one, use the
+			Fn library's <code class="js">get</code> function:
+
+			    dom('button').map(Fn.get('id'))...
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="remove">
+				<a class="block text-5" href="#remove"><code>remove(node)</code></a>
+
+			Removes <code class="js">node</code> from the DOM.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="removeClass">
+				<a class="block text-5" href="#removeClass"><code>removeClass(class, node)</code></a>
+
+			Removes <code class="js">class</code> from the classList of <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="replace">
+				<a class="block text-5" href="#replace"><code>replace(target, node)</code></a>
+
+			Swaps <code class="js">target</code> for <code class="js">node</code>.
+			</div>
+		</article
+
+		><article class="grid-block block @2-span-4/15 @2-span-left-1/15 @3-span-2/9 @3-span-left-1/9">
+			<h2 class="block">events.</h2>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="event">
+				<a class="block text-5" href="#event"><code>event(type, node)</code></a>
+
+			Returns a mappable stream of events heard on <code class="js">node</code>:
+
+			    var stream = dom
+			    .event('click', dom.body);
+			    .map(Fn.get('timeStamp'))
+			    .each(function(time) {
+			        // Do something with times
+			    });
+
+			Stopping the stream removes the event listeners:
+
+			    stream.stop();
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="requestEvent">
+				<a class="block text-5" href="#requestEvent"><code>requestEvent(type, fn, node)</code></a>
+
+			Calls fn once on the next event of <code class="js">type</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="trapFocus">
+				<a class="block text-5" href="#trapFocus"><code>trapFocus(node)</code></a>
+
+			Constrains focus to focusable elements inside <code class="js">node</code>.
+			Returns a function that removes the trap.
+			Creating a new trap also removes the existing trap.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="trigger">
+				<a class="block text-5" href="#trigger"><code>trigger(type, node)</code></a>
+
+			Triggers event of <code class="js">type</code> on <code class="js">node</code>.
+
+			    dom.trigger('dom-activate', dom.get('toggle-id'));
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="isPrimaryButton">
+				<a class="block text-5" href="#isPrimaryButton"><code>isPrimaryButton(e)</code></a>
+
+			Returns <code class="js">true</code> if user event is from the primary (normally the left or only)
+			button of an input device. Use this to avoid listening to right-clicks.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="preventDefault">
+				<a class="block text-5" href="#preventDefault"><code>preventDefault(e)</code></a>
+
+			Calls `e.preventDefault()`.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="toKey">
+				<a class="block text-5" href="#toKey"><code>toKey(e)</code></a>
+
+			Returns key string corresponding to `e.keyCode`, or <code class="js">undefined</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="Event">
+				<a class="block text-5" href="#Event"><code>Event(type, properties)</code></a>
+
+			Creates a CustomEvent of type <code class="js">type</code>.
+			Additionally, <code class="js">properties</code> are assigned to the event object.
+			</div>
+		</article
+
+		><article class="grid-block block @2-span-4/15 @3-span-2/9">
+			<h2 class="block">style.</h2>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="box">
+				<a class="block text-5" href="#box"><code>box(node)</code></a>
+
+			Returns a <code class="js">DOMRect</code> object describing the draw box of <code class="js">node</code>.
+			(If <code class="js">node</code> is <code class="js">window</code> a plain object is returned).
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="bounds">
+				<a class="block text-5" href="#bounds"><code>bounds(node)</code></a>
+
+			Returns a <code class="js">DOMRect</code> object describing the bounding box of <code class="js">node</code> and its
+			descendants.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="offset">
+				<a class="block text-5" href="#offset"><code>offset(node1, node2)</code></a>
+
+			Returns array `[x, y]` representing the vector from <code class="js">node1</code> to <code class="js">node2</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="position">
+				<a class="block text-5" href="#position"><code>position(node)</code></a>
+
+			Returns array `[x, y]` representing the screen coordinates of <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="style">
+				<a class="block text-5" href="#style"><code>style(property, node)</code></a>
+
+			Returns the computed style <code class="js">property</code> of <code class="js">node</code>.
+			If <code class="js">property</code> is of the form `"property:name"`, a named aspect of the property
+			is returned.
+
+			    dom.style('transform:rotate', node);     // returns rotation, as a number, in radians
+			    dom.style('transform:scale', node);      // returns scale, as a number
+			    dom.style('transform:translateX', node); // returns translation, as a number, in px
+			    dom.style('transform:translateY', node); // returns translation, as a number, in px
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="toPx">
+				<a class="block text-5" href="#toPx"><code>toPx(value)</code></a>
+
+			Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in pixels.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="toRem">
+				<a class="block text-5" href="#toRem"><code>toRem(value)</code></a>
+
+			Takes number in pixels and returns a string of the form '10rem'.
+			</div>
+		</article
+
+		><article class="grid-block block @2-span-4/15 @3-span-2/9">
+			<h2 class="block">animation.</h2>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="animate">
+				<a class="block text-5" href="#animate"><code>animate(duration, transform, name, object, value)</code></a>
+
+			Animates property <code class="js">name</code> of <code class="js">object</code> to <code class="js">value</code> over <code class="js">duration</code> seconds, using
+			the <code class="js">transform</code> function as an easing function. Updates the object on animation
+			frames.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="requestFrame">
+				<a class="block text-5" href="#requestFrame"><code>requestFrame(fn)</code></a>
+
+			Alias of window.requestAnimationFrame.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="transition">
+				<a class="block text-5" href="#transition"><code>transition(duration, fn)</code></a>
+
+			Calls <code class="js">fn</code> on each frame until <code class="js">duration</code> seconds has elapsed. <code class="js">fn</code> is passed a
+			single argument <code class="js">progress</code>, a number that ramps from 0-1 over the duration of
+			the transition.
+
+			    dom.transition(3, function(progress) {
+			        // Called every frame for 3 seconds
+			    });
+
+			The `.animate()` function uses `.transition()` behind the scenes.
+			</div>
+		</article
+
+		><article class="grid-block block @2-span-4/15 @2-span-left-1/15 @3-span-2/9 @3-span-left-1/9">
+			<h2 class="block">scrolling.</h2>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="animateScroll">
+				<a class="block text-5" href="#animateScroll"><code>animateScroll(value)</code></a>
+
+			Shortcut helper for animating scrollTop of main view.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="disableScroll">
+				<a class="block text-5" href="#disableScroll"><code>disableScroll(node)</code></a>
+
+			Disables scrolling by setting `overflow: hidden` on <code class="js">node</code> while maintaining the
+			current scrollTop, effectively causing the node to 'freeze'.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="enableScroll">
+				<a class="block text-5" href="#enableScroll"><code>enableScroll(node)</code></a>
+
+			Enables scrolling by removing `overflow: hidden` on <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="scrollRatio">
+				<a class="block text-5" href="#scrollRatio"><code>scrollRatio(node)</code></a>
+
+			Return the ratio of scrollTop to scrollHeight.
+			</div>
+		</article
+
+		><article class="grid-block block @2-span-4/15 @3-span-2/9">
+			<h2 class="block">HTML.</h2>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="escape">
+				<a class="block text-5" href="#escape"><code>escape(string)</code></a>
+
+			Escapes <code class="js">string</code> for setting safely as HTML.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="fragmentFromHTML">
+				<a class="block text-5" href="#fragmentFromHTML"><code>fragmentFromHTML(string)</code></a>
+
+			Returns a DOM fragment of the parsed html <code class="js">string</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="fragmentFromTemplate">
+				<a class="block text-5" href="#fragmentFromTemplate"><code>fragmentFromTemplate(node)</code></a>
+
+			Returns a DOM fragment containing the content of the template <code class="js">node</code>.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="parse">
+				<a class="block text-5" href="#parse"><code>parse(type, string)</code></a>
+
+			Returns a document parsed from <code class="js">string</code>, where <code class="js">type</code> is one of `'xml'`,
+			`'html'` or `'svg'`.
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="prefix">
+				<a class="block text-5" href="#prefix"><code>prefix(string)</code></a>
+
+			Returns a prefixed CSS property name where a prefix is required in the current
+			browser.
+			</div>
+		</article>
+	</div>
+
+	<div class="grid-block block">
+		<h1 class="block @2-grid-left-1/15 @3-grid-left-1/9">plugins.</h1>
+	</div>
+
+	<div class="grid-block block">
+	<div class="block @2-grid-3/5 @2-grid-left-1/15 @3-grid-4/9 @3-grid-left-1/9">
+		<h2>popable</h2>
 
 		<p>A popable goes away when clicked outside.</p>
 
@@ -44,9 +564,9 @@
 		</div>
 
 		<a class="button" href="#popable-dialog">Popable dialog</a>
-	</div>
+	</div
 
-	<div class="dialog-layer layer fixed" href="#popable-dialog">
+	><div class="dialog-layer layer fixed" href="#popable-dialog">
 		<div class="dialog popable focusable" id="popable-dialog" style="max-width: 30rem;">
 			<p>Hello. A popable goes away when clicked outside of, so you can click
 			on the background layer to close this dialog.</p>
@@ -55,10 +575,10 @@
 			<label>Uh.. HOW many?</label>
 			<input/>
 		</div>
-	</div>
+	</div
 
-	<div class="site_wrap wrap">
-		<h1>.toggleable</h1>
+	><div class="block @2-grid-3/5 @2-grid-left-1/3 @3-grid-4/9 @3-grid-left-1/3">
+		<h2>toggleable</h2>
 
 		<p>Activates and deactivates when any link pointing to it is clicked.</p>
 
@@ -69,9 +589,9 @@
 		</div>
 
 		<a class="button" href="#toggleable-dialog">Toggleable dialog</a>
-	</div>
+	</div
 
-	<div class="dialog-layer layer fixed" href="#toggleable-dialog">
+	><div class="dialog-layer layer fixed" href="#toggleable-dialog">
 		<div class="dialog toggleable focusable" id="toggleable-dialog" style="max-width: 30rem;">
 			<p>Hello. A toggleable only goes away when a link to it is clicked,
 			so you can't close this dialog by clicking on the background layer.</p>
@@ -79,12 +599,14 @@
 			<input/>
 			<label>Uh.. HOW many?</label>
 			<input/>
+			</div>
+
 			<a class="button" href="#toggleable-dialog">Close</a>
 		</div>
-	</div>
+	</div
 
-	<div class="site_wrap wrap">
-		<h1>.swipeable</h1>
+	><div class="block @2-grid-3/5 @2-grid-left-3/15 @3-grid-4/9 @3-grid-left-2/9">
+		<h2>swipeable</h2>
 
 		<p>Slides horizontally with a touch or mouse.</p>
 
@@ -103,10 +625,10 @@
 			<li><a class="slide_button button" href="#slide3">3</a></li>
 			<li><a class="slide_button button" href="#slide4">4</a></li>
 		</ul>
-	</div>
+	</div
 
-	<div class="site_wrap wrap">
-		<h1>.switchable</h1>
+	><div class="block @2-grid-3/5 @2-grid-left-1/3 @3-grid-4/9 @3-grid-left-1/3">
+		<h2>switchable</h2>
 
 		<p>For any group of siblings with the class <code>switchable</code>,
 		only one can be <code>active</code> at any one time.</p>
@@ -128,9 +650,27 @@
 		><div class="tab-block block switchable" id="tab-3">
 			Tab 3
 		</div>
+	</div
+
+	><div class="block @2-grid-3/5 @2-grid-left-1/15 @3-grid-4/9 @3-grid-left-1/9">
+		<h2>locateable</h2>
+
+		<p>Scrolls the main view to bring the targeted element into view.</p>
+	</div
+
+	><div class="block @2-grid-3/5 @2-grid-left-1/5 @3-grid-4/9 @3-grid-left-1/9">
+		<h2>focusable</h2>
+
+		<p>Traps focus inside the node when active.</p>
+	</div
+
+	><div class="block @2-grid-3/5 @2-grid-left-1/3 @3-grid-4/9 @3-grid-left-1/9">
+		<h2>removeable</h2>
+
+		<p>Is removed from the DOM on <code class="js">dom-deactivate</code>.</p>
 	</div>
 
-	<div class="site_wrap wrap">
+	<!--div class="site_wrap wrap">
 		<h1>touch</h1>
 
 		<div class="test_wrap wrap">
@@ -149,9 +689,9 @@
 			<li>Github: <a href="http://github.com/stephband/dom">github.com/stephband/dom</a></li>
 			<li>Issues: <a href="http://github.com/stephband/dom/issues">github.com/stephband/dom/issues</a></li>
 		</ul>
-	</div>
+	</div-->
 
-	<footer class="site_footer">
+	<!--footer class="site_footer">
 		<div class="full_wrap wrap">
 			<div class="bio_col col">
 				<h3>Who made this?</h3>
@@ -177,7 +717,7 @@
 				</ul>
 			</div>
 		</div>
-	</footer>
+	</footer-->
 
 	<script src="../fn/polyfills/number.isnan.js"></script>
 	<script src="../fn/polyfills/object.assign.js"></script>
@@ -198,8 +738,9 @@
 	<script src="js/dom.moveable.js"></script>
 	<script src="js/dom.swipeable.js"></script>
 	<script src="js/dom.focusable.js"></script>
+	<script src="js/dom.root.js"></script>
 
-	<script>
+	<script type="dont run">
 		var toDeg = Fn.multiply(57.295779513);
 		var toRad = Fn.multiply(1 / 57.295779513);
 

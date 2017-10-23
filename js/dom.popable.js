@@ -5,8 +5,8 @@
 (function(window) {
 
 	var dom     = window.dom;
-	var name    = "popable";
 	var trigger = dom.events.trigger;
+	var matches = dom.matches('.popable, [popable]');
 
 	function activate(e) {
 		// Use method detection - e.defaultPrevented is not set in time for
@@ -14,8 +14,7 @@
 		if (!e.default) { return; }
 
 		var node    = e.target;
-		var classes = dom.classes(node);
-		if (!classes.contains(name)) { return; }
+		if (!matches(node)) { return; }
 
 		// Make user actions outside node deactivat the node
 
@@ -43,10 +42,11 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 		e.default();
 	}
 
 	document.addEventListener('dom-activate', activate);
 	document.addEventListener('dom-deactivate', deactivate);
+	dom.activeMatchers.push(matches);
 })(this);

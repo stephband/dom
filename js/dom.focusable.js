@@ -1,11 +1,10 @@
 (function(window) {
 	"use strict";
-	
+
 	var Fn      = window.Fn;
 	var dom     = window.dom;
 
 	var noop          = Fn.noop;
-	var requestTick   = Fn.requestTick;
 	var on            = dom.events.on;
 	var off           = dom.events.off;
 	var trigger       = dom.events.trigger;
@@ -14,7 +13,7 @@
 	var trapFocus     = dom.trapFocus;
 	var untrapFocus   = noop;
 
-	var matches = dom.matches('.focusable');
+	var matches = dom.matches('.focusable, [focusable]');
 	var delay   = 600;
 
 	on(document, 'dom-activate', function(e) {
@@ -73,4 +72,6 @@
 		on(e.target, 'transitionend', untrap);
 		enableScroll(dom.root);
 	});
+
+	dom.activeMatchers.push(matches);
 })(this);

@@ -11,12 +11,10 @@
     var noop     = Fn.noop;
     var powOut   = Fn.exponentialOut;
     var animate  = dom.animate;
-    var classes  = dom.classes;
     var box      = dom.box;
     var offset   = dom.offset;
     var on       = dom.events.on;
-
-    var name     = "locateable";
+    var matches  = dom.matches(".locateable, [locateable]");
 
     // Time after scroll event to consider the document is scrolling
     var idleTime = 90;
@@ -35,7 +33,7 @@
         if (!e.default) { return; }
 
         var target = e.target;
-        if (!classes(target).contains(name)) { return; }
+        if (!matches(target)) { return; }
 
         // If node is already active, ignore
         if (target === activeNode) { return; }
@@ -73,7 +71,7 @@
 
         var target = e.target;
 
-        if (!classes(target).contains(name)) { return; }
+        if (!matches(target)) { return; }
 
         e.default();
 
@@ -136,4 +134,5 @@
     on(document, 'dom-deactivate', deactivate);
     on(window, 'scroll', scroll);
     update();
+    dom.activeMatchers.push(matches);
 })(this);

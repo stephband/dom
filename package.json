@@ -1,7 +1,7 @@
 {
     "name": "dom",
     "title": "dom",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "author": {
         "name": "Stephen Band",
         "url": "http://stephen.band",
@@ -52,7 +52,7 @@
     "scripts": {
         "build-nodeps":  "cat js/dom.js js/dom-activate.js js/dom-touch.js js/dom-swipe.js js/dom.popable.js js/dom.toggleable.js js/dom.switchable.js js/dom.swipeable.js js/dom.focusable.js js/dom.removeable.js js/dom.locateable.js > dist/dom-nodeps.js && minify dist/dom-nodeps.js",
         "build":         "npm run build-nodeps && cat fn/js/fn.js fn/js/stream.js polyfills/customevent.js polyfills/document.scrollingelement.js dist/dom-nodeps.js > dist/dom.js && minify dist/dom.js && cat css/dom.css > dist/dom.css",
-        "build-version": "npm run build && cp dist/dom.js dist/dom-1.1.2.js && cp dist/dom.min.js dist/dom-1.1.2.min.js && cp dist/dom.css dist/dom-1.1.2.css",
-        "publish":       "git pull origin master && npm run build-version && git add dist/* && git commit -am 'Build version 1.1.2' && git push"
+        "build-version": "npm run build && cp dist/dom.js dist/dom-1.1.3.js && cp dist/dom.min.js dist/dom-1.1.3.min.js && cp dist/dom.css dist/dom-1.1.3.css",
+        "publish":       "git pull origin master && npm run build-version && git add dist/* && git commit -am 'Build version 1.1.3' && git push"
     }
 }

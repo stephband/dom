@@ -1,4 +1,4 @@
-// dom.popable
+// dom.locateable
 //
 // Extends the default behaviour of events for the .tip class.
 

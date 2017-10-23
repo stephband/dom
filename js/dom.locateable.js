@@ -56,10 +56,10 @@
         // was the last scroll event ages ago ?
         // TODO: test on iOS
         if (scrollTime > t || t > scrollTime + idleTime) {
-            coords     = offset(dom.viewport, target);
+            coords     = offset(dom.view, target);
             safeTop    = dom.safe.top;
             scrollTime = t + scrollDuration * 1000;
-            cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', dom.viewport, coords[1] - safeTop);
+            cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', dom.view, coords[1] - safeTop);
         }
 
         e.default();

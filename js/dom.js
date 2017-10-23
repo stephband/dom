@@ -1135,7 +1135,7 @@ function getPositionParent(node) {
 	}
 
 	function animateScroll(value) {
-		return animate(0.6, pow(2), 'scrollTop', dom.viewport, toPx(value));
+		return animate(0.6, pow(2), 'scrollTop', dom.view, toPx(value));
 	}
 
 	function scrollRatio(node) {
@@ -1388,7 +1388,11 @@ function getPositionParent(node) {
 		root: { value: document.documentElement, enumerable: true },
 		head: { value: document.head, enumerable: true },
 		body: { get: function() { return document.body; }, enumerable: true	},
-		viewport: { get: function() { return document.scrollingElement; }, enumerable: true }
+		view: { get: function() { return document.scrollingElement; }, enumerable: true },
+		viewport: { get: function() {
+			console.warn('Deprecated: dom.viewport is now dom.view');
+			return document.scrollingElement;
+		}, enumerable: true }
 	});
 
 

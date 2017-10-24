@@ -17,19 +17,29 @@
 	var matches        = dom.matches;
 	var remove         = dom.remove;
 
-	var untouchedClass        = 'untouched';
+	var validatedClass        = 'validated';
 	var errorElementSelector  = '.error-label';
-	var errorAttribute        = 'data-error';
+	//var errorAttribute        = 'data-error';
 
     var validitionMessages = window.validitionMessages = assign(window.validitionMessages || {}, {
-		//patternMismatch: pattern
-		//rangeOverflow:   max
-		//rangeUnderflow:  min
-		//stepMismatch:    step
-		//tooLong:         maxlength
-		//typeMismatch:    If value does not parse as correct type
-		//valueMissing:    required
+		//pattern:   '',
+		//max:       '',
+		//min:       '',
+		//step:      '',
+		//maxlength: '',
+		//type:      '',
+		//required:  ''
 	});
+
+	var types = {
+		patternMismatch: 'pattern',
+		rangeOverflow:   'max',
+		rangeUnderflow:  'min',
+		stepMismatch:    'step',
+		tooLong:         'maxlength',
+		typeMismatch:    'type',
+		valueMissing:    'required'
+	};
 
 	function negate(fn) {
 		return function() {
@@ -50,10 +60,10 @@
 			&& matches(errorElementSelector, node.nextElementSibling);
 	}
 
-	function isErrorAttribute(error) {
-		var node = error.node;
-		return !!attribute(errorAttribute, node);
-	}
+	//function isErrorAttribute(error) {
+	//	var node = error.node;
+	//	return !!attribute(errorAttribute, node);
+	//}
 
 	function flattenErrors(object) {
 		var errors = [];
@@ -81,8 +91,9 @@
 			if (name !== 'valid' && validity[name]) {
 				return {
 					type: name,
+					attr: types[name],
 					name: input.name,
-					text: validitionMessages[name] || node.validationMessage,
+					text: validitionMessages[types[name]] || node.validationMessage,
 					node: input
 				};
 			}
@@ -97,17 +108,14 @@
 			node = node.nextElementSibling;
 		}
 
-        var message = dom.create('label', {
-			for:   input.id,
-			//value: input.value
+        var label = dom.create('label')
+        dom.assign(label, {
+            textContent: error.text,
+			for:         input.id,
+            class:       'error-label'
 		});
 
-		//Sparky(errorTemplateSelector, assign({
-		//	id:    input.id,
-		//	value: input.value
-		//}, error));
-
-		after(node, message);
+		after(node, label);
 
 		if (error.type === 'customError') {
 			node.setCustomValidity(error.text);
@@ -121,8 +129,8 @@
 		}
 	}
 
-	function removeUntouchedClass(input) {
-		classes(input).remove(untouchedClass);
+	function addValidatedClass(input) {
+		classes(input).add(validatedClass);
 	}
 
 	function removeMessages(input) {
@@ -146,26 +154,30 @@
 	.filter(isInput)
 	.each(invoke('checkValidity', nothing));
 
-	dom
-	.event('focusout', document)
-	.map(get('target'))
-	.unique()
-	.each(removeUntouchedClass);
+	//dom
+	//.event('focusout', document)
+	//.map(get('target'))
+	//.unique()
+	//.each(addValidatedClass);
 
+	// Add event in capture phase
 	document.addEventListener(
 		'invalid',
 
 		// Push to stream
 		Stream.of()
+        .tap(console.log)
 		.map(get('target'))
-		.tap(once(removeUntouchedClass))
+		.tap(once(addValidatedClass))
 		.filter(negate(isShowingMessage))
 		.map(toError)
-		.filter(isErrorAttribute)
+        //.filter(isErrorAttribute)
+		//.filter(isMessage)
+        .tap(console.log)
 		.each(renderError)
 		.push,
 
-		// Add event in capture phase!!
+		// Capture phase
 		true
 	);
 

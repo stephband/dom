@@ -263,7 +263,12 @@
 		var n = names.length;
 
 		while (n--) {
-			node.setAttribute(names[n], attributes[names[n]]);
+			if (names[n] in node) {
+				node[names[n]] = attributes[names[n]];
+			}
+			else {
+				node.setAttribute(names[n], attributes[names[n]]);
+			}
 		}
 	}
 
@@ -277,10 +282,10 @@
 	}
 
 	function create(name) {
-		// create(name)
-		// create(name, text)
-		// create(name, attributes)
-		// create(name, text, attributes)
+		// create(type)
+		// create(type, text)
+		// create(tag, attributes)
+		// create(tag, text, attributes)
 
 		if (constructors[name]) {
 			return constructors[name](arguments[1]);

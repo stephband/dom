@@ -2701,22 +2701,13 @@ function getPositionParent(node) {
 	var attribute      = dom.attribute;
 	var classes        = dom.classes;
     var matches        = dom.matches;
+    var next           = dom.next;
 	var remove         = dom.remove;
 
-    var isValidateable = dom.matches('input.validateable, select.validateable, textarea.validateable, .validateable input, .validateable textarea, .validateable select');
+    var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select');
 	var validatedClass = 'validated';
 	var errorSelector  = '.error-label';
 	//var errorAttribute        = 'data-error';
-
-    var validitionMessages = window.validitionMessages = assign(window.validitionMessages || {}, {
-		//pattern:   '',
-		//max:       '',
-		//min:       '',
-		//step:      '',
-		//maxlength: '',
-		//type:      '',
-		//required:  ''
-	});
 
 	var types = {
 		patternMismatch: 'pattern',
@@ -2777,7 +2768,7 @@ function getPositionParent(node) {
 					type: name,
 					attr: types[name],
 					name: input.name,
-					text: validitionMessages[types[name]] || node.validationMessage,
+					text: dom.validation[types[name]] || node.validationMessage,
 					node: input
 				};
 			}
@@ -2820,8 +2811,7 @@ function getPositionParent(node) {
 	function removeMessages(input) {
 		var node = input;
 
-		while (node.nextElementSibling && matches(errorSelector, node.nextElementSibling)) {
-			node = node.nextElementSibling;
+		while ((node = next(node)) && matches(errorSelector, node)) {
 			remove(node);
 		}
 	}
@@ -2839,6 +2829,12 @@ function getPositionParent(node) {
 	.filter(isValidateable)
 	.each(invoke('checkValidity', nothing));
 
+    dom
+	.event('submit', document)
+	.map(get('target'))
+	.filter(isValidateable)
+	.each(addValidatedClass);
+
 	//dom
 	//.event('focusout', document)
 	//.map(get('target'))
@@ -2852,6 +2848,7 @@ function getPositionParent(node) {
 		// Push to stream
 		Stream.of()
 		.map(get('target'))
+        .filter(isValidateable)
 		.tap(once(addValidatedClass))
 		.filter(negate(isShowingMessage))
 		.map(toError)
@@ -2863,5 +2860,7 @@ function getPositionParent(node) {
 		// Capture phase
 		true
 	);
+
+    dom.validation = dom.validation || {};
 
 })(this);

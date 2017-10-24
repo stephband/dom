@@ -5354,6 +5354,7 @@ function getPositionParent(node) {
 	var attribute      = dom.attribute;
 	var classes        = dom.classes;
     var matches        = dom.matches;
+    var next           = dom.next;
 	var remove         = dom.remove;
 
     var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select');
@@ -5463,8 +5464,7 @@ function getPositionParent(node) {
 	function removeMessages(input) {
 		var node = input;
 
-		while (node.nextElementSibling && matches(errorSelector, node.nextElementSibling)) {
-			node = node.nextElementSibling;
+		while ((node = next(node)) && matches(errorSelector, node)) {
 			remove(node);
 		}
 	}
@@ -5501,6 +5501,7 @@ function getPositionParent(node) {
 		// Push to stream
 		Stream.of()
 		.map(get('target'))
+        .filter(isValidateable)
 		.tap(once(addValidatedClass))
 		.filter(negate(isShowingMessage))
 		.map(toError)

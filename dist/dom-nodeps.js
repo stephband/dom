@@ -2786,6 +2786,7 @@ function getPositionParent(node) {
 		}
 	}
 
+	// Clear validation on new input
 	dom
 	.event('input', document)
 	.map(get('target'))
@@ -2794,19 +2795,24 @@ function getPositionParent(node) {
 	.filter(isValid)
 	.each(removeMessages);
 
+	// Check validity on focus out
 	dom
 	.event('focusout', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(invoke('checkValidity', nothing));
 
+	// Check validation on form submit
+	// TODO doesnt work because 'submit' is not received if the validity
+	// check shows the form is invalid
     dom
 	.event('submit', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(addValidatedClass);
 
-	// Add events in capture phase
+	// Add error labels after invalid inputs. Listen to events in the
+	// capture phase.
 	document.addEventListener(
 		'invalid',
 

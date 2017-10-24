@@ -14,11 +14,12 @@
 	var after          = dom.after;
 	var attribute      = dom.attribute;
 	var classes        = dom.classes;
-	var matches        = dom.matches;
+    var matches        = dom.matches;
 	var remove         = dom.remove;
 
-	var validatedClass        = 'validated';
-	var errorElementSelector  = '.error-label';
+    var isValidateable = dom.matches('input.validateable, select.validateable, textarea.validateable, .validateable input, .validateable textarea, .validateable select');
+	var validatedClass = 'validated';
+	var errorSelector  = '.error-label';
 	//var errorAttribute        = 'data-error';
 
     var validitionMessages = window.validitionMessages = assign(window.validitionMessages || {}, {
@@ -47,17 +48,13 @@
 		};
 	}
 
-	function isInput(node) {
-		return matches('input, textarea, select', node);
-	}
-
 	function isValid(node) {
 		return node.validity ? node.validity.valid : true ;
 	}
 
 	function isShowingMessage(node) {
 		return node.nextElementSibling
-			&& matches(errorElementSelector, node.nextElementSibling);
+			&& matches(errorSelector, node.nextElementSibling);
 	}
 
 	//function isErrorAttribute(error) {
@@ -65,27 +62,28 @@
 	//	return !!attribute(errorAttribute, node);
 	//}
 
-	function flattenErrors(object) {
-		var errors = [];
-
-		// Flatten errors into a list
-		for (name in object) {
-			errors.push.apply(errors,
-				object[name].map(function(text) {
-					return {
-						name: name,
-						text: text
-					}
-				})
-			);
-		}
-
-		return errors;
-	}
+	//function flattenErrors(object) {
+	//	var errors = [];
+    //
+	//	// Flatten errors into a list
+	//	for (name in object) {
+	//		errors.push.apply(errors,
+	//			object[name].map(function(text) {
+	//				return {
+	//					name: name,
+	//					text: text
+	//				}
+	//			})
+	//		);
+	//	}
+    //
+	//	return errors;
+	//}
 
 	function toError(input) {
 		var node     = input;
 		var validity = node.validity;
+        var name;
 
 		for (name in validity) {
 			if (name !== 'valid' && validity[name]) {
@@ -104,7 +102,7 @@
 		var input  = error.node;
 		var node   = input;
 
-		while (node.nextElementSibling && matches(errorElementSelector, node.nextElementSibling)) {
+		while (node.nextElementSibling && matches(errorSelector, node.nextElementSibling)) {
 			node = node.nextElementSibling;
 		}
 
@@ -134,9 +132,9 @@
 	}
 
 	function removeMessages(input) {
-		var node  = input;
+		var node = input;
 
-		while (node.nextElementSibling && matches(errorElementSelector, node.nextElementSibling)) {
+		while (node.nextElementSibling && matches(errorSelector, node.nextElementSibling)) {
 			node = node.nextElementSibling;
 			remove(node);
 		}
@@ -145,13 +143,14 @@
 	dom
 	.event('input', document)
 	.map(get('target'))
+    .filter(isValidateable)
 	.filter(isValid)
 	.each(removeMessages);
 
 	dom
 	.event('focusout', document)
 	.map(get('target'))
-	.filter(isInput)
+	.filter(isValidateable)
 	.each(invoke('checkValidity', nothing));
 
 	//dom
@@ -166,14 +165,12 @@
 
 		// Push to stream
 		Stream.of()
-        .tap(console.log)
 		.map(get('target'))
 		.tap(once(addValidatedClass))
 		.filter(negate(isShowingMessage))
 		.map(toError)
         //.filter(isErrorAttribute)
 		//.filter(isMessage)
-        .tap(console.log)
 		.each(renderError)
 		.push,
 

@@ -5356,16 +5356,6 @@ function getPositionParent(node) {
 	var errorSelector  = '.error-label';
 	//var errorAttribute        = 'data-error';
 
-    var validitionMessages = window.validitionMessages = assign(window.validitionMessages || {}, {
-		//pattern:   '',
-		//max:       '',
-		//min:       '',
-		//step:      '',
-		//maxlength: '',
-		//type:      '',
-		//required:  ''
-	});
-
 	var types = {
 		patternMismatch: 'pattern',
 		rangeOverflow:   'max',
@@ -5425,7 +5415,7 @@ function getPositionParent(node) {
 					type: name,
 					attr: types[name],
 					name: input.name,
-					text: validitionMessages[types[name]] || node.validationMessage,
+					text: dom.validation[types[name]] || node.validationMessage,
 					node: input
 				};
 			}
@@ -5511,5 +5501,7 @@ function getPositionParent(node) {
 		// Capture phase
 		true
 	);
+
+    dom.validation = dom.validation || {};
 
 })(this);

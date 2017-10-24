@@ -2704,10 +2704,9 @@ function getPositionParent(node) {
     var next           = dom.next;
 	var remove         = dom.remove;
 
-    var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select');
+    var isValidateable = matches('.validateable, .validateable input, .validateable textarea, .validateable select');
+	var isErrorLabel   = matches('.error-label');
 	var validatedClass = 'validated';
-	var errorSelector  = '.error-label';
-	//var errorAttribute        = 'data-error';
 
 	var types = {
 		patternMismatch: 'pattern',
@@ -2730,45 +2729,27 @@ function getPositionParent(node) {
 	}
 
 	function isShowingMessage(node) {
-		return node.nextElementSibling
-			&& matches(errorSelector, node.nextElementSibling);
+		return node.nextElementSibling && isErrorLabel(node.nextElementSibling);
 	}
-
-	//function isErrorAttribute(error) {
-	//	var node = error.node;
-	//	return !!attribute(errorAttribute, node);
-	//}
-
-	//function flattenErrors(object) {
-	//	var errors = [];
-    //
-	//	// Flatten errors into a list
-	//	for (name in object) {
-	//		errors.push.apply(errors,
-	//			object[name].map(function(text) {
-	//				return {
-	//					name: name,
-	//					text: text
-	//				}
-	//			})
-	//		);
-	//	}
-    //
-	//	return errors;
-	//}
 
 	function toError(input) {
 		var node     = input;
 		var validity = node.validity;
-        var name;
+        var name, text;
 
 		for (name in validity) {
 			if (name !== 'valid' && validity[name]) {
+				text = dom.validation[types[name]];
+
+				if (text) {
+					input.setCustomValidity(text);
+				}
+
 				return {
 					type: name,
 					attr: types[name],
 					name: input.name,
-					text: dom.validation[types[name]] || node.validationMessage,
+					text: node.validationMessage,
 					node: input
 				};
 			}
@@ -2779,7 +2760,7 @@ function getPositionParent(node) {
 		var input  = error.node;
 		var node   = input;
 
-		while (node.nextElementSibling && matches(errorSelector, node.nextElementSibling)) {
+		while (node.nextElementSibling && isErrorLabel(node.nextElementSibling)) {
 			node = node.nextElementSibling;
 		}
 
@@ -2791,17 +2772,6 @@ function getPositionParent(node) {
 		});
 
 		after(node, label);
-
-		if (error.type === 'customError') {
-			node.setCustomValidity(error.text);
-
-			dom
-			.on('input', node)
-			.take(1)
-			.each(function() {
-				node.setCustomValidity('');
-			});
-		}
 	}
 
 	function addValidatedClass(input) {
@@ -2811,7 +2781,7 @@ function getPositionParent(node) {
 	function removeMessages(input) {
 		var node = input;
 
-		while ((node = next(node)) && matches(errorSelector, node)) {
+		while ((node = next(node)) && isErrorLabel(node)) {
 			remove(node);
 		}
 	}
@@ -2820,6 +2790,7 @@ function getPositionParent(node) {
 	.event('input', document)
 	.map(get('target'))
     .filter(isValidateable)
+	.tap(invoke('setCustomValidity', ['']))
 	.filter(isValid)
 	.each(removeMessages);
 
@@ -2835,13 +2806,7 @@ function getPositionParent(node) {
 	.filter(isValidateable)
 	.each(addValidatedClass);
 
-	//dom
-	//.event('focusout', document)
-	//.map(get('target'))
-	//.unique()
-	//.each(addValidatedClass);
-
-	// Add event in capture phase
+	// Add events in capture phase
 	document.addEventListener(
 		'invalid',
 
@@ -2849,11 +2814,9 @@ function getPositionParent(node) {
 		Stream.of()
 		.map(get('target'))
         .filter(isValidateable)
-		.tap(once(addValidatedClass))
+		.tap(addValidatedClass)
 		.filter(negate(isShowingMessage))
 		.map(toError)
-        //.filter(isErrorAttribute)
-		//.filter(isMessage)
 		.each(renderError)
 		.push,
 

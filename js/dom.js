@@ -263,7 +263,12 @@
 		var n = names.length;
 
 		while (n--) {
-			node.setAttribute(names[n], attributes[names[n]]);
+			if (names[n] in node) {
+				node[names[n]] = attributes[names[n]];
+			}
+			else {
+				node.setAttribute(names[n], attributes[names[n]]);
+			}
 		}
 	}
 
@@ -277,10 +282,10 @@
 	}
 
 	function create(name) {
-		// create(name)
-		// create(name, text)
-		// create(name, attributes)
-		// create(name, text, attributes)
+		// create(type)
+		// create(type, text)
+		// create(tag, attributes)
+		// create(tag, text, attributes)
 
 		if (constructors[name]) {
 			return constructors[name](arguments[1]);
@@ -1135,7 +1140,7 @@ function getPositionParent(node) {
 	}
 
 	function animateScroll(value) {
-		return animate(0.6, pow(2), 'scrollTop', dom.viewport, toPx(value));
+		return animate(0.6, pow(2), 'scrollTop', dom.view, toPx(value));
 	}
 
 	function scrollRatio(node) {
@@ -1388,7 +1393,11 @@ function getPositionParent(node) {
 		root: { value: document.documentElement, enumerable: true },
 		head: { value: document.head, enumerable: true },
 		body: { get: function() { return document.body; }, enumerable: true	},
-		viewport: { get: function() { return document.scrollingElement; }, enumerable: true }
+		view: { get: function() { return document.scrollingElement; }, enumerable: true },
+		viewport: { get: function() {
+			console.warn('Deprecated: dom.viewport is now dom.view');
+			return document.scrollingElement;
+		}, enumerable: true }
 	});
 
 

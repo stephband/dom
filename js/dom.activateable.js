@@ -7,7 +7,7 @@
 
 	// Define
 
-	var name = 'activateable';
+	var matches = dom.matches('.activateable, [activateable]');
 
 	// Functions
 
@@ -19,7 +19,7 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		//dom.identify(target);
 		e.default();
@@ -29,7 +29,7 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		//dom.identify(target);
 		e.default();
@@ -37,4 +37,5 @@
 
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
+	dom.activeMatchers.push(matches);
 })(this);

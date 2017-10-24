@@ -263,7 +263,12 @@
 		var n = names.length;
 
 		while (n--) {
-			node.setAttribute(names[n], attributes[names[n]]);
+			if (names[n] in node) {
+				node[names[n]] = attributes[names[n]];
+			}
+			else {
+				node.setAttribute(names[n], attributes[names[n]]);
+			}
 		}
 	}
 
@@ -277,10 +282,10 @@
 	}
 
 	function create(name) {
-		// create(name)
-		// create(name, text)
-		// create(name, attributes)
-		// create(name, text, attributes)
+		// create(type)
+		// create(type, text)
+		// create(tag, attributes)
+		// create(tag, text, attributes)
 
 		if (constructors[name]) {
 			return constructors[name](arguments[1]);
@@ -1135,7 +1140,7 @@ function getPositionParent(node) {
 	}
 
 	function animateScroll(value) {
-		return animate(0.6, pow(2), 'scrollTop', dom.viewport, toPx(value));
+		return animate(0.6, pow(2), 'scrollTop', dom.view, toPx(value));
 	}
 
 	function scrollRatio(node) {
@@ -1388,7 +1393,11 @@ function getPositionParent(node) {
 		root: { value: document.documentElement, enumerable: true },
 		head: { value: document.head, enumerable: true },
 		body: { get: function() { return document.body; }, enumerable: true	},
-		viewport: { get: function() { return document.scrollingElement; }, enumerable: true }
+		view: { get: function() { return document.scrollingElement; }, enumerable: true },
+		viewport: { get: function() {
+			console.warn('Deprecated: dom.viewport is now dom.view');
+			return document.scrollingElement;
+		}, enumerable: true }
 	});
 
 
@@ -1408,6 +1417,7 @@ function getPositionParent(node) {
 	var on        = dom.events.on;
 	var off       = dom.events.off;
 	var trigger   = dom.events.trigger;
+	var curry     = Fn.curry;
 	var isDefined = Fn.isDefined;
 	var overload  = Fn.overload;
 
@@ -1419,6 +1429,15 @@ function getPositionParent(node) {
 
 	var store     = new WeakMap();
 
+	var apply = curry(function apply(node, fn) {
+		return fn(node);
+	});
+
+
+	// We need a place to register node matchers for activate events
+	Object.defineProperties(dom, {
+		activeMatchers: { value: [] }
+	});
 
 	function findButtons(id) {
 		return dom
@@ -1685,12 +1704,8 @@ function getPositionParent(node) {
 
 		// Is the node popable, switchable or toggleable?
 		var classes = dom.classes(node);
-		if (classes.contains('popable') ||
-			classes.contains('switchable') ||
-			classes.contains('toggleable') ||
-			classes.contains('focusable') ||
-			classes.contains('removeable') ||
-			classes.contains('locateable')) {
+
+		if (dom.activeMatchers.find(apply(node))) {
 			activate(e, node);
 		}
 		// A bit of a fudge, but smooth scrolling is so project-dependent it is
@@ -2082,8 +2097,8 @@ function getPositionParent(node) {
 (function(window) {
 
 	var dom     = window.dom;
-	var name    = "popable";
 	var trigger = dom.events.trigger;
+	var matches = dom.matches('.popable, [popable]');
 
 	function activate(e) {
 		// Use method detection - e.defaultPrevented is not set in time for
@@ -2091,8 +2106,7 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var node    = e.target;
-		var classes = dom.classes(node);
-		if (!classes.contains(name)) { return; }
+		if (!matches(node)) { return; }
 
 		// Make user actions outside node deactivat the node
 
@@ -2120,12 +2134,13 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 		e.default();
 	}
 
 	document.addEventListener('dom-activate', activate);
 	document.addEventListener('dom-deactivate', deactivate);
+	dom.activeMatchers.push(matches);
 })(this);
 // dom.toggleable
 
@@ -2136,7 +2151,7 @@ function getPositionParent(node) {
 
 	// Define
 
-	var name = 'toggleable';
+	var matches = dom.matches('.toggleable, [toggleable]');
 
 	// Functions
 
@@ -2165,7 +2180,7 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		var id = dom.identify(target);
 
@@ -2181,7 +2196,7 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		var id = e.target.id;
 
@@ -2195,6 +2210,8 @@ function getPositionParent(node) {
 
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
+
+	dom.activeMatchers.push(matches);
 })(this);
 // dom.switchable
 //
@@ -2211,15 +2228,15 @@ function getPositionParent(node) {
 
 	// Define
 
-	var name = 'switchable';
-	var on   = dom.events.on;
+	var matches = dom.matches('.switchable, [switchable]');
+	var on      = dom.events.on;
 	var triggerDeactivate = dom.trigger('dom-deactivate');
 
 	function activate(e) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		var nodes = dom.query('.switchable', target.parentNode);
 		var i     = nodes.indexOf(target);
@@ -2239,13 +2256,14 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		e.default();
 	}
 
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
+	dom.activeMatchers.push(matches);
 })(this);
 (function(window) {
 	"use strict";
@@ -2351,8 +2369,8 @@ function getPositionParent(node) {
 	});
 
 	function transform(node, active) {
-		var l1 = dom.viewportLeft(node);
-		var l2 = dom.viewportLeft(active);
+		var l1 = dom.box(node).left;
+		var l2 = dom.box(active).left;
 
 		// Round the translation - without rounding images and text become
 		// slightly fuzzy as they are antialiased.
@@ -2404,8 +2422,8 @@ function getPositionParent(node) {
 		classes.remove('notransition');
 		document.documentElement.clientWidth;
 
-		var l1 = dom.viewportLeft(node);
-		var l2 = dom.viewportLeft(parent);
+		var l1 = dom.box(node).left;
+		var l2 = dom.box(parent).left;
 		var l  = l1 - l2 - dom.style('margin-left', node);
 
 		parent.style.transform = 'translate(' + (-l) + 'px, 0px)';
@@ -2414,12 +2432,11 @@ function getPositionParent(node) {
 })(this);
 (function(window) {
 	"use strict";
-	
+
 	var Fn      = window.Fn;
 	var dom     = window.dom;
 
 	var noop          = Fn.noop;
-	var requestTick   = Fn.requestTick;
 	var on            = dom.events.on;
 	var off           = dom.events.off;
 	var trigger       = dom.events.trigger;
@@ -2428,7 +2445,7 @@ function getPositionParent(node) {
 	var trapFocus     = dom.trapFocus;
 	var untrapFocus   = noop;
 
-	var matches = dom.matches('.focusable');
+	var matches = dom.matches('.focusable, [focusable]');
 	var delay   = 600;
 
 	on(document, 'dom-activate', function(e) {
@@ -2487,6 +2504,8 @@ function getPositionParent(node) {
 		on(e.target, 'transitionend', untrap);
 		enableScroll(dom.root);
 	});
+
+	dom.activeMatchers.push(matches);
 })(this);
 // dom.toggleable
 
@@ -2494,10 +2513,11 @@ function getPositionParent(node) {
 	"use strict";
 
 	// Import
-	var dom     = window.dom;
+	var dom         = window.dom;
 
 	// Define
-	var name    = 'removeable';
+	var matches     = dom.matches('.removeable, [removeable]');
+
 	// Max duration of deactivation transition in seconds
 	var maxDuration = 1;
 
@@ -2510,7 +2530,7 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		function update() {
 			clearTimeout(timer);
@@ -2526,7 +2546,7 @@ function getPositionParent(node) {
 
 	on(document, 'dom-deactivate', deactivate);
 })(this);
-// dom.popable
+// dom.locateable
 //
 // Extends the default behaviour of events for the .tip class.
 
@@ -2539,12 +2559,10 @@ function getPositionParent(node) {
     var noop     = Fn.noop;
     var powOut   = Fn.exponentialOut;
     var animate  = dom.animate;
-    var classes  = dom.classes;
     var box      = dom.box;
     var offset   = dom.offset;
     var on       = dom.events.on;
-
-    var name     = "locateable";
+    var matches  = dom.matches(".locateable, [locateable]");
 
     // Time after scroll event to consider the document is scrolling
     var idleTime = 90;
@@ -2563,7 +2581,7 @@ function getPositionParent(node) {
         if (!e.default) { return; }
 
         var target = e.target;
-        if (!classes(target).contains(name)) { return; }
+        if (!matches(target)) { return; }
 
         // If node is already active, ignore
         if (target === activeNode) { return; }
@@ -2586,10 +2604,10 @@ function getPositionParent(node) {
         // was the last scroll event ages ago ?
         // TODO: test on iOS
         if (scrollTime > t || t > scrollTime + idleTime) {
-            coords     = offset(dom.viewport, target);
+            coords     = offset(dom.view, target);
             safeTop    = dom.safe.top;
             scrollTime = t + scrollDuration * 1000;
-            cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', dom.viewport, coords[1] - safeTop);
+            cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', dom.view, coords[1] - safeTop);
         }
 
         e.default();
@@ -2601,7 +2619,7 @@ function getPositionParent(node) {
 
         var target = e.target;
 
-        if (!classes(target).contains(name)) { return; }
+        if (!matches(target)) { return; }
 
         e.default();
 
@@ -2664,4 +2682,186 @@ function getPositionParent(node) {
     on(document, 'dom-deactivate', deactivate);
     on(window, 'scroll', scroll);
     update();
+    dom.activeMatchers.push(matches);
+})(this);
+(function(window) {
+	"use strict";
+
+	var assign         = Object.assign;
+	var Fn             = window.Fn;
+	var Stream         = window.Stream;
+	var dom            = window.dom;
+
+	var get            = Fn.get;
+	var invoke         = Fn.invoke;
+	var nothing        = Fn.nothing;
+	var once           = Fn.once;
+
+	var after          = dom.after;
+	var attribute      = dom.attribute;
+	var classes        = dom.classes;
+    var matches        = dom.matches;
+	var remove         = dom.remove;
+
+    var isValidateable = dom.matches('input.validateable, select.validateable, textarea.validateable, .validateable input, .validateable textarea, .validateable select');
+	var validatedClass = 'validated';
+	var errorSelector  = '.error-label';
+	//var errorAttribute        = 'data-error';
+
+    var validitionMessages = window.validitionMessages = assign(window.validitionMessages || {}, {
+		//pattern:   '',
+		//max:       '',
+		//min:       '',
+		//step:      '',
+		//maxlength: '',
+		//type:      '',
+		//required:  ''
+	});
+
+	var types = {
+		patternMismatch: 'pattern',
+		rangeOverflow:   'max',
+		rangeUnderflow:  'min',
+		stepMismatch:    'step',
+		tooLong:         'maxlength',
+		typeMismatch:    'type',
+		valueMissing:    'required'
+	};
+
+	function negate(fn) {
+		return function() {
+			return !fn.apply(this, arguments);
+		};
+	}
+
+	function isValid(node) {
+		return node.validity ? node.validity.valid : true ;
+	}
+
+	function isShowingMessage(node) {
+		return node.nextElementSibling
+			&& matches(errorSelector, node.nextElementSibling);
+	}
+
+	//function isErrorAttribute(error) {
+	//	var node = error.node;
+	//	return !!attribute(errorAttribute, node);
+	//}
+
+	//function flattenErrors(object) {
+	//	var errors = [];
+    //
+	//	// Flatten errors into a list
+	//	for (name in object) {
+	//		errors.push.apply(errors,
+	//			object[name].map(function(text) {
+	//				return {
+	//					name: name,
+	//					text: text
+	//				}
+	//			})
+	//		);
+	//	}
+    //
+	//	return errors;
+	//}
+
+	function toError(input) {
+		var node     = input;
+		var validity = node.validity;
+        var name;
+
+		for (name in validity) {
+			if (name !== 'valid' && validity[name]) {
+				return {
+					type: name,
+					attr: types[name],
+					name: input.name,
+					text: validitionMessages[types[name]] || node.validationMessage,
+					node: input
+				};
+			}
+		}
+	}
+
+	function renderError(error) {
+		var input  = error.node;
+		var node   = input;
+
+		while (node.nextElementSibling && matches(errorSelector, node.nextElementSibling)) {
+			node = node.nextElementSibling;
+		}
+
+        var label = dom.create('label')
+        dom.assign(label, {
+            textContent: error.text,
+			for:         input.id,
+            class:       'error-label'
+		});
+
+		after(node, label);
+
+		if (error.type === 'customError') {
+			node.setCustomValidity(error.text);
+
+			dom
+			.on('input', node)
+			.take(1)
+			.each(function() {
+				node.setCustomValidity('');
+			});
+		}
+	}
+
+	function addValidatedClass(input) {
+		classes(input).add(validatedClass);
+	}
+
+	function removeMessages(input) {
+		var node = input;
+
+		while (node.nextElementSibling && matches(errorSelector, node.nextElementSibling)) {
+			node = node.nextElementSibling;
+			remove(node);
+		}
+	}
+
+	dom
+	.event('input', document)
+	.map(get('target'))
+    .filter(isValidateable)
+	.filter(isValid)
+	.each(removeMessages);
+
+	dom
+	.event('focusout', document)
+	.map(get('target'))
+	.filter(isValidateable)
+	.each(invoke('checkValidity', nothing));
+
+	//dom
+	//.event('focusout', document)
+	//.map(get('target'))
+	//.unique()
+	//.each(addValidatedClass);
+
+	// Add event in capture phase
+	document.addEventListener(
+		'invalid',
+
+		// Push to stream
+		Stream.of()
+		.map(get('target'))
+		.tap(once(addValidatedClass))
+		.filter(negate(isShowingMessage))
+		.map(toError)
+        //.filter(isErrorAttribute)
+		//.filter(isMessage)
+		.each(renderError)
+		.push,
+
+		// Capture phase
+		true
+	);
+
 })(this);

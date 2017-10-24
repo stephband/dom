@@ -102,8 +102,8 @@
 	});
 
 	function transform(node, active) {
-		var l1 = dom.viewportLeft(node);
-		var l2 = dom.viewportLeft(active);
+		var l1 = dom.box(node).left;
+		var l2 = dom.box(active).left;
 
 		// Round the translation - without rounding images and text become
 		// slightly fuzzy as they are antialiased.
@@ -155,8 +155,8 @@
 		classes.remove('notransition');
 		document.documentElement.clientWidth;
 
-		var l1 = dom.viewportLeft(node);
-		var l2 = dom.viewportLeft(parent);
+		var l1 = dom.box(node).left;
+		var l2 = dom.box(parent).left;
 		var l  = l1 - l2 - dom.style('margin-left', node);
 
 		parent.style.transform = 'translate(' + (-l) + 'px, 0px)';

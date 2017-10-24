@@ -10,6 +10,7 @@
 	var on        = dom.events.on;
 	var off       = dom.events.off;
 	var trigger   = dom.events.trigger;
+	var curry     = Fn.curry;
 	var isDefined = Fn.isDefined;
 	var overload  = Fn.overload;
 
@@ -21,6 +22,15 @@
 
 	var store     = new WeakMap();
 
+	var apply = curry(function apply(node, fn) {
+		return fn(node);
+	});
+
+
+	// We need a place to register node matchers for activate events
+	Object.defineProperties(dom, {
+		activeMatchers: { value: [] }
+	});
 
 	function findButtons(id) {
 		return dom
@@ -287,12 +297,8 @@
 
 		// Is the node popable, switchable or toggleable?
 		var classes = dom.classes(node);
-		if (classes.contains('popable') ||
-			classes.contains('switchable') ||
-			classes.contains('toggleable') ||
-			classes.contains('focusable') ||
-			classes.contains('removeable') ||
-			classes.contains('locateable')) {
+
+		if (dom.activeMatchers.find(apply(node))) {
 			activate(e, node);
 		}
 		// A bit of a fudge, but smooth scrolling is so project-dependent it is

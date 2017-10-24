@@ -4,10 +4,11 @@
 	"use strict";
 
 	// Import
-	var dom     = window.dom;
+	var dom         = window.dom;
 
 	// Define
-	var name    = 'removeable';
+	var matches     = dom.matches('.removeable, [removeable]');
+
 	// Max duration of deactivation transition in seconds
 	var maxDuration = 1;
 
@@ -20,7 +21,7 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		function update() {
 			clearTimeout(timer);

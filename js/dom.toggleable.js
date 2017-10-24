@@ -7,7 +7,7 @@
 
 	// Define
 
-	var name = 'toggleable';
+	var matches = dom.matches('.toggleable, [toggleable]');
 
 	// Functions
 
@@ -36,7 +36,7 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		var id = dom.identify(target);
 
@@ -52,7 +52,7 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		var id = e.target.id;
 
@@ -66,4 +66,6 @@
 
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
+
+	dom.activeMatchers.push(matches);
 })(this);

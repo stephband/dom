@@ -13,15 +13,15 @@
 
 	// Define
 
-	var name = 'switchable';
-	var on   = dom.events.on;
+	var matches = dom.matches('.switchable, [switchable]');
+	var on      = dom.events.on;
 	var triggerDeactivate = dom.trigger('dom-deactivate');
 
 	function activate(e) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		var nodes = dom.query('.switchable', target.parentNode);
 		var i     = nodes.indexOf(target);
@@ -41,11 +41,12 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!dom.classes(target).contains(name)) { return; }
+		if (!matches(target)) { return; }
 
 		e.default();
 	}
 
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
+	dom.activeMatchers.push(matches);
 })(this);

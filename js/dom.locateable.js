@@ -1,4 +1,4 @@
-// dom.popable
+// dom.locateable
 //
 // Extends the default behaviour of events for the .tip class.
 
@@ -11,12 +11,10 @@
     var noop     = Fn.noop;
     var powOut   = Fn.exponentialOut;
     var animate  = dom.animate;
-    var classes  = dom.classes;
     var box      = dom.box;
     var offset   = dom.offset;
     var on       = dom.events.on;
-
-    var name     = "locateable";
+    var matches  = dom.matches(".locateable, [locateable]");
 
     // Time after scroll event to consider the document is scrolling
     var idleTime = 90;
@@ -35,7 +33,7 @@
         if (!e.default) { return; }
 
         var target = e.target;
-        if (!classes(target).contains(name)) { return; }
+        if (!matches(target)) { return; }
 
         // If node is already active, ignore
         if (target === activeNode) { return; }
@@ -58,10 +56,10 @@
         // was the last scroll event ages ago ?
         // TODO: test on iOS
         if (scrollTime > t || t > scrollTime + idleTime) {
-            coords     = offset(dom.viewport, target);
+            coords     = offset(dom.view, target);
             safeTop    = dom.safe.top;
             scrollTime = t + scrollDuration * 1000;
-            cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', dom.viewport, coords[1] - safeTop);
+            cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', dom.view, coords[1] - safeTop);
         }
 
         e.default();
@@ -73,7 +71,7 @@
 
         var target = e.target;
 
-        if (!classes(target).contains(name)) { return; }
+        if (!matches(target)) { return; }
 
         e.default();
 
@@ -136,4 +134,5 @@
     on(document, 'dom-deactivate', deactivate);
     on(window, 'scroll', scroll);
     update();
+    dom.activeMatchers.push(matches);
 })(this);

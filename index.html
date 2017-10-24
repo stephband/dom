@@ -7,194 +7,179 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5">
 
 	<title>dom</title>
-	<script>document.documentElement.className = 'js';</script>
+	<script>
+		document.documentElement.className = 'js';
+		window.validitionMessages = {
+			pattern:   'Doesnt match',
+			max:       'Higher than possible',
+			min:       'Lower than possible',
+			step:      'Out of step',
+			maxlength: 'Too long',
+			type:      'Wrong type!',
+			required:  'Required value'
+		};
+	</script>
 
 	<link rel="icon" type="image/png" href="images/favicon.png" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
 	<link rel="stylesheet" type="text/css" href="http://stephen.band/bolt/dist/bolt.min.css" />
+	<link rel="stylesheet" type="text/css" href="../bolt/dist/bolt.min.css" />
 	<!--link rel="stylesheet" type="text/css" href="http://stephen.band/css/template.theme.min.css" />
 	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.layout.css" />
 	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/docs.classes.css" />
 	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.highlight.light.css" /-->
 
-	<link rel="stylesheet" type="text/css" href="css/grid.css" />
+	<link rel="stylesheet" type="text/css" href="fn/css/grid.css" />
+	<link rel="stylesheet" type="text/css" href="fn/css/docs.css" />
 	<link rel="stylesheet" type="text/css" href="css/dom.css" />
 	<link rel="stylesheet" type="text/css" href="css/demo.css" />
 	<link rel="stylesheet" type="text/css" href="css/slide.css" />
 
 	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" rel="stylesheet">
-<style>
-	body {
-		padding-top: 1.5rem;
-		padding-bottom: 2.25rem;
-		color: #141B1E;
-	}
 
-	@media (min-width: 84em) {
-		body {
-			padding-top: 1.875rem;
-			padding-bottom: 3.75rem;
-		}
-	}
-
-	body > .grid-block + .grid-block {
-		margin-top: 72px;
-	}
-
-	.toggle-block {
-		opacity: 1;
-		visibility: visible;
-		min-height: 2.25rem;
-		padding-left: 0.9375rem;
-		padding-right: 0.9375rem;
-		color: #444444;
-	}
-
-	.toggle-block.active {
-		margin-bottom: 2.25rem;
-	}
-
-	.toggle-block::before {
-		content: '';
-		position: absolute;
-		top: 5px;
-		bottom: 15px;
-		width: 3px;
-		left: 0;
-		background-color: transparent;
-		transition:
-			background-color 0.8s linear,
-			bottom 0.6s linear;
-	}
-
-	.toggle-block.active::before {
-		content: '';
-		bottom: 5px;
-		background-color: #c4cfd2;
-	}
-
-	.toggle-block > .block {
-		margin-bottom: 0.75rem;
-	}
-
-	.toggle-block + .toggle-block {
-		margin-top: 0;
-	}
-
-	.text-8,  body { font-size: 0.9375rem; line-height: 1.5rem; font-weight: 300; }
-	.text-10, code {
-		font-family: 'Roboto Mono', monospace;
-		font-size: 1.0625rem;
-	}
-
-	a.block {
-		position: relative;
-		text-decoration: none;
-	}
-
-	a.block:hover {
-		border-bottom: 1px solid #999999;
-	}
-
-	.js.block {
-		font-size: 0.75rem;
-		margin-left: -0.8125rem;
-		padding-left: 0.8125rem;
-		padding-top: 9px;
-		padding-bottom: 9px;
-		padding-right: 0.75rem;
-		width: calc(100% + 0.75rem + 0.9375rem);
-		color: white;
-		background-color: #141B1E;
-		border-radius: 0;
-		border-bottom-left-radius: 0;
-		margin-top: 18px;
-		overflow: auto;
-		box-shadow: inset -18px 4px 110px -20px rgba(0,0,0,0.1);
-	}
-
-	.js.block + p {
-		margin-top: 1.125rem;
-	}
-
-	code {
-		font-size: 14px;
-		font-weight: 400;
-		color:#5e686d;
-		background-color: #e9eaea;
-		padding-left: 3px;
-		padding-right: 3px;
-		margin-left: -1px;
-		margin-right: -2px;
-		padding-bottom: 2px;
-		padding-top: 0px;
-		border-radius: 4px;
-		word-spacing: -0.125em;
-		letter-spacing: -0.0125em;
-	}
-
-	.text-5 {
-		font-size:   1rem;
-		line-height: 1.5rem;
-	}
-
-	a {
-		text-decoration: none;
-		padding-bottom: 2px;
-		border-bottom: 2px solid transparent;
-		transition: border-bottom-color 0.333s linear;
-	}
-
-	a:focus {
-		text-decoration: none;
-	}
-
-	a:hover {
-		text-decoration: none;
-		padding-bottom: 2px;
-		border-bottom: 2px solid #ababab;
-		transition-duration: 0.120s;
-	}
-
-	.keyboard a:focus {
-		border-bottom: 1px solid #999999;
-	}
-
-	.text-5 code {
-		font-size: inherit;
-		font-weight: 400;
-		color: #444;
-		background-color: transparent;
-		padding: 0;
-		margin: 0;
-		word-spacing: -0.25em;
-		letter-spacing: -0.0125em;
-	}
-
-	h5, .text-5 {
-		margin-bottom: 0.75rem;
-	}
-
-	.spaced-grid-block > .block {
-		margin-top: 1.125rem;
-		margin-bottom: 1.125rem;
-	}
-
-	pre {
-		white-space: pre;
-	}
-</style>
 </head>
 
 <body>
 	<header class="grid-block block">
-		<h1 class="block @2-grid-left-1/15 @3-grid-left-1/9">dom.</h1>
+		<h1 class="block @2-grid-left-1/15 @3-grid-left-1/9">dom</h1>
 	</header>
+
+
+
+	<form class="col validateable" action="#" onsubmit="e.preventDefault()">
+
+      <h2>html5 type</h2>
+
+      <label for="text">text</label>
+      <input type="text" id="text" name="text" />
+
+      <label for="search">search</label>
+      <input type="search" id="search" name="search" />
+
+      <label for="tel">tel</label>
+      <input type="tel" id="tel" name="tel" />
+
+      <label for="url">url</label>
+      <input type="url" id="url" name="url" />
+
+      <label for="color">color</label>
+      <input type="color" id="color" name="color" />
+
+      <label for="email">email</label>
+      <input type="email" id="email" name="email" />
+
+      <label for="password">password</label>
+      <input type="password" id="password" name="password" />
+
+      <label for="textarea">textarea</label>
+      <textarea id="textarea" name="textarea"></textarea>
+
+      <label for="textarea">textarea.resizeable</label>
+      <textarea class="resizeable" id="textarea" name="textarea">The quick brown fox jumps over the lazy dog.</textarea>
+
+      <label for="number">number</label>
+      <input type="number" id="number" name="number" />
+
+      <label for="date">date</label>
+      <input type="date" id="date" name="date" />
+
+      <label for="time">time</label>
+      <input type="time" id="time" name="time" />
+
+      <label for="week">week</label>
+      <input type="week" id="week" name="week" />
+
+      <label for="month">month</label>
+      <input type="month" id="month" name="month" />
+
+      <label for="datetime">datetime</label>
+      <input type="datetime" id="datetime" name="datetime" />
+
+      <label for="datetime-local">datetime-local</label>
+      <input type="datetime-local" id="datetime-local" name="datetime-local" />
+
+      <label for="range">range</label>
+      <input type="range" id="range" name="range" />
+
+      <label for="radio">radio</label>
+      <input type="radio" id="radio" name="radio" />
+
+      <label for="checkbox">checkbox</label>
+      <input type="checkbox" id="checkbox" name="checkbox" />
+
+      <label for="radio2">
+        <input type="radio" id="radio2" name="radio2" />
+        radio
+      </label>
+
+      <label for="checkbox2">
+        <input type="checkbox" id="checkbox2" name="checkbox2" />
+        checkbox
+      </label>
+
+      <label for="select">select</label>
+      <select>
+      	<option>Item 1</option>
+      	<option>Item 2</option>
+      	<option>Item 3</option>
+      	<option>Item 4</option>
+      </select>
+
+      <label for="file">file</label>
+      <input type="file" id="file" name="file" />
+
+      <label for="hidden">hidden</label>
+      <input type="hidden" id="hidden" name="hidden" />
+
+      <label for="image">image</label>
+      <input type="image" id="image" name="image" />
+
+      <label for="button">button</label>
+      <input type="button" id="button" name="button" value="button" />
+
+      <label for="reset">reset</label>
+      <input type="reset" id="reset" name="reset" />
+
+      <label for="submit">submit</label>
+      <input type="submit" id="submit" name="submit" />
+    </form>
+
+
+
+
+
+
+
+
 
 	<div class="spaced-grid-block grid-block block">
 		<article class="grid-block block @2-span-4/15 @2-span-left-1/15 @3-span-2/9 @3-span-left-1/9">
-			<h2 class="block">selection.</h2>
+			<h2 class="block">nodes.</h2>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="root">
+				<h3 class="text-5"><a href="#root"><code class="js">root</code></a></h3>
+				<p>The document root, an alias of <code class="js">document.documentElement</code>.</p>
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="head">
+				<h3 class="text-5"><a href="#head"><code class="js">head</code></a></h3>
+				<p>Alias of <code class="js">document.head</code>.</p>
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="body">
+				<h3 class="text-5"><a href="#body"><code class="js">body</code></a></h3>
+				<p>Alias of <code class="js">document.body</code>.</p>
+			</div>
+
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="view">
+				<h3 class="text-5"><a href="#view"><code class="js">view</code></a></h3>
+				<p>The main scrolling 'view' element, an alias of <code class="js">document.scrollingElement</code>.</p>
+			</div>
+		</article
+
+		><article class="grid-block block @2-span-4/15 @2-span-left-1/15 @3-span-2/9 @3-span-left-1/9">
+			<h2 class="block">select.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="closest">
 				<h3 class="text-5"><a href="#closest"><code class="js">closest(selector, node)</code></a></h3>
@@ -235,7 +220,7 @@
 		</article
 
 		><article class="grid-block block @2-span-4/15 @3-span-2/9">
-			<h2 class="block">inspection.</h2>
+			<h2 class="block">inspect.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="attribute">
 				<h3 class="text-5"><a href="#attribute"><code class="js">attribute(name, node)</code></a></h3>
@@ -297,7 +282,7 @@
 		</article
 
 		><article class="grid-block block @2-span-4/15 @3-span-2/9">
-			<h2 class="block">mutation.</h2>
+			<h2 class="block">mutate.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="addClass">
 				<h3 class="text-5"><a href="#addClass"><code class="js">addClass(class, node)</code></a></h3>
@@ -389,7 +374,7 @@
 		</article
 
 		><article class="grid-block block @2-span-4/15 @2-span-left-1/15 @3-span-2/9 @3-span-left-1/9">
-			<h2 class="block">events.</h2>
+			<h2 class="block">listen.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="event">
 				<h3 class="text-5"><a href="#event"><code class="js">event(type, node)</code></a></h3>
@@ -513,7 +498,7 @@
 		</article
 
 		><article class="grid-block block @2-span-4/15 @3-span-2/9">
-			<h2 class="block">animation.</h2>
+			<h2 class="block">animate.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="animate">
 				<h3 class="text-5"><a href="#animate"><code class="js">animate(dur, map, name, object, value)</code></a></h3>
@@ -541,7 +526,7 @@
 		</article
 
 		><article class="grid-block block @2-span-4/15 @2-span-left-1/15 @3-span-2/9 @3-span-left-1/9">
-			<h2 class="block">scrolling.</h2>
+			<h2 class="block">scroll.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="animateScroll">
 				<h3 class="text-5"><a href="#animateScroll"><code class="js">animateScroll(value)</code></a></h3>
@@ -729,54 +714,10 @@
 		<p>Is removed from the DOM on <code class="js">dom-deactivate</code>.</p>
 	</div>
 
-	<!--div class="site_wrap wrap">
-		<h1>touch</h1>
-
-		<div class="test_wrap wrap">
-			<div class="test">
-				<div class="resize"></div>
-				<div class="rotate"></div>
-			</div>
-
-			<div class="centre_mark"></div>
-			<div class="origin_mark"></div>
-		</div>
-
-		<h2>Project</h2>
-
-		<ul>
-			<li>Github: <a href="http://github.com/stephband/dom">github.com/stephband/dom</a></li>
-			<li>Issues: <a href="http://github.com/stephband/dom/issues">github.com/stephband/dom/issues</a></li>
-		</ul>
-	</div-->
-
-	<!--footer class="site_footer">
-		<div class="full_wrap wrap">
-			<div class="bio_col col">
-				<h3>Who made this?</h3>
-				<p>I did. I come from Scotland and I live in Lausanne, Switzerland. I make web things at <a href="http://cruncher.ch">Cruncher</a>. I miss Branston Pickle. When I'm not glued to a screen I play music and hike mountains.</p>
-			</div
-			><div class="repo_col col">
-				<h3>More code</h3>
-				<ul class="repo_index index">
-					<li><a href="http://stephband.info/bolt">Bolt</a></li>
-					<li><a href="http://stephband.info/jparallax/">jQuery.parallax</a></li>
-					<li><a href="http://stephband.info/jquery.event.tap/">jQuery.event.tap</a></li>
-					<li><a href="http://stephband.info/jquery.event.move/">jQuery.event.move</a></li>
-					<li><a href="http://stephband.info/jquery.event.swipe/">jQuery.event.swipe</a></li>
-				</ul>
-			</div
-			><div class="social_col col">
-				<h3>Find me on...</h3>
-				<ul class="social_index index">
-					<li><a href="http://twitter.com/stephband">twitter</a></li>
-					<li><a href="http://github.com/stephband">github</a></li>
-					<li><a href="http://plus.google.com/114566808430966059989/photos">google+</a></li>
-					<li><a href="http://www.linkedin.com/profile/view?id=27013870">linkedin</a></li>
-				</ul>
-			</div>
-		</div>
-	</footer-->
+	<script src="../fn/polyfills/number.isnan.js"></script>
+	<script src="../fn/polyfills/object.assign.js"></script>
+	<script src="../fn/js/fn.js"></script>
+	<script src="../fn/js/stream.js"></script>
 
 	<script src="http://stephen.band/Fn/polyfills/number.isnan.js"></script>
 	<script src="http://stephen.band/Fn/polyfills/object.assign.js"></script>
@@ -797,184 +738,7 @@
 	<script src="js/dom.moveable.js"></script>
 	<script src="js/dom.swipeable.js"></script>
 	<script src="js/dom.focusable.js"></script>
+	<script src="js/dom.validateable.js"></script>
 	<script src="js/dom.root.js"></script>
-
-	<script type="dont run">
-		var toDeg = Fn.multiply(57.295779513);
-		var toRad = Fn.multiply(1 / 57.295779513);
-
-		// FUNCTIONS
-
-		var pi  = Math.PI,
-		    pi2 = pi * 2;
-
-		// Converts cartesian [x, y] to polar [distance, angle] coordinates,
-		// downward, anti-clockwise, angle in radians.
-		function toPolar(cart) {
-			var x = cart[0],
-					y = cart[1];
-
-			// Detect quadrant and work out vector
-			if (y === 0) 	{ return x === 0 ? [0, 0] : x > 0 ? [x, 0.5 * pi] : [-x, 1.5 * pi] ; }
-			if (y < 0) 		{ return x === 0 ? [-y, pi] : [Math.sqrt(x*x + y*y), Math.atan(x/y) + pi] ; }
-			if (y > 0) 		{ return x === 0 ? [y, 0] : [Math.sqrt(x*x + y*y), (x > 0) ? Math.atan(x/y) : pi2 + Math.atan(x/y)] ; }
-		}
-
-		// Converts [distance, angle] vector to cartesian [x, y] coordinates.
-		function toCartesian(vect) {
-			var d = vect[0],
-					a = vect[1];
-
-			// Work out cartesian coordinates
-			return [ Math.sin(a) * d, Math.cos(a) * d ];
-		}
-
-		// log event objects
-		function logEvent(e){ window.console && console.log(e.type, e); }
-
-
-		var box        = dom('.test')[0];
-		var resize     = dom('.resize')[0];
-		var rotate     = dom('.rotate')[0];
-		var centreMark = dom('.centre_mark')[0];
-		var originMark = dom('.origin_mark')[0];
-
-
-		// Test properties
-
-		var on = dom.events.on;
-		var rotation = 0;
-
-		on(box, 'touch', function(e) {
-			if (e.defaultPrevented) { return; }
-			if (e.target !== e.currentTarget) { return; }
-
-			var node = e.target;
-			var transform = dom.style('transform', node);
-			transform = !transform || transform === 'none' ? '' : transform;
-
-			e
-			.detail()
-			.map(function(data) {
-				return 'translate(' + data.x + 'px, ' + data.y + 'px)';
-			})
-			.each(function(property) {
-				node.style.transform = transform + ' ' + property;
-			});
-		});
-
-		on(resize, 'touch', function(e) {
-			if (e.defaultPrevented) { return; }
-
-			var node = e.target;
-			var startWidth = box.offsetWidth;
-			var startHeight = box.offsetHeight;
-			var transform = dom.style('transform', node);
-			var start, rotatedOrigin, distX, distY;
-
-			transform = !transform || transform === 'none' ? '' : transform;
-
-			e
-			.detail()
-			.each(function(data) {
-				var polarDelta = toPolar([data.x, data.y]);
-
-				// Comments are useless. I can't describe what's going
-				// on here without a pencil and paper. Sorry, but basically,
-				// we're undoing the rotate transform to work out where
-				// the rotated origin lies.
-				polarDelta[1] += toRad(rotation);
-
-				var normalisedDelta = toCartesian(polarDelta);
-				var width  = startWidth + normalisedDelta[0];
-				var height = startHeight + normalisedDelta[1];
-
-				width  = width >= 0 ? width : 0;
-				height = height >= 0 ? height : 0;
-
-				var originDelta = [
-					data.x/2 - (width === 0  ? -startWidth/2  : normalisedDelta[0]/2),
-					data.y/2 - (height === 0 ? -startHeight/2 : normalisedDelta[1]/2)
-				];
-
-				// TODO: property just used to move the origin mark
-				var property = 'translate(' + originDelta[0] + 'px, ' + originDelta[1] + 'px)';
-
-				box.style.width     = width;
-				box.style.height    = height;
-			});
-		});
-
-		on(rotate, 'touch', function(e) {
-			if (e.defaultPrevented) { return; }
-
-			var node = e.target;
-			var pageX = e.pageX;
-			var pageY = e.pageY;
-			var transform = dom.style('transform', node);
-
-			transform = !transform || transform === 'none' ? '' : transform;
-
-			var positionParent = box.offsetParent;
-			var left = dom.viewportLeft(positionParent);
-			var top  = dom.viewportTop(positionParent);
-
-			var centre = {
-				x: parseFloat(dom.style('left', box)) + parseFloat(dom.style('width', box))/2,
-				y: parseFloat(dom.style('top', box)) + parseFloat(dom.style('height', box))/2
-			};
-
-			var startRotate = 0;
-			var startAngle = toPolar([pageX - left - centre.x, pageY - top - centre.y])[1];
-
-			e
-			.detail()
-			.each(function(data) {
-				var nowAngle = toPolar([data.x + pageX - left - centre.x, data.x + pageY - top - centre.y])[1];
-				var deltaRotate = nowAngle - startAngle;
-
-				rotation = parseInt(startRotate - toDeg(deltaRotate));
-				var rotate = 'rotate(' + rotation + 'deg)';
-				box.style.transform = transform + ' ' + rotate;
-			});
-		});
-
-
-
-
-
-
-
-
-		// Test for correct deltaX and deltaY values
-
-		var distX = 0, distY = 0, pageX = 0, pageY = 0, startX = 0, startY = 0;
-
-		dom
-		.event('dom-touch', box)
-		.each(function(e) {
-			console.log('touch', e);
-
-			e
-			.detail()
-			.each(function(data) {
-				console.log(data);
-
-				//console.assert(data.startX === startX, 'e.startX property not correct. Expected:', startX, 'Actual:', data.startX);
-				//console.assert(data.startY === startY, 'e.startY property not correct. Expected:', startY, 'Actual:', data.startY);
-				//console.assert(data[0] === data.pageX - pageX, 'e.deltaX property not correct. e.startX:', data.startX, 'e.distX:', data.distX, 'e.deltaX:', data.deltaX, 'e.pageX:', data.pageX);
-				//console.assert(data[1] === data.pageY - pageY, 'e.deltaY property not correct. e.startY:', data.startY, 'e.distY:', data.distY, 'e.deltaY:', data.deltaY, 'e.pageY:', data.pageY);
-				//console.assert(data.distX === data.pageX - pageX, 'e.pageX  property not correct. e.startX:', data.startX, 'e.distX:', data.distX, 'e.deltaX:', data.deltaX, 'e.pageX:', data.pageX);
-				//console.assert(data.distY === data.pageY - pageY, 'e.pageY  property not correct. e.startY:', data.startY, 'e.distY:', data.distY, 'e.deltaY:', data.deltaY, 'e.pageY:', data.pageY);
-			});
-
-			startX = e.pageX;
-			startY = e.pageY;
-			distX  = 0;
-			distY  = 0;
-			pageX  = e.pageX;
-			pageY  = e.pageY;
-		});
-	</script>
 </body>
 </html>

@@ -17,7 +17,7 @@
     var matches        = dom.matches;
 	var remove         = dom.remove;
 
-    var isValidateable = dom.matches('input.validateable, select.validateable, textarea.validateable, .validateable input, .validateable textarea, .validateable select');
+    var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select');
 	var validatedClass = 'validated';
 	var errorSelector  = '.error-label';
 	//var errorAttribute        = 'data-error';
@@ -142,6 +142,12 @@
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(invoke('checkValidity', nothing));
+
+    dom
+	.event('submit', document)
+	.map(get('target'))
+	.filter(isValidateable)
+	.each(addValidatedClass);
 
 	//dom
 	//.event('focusout', document)

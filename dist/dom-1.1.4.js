@@ -66,7 +66,7 @@
 	function deprecate(fn, message) {
 		// Recall any function and log a depreciation warning
 		return function deprecate() {
-			console.warn('Fn: deprecated - ' + message);
+			console.warn('Deprecation warning: ' + message);
 			return fn.apply(this, arguments);
 		};
 	}
@@ -1490,6 +1490,23 @@
 		of: function() { return Fn.from(arguments); },
 
 		from: function(object) {
+			var i;
+
+			// object is an array or array-like object. Iterate over it without
+			// mutating it.
+			if (typeof object.length === 'number') {
+				i = -1;
+
+				return new Fn(function shiftArray() {
+					// Ignore undefined holes in arrays
+					return ++i >= object.length ?
+						undefined :
+					object[i] === undefined ?
+						shiftArray() :
+						object[i] ;
+				});
+			}
+
 			// object is an object with a shift function
 			if (typeof object.shift === "function" && object.length === undefined) {
 				return new Fn(function shiftObject() {
@@ -1511,18 +1528,7 @@
 				});
 			}
 
-			// object is an array or array-like object. Iterate over it without
-			// mutating it.
-			var i = -1;
-
-			return new Fn(function shiftArray() {
-				// Ignore undefined holes in arrays
-				return ++i >= object.length ?
-					undefined :
-				object[i] === undefined ?
-					shiftArray() :
-					object[i] ;
-			});
+			throw new Error('Fn: from(object) object is not a list of a known kind (array, functor, stream, iterator).')
 		},
 
 		Timer:    Timer,
@@ -1967,7 +1973,6 @@
 		}
 
 		var stream  = this;
-		var args    = arguments;
 		var getSource;
 
 		var promise = new Promise(function(resolve, reject) {
@@ -5351,7 +5356,7 @@ function getPositionParent(node) {
     var matches        = dom.matches;
 	var remove         = dom.remove;
 
-    var isValidateable = dom.matches('input.validateable, select.validateable, textarea.validateable, .validateable input, .validateable textarea, .validateable select');
+    var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select');
 	var validatedClass = 'validated';
 	var errorSelector  = '.error-label';
 	//var errorAttribute        = 'data-error';
@@ -5476,6 +5481,12 @@ function getPositionParent(node) {
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(invoke('checkValidity', nothing));
+
+    dom
+	.event('submit', document)
+	.map(get('target'))
+	.filter(isValidateable)
+	.each(addValidatedClass);
 
 	//dom
 	//.event('focusout', document)

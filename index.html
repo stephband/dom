@@ -9,15 +9,6 @@
 	<title>dom</title>
 	<script>
 		document.documentElement.className = 'js';
-		window.validitionMessages = {
-			pattern:   'Doesnt match',
-			max:       'Higher than possible',
-			min:       'Lower than possible',
-			step:      'Out of step',
-			maxlength: 'Too long',
-			type:      'Wrong type!',
-			required:  'Required value'
-		};
 	</script>
 
 	<link rel="icon" type="image/png" href="images/favicon.png" />
@@ -740,5 +731,17 @@
 	<script src="js/dom.focusable.js"></script>
 	<script src="js/dom.validateable.js"></script>
 	<script src="js/dom.root.js"></script>
+
+	<script>
+	window.dom.validation = {
+		pattern:   'Doesnt match',
+		max:       'Higher than possible',
+		min:       'Lower than possible',
+		step:      'Out of step',
+		maxlength: 'Too long',
+		type:      'Wrong type!',
+		required:  'Required value'
+	};
+	</script>
 </body>
 </html>

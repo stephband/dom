@@ -54,7 +54,7 @@
       <input type="color" id="color" name="color" />
 
       <label for="email">email</label>
-      <input type="email" id="email" name="email" />
+      <input type="email" id="email" name="email" data-val-type="Wrong type, knucklehead" />
 
       <label for="password">password</label>
       <input type="password" id="password" name="password" />
@@ -729,7 +729,8 @@
 	<script src="js/dom.root.js"></script>
 
 	<script>
-	window.dom.validation = {
+	window.dom.validation.prefix = 'data-val-';
+	window.dom.validation.messages = {
 		pattern:   'Doesnt match',
 		max:       'Higher than possible',
 		min:       'Lower than possible',

@@ -1,7 +1,23 @@
 (function(window) {
 	"use strict";
 
-	var assign         = Object.assign;
+    // Monitors forms and fields with .validateable for input, and generates
+    // and manages .error-labels following those that fail validation.
+    //
+    // Messages are read from:
+    //
+    // 1. A validation attribute on the input:
+    //    <input type="email" data-validation-type="That is not an email address" />
+    //    The attribute name can be modified globally by setting dom.validation.attributePrefix.
+    //
+    // 2. The messages in dom.validation.messages.
+    //
+    // 3. The browser's default validation message (which is available on the
+    //    input at the point that it fails validastion).
+    //
+    // Inputs inside or with .validateable are given .validated after they are
+    // first validated, enabling pre- as well as post- validation styles.
+
 	var Fn             = window.Fn;
 	var Stream         = window.Stream;
 	var dom            = window.dom;
@@ -12,7 +28,6 @@
 	var once           = Fn.once;
 
 	var after          = dom.after;
-	var attribute      = dom.attribute;
 	var classes        = dom.classes;
     var matches        = dom.matches;
     var next           = dom.next;
@@ -48,32 +63,11 @@
 			&& matches(errorSelector, node.nextElementSibling);
 	}
 
-	//function isErrorAttribute(error) {
-	//	var node = error.node;
-	//	return !!attribute(errorAttribute, node);
-	//}
-
-	//function flattenErrors(object) {
-	//	var errors = [];
-    //
-	//	// Flatten errors into a list
-	//	for (name in object) {
-	//		errors.push.apply(errors,
-	//			object[name].map(function(text) {
-	//				return {
-	//					name: name,
-	//					text: text
-	//				}
-	//			})
-	//		);
-	//	}
-    //
-	//	return errors;
-	//}
-
 	function toError(input) {
 		var node     = input;
 		var validity = node.validity;
+        var prefix   = dom.validation.attributePrefix;
+        var messages = dom.validation.messages;
         var name;
 
 		for (name in validity) {
@@ -82,8 +76,8 @@
 					type: name,
 					attr: types[name],
 					name: input.name,
-					text: (dom.validation.prefix && input.getAttribute(dom.validation.prefix + types[name]))
-                        || (dom.validation.messages && dom.validation.messages[types[name]])
+					text: (prefix && input.getAttribute(prefix + types[name]))
+                        || (messages && messages[types[name]])
                         || node.validationMessage,
 					node: input
 				};
@@ -177,6 +171,20 @@
 		true
 	);
 
-    dom.validation = dom.validation || {};
+    dom.validation = dom.validation || {
+        // Prefix for input attributes containing validation messages.
+        attributePrefix: 'data-validation-',
+
+        // Global object for validation messages.
+        messages: {
+            // pattern:
+            // max:
+            // min:
+            // step:
+            // maxlength:
+            // type:
+            // required:
+        }
+    };
 
 })(this);

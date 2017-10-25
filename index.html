@@ -729,8 +729,9 @@
 	<script src="js/dom.root.js"></script>
 
 	<script>
-	window.dom.validation.prefix = 'data-val-';
-	window.dom.validation.messages = {
+	var dom = window.dom;
+	dom.validation.attributePrefix = 'data-val-';
+	dom.validation.messages = {
 		pattern:   'Doesnt match',
 		max:       'Higher than possible',
 		min:       'Lower than possible',

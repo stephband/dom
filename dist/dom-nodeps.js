@@ -2723,8 +2723,6 @@ function getPositionParent(node) {
 	var remove         = dom.remove;
 
     var isValidateable = matches('.validateable, .validateable input, .validateable textarea, .validateable select');
-	var isErrorLabel   = matches('.error-label');
-	var validatedClass = 'validated';
 
 	var types = {
 		patternMismatch: 'pattern',
@@ -2747,7 +2745,8 @@ function getPositionParent(node) {
 	}
 
 	function isShowingMessage(node) {
-		return node.nextElementSibling && isErrorLabel(node.nextElementSibling);
+		return node.nextElementSibling
+			&& matches('.' + dom.validation.errorClass, node.nextElementSibling);
 	}
 
 	function toError(input) {
@@ -2782,7 +2781,7 @@ function getPositionParent(node) {
 		var input  = error.node;
 		var node   = input;
 
-		while (node.nextElementSibling && isErrorLabel(node.nextElementSibling)) {
+		while (node.nextElementSibling && matches('.' + dom.validation.errorClass, node.nextElementSibling)) {
 			node = node.nextElementSibling;
 		}
 
@@ -2797,13 +2796,13 @@ function getPositionParent(node) {
 	}
 
 	function addValidatedClass(input) {
-		classes(input).add(validatedClass);
+		classes(input).add(dom.validation.validatedClass);
 	}
 
 	function removeMessages(input) {
 		var node = input;
 
-		while ((node = next(node)) && isErrorLabel(node)) {
+		while ((node = next(node)) && matches('.' + dom.validation.errorClass, node)) {
 			remove(node);
 		}
 	}
@@ -2828,7 +2827,7 @@ function getPositionParent(node) {
 	.filter(isValidateable)
 	.each(addValidatedClass);
 
-	// Add events in capture phase
+	// Add event in capture phase
 	document.addEventListener(
 		'invalid',
 
@@ -2846,7 +2845,12 @@ function getPositionParent(node) {
 		true
 	);
 
-    dom.validation = dom.validation || {
+    dom.validation = {
+		errorClass: 'error-label',
+
+		// Class added to validated nodes (note: not valid nodes, necessarily)
+		validatedClass: 'validated',
+
         // Prefix for input attributes containing validation messages.
         attributePrefix: 'data-validation-',
 

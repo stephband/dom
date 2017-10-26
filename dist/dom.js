@@ -532,7 +532,11 @@
 
 	var tap = curry(function tap(fn, object) {
 		return object === undefined ? undefined : (fn(object), object) ;
+<<<<<<< HEAD
 	});
+=======
+	}, true);
+>>>>>>> ff3c454259837ae0c7128fb1b1e468cb7db4d446
 
 
 	// Objects
@@ -5438,6 +5442,7 @@ function getPositionParent(node) {
 		}
 	}
 
+	// Clear validation on new input
 	dom
 	.event('input', document)
 	.map(get('target'))
@@ -5446,19 +5451,28 @@ function getPositionParent(node) {
 	.filter(isValid)
 	.each(removeMessages);
 
+	// Check validity on focus out
 	dom
 	.event('focusout', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(invoke('checkValidity', nothing));
 
+	// Check validation on form submit
+	// TODO doesnt work because 'submit' is not received if the validity
+	// check shows the form is invalid
     dom
 	.event('submit', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(addValidatedClass);
 
+<<<<<<< HEAD
 	// Add events in capture phase
+=======
+	// Add error labels after invalid inputs. Listen to events in the
+	// capture phase.
+>>>>>>> ff3c454259837ae0c7128fb1b1e468cb7db4d446
 	document.addEventListener(
 		'invalid',
 

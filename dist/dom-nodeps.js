@@ -1421,8 +1421,6 @@ function getPositionParent(node) {
 	var isDefined = Fn.isDefined;
 	var overload  = Fn.overload;
 
-	var activeClass = "active";
-	var onClass   = "on";
 	var location  = window.location;
 	var id        = location.hash;
 	var settings  = { cache: true };
@@ -1485,12 +1483,12 @@ function getPositionParent(node) {
 
 		if (debug) { console.log('[activate] default | target:', this.target.id, 'data:', data); }
 
-		classes(data.node).add(activeClass);
+		classes(data.node).add(dom.activation.activeClass);
 		buttons = getButtons(data);
 
 		if (buttons) {
 			buttons.forEach(function(node) {
-				dom.classes(node).add(onClass);
+				dom.classes(node).add(dom.activation.onClass);
 			});
 		}
 	}
@@ -1506,12 +1504,12 @@ function getPositionParent(node) {
 
 		if (debug) { console.log('[deactivate] default | target:', this.target.id, 'data:', data); }
 
-		classes(data.node).remove(activeClass);
+		classes(data.node).remove(dom.activation.activeClass);
 		buttons = getButtons(data);
 
 		if (buttons) {
 			buttons.forEach(function(node) {
-				dom.classes(node).remove(onClass);
+				dom.classes(node).remove(dom.activation.onClass);
 			});
 		}
 	}
@@ -1747,7 +1745,7 @@ function getPositionParent(node) {
 	// Document setup
 	dom.ready(function() {
 		// Setup all things that should start out active
-		dom('.' + activeClass).forEach(triggerActivate);
+		dom('.' + dom.activation.activeClass).forEach(triggerActivate);
 
 		// Activate the node that corresponds to the hashref in
 		// location.hash, checking if it's an alphanumeric id selector
@@ -1758,6 +1756,11 @@ function getPositionParent(node) {
 		try { dom(id).forEach(triggerActivate); }
 		catch(e) {}
 	});
+
+	dom.activation = {
+		activeClass: 'active',
+		onClass:     'on'
+	};
 })(this);
 (function(window) {
 	"use strict";
@@ -2687,7 +2690,23 @@ function getPositionParent(node) {
 (function(window) {
 	"use strict";
 
-	var assign         = Object.assign;
+    // Monitors forms and fields with .validateable for input, and generates
+    // and manages .error-labels following those that fail validation.
+    //
+    // Messages are read from:
+    //
+    // 1. A validation attribute on the input:
+    //    <input type="email" data-validation-type="That is not an email address" />
+    //    The attribute name can be modified globally by setting dom.validation.attributePrefix.
+    //
+    // 2. The messages in dom.validation.messages.
+    //
+    // 3. The browser's default validation message (which is available on the
+    //    input at the point that it fails validastion).
+    //
+    // Inputs inside or with .validateable are given .validated after they are
+    // first validated, enabling pre- as well as post- validation styles.
+
 	var Fn             = window.Fn;
 	var Stream         = window.Stream;
 	var dom            = window.dom;
@@ -2698,7 +2717,6 @@ function getPositionParent(node) {
 	var once           = Fn.once;
 
 	var after          = dom.after;
-	var attribute      = dom.attribute;
 	var classes        = dom.classes;
     var matches        = dom.matches;
     var next           = dom.next;
@@ -2735,6 +2753,8 @@ function getPositionParent(node) {
 	function toError(input) {
 		var node     = input;
 		var validity = node.validity;
+        var prefix   = dom.validation.attributePrefix;
+        var messages = dom.validation.messages;
         var name, text;
 
 		for (name in validity) {
@@ -2749,7 +2769,9 @@ function getPositionParent(node) {
 					type: name,
 					attr: types[name],
 					name: input.name,
-					text: node.validationMessage,
+					text: (prefix && input.getAttribute(prefix + types[name]))
+                        || (messages && messages[types[name]])
+                        || node.validationMessage,
 					node: input
 				};
 			}
@@ -2786,7 +2808,6 @@ function getPositionParent(node) {
 		}
 	}
 
-	// Clear validation on new input
 	dom
 	.event('input', document)
 	.map(get('target'))
@@ -2795,28 +2816,19 @@ function getPositionParent(node) {
 	.filter(isValid)
 	.each(removeMessages);
 
-	// Check validity on focus out
 	dom
 	.event('focusout', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(invoke('checkValidity', nothing));
 
-	// Check validation on form submit
-	// TODO doesnt work because 'submit' is not received if the validity
-	// check shows the form is invalid
     dom
 	.event('submit', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(addValidatedClass);
 
-<<<<<<< HEAD
 	// Add events in capture phase
-=======
-	// Add error labels after invalid inputs. Listen to events in the
-	// capture phase.
->>>>>>> ff3c454259837ae0c7128fb1b1e468cb7db4d446
 	document.addEventListener(
 		'invalid',
 
@@ -2834,6 +2846,20 @@ function getPositionParent(node) {
 		true
 	);
 
-    dom.validation = dom.validation || {};
+    dom.validation = dom.validation || {
+        // Prefix for input attributes containing validation messages.
+        attributePrefix: 'data-validation-',
+
+        // Global object for validation messages.
+        messages: {
+            // pattern:
+            // max:
+            // min:
+            // step:
+            // maxlength:
+            // type:
+            // required:
+        }
+    };
 
 })(this);

@@ -34,9 +34,6 @@
 	var remove         = dom.remove;
 
     var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select');
-	var validatedClass = 'validated';
-	var errorSelector  = '.error-label';
-	//var errorAttribute        = 'data-error';
 
 	var types = {
 		patternMismatch: 'pattern',
@@ -60,7 +57,7 @@
 
 	function isShowingMessage(node) {
 		return node.nextElementSibling
-			&& matches(errorSelector, node.nextElementSibling);
+			&& matches('.' + dom.validation.errorClass, node.nextElementSibling);
 	}
 
 	function toError(input) {
@@ -89,7 +86,7 @@
 		var input  = error.node;
 		var node   = input;
 
-		while (node.nextElementSibling && matches(errorSelector, node.nextElementSibling)) {
+		while (node.nextElementSibling && matches('.' + dom.validation.errorClass, node.nextElementSibling)) {
 			node = node.nextElementSibling;
 		}
 
@@ -115,13 +112,13 @@
 	}
 
 	function addValidatedClass(input) {
-		classes(input).add(validatedClass);
+		classes(input).add(dom.validation.validatedClass);
 	}
 
 	function removeMessages(input) {
 		var node = input;
 
-		while ((node = next(node)) && matches(errorSelector, node)) {
+		while ((node = next(node)) && matches('.' + dom.validation.errorClass, node)) {
 			remove(node);
 		}
 	}
@@ -145,12 +142,6 @@
 	.filter(isValidateable)
 	.each(addValidatedClass);
 
-	//dom
-	//.event('focusout', document)
-	//.map(get('target'))
-	//.unique()
-	//.each(addValidatedClass);
-
 	// Add event in capture phase
 	document.addEventListener(
 		'invalid',
@@ -162,8 +153,6 @@
 		.tap(once(addValidatedClass))
 		.filter(negate(isShowingMessage))
 		.map(toError)
-        //.filter(isErrorAttribute)
-		//.filter(isMessage)
 		.each(renderError)
 		.push,
 
@@ -171,7 +160,12 @@
 		true
 	);
 
-    dom.validation = dom.validation || {
+    dom.validation = {
+		errorClass: 'error-label',
+
+		// Class added to validated nodes (note: not valid nodes, necessarily)
+		validatedClass: 'validated',
+
         // Prefix for input attributes containing validation messages.
         attributePrefix: 'data-validation-',
 

@@ -14,8 +14,6 @@
 	var isDefined = Fn.isDefined;
 	var overload  = Fn.overload;
 
-	var activeClass = "active";
-	var onClass   = "on";
 	var location  = window.location;
 	var id        = location.hash;
 	var settings  = { cache: true };
@@ -78,12 +76,12 @@
 
 		if (debug) { console.log('[activate] default | target:', this.target.id, 'data:', data); }
 
-		classes(data.node).add(activeClass);
+		classes(data.node).add(dom.activation.activeClass);
 		buttons = getButtons(data);
 
 		if (buttons) {
 			buttons.forEach(function(node) {
-				dom.classes(node).add(onClass);
+				dom.classes(node).add(dom.activation.onClass);
 			});
 		}
 	}
@@ -99,12 +97,12 @@
 
 		if (debug) { console.log('[deactivate] default | target:', this.target.id, 'data:', data); }
 
-		classes(data.node).remove(activeClass);
+		classes(data.node).remove(dom.activation.activeClass);
 		buttons = getButtons(data);
 
 		if (buttons) {
 			buttons.forEach(function(node) {
-				dom.classes(node).remove(onClass);
+				dom.classes(node).remove(dom.activation.onClass);
 			});
 		}
 	}
@@ -340,7 +338,7 @@
 	// Document setup
 	dom.ready(function() {
 		// Setup all things that should start out active
-		dom('.' + activeClass).forEach(triggerActivate);
+		dom('.' + dom.activation.activeClass).forEach(triggerActivate);
 
 		// Activate the node that corresponds to the hashref in
 		// location.hash, checking if it's an alphanumeric id selector
@@ -351,4 +349,9 @@
 		try { dom(id).forEach(triggerActivate); }
 		catch(e) {}
 	});
+
+	dom.activation = {
+		activeClass: 'active',
+		onClass:     'on'
+	};
 })(this);

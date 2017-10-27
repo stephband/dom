@@ -1,7 +1,23 @@
 (function(window) {
 	"use strict";
 
-	var assign         = Object.assign;
+    // Monitors forms and fields with .validateable for input, and generates
+    // and manages .error-labels following those that fail validation.
+    //
+    // Messages are read from:
+    //
+    // 1. A validation attribute on the input:
+    //    <input type="email" data-validation-type="That is not an email address" />
+    //    The attribute name can be modified globally by setting dom.validation.attributePrefix.
+    //
+    // 2. The messages in dom.validation.messages.
+    //
+    // 3. The browser's default validation message (which is available on the
+    //    input at the point that it fails validastion).
+    //
+    // Inputs inside or with .validateable are given .validated after they are
+    // first validated, enabling pre- as well as post- validation styles.
+
 	var Fn             = window.Fn;
 	var Stream         = window.Stream;
 	var dom            = window.dom;
@@ -12,15 +28,12 @@
 	var once           = Fn.once;
 
 	var after          = dom.after;
-	var attribute      = dom.attribute;
 	var classes        = dom.classes;
     var matches        = dom.matches;
     var next           = dom.next;
 	var remove         = dom.remove;
 
-    var isValidateable = matches('.validateable, .validateable input, .validateable textarea, .validateable select');
-	var isErrorLabel   = matches('.error-label');
-	var validatedClass = 'validated';
+    var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select');
 
 	var types = {
 		patternMismatch: 'pattern',
@@ -43,27 +56,26 @@
 	}
 
 	function isShowingMessage(node) {
-		return node.nextElementSibling && isErrorLabel(node.nextElementSibling);
+		return node.nextElementSibling
+			&& matches('.' + dom.validation.errorClass, node.nextElementSibling);
 	}
 
 	function toError(input) {
 		var node     = input;
 		var validity = node.validity;
-        var name, text;
+        var prefix   = dom.validation.attributePrefix;
+        var messages = dom.validation.messages;
+        var name;
 
 		for (name in validity) {
 			if (name !== 'valid' && validity[name]) {
-				text = dom.validation[types[name]];
-
-				if (text) {
-					input.setCustomValidity(text);
-				}
-
 				return {
 					type: name,
 					attr: types[name],
 					name: input.name,
-					text: node.validationMessage,
+					text: (prefix && input.getAttribute(prefix + types[name]))
+                        || (messages && messages[types[name]])
+                        || node.validationMessage,
 					node: input
 				};
 			}
@@ -74,7 +86,7 @@
 		var input  = error.node;
 		var node   = input;
 
-		while (node.nextElementSibling && isErrorLabel(node.nextElementSibling)) {
+		while (node.nextElementSibling && matches('.' + dom.validation.errorClass, node.nextElementSibling)) {
 			node = node.nextElementSibling;
 		}
 
@@ -86,47 +98,51 @@
 		});
 
 		after(node, label);
+
+		if (error.type === 'customError') {
+			node.setCustomValidity(error.text);
+
+			dom
+			.on('input', node)
+			.take(1)
+			.each(function() {
+				node.setCustomValidity('');
+			});
+		}
 	}
 
 	function addValidatedClass(input) {
-		classes(input).add(validatedClass);
+		classes(input).add(dom.validation.validatedClass);
 	}
 
 	function removeMessages(input) {
 		var node = input;
 
-		while ((node = next(node)) && isErrorLabel(node)) {
+		while ((node = next(node)) && matches('.' + dom.validation.errorClass, node)) {
 			remove(node);
 		}
 	}
 
-	// Clear validation on new input
 	dom
 	.event('input', document)
 	.map(get('target'))
     .filter(isValidateable)
-	.tap(invoke('setCustomValidity', ['']))
 	.filter(isValid)
 	.each(removeMessages);
 
-	// Check validity on focus out
 	dom
 	.event('focusout', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(invoke('checkValidity', nothing));
 
-	// Check validation on form submit
-	// TODO doesnt work because 'submit' is not received if the validity
-	// check shows the form is invalid
     dom
 	.event('submit', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(addValidatedClass);
 
-	// Add error labels after invalid inputs. Listen to events in the
-	// capture phase.
+	// Add event in capture phase
 	document.addEventListener(
 		'invalid',
 
@@ -134,7 +150,7 @@
 		Stream.of()
 		.map(get('target'))
         .filter(isValidateable)
-		.tap(addValidatedClass)
+		.tap(once(addValidatedClass))
 		.filter(negate(isShowingMessage))
 		.map(toError)
 		.each(renderError)
@@ -144,6 +160,25 @@
 		true
 	);
 
-    dom.validation = dom.validation || {};
+    dom.validation = {
+		errorClass: 'error-label',
+
+		// Class added to validated nodes (note: not valid nodes, necessarily)
+		validatedClass: 'validated',
+
+        // Prefix for input attributes containing validation messages.
+        attributePrefix: 'data-validation-',
+
+        // Global object for validation messages.
+        messages: {
+            // pattern:
+            // max:
+            // min:
+            // step:
+            // maxlength:
+            // type:
+            // required:
+        }
+    };
 
 })(this);

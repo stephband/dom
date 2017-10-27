@@ -1034,6 +1034,8 @@ function getPositionParent(node) {
 	}
 
 	function parse(type, string) {
+		if (!string) { return; }
+
 		var mimetype = mimetypes[type];
 		var xml;
 

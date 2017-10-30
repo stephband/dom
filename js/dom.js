@@ -924,11 +924,11 @@ function getPositionParent(node) {
 			});
 
 			return {
-				shift: function() {
+				shift: function shiftEvent() {
 					return buffer.shift();
 				},
 
-				stop: function stop() {
+				stop: function stopEvent() {
 					types.forEach(function(type) {
 						node.removeEventListener(type, update);
 					});

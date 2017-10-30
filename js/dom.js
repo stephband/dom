@@ -1141,8 +1141,32 @@ function getPositionParent(node) {
 		);
 	}
 
-	function animateScroll(value) {
-		return animate(0.6, pow(2), 'scrollTop', dom.view, toPx(value));
+	function animateScroll(coords) {
+		var duration = 0.6;
+		var ease = pow(2);
+
+		// coords may be a single y value or a an [x, y] array
+		var x, y;
+
+		if (typeof coords === "number") {
+			x = false;
+			y = coords;
+		}
+		else {
+			x = coords[0];
+			y = coords[1];
+		}
+
+		var denormaliseX = x !== false && denormalise(dom.view.scrollLeft, x);
+		var denormaliseY = denormalise(dom.view.scrollTop, y);
+
+		return transition(
+			duration,
+			pipe(ease, function(progress) {
+				x !== false && (dom.view.scrollLeft = denormaliseX(progress));
+				dom.view.scrollTop  = denormaliseY(progress);
+			})
+		);
 	}
 
 	function scrollRatio(node) {

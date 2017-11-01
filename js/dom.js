@@ -1068,38 +1068,56 @@ function getPositionParent(node) {
 
 	// Units
 
-	var rem = /(\d*\.?\d+)r?em/;
+	var runit = /(\d*\.?\d+)(r?em|vw|vh)/;
+	var rvw = /(\d*\.?\d+)vw/;
+	var rvh = /(\d*\.?\d+)vh/;
 	//var rpercent = /(\d*\.?\d+)%/;
 
 	var fontSize;
+
+	var units = {
+		em: function(n) {
+			return getFontSize() * n;
+		},
+
+		rem: function(n) {
+			return getFontSize() * n;
+		},
+
+		vw: function(n) {
+			return window.innerWidth * n / 100;
+		},
+
+		vh: function(n) {
+			return window.innerHeight * n / 100;
+		}
+	};
 
 	var toPx = overload(toType, {
 		'number': id,
 
 		'string': function(string) {
-			var data, n;
+			var data = runit.exec(string);
 
-			data = rem.exec(string);
 			if (data) {
-				n = parseFloat(data[1]);
-				return getFontSize() * n;
+				return units[data[2]](parseFloat(data[1]));
 			}
 
-			//data = rpercent.exec(string);
-			//if (data) {
-			//	n = parseFloat(data[1]) / 100;
-			//	return width * n;
-			//}
-
-			throw new Error('dom: ' + string + '\' cannot be parsed as rem, em or %.');
+			throw new Error('dom: "' + string + '" cannot be parsed as rem, em, vw or vh units.');
 		}
 	});
 
-	var toRem = overload(toType, {
-		'number': function(n) {
-			return n / getFontSize();
-		}
-	});
+	function toRem(n) {
+		return (toPx(n) / getFontSize()) + 'rem';
+	}
+
+	function toVw(n) {
+		return (100 * toPx(n) / window.innerWidth) + 'vw';
+	}
+
+	function toVh(n) {
+		return (100 * toPx(n) / window.innerHeight) + 'vh';
+	}
 
 	function getFontSize() {
 		return fontSize ||
@@ -1304,6 +1322,8 @@ function getPositionParent(node) {
 
 		toPx:           toPx,
 		toRem:          toRem,
+		toVw:           toVw,
+		toVh:           toVh,
 		viewportLeft:   viewportLeft,
 		viewportTop:    viewportTop,
 

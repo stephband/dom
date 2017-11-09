@@ -20,9 +20,21 @@
         .map(get('target'))
         .each(function(node){
             var action = node.getAttribute('action');
-            var data = new FormData(node);
-            console.log(data);
-            axios.post(action, data)
+            var post_data = new FormData(node);
+            console.log(post_data);
+            axios.post(action, post_data)
+            .then(function(response){
+                if(response.status < 300) {
+                    dom.events.trigger(node, 'dom-posted', response.data);
+                } else {
+                    var error = new Error(response.statusText);
+                    error.response = response;
+                    dom.events.trigger(node, 'dom-error', error)
+                }
+            })
+            .catch(function(error_response){
+                dom.events.trigger(node, 'dom-error', error_response)
+            });
         });
 
 })(this);

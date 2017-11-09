@@ -23,7 +23,7 @@
 		var target = e.target;
 		if (!matches(target)) { return; }
 
-		var nodes = dom.query('.switchable', target.parentNode);
+		var nodes = dom.children(target.parentNode).filter(matches);
 		var i     = nodes.indexOf(target);
 
 		nodes.splice(i, 1);

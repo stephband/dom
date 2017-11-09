@@ -25,15 +25,15 @@
             axios.post(action, post_data)
             .then(function(response){
                 if(response.status < 300) {
-                    dom.events.trigger(node, 'dom-posted', response.data);
+                    dom.events.trigger(node, 'dom-posted', {detail: response.data});
                 } else {
                     var error = new Error(response.statusText);
                     error.response = response;
-                    dom.events.trigger(node, 'dom-error', error)
+                    dom.events.trigger(node, 'dom-error', {detail: error})
                 }
             })
             .catch(function(error_response){
-                dom.events.trigger(node, 'dom-error', error_response)
+                dom.events.trigger(node, 'dom-error', {detail: error_response})
             });
         });
 

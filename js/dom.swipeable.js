@@ -59,7 +59,7 @@
 			xMax = parseFloat(xMax) || 0;
 		}
 
-		classes.add('notransition');
+		classes.add('no-transition');
 
 		var ax = x;
 
@@ -81,7 +81,7 @@
 			node.style.transform = transform;
 		})
 		.then(function() {
-			classes.remove('notransition');
+			classes.remove('no-transition');
 
 			// Todo: Watch out, this may interfere with slides
 			var xSnaps = dom.attribute('data-slide-snap', node);

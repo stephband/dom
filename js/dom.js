@@ -125,9 +125,10 @@
 					node.webkitRequestFullscreen ||
 					node.mozRequestFullScreen ||
 					node.msRequestFullscreen);
-			})
+			}),
 
 			enumerable: true
+		}
 	});
 
 
@@ -1298,14 +1299,14 @@ function getPositionParent(node) {
 		fullscreen: function fullscreen(node) {
 			// Hack around a Chrome layout bug by forcing the page to refresh when
 			// exiting full screen mode. Nasty nasty.
-			doc.on('webkitfullscreenchange', function enter(e) {
+			on(document, 'webkitfullscreenchange', function enter(e) {
 				// Ignore the first event, as it is the one caused by going into
 				// fullscreen mode.
 
-				doc.off('webkitfullscreenchange', enter);
-				doc.on('webkitfullscreenchange', function exit(e) {
+				off(document, 'webkitfullscreenchange', enter);
+				on(document, 'webkitfullscreenchange', function exit(e) {
 					window.location.reload();
-					doc.off('webkitfullscreenchange', exit);
+					off(document, 'webkitfullscreenchange', exit);
 				});
 			});
 

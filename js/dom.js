@@ -116,7 +116,18 @@
 			}),
 
 			enumerable: true
-		}
+		},
+
+		fullscreen: {
+			get: cache(function testFullscreen() {
+				var node = document.createElement('div');
+				return !!(node.requestFullscreen ||
+					node.webkitRequestFullscreen ||
+					node.mozRequestFullScreen ||
+					node.msRequestFullscreen);
+			})
+
+			enumerable: true
 	});
 
 
@@ -1283,6 +1294,28 @@ function getPositionParent(node) {
 		replace:  curry(replace, true),
 		empty:    empty,
 		remove:   remove,
+
+		fullscreen: function fullscreen(node) {
+			// Hack around a Chrome layout bug by forcing the page to refresh when
+			// exiting full screen mode. Nasty nasty.
+			doc.on('webkitfullscreenchange', function enter(e) {
+				// Ignore the first event, as it is the one caused by going into
+				// fullscreen mode.
+
+				doc.off('webkitfullscreenchange', enter);
+				doc.on('webkitfullscreenchange', function exit(e) {
+					window.location.reload();
+					doc.off('webkitfullscreenchange', exit);
+				});
+			});
+
+			// Find the right method and call it
+			return node.requestFullscreen ? node.requestFullscreen() :
+				node.webkitRequestFullscreen ? node.webkitRequestFullscreen() :
+				node.mozRequestFullScreen ? node.mozRequestFullScreen() :
+				node.msRequestFullscreen ? node.msRequestFullscreen() :
+				undefined ;
+		},
 
 		// DOM inspection
 

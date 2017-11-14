@@ -438,6 +438,10 @@
 
 	// DOM Traversal
 
+	function find(selector, node) {
+		return node.querySelector(selector);
+	}
+
 	function query(selector, node) {
 		node = node || document;
 		return toArray(node.querySelectorAll(selector));

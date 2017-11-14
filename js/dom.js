@@ -1271,10 +1271,7 @@ function getPositionParent(node) {
 			return document.getElementById(id) || undefined;
 		},
 
-		find:     Fn.deprecate(function get(id) {
-			return document.getElementById(id) || undefined;
-		}, 'dom.find(id) is now dom.get(id)'),
-
+		find:     curry(find,     true),
 		query:    curry(query,    true),
 		closest:  curry(closest,  true),
 		contains: curry(contains, true),

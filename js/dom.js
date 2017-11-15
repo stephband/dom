@@ -1298,6 +1298,12 @@ function getPositionParent(node) {
 		remove:   remove,
 
 		fullscreen: function fullscreen(node) {
+
+			/*
+				This hack was used in a previous project, is no longer
+				required
+			*/
+			/*
 			// Hack around a Chrome layout bug by forcing the page to refresh when
 			// exiting full screen mode. Nasty nasty.
 			on(document, 'webkitfullscreenchange', function enter(e) {
@@ -1310,6 +1316,7 @@ function getPositionParent(node) {
 					off(document, 'webkitfullscreenchange', exit);
 				});
 			});
+			*/
 
 			// Find the right method and call it
 			return node.requestFullscreen ? node.requestFullscreen() :

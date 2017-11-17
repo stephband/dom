@@ -2,7 +2,9 @@
 (function(window) {
     var Fn  = window.Fn;
     var dom = window.dom;
-
+    if(document.body.clientWidth < 480) {
+        return
+    }
     // Prevent orphans at the end of paragraphs and headings
     dom('h1, h2, h3, h4, h5, h6, p, li')
     .map(Fn.get('childNodes'))

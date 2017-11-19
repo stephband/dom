@@ -337,9 +337,6 @@
 
 	// Document setup
 	dom.ready(function() {
-console.log('ACTIVATING', dom('.' + dom.activation.activeClass).map(function(n) {
-return n.id;
-}).join(', '));
 		// Setup all things that should start out active
 		dom('.' + dom.activation.activeClass).forEach(triggerActivate);
 

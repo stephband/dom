@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="author" content="">
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5">
+
+	<title>dom</title>
+	<script>
+		document.documentElement.className = 'js';
+	</script>
+
+	<link rel="icon" type="image/png" href="images/favicon.png" />
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/bolt/dist/bolt.min.css" />
+	<link rel="stylesheet" type="text/css" href="../bolt/dist/bolt.min.css" />
+	<!--link rel="stylesheet" type="text/css" href="http://stephen.band/css/template.theme.min.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.layout.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/docs.classes.css" />
+	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.highlight.light.css" /-->
+
+	<link rel="stylesheet" type="text/css" href="fn/css/grid.css" />
+	<link rel="stylesheet" type="text/css" href="fn/css/docs.css" />
+	<link rel="stylesheet" type="text/css" href="css/dom.css" />
+	<link rel="stylesheet" type="text/css" href="css/demo.css" />
+	<link rel="stylesheet" type="text/css" href="css/slide.css" />
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" rel="stylesheet">
+
+	<style>
+		body {
+			color: #004e58;
+			color: #005d5a;
+			color: #305000;
+		}
+		ol { padding-left: 0; }
+	</style>
+</head>
+
+<body>
+
+	<ul class="inline-index index">
+		<li><a class="tab-button button" href="#tab-1">1</a></li>
+		<li><a class="tab-button button" href="#tab-2">2</a></li>
+		<li><a class="tab-button button" href="#tab-3">3</a></li>
+	</ul>
+
+	<div class="tab-block block switchable active" id="tab-1">
+		Tab 1
+	</div
+
+	><div class="tab-block block switchable" id="tab-2">
+		Tab 2
+	</div
+
+	><div class="tab-block block switchable" id="tab-3">
+		Tab 3
+	</div>
+
+
+	<script src="../fn/polyfills/number.isnan.js"></script>
+	<script src="../fn/polyfills/object.assign.js"></script>
+	<script src="../fn/polyfills/object.setprototypeof.js"></script>
+	<script src="../fn/polyfills/math.log10.js"></script>
+	<script src="../fn/polyfills/promise.js"></script>
+	<script src="../fn/polyfills/symbol.js"></script>
+	<script src="../fn/polyfills/array.of.js"></script>
+	<script src="../fn/polyfills/array.from.js"></script>
+	<script src="../fn/polyfills/array.find.js"></script>
+	<script src="../fn/js/fn.js"></script>
+	<script src="../fn/js/stream.js"></script>
+
+	<script src="http://stephen.band/Fn/polyfills/number.isnan.js"></script>
+	<script src="http://stephen.band/Fn/polyfills/object.assign.js"></script>
+	<script src="http://stephen.band/Fn/js/fn.js"></script>
+	<script src="http://stephen.band/Fn/js/stream.js"></script>
+
+	<script src="polyfills/requestanimationframe.js"></script>
+	<script src="polyfills/customevent.js"></script>
+	<script src="test/config.js"></script>
+
+	<script src="js/dom.js"></script>
+	<script src="js/dom-activate.js"></script>
+	<script src="js/dom-touch.js"></script>
+	<script src="js/dom-swipe.js"></script>
+	<script src="js/dom.popable.js"></script>
+	<script src="js/dom.toggleable.js"></script>
+	<script src="js/dom.switchable.js"></script>
+	<script src="js/dom.moveable.js"></script>
+	<script src="js/dom.swipeable.js"></script>
+	<script src="js/dom.focusable.js"></script>
+	<script src="js/dom.validateable.js"></script>
+	<script src="js/dom.root.js"></script>
+
+	<script>
+	var dom = window.dom;
+	dom.validation.attributePrefix = 'data-val-';
+	dom.validation.messages = {
+		pattern:   'Doesnt match',
+		max:       'Higher than possible',
+		min:       'Lower than possible',
+		step:      'Out of step',
+		maxlength: 'Too long',
+		type:      'Wrong type!',
+		required:  'Required value'
+	};
+	</script>
+</body>
+</html>

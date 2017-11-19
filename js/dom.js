@@ -125,9 +125,10 @@
 					node.webkitRequestFullscreen ||
 					node.mozRequestFullScreen ||
 					node.msRequestFullscreen);
-			})
+			}),
 
 			enumerable: true
+		}
 	});
 
 
@@ -436,6 +437,10 @@
 
 
 	// DOM Traversal
+
+	function find(selector, node) {
+		return node.querySelector(selector);
+	}
 
 	function query(selector, node) {
 		node = node || document;
@@ -1270,10 +1275,7 @@ function getPositionParent(node) {
 			return document.getElementById(id) || undefined;
 		},
 
-		find:     Fn.deprecate(function get(id) {
-			return document.getElementById(id) || undefined;
-		}, 'dom.find(id) is now dom.get(id)'),
-
+		find:     curry(find,     true),
 		query:    curry(query,    true),
 		closest:  curry(closest,  true),
 		contains: curry(contains, true),
@@ -1296,18 +1298,25 @@ function getPositionParent(node) {
 		remove:   remove,
 
 		fullscreen: function fullscreen(node) {
+
+			/*
+				This hack was used in a previous project, is no longer
+				required
+			*/
+			/*
 			// Hack around a Chrome layout bug by forcing the page to refresh when
 			// exiting full screen mode. Nasty nasty.
-			doc.on('webkitfullscreenchange', function enter(e) {
+			on(document, 'webkitfullscreenchange', function enter(e) {
 				// Ignore the first event, as it is the one caused by going into
 				// fullscreen mode.
 
-				doc.off('webkitfullscreenchange', enter);
-				doc.on('webkitfullscreenchange', function exit(e) {
+				off(document, 'webkitfullscreenchange', enter);
+				on(document, 'webkitfullscreenchange', function exit(e) {
 					window.location.reload();
-					doc.off('webkitfullscreenchange', exit);
+					off(document, 'webkitfullscreenchange', exit);
 				});
 			});
+			*/
 
 			// Find the right method and call it
 			return node.requestFullscreen ? node.requestFullscreen() :

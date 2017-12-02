@@ -20,8 +20,6 @@
 		var target = e.target;
 		if (!matches(target)) { return; }
 
-        console.log('FULL');
-
         dom.fullscreen(e.target);
 
         // Don't call the default activate actions, we are hijacking the

@@ -42,7 +42,42 @@
 
 	// Features
 
-	var features = define({}, {
+	var features = define({
+		events: define({}, {
+			fullscreenchange: {
+				get: cache(function() {
+					// TODO: untested event names
+					return ('fullscreenElement' in document) ? 'fullscreenchange' :
+					('webkitFullscreenElement' in document) ? 'webkitfullscreenchange' :
+					('mozFullScreenElement' in document) ? 'mozfullscreenchange' :
+					('msFullscreenElement' in document) ? 'MSFullscreenChange' :
+					'fullscreenchange' ;
+				}),
+
+				enumerable: true
+			},
+
+			transitionend: {
+				// Infer transitionend event from CSS transition prefix
+
+				get: cache(function() {
+					var end = {
+						KhtmlTransition: false,
+						OTransition: 'oTransitionEnd',
+						MozTransition: 'transitionend',
+						WebkitTransition: 'webkitTransitionEnd',
+						msTransition: 'MSTransitionEnd',
+						transition: 'transitionend'
+					};
+
+					var prefixed = prefix('transition');
+					return prefixed && end[prefixed];
+				}),
+
+				enumerable: true
+			}
+		})
+	}, {
 		inputEventsWhileDisabled: {
 			// FireFox won't dispatch any events on disabled inputs:
 			// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
@@ -99,21 +134,10 @@
 		},
 
 		transitionend: {
-			// Infer transitionend event from CSS transition prefix
-
-			get: cache(function() {
-				var end = {
-					KhtmlTransition: false,
-					OTransition: 'oTransitionEnd',
-					MozTransition: 'transitionend',
-					WebkitTransition: 'webkitTransitionEnd',
-					msTransition: 'MSTransitionEnd',
-					transition: 'transitionend'
-				};
-
-				var prefixed = prefix('transition');
-				return prefixed && end[prefixed];
-			}),
+			get: function() {
+				console.warn('dom.features.transitionend deprecated in favour of dom.features.events.transitionend.');
+				return features.events.transitionend;
+			},
 
 			enumerable: true
 		},
@@ -895,7 +919,7 @@ function getPositionParent(node) {
 	}
 
 	function end(e, fn) {
-		off(e.currentTarget, features.transitionend, end);
+		off(e.currentTarget, features.events.transitionend, end);
 		fn(e.timeStamp);
 	}
 
@@ -906,7 +930,7 @@ function getPositionParent(node) {
 				return;
 			}
 
-			type = features.transitionend;
+			type = features.events.transitionend;
 		}
 
 		on(node, type, end, fn);
@@ -924,8 +948,12 @@ function getPositionParent(node) {
 		};
 	}
 
+	function prefixType(type) {
+		return features.events[type] || type ;
+	}
+
 	function event(types, node) {
-		types = types.split(rspaces);
+		types = types.split(rspaces).map(prefixType);
 
 		return new Stream(function setup(notify, stop) {
 			var buffer = [];

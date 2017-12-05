@@ -4,10 +4,10 @@
 	var Fn       = window.Fn;
 	var last     = Fn.last;
 	var dom      = window.dom;
-	var children = dom.children;
 	var on       = dom.events.on;
 	var trigger  = dom.events.trigger;
 	var closest  = dom.closest;
+	var matches  = dom.matches;
 	var tau      = Math.PI * 2;
 
 	var elasticDistance = 800;
@@ -19,7 +19,7 @@
 	}
 
 	function xMinFromChildren(node) {
-		var child = last(children(node).filter(dom.matches('.switchable')));
+		var child = last(dom.children(node).filter(dom.matches('.switchable')));
 
 		// Get the right-most x of the last switchable child's right-most edge
 		var w1 = child.offsetLeft + child.clientWidth;
@@ -27,7 +27,7 @@
 		return w2 - w1;
 	}
 
-	on(document, 'dom-touch', function(e) {
+	on(document, 'dom-touch', function touch(e) {
 		if (e.defaultPrevented) { return; }
 
 		var node = closest('.swipeable', e.target);
@@ -111,7 +111,20 @@
 		node.style.transform = 'translate(' + l + 'px, 0px)';
 	}
 
-	on(document, 'dom-swipe', function(e) {
+	function update(swipeable, node) {
+		var box = dom.box(node);
+
+		// node may not be visible, in which case we can't update
+		if (!box) { return; }
+
+		var l1 = box.left;
+		var l2 = dom.box(swipeable).left;
+		var l  = l1 - l2 - dom.style('margin-left', node);
+
+		swipeable.style.transform = 'translate(' + (-l) + 'px, 0px)';
+	}
+
+	on(document, 'dom-swipe', function swipe(e) {
 		if (e.defaultPrevented) { return; }
 
 		var node = closest('.swipeable', e.target);
@@ -129,9 +142,14 @@
 
 		if (!prop) { return; }
 
-		var active = children(node)
+		var children = dom.children(node);
+
+		// it is entirely possible there are no active children – the initial
+		// HTML may not specify an active child – in which case we assume the
+		// first child is displayed
+		var active = children
 		.filter(dom.matches('.active'))
-		.shift();
+		.shift() || children.shift();
 
 		if (active[prop]) {
 			trigger(active[prop], 'dom-activate');
@@ -141,7 +159,7 @@
 		}
 	});
 
-	on(document, 'dom-activate', function(e) {
+	on(document, 'dom-activate', function activate(e) {
 		// Use method detection - e.defaultPrevented is not set in time for
 		// subsequent listeners on the same node
 		if (!e.default) { return; }
@@ -152,14 +170,26 @@
 		if (!dom.matches('.swipeable', parent)) { return; }
 
 		var classes = dom.classes(parent);
-		classes.remove('notransition');
-		document.documentElement.clientWidth;
-
-		var l1 = dom.box(node).left;
-		var l2 = dom.box(parent).left;
-		var l  = l1 - l2 - dom.style('margin-left', node);
-
-		parent.style.transform = 'translate(' + (-l) + 'px, 0px)';
+		classes.remove('no-transition');
+		// Force recalc
+		// TODO: check if this gets removed by JS minifier
+		dom.root.clientWidth;
 		e.preventDefault();
+		update(parent, node);
+	});
+
+	on(window, 'resize', function resize() {
+		// Update swipeable positions
+		dom('.swipeable').forEach(function(swipeable) {
+			var node = dom.children(swipeable).find(matches('.active'));
+			if (!node) { return; }
+			var classes = dom.classes(swipeable);
+			classes.add('no-transition');
+			update(swipeable, node);
+			// Force recalc
+			// TODO: check if this gets removed by JS minifier
+			dom.root.clientWidth;
+			classes.remove('no-transition');
+		});
 	});
 })(this);

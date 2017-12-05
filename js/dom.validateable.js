@@ -148,8 +148,11 @@
 
 		// Push to stream
 		Stream.of()
+		.tap(console.log)
 		.map(get('target'))
+		.tap(console.log)
         .filter(isValidateable)
+		.tap(console.log)
 		.tap(once(addValidatedClass))
 		.filter(negate(isShowingMessage))
 		.map(toError)

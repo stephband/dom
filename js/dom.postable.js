@@ -3,6 +3,7 @@
 (function(window) {
     "use strict";
 
+    var axios   = window.axios;
     var dom     = window.dom;
     var Fn      = window.Fn;
     var get     = Fn.get;
@@ -21,14 +22,14 @@
         .each(function(node){
             var action = node.getAttribute('action');
             var post_data = new FormData(node);
-            console.log(post_data);
 
             axios
             .post(action, post_data)
             .then(function(response){
                 if(response.status < 300) {
                     dom.events.trigger(node, 'dom-posted', {detail: response.data});
-                } else {
+                }
+                else {
                     var error = new Error(response.statusText);
                     error.response = response;
                     dom.events.trigger(node, 'dom-error', {detail: error})

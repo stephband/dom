@@ -297,7 +297,7 @@
 		if (!node) { return; }
 
 		// Is the node popable, switchable or toggleable?
-		var classes = dom.classes(node);
+		//var classes = dom.classes(node);
 
 		if (dom.activeMatchers.find(apply(node))) {
 			activate(e, node);

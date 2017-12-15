@@ -22,7 +22,9 @@
             var action = node.getAttribute('action');
             var post_data = new FormData(node);
             console.log(post_data);
-            axios.post(action, post_data)
+
+            axios
+            .post(action, post_data)
             .then(function(response){
                 if(response.status < 300) {
                     dom.events.trigger(node, 'dom-posted', {detail: response.data});

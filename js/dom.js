@@ -876,7 +876,7 @@ function getPositionParent(node) {
 		var handlers, type;
 
 		var n = -1;
-		while (n++ < types.length) {
+		while (++n < types.length) {
 			type = types[n];
 			handlers = events[type] || (events[type] = []);
 			handlers.push([fn, handler]);

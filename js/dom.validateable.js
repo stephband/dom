@@ -25,7 +25,6 @@
 	var get            = Fn.get;
 	var invoke         = Fn.invoke;
 	var nothing        = Fn.nothing;
-	var once           = Fn.once;
 
 	var after          = dom.after;
 	var classes        = dom.classes;
@@ -150,7 +149,7 @@
 		Stream.of()
 		.map(get('target'))
         .filter(isValidateable)
-		.tap(once(addValidatedClass))
+		.tap(addValidatedClass)
 		.filter(negate(isShowingMessage))
 		.map(toError)
 		.each(renderError)

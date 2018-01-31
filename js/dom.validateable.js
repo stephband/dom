@@ -123,20 +123,20 @@
 	}
 
 	dom
-	.event('input', document)
+	.events('input', document)
 	.map(get('target'))
     .filter(isValidateable)
 	.filter(isValid)
 	.each(removeMessages);
 
 	dom
-	.event('focusout', document)
+	.events('focusout', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(invoke('checkValidity', nothing));
 
     dom
-	.event('submit', document)
+	.events('submit', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(addValidatedClass);

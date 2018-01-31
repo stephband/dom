@@ -13,7 +13,7 @@
     var matches = dom.matches('.postable, [postable]');
 
     // Functions
-    dom.event('submit', document)
+    dom.events('submit', document)
         .filter(function(event){
             return matches(event.target);
         })

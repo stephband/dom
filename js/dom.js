@@ -1416,20 +1416,19 @@ function getPositionParent(node) {
 		trapFocus:       trapFocus,
 		trap:            Fn.deprecate(trapFocus, 'dom.trap() is now dom.trapFocus()'),
 
-		events: {
-			on:      on,
-			off:     off,
-			trigger: trigger
-		},
-
-		on:     Fn.deprecate(curry(event, true), 'dom.on() is now dom.event()'),
-
 		trigger: curry(function(type, node) {
 			trigger(node, type);
 			return node;
 		}, true),
 
-		event: curry(event, true),
+		events: assign(curry(event, true), {
+			on:      on,
+			off:     off,
+			trigger: trigger
+		}),
+
+		on:    Fn.deprecate(curry(event, true), 'dom.on() is now dom.events()'),
+		event: Fn.deprecate(curry(event, true), 'Deprecated dom.event() – now dom.events()'),
 
 		// DOM animation adn scrolling
 

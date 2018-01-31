@@ -886,6 +886,13 @@ function getPositionParent(node) {
 		return node;
 	}
 
+	function once(node, types, fn, data) {
+		on(node, types, function once() {
+			off(node, types, once);
+			fn.apply(null, arguments);
+		}, data);
+	}
+
 	function off(node, types, fn) {
 		types = types.split(rspaces);
 
@@ -1423,6 +1430,7 @@ function getPositionParent(node) {
 
 		events: assign(curry(event, true), {
 			on:      on,
+			once:    once,
 			off:     off,
 			trigger: trigger
 		}),

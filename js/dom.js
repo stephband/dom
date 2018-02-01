@@ -858,6 +858,10 @@ function getPositionParent(node) {
 		e.preventDefault();
 	}
 
+	function isTargetEvent(e) {
+		return e.target === e.currentTarget;
+	}
+
 	function isPrimaryButton(e) {
 		// Ignore mousedowns on any button other than the left (or primary)
 		// mouse button, or when a modifier key is pressed.
@@ -1435,6 +1439,7 @@ function getPositionParent(node) {
 		Event:           Event,
 		delegate:        delegate,
 		isPrimaryButton: isPrimaryButton,
+		isTargetEvent:   isTargetEvent,
 		preventDefault:  preventDefault,
 		toKey:           toKey,
 		trapFocus:       trapFocus,

@@ -1361,6 +1361,23 @@ function getPositionParent(node) {
 				undefined ;
 		},
 
+// Keep links to the current route up to date even when the DOM mutates
+
+// EXAMPLE CODE for mutation observers  ------
+
+//		var observer = new MutationObserver(function(mutationsList) {
+//		    var mutation;
+//		    for(mutation of mutationsList) {
+//		        if (mutation.addedNodes.length) {
+//		            dom
+//		            .query('a[href="' + router.path + '"]', mutation.target)
+//		            .forEach(dom.addClass('current'));
+//		        }
+//		    }
+//		});
+//
+//		observer.observe(dom.get('calendar'), { childList: true, subtree: true });
+
 		// DOM inspection
 
 		isElementNode:  isElementNode,

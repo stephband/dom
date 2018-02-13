@@ -16,6 +16,9 @@
 // so the last message per input will be displayed.
 
 (function(window) {
+	var Fn  = window.Fn;
+	var get = Fn.get;
+
     function toSelector(str) {
 		return '[name="' + str + '"]';
 	}

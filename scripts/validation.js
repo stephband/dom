@@ -8,7 +8,7 @@
 // This script takes .data.errors from a response and sets input validity on
 // inputs that caused the error. It expects the errors object to be in the form:
 //
-// error = {
+// {
 //     'input name': ['Message 1', 'Message 2']
 // }
 //
@@ -52,13 +52,17 @@
 
 	dom
 	.events('dom-error', document)
-	.map(getPath('detail'))
-	.each(function(response) {
-		//var error = new Error(response.statusText);
-		//error.response = response;
+	.each(function(e) {
+		var form    = e.target;
+		var reponse = e.detail;
 
-		if (response.data && typeof response.data.errors === 'object') {
-			flattenErrors(response.data.errors).forEach(setValidity);
+		if (response && response.data && typeof response.data.errors === 'object') {
+			// Format data and set custom validation messages on inputs
+			flattenErrors(response.data.errors)
+			.forEach(setValidity);
+
+			// Cause the validation handling found in dom.validation.js to
+			// pick up the custom validation messages and render them
 			form.checkValidity();
 		}
 	});

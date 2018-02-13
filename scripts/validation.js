@@ -23,7 +23,7 @@
 		return '[name="' + str + '"]';
 	}
 
-	function flattenErrors(object) {
+	function flattenErrors(object, form) {
 		var errors = [];
 
 		// Flatten errors into a list
@@ -31,6 +31,7 @@
 			errors.push.apply(errors,
 				object[name].map(function(text) {
 					return {
+						form: form,
 						name: name,
 						text: text
 					};
@@ -43,7 +44,7 @@
 
 	function setValidity(error) {
 		var selector = toSelector(error.name);
-		var input    = dom.find(selector, form);
+		var input    = dom.find(selector, error.form);
 
 		if (!input) {
 			console.warn('Error given for non-existent field name="' + error.name + '"', error);
@@ -56,12 +57,12 @@
 	dom
 	.events('dom-error', document)
 	.each(function(e) {
-		var form    = e.target;
-		var reponse = e.detail;
+		var form     = e.target;
+		var response = e.detail;
 
 		if (response && response.data && typeof response.data.errors === 'object') {
 			// Format data and set custom validation messages on inputs
-			flattenErrors(response.data.errors)
+			flattenErrors(response.data.errors, form)
 			.forEach(setValidity);
 
 			// Cause the validation handling found in dom.validation.js to

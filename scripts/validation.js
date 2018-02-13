@@ -16,6 +16,9 @@
 // so the last message per input will be displayed.
 
 (function(window) {
+	var Fn = window.Fn;
+	var get = Fn.get;
+
     function toSelector(str) {
 		return '[name="' + str + '"]';
 	}
@@ -52,7 +55,7 @@
 
 	dom
 	.events('dom-error', document)
-	.map(getPath('detail'))
+	.map(get('detail'))
 	.each(function(response) {
 		//var error = new Error(response.statusText);
 		//error.response = response;

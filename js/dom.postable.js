@@ -35,6 +35,22 @@
 		return errors;
 	}
 
+    function handlerErrors(response, form) {
+        flattenErrors(response.errors)
+        .forEach(function(error) {
+            var input = dom.find(error.selector, form);
+
+            if (!input) {
+                console.warn('Error given for non-existent field name="' + error.name + '"', error);
+                return;
+            }
+
+            input.setCustomValidity(error.text);
+        });
+
+        form.checkValidity();
+    }
+
     // Functions
     dom.events('submit', document)
         .filter(function(event){
@@ -58,25 +74,15 @@
                     dom.events.trigger(form, 'dom-error', {detail: error});
 
                     if (typeof response.errors === 'object') {
-
-                        flattenErrors(response.errors)
-                        .forEach(function(input) {
-                            var input = dom.find(error.selector, form);
-
-                            if (!input) {
-                                console.warn('Error given for non-existent field name="' + error.name + '"', error);
-                                return;
-                            }
-
-                            input.setCustomValidity(error.text);
-                        });
-
-                        form.checkValidity();
+                        handlerErrors(response, form);
                     }
                 }
             })
             .catch(function(error_response){
-                dom.events.trigger(form, 'dom-error', {detail: error_response})
+                dom.events.trigger(form, 'dom-error', {detail: error_response});
+                if (error_response.response && error_response.response.data && typeof error_response.response.data.errors === 'object') {
+                    handlerErrors(error_response.response.data, form);
+                }
             });
         });
 

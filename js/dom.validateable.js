@@ -82,15 +82,15 @@
 	}
 
 	function renderError(error) {
-		var input  = error.node;
-		var node   = input;
+		var input = error.node;
+		var node  = input;
 
+		// Find the last error
 		while (node.nextElementSibling && matches('.' + dom.validation.errorClass, node.nextElementSibling)) {
 			node = node.nextElementSibling;
 		}
 
-        var label = dom.create('label')
-        dom.assign(label, {
+        var label = dom.create('label', {
             textContent: error.text,
 			for:         input.id,
             class:       'error-label'
@@ -102,7 +102,7 @@
 			node.setCustomValidity(error.text);
 
 			dom
-			.on('input', node)
+			.events('input', node)
 			.take(1)
 			.each(function() {
 				node.setCustomValidity('');
@@ -162,7 +162,8 @@
     dom.validation = {
 		errorClass: 'error-label',
 
-		// Class added to validated nodes (note: not valid nodes, necessarily)
+		// Class added to validated nodes (note: not valid nodes, necessarily,
+		// but nodes that have been validated).
 		validatedClass: 'validated',
 
         // Prefix for input attributes containing validation messages.

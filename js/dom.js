@@ -1306,7 +1306,12 @@ function getPositionParent(node) {
 
 		// DOM lifecycle
 
-		ready:    ready.then.bind(ready),
+		ready:   ready.then.bind(ready),
+
+		now:     function() {
+			// Return DOM time in seconds
+			return window.performance.now() / 1000;
+		},
 
 		// DOM traversal
 

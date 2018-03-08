@@ -275,18 +275,45 @@
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="events">
 				<h3 class="dot-indent text-5"><a href="#events"><code class="js">.events(type, node)</code></a></h3>
 
-			Returns a mappable stream of events heard on <code class="js">node</code>:
+				<p>Returns a stream of events of <code class="js">type</code> heard on <code class="js">node</code>:</p>
 
-			    var stream = dom
-			    .events('click', dom.body);
-			    .map(Fn.get('timeStamp'))
-			    .each(function(time) {
-			        // Do something with times
-			    });
+				<pre><code class="js">dom.events('click', dom.body)
+.each(function(e) {
+    // Do something with event object e
+});</code></pre>
 
-			Stopping the stream removes the event listeners:
+				<p>Event streams are filterable, mappable, etc. See <a href="//stephen.band/fn/index.html#stream"></a> for a
+				list of methods fund on streams.</p>
 
-			    stream.stop();
+				<pre><code class="js">dom.events('click', dom.body)
+.map(get('target'))
+.filter(closest('a'))
+.each(function(target) {
+    // Do something with target node
+});</code></pre>
+
+				<p><code class="js">type</code> is either a string of space-seperated event types, or
+				an object with a property <code class="js">type</code> that is a string of space-seperated
+				event types. The object may also be used to pass in options such as the boolean property
+				<code class="js">passive</code>.</p>
+
+				<pre><code class="js">dom.events({ type: 'touchmove', passive: false }, dom.body)
+.each(function(e) {
+    // Do something with event object e
+});</code></pre>
+
+				<p>Stopping an event stream removes event listeners. A stream can be stopped
+				from inside or outside its consumer:</p>
+
+				<pre><code class="js">var stream = dom.events('click', dom.body)
+.each(function(e) {
+    // Remove event listeners
+	// Inside a consumer, `this` is the stream
+    this.stop();
+});
+
+// Remove event listeners
+stream.stop()</code></pre>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="requestEvent">
@@ -344,8 +371,18 @@
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="box">
 				<h3 class="dot-indent text-5"><a href="#box"><code class="js">.box(node)</code></a></h3>
 
-			Returns a <code class="js">DOMRect</code> object describing the draw box of <code class="js">node</code>.
-			(If <code class="js">node</code> is <code class="js">window</code> a plain object is returned).
+				<p>Returns a <code class="js">DOMRect</code> object describing the draw box of <code class="js">node</code>.
+				(If <code class="js">node</code> is <code class="js">window</code> a simulated <code class="js">DOMRect</code>
+				object is returned). A <code class="js">DOMRect</code> object has the form:</p>
+
+				<pre><code class="js">{
+    top:    <i>n</i>px,
+    bottom: <i>n</i>px,
+    left:   <i>n</i>px,
+    right:  <i>n</i>px,
+    width:  <i>n</i>px,
+    height: <i>n</i>px
+}</code></pre>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="bounds">

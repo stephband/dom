@@ -872,11 +872,17 @@ function getPositionParent(node) {
 		return keyCodes[e.keyCode];
 	}
 
-	function on(node, types, fn, data) {
-		types = types.split(rspaces);
+	function on(node, type, fn, data) {
+		var options;
 
+		if (typeof type === 'object') {
+			options = type;
+			type    = options.type;
+		}
+
+		var types   = type.split(rspaces);
 		var events  = node[eventsSymbol] || (node[eventsSymbol] = {});
-		var handler = bindTail(fn, data);
+		var handler = data ? bindTail(fn, data) : fn ;
 		var handlers, type;
 
 		var n = -1;
@@ -884,7 +890,7 @@ function getPositionParent(node) {
 			type = types[n];
 			handlers = events[type] || (events[type] = []);
 			handlers.push([fn, handler]);
-			node.addEventListener(type, handler);
+			node.addEventListener(type, handler, options);
 		}
 
 		return node;
@@ -897,10 +903,16 @@ function getPositionParent(node) {
 		}, data);
 	}
 
-	function off(node, types, fn) {
-		types = types.split(rspaces);
+	function off(node, type, fn) {
+		var options;
 
-		var events = node[eventsSymbol];
+		if (typeof type === 'object') {
+			options = type;
+			type    = options.type;
+		}
+
+		var types   = type.split(rspaces);
+		var events  = node[eventsSymbol];
 		var type, handlers, i;
 
 		if (!events) { return node; }
@@ -963,8 +975,15 @@ function getPositionParent(node) {
 		return features.events[type] || type ;
 	}
 
-	function event(types, node) {
-		types = types.split(rspaces).map(prefixType);
+	function event(type, node) {
+		var options;
+
+		if (typeof type === 'object') {
+			options = type;
+			type    = options.type;
+		}
+
+		var types = type.split(rspaces).map(prefixType);
 
 		return new Stream(function setup(notify, stop) {
 			var buffer = [];
@@ -975,7 +994,7 @@ function getPositionParent(node) {
 			}
 
 			types.forEach(function(type) {
-				node.addEventListener(type, update);
+				node.addEventListener(type, update, options);
 			});
 
 			return {

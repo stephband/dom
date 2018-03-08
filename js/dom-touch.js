@@ -24,7 +24,7 @@
 	};
 
 	var touchevents = {
-		move:   'touchmove',
+		move:   { type: 'touchmove', passive: false },
 		cancel: 'touchend',
 		end:    'touchend'
 	};

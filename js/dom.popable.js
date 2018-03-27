@@ -49,4 +49,4 @@
 	document.addEventListener('dom-activate', activate);
 	document.addEventListener('dom-deactivate', deactivate);
 	dom.activeMatchers.push(matches);
-})(this);
+})(window);

@@ -29,4 +29,4 @@
         var labels   = property.split(rspaces).map(dashesToSpaces);
         analyse.apply(null, labels);
     });
-})(this);
+})(window);

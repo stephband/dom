@@ -276,4 +276,4 @@
 	on(document, 'mousedown', mousedown);
 	on(document, 'touchstart', touchstart);
 
-})(this);
+})(window);

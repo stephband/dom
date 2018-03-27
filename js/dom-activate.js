@@ -357,4 +357,4 @@
 		activeClass: 'active',
 		onClass:     'on'
 	};
-})(this);
+})(window);

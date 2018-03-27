@@ -38,4 +38,4 @@
 			dom.events.trigger(form, 'dom-error', { detail: error.response });
 		});
 	});
-})(this);
+})(window);

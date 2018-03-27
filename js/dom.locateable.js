@@ -135,4 +135,4 @@
     on(window, 'scroll', scroll);
     update();
     dom.activeMatchers.push(matches);
-})(this);
+})(window);

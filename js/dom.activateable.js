@@ -38,4 +38,4 @@
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
 	dom.activeMatchers.push(matches);
-})(this);
+})(window);

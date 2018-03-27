@@ -192,4 +192,4 @@
 			classes.remove('no-transition');
 		});
 	});
-})(this);
+})(window);

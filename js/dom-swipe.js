@@ -49,4 +49,4 @@
 			touchdone(node, data);
 		});
 	});
-})(this);
+})(window);

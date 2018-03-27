@@ -1,7 +1,7 @@
 (function(window) {
 	if (!window.console || !window.console.log) { return; }
 	console.log('dom         – https://github.com/stephband/dom');
-})(this);
+})(window);
 
 (function(window) {
 	"use strict";
@@ -1573,4 +1573,4 @@ function getPositionParent(node) {
 	// Export
 
 	window.dom = dom;
-})(this);
+})(window);

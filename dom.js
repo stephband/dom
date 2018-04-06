@@ -1,10 +1,22 @@
 import './js/dom.js';
 
-export default window.dom;
+var dom = window.dom;
+
+export default dom;
+
+// Lifecycle
 
 export const ready                  = dom.ready;
 export const now                    = dom.now;
 
+// HTML
+
+export const escape                 = dom.escape;
+export const parse                  = dom.parse;
+
+// Inspect
+
+export const attribute              = dom.attribute;
 export const children               = dom.children;
 export const closest                = dom.closest;
 export const contains               = dom.contains;
@@ -14,6 +26,16 @@ export const matches                = dom.matches;
 export const next                   = dom.next;
 export const previous               = dom.previous;
 export const query                  = dom.query;
+export const tag                    = dom.tag;
+export const type                   = dom.type;
+export const isElementNode          = dom.isElementNode;
+export const isTextNode             = dom.isTextNode;
+export const isCommentNode          = dom.isCommentNode;
+export const isFragmentNode         = dom.isFragmentNode;
+export const isInternalLink         = dom.isInternalLink;
+export const isValid                = dom.isValid;
+
+// Mutate
 
 export const assign                 = dom.assign;
 export const create                 = dom.create;
@@ -26,17 +48,7 @@ export const replace                = dom.replace;
 export const empty                  = dom.empty;
 export const remove                 = dom.remove;
 
-export const fullscreen             = dom.fullscreen;
-
-export const isElementNode          = dom.isElementNode;
-export const isTextNode             = dom.isTextNode;
-export const isCommentNode          = dom.isCommentNode;
-export const isFragmentNode         = dom.isFragmentNode;
-export const isInternalLink         = dom.isInternalLink;
-
-export const attribute              = dom.attribute;
-export const tag                    = dom.tag;
-export const type                   = dom.type;
+// Style
 
 export const box                    = dom.box;
 export const bounds                 = dom.bounds;
@@ -52,13 +64,14 @@ export const toRem                  = dom.toRem;
 export const toVw                   = dom.toVw;
 export const toVh                   = dom.toVh;
 
+// Fragments
+
 export const fragmentFromTemplate   = dom.fragmentFromTemplate;
 export const fragmentFromChildren   = dom.fragmentFromChildren;
 export const fragmentFromHTML       = dom.fragmentFromHTML;
 export const fragmentFromId         = dom.fragmentFromId;
 
-export const escape                 = dom.escape;
-export const parse                  = dom.parse;
+// Events
 
 export const Event                  = dom.Event;
 export const events                 = dom.events;
@@ -68,15 +81,20 @@ export const isPrimaryButton        = dom.isPrimaryButton;
 export const isTargetEvent          = dom.isTargetEvent;
 export const preventDefault         = dom.preventDefault;
 export const toKey                  = dom.toKey;
-
 export const trapFocus              = dom.trapFocus;
-export const transition             = dom.transition;
+export const requestEvent           = dom.requestEvent;
+
+// Animation
 
 export const animate                = dom.animate;
+export const fullscreen             = dom.fullscreen;
+export const transition             = dom.transition;
+export const validate               = dom.validate;
+export const requestFrame           = dom.requestFrame;
+
+// Scroll
 
 export const animateScroll          = dom.animateScroll;
 export const scrollRatio            = dom.scrollRatio;
 export const disableScroll          = dom.disableScroll;
 export const enableScroll           = dom.enableScroll;
-export const requestEvent           = dom.requestEvent;
-export const requestFrame           = dom.requestFrame;

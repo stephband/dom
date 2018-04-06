@@ -23,15 +23,14 @@
 	var dom            = window.dom;
 
 	var get            = Fn.get;
-	var invoke         = Fn.invoke;
-	var nothing        = Fn.nothing;
 
 	var after          = dom.after;
 	var classes        = dom.classes;
+	var isValid        = dom.isValid;
     var matches        = dom.matches;
     var next           = dom.next;
 	var remove         = dom.remove;
-
+	var validate       = dom.validate;
     var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select');
 
 	var types = {
@@ -48,10 +47,6 @@
 		return function() {
 			return !fn.apply(this, arguments);
 		};
-	}
-
-	function isValid(node) {
-		return node.validity ? node.validity.valid : true ;
 	}
 
 	function isShowingMessage(node) {
@@ -133,7 +128,7 @@
 	.events('focusout', document)
 	.map(get('target'))
 	.filter(isValidateable)
-	.each(invoke('checkValidity', nothing));
+	.each(validate);
 
     dom
 	.events('submit', document)
@@ -159,7 +154,7 @@
 		true
 	);
 
-    dom.validation = {
+	dom.validation = {
 		errorClass: 'error-label',
 
 		// Class added to validated nodes (note: not valid nodes, necessarily,

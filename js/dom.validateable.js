@@ -31,7 +31,7 @@
     var next           = dom.next;
 	var remove         = dom.remove;
 	var validate       = dom.validate;
-    var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select');
+    var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select, [validateable], [validateable] input, [validateable] textarea, [validateable] select');
 
 	var types = {
 		patternMismatch: 'pattern',

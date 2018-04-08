@@ -31,11 +31,11 @@
 				dom.events.trigger(form, 'dom-posted', { detail: response.data });
 			}
 			else {
-				dom.events.trigger(form, 'dom-error', { detail: response });
+				dom.events.trigger(form, 'dom-error', { detail: response.data.errors });
 			}
 		})
 		.catch(function(error) {
-			dom.events.trigger(form, 'dom-error', { detail: error.response });
+			dom.events.trigger(form, 'dom-error', { detail: error.response.data.errors });
 		});
 	});
 })(window);

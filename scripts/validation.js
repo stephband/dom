@@ -57,17 +57,16 @@
 	dom
 	.events('dom-error', document)
 	.each(function(e) {
-		var form     = e.target;
-		var response = e.detail;
+		var form   = e.target;
+		var errors = e.detail;
 
-		if (response && response.data && typeof response.data.errors === 'object') {
+		if (typeof errors === 'object') {
 			// Format data and set custom validation messages on inputs
-			flattenErrors(response.data.errors, form)
-			.forEach(setValidity);
+			flattenErrors(errors, form).forEach(setValidity);
 
 			// Cause the validation handling found in dom.validation.js to
 			// pick up the custom validation messages and render them
 			form.checkValidity();
 		}
 	});
-})(this);
+})(window);

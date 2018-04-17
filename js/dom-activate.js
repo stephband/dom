@@ -301,7 +301,7 @@
 		//	return;
 		//}
 
-		trigger(node, 'dom-activate', { relatedTarget: e.currentTarget });
+		trigger(node, 'dom-activate', { relatedTarget: e.delegateTarget });
 	}
 
 	function getHash(node) {
@@ -339,7 +339,7 @@
 		// Does it point to an id?
 		var id = getHash(e.delegateTarget);
 		if (!id) { return; }
-		
+
 		activateId(e, id);
 	}
 

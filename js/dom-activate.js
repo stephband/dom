@@ -278,7 +278,7 @@
 		//	return;
 		//}
 
-		trigger(node, 'dom-activate', { relatedTarget: e.currentTarget });
+		trigger(node, 'dom-activate', { relatedTarget: e.delegateTarget });
 	}
 
 	function getHash(node) {

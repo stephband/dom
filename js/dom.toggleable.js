@@ -4,6 +4,7 @@
 	"use strict";
 
 	var dom     = window.dom;
+	var Fn      = window.Fn;
 
 	// Define
 
@@ -11,20 +12,37 @@
 
 	// Functions
 
+	var closest = dom.closest;
 	var on      = dom.events.on;
 	var off     = dom.events.off;
 	var trigger = dom.events.trigger;
+	var remove  = Fn.remove;
 
-	function click(e, activeTarget) {
+	var actives = [];
+
+	function getHash(node) {
+		return (node.hash ?
+			node.hash :
+			node.getAttribute('href')
+		).substring(1);
+	}
+
+	function click(e) {
 		// A prevented default means this link has already been handled.
 		if (e.defaultPrevented) { return; }
 		if (!dom.isPrimaryButton(e)) { return; }
 
-		var node = e.currentTarget;
+		var node = closest('a[href]', e.target);
 		if (!node) { return; }
+		if (node.hostname && !dom.isInternalLink(node)) { return; }
 
-		trigger(activeTarget, 'dom-deactivate', {
-			relatedTarget: e.target
+		// Does it point to an id?
+		var id = getHash(node);
+		if (!id) { return; }
+		if (actives.indexOf(id) === -1) { return; }
+
+		trigger(dom.get(id), 'dom-deactivate', {
+			relatedTarget: node
 		});
 
 		e.preventDefault();
@@ -38,13 +56,7 @@
 		var target = e.target;
 		if (!matches(target)) { return; }
 
-		var id = dom.identify(target);
-
-		dom('a[href$="#' + id + '"]')
-		.forEach(function(node) {
-			on(node, 'click', click, e.target);
-		});
-
+		actives.push(dom.identify(target));
 		e.default();
 	}
 
@@ -54,18 +66,13 @@
 		var target = e.target;
 		if (!matches(target)) { return; }
 
-		var id = e.target.id;
-
-		dom('a[href$="#' + id + '"]')
-		.forEach(function(node) {
-			off(node, 'click', click);
-		});
-
+		remove(actives, target.id)
 		e.default();
 	}
 
+	on(dom.root, 'click', click);
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
 
 	dom.activeMatchers.push(matches);
-})(this);
+})(window);

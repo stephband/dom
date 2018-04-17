@@ -8,11 +8,11 @@
 	on(document, 'dom-touch', function(e) {
 		if (e.defaultPrevented) { return; }
 
-		var moveable = closest('.moveable', e.target);
+		var moveable = closest('.moveable [moveable]', e.target);
 		if (!moveable) { return; }
 
 		var transform = dom.style('transform', moveable);
-		transform = !transform || transform === 'none' ? '' : transform; 
+		transform = !transform || transform === 'none' ? '' : transform;
 
 		e
 		.detail()
@@ -26,4 +26,4 @@
 		//	//moveable.style.transform = transform;
 		//});
 	});
-})(this);
+})(window);

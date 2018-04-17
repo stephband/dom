@@ -21,7 +21,7 @@
     }
 
     dom
-    .event('change', document)
+    .events('change', document)
     .map(Fn.get('target'))
     .map(dom.closest('[data-analyse]'))
     .each(function(node) {
@@ -29,4 +29,4 @@
         var labels   = property.split(rspaces).map(dashesToSpaces);
         analyse.apply(null, labels);
     });
-})(this);
+})(window);

@@ -278,7 +278,10 @@
 		//	return;
 		//}
 
-		trigger(node, 'dom-activate', { relatedTarget: e.delegateTarget });
+		// TODO: This doesnt seemt o set relatedTarget
+		// trigger(node, 'dom-activate', { relatedTarget: e.delegateTarget });
+		var a = dom.Event('dom-activate', { relatedTarget: e.delegateTarget });
+		node.dispatchEvent(a);
 	}
 
 	function getHash(node) {
@@ -294,7 +297,7 @@
 		if (!node) { return; }
 
 		// Is the node popable, switchable or toggleable?
-		var classes = dom.classes(node);
+		//var classes = dom.classes(node);
 
 		if (dom.activeMatchers.find(apply(node))) {
 			activate(e, node);
@@ -354,4 +357,4 @@
 		activeClass: 'active',
 		onClass:     'on'
 	};
-})(this);
+})(window);

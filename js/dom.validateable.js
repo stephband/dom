@@ -23,16 +23,15 @@
 	var dom            = window.dom;
 
 	var get            = Fn.get;
-	var invoke         = Fn.invoke;
-	var nothing        = Fn.nothing;
 
 	var after          = dom.after;
 	var classes        = dom.classes;
+	var isValid        = dom.isValid;
     var matches        = dom.matches;
     var next           = dom.next;
 	var remove         = dom.remove;
-
-    var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select');
+	var validate       = dom.validate;
+    var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select, [validateable], [validateable] input, [validateable] textarea, [validateable] select');
 
 	var types = {
 		patternMismatch: 'pattern',
@@ -48,10 +47,6 @@
 		return function() {
 			return !fn.apply(this, arguments);
 		};
-	}
-
-	function isValid(node) {
-		return node.validity ? node.validity.valid : true ;
 	}
 
 	function isShowingMessage(node) {
@@ -82,15 +77,15 @@
 	}
 
 	function renderError(error) {
-		var input  = error.node;
-		var node   = input;
+		var input = error.node;
+		var node  = input;
 
+		// Find the last error
 		while (node.nextElementSibling && matches('.' + dom.validation.errorClass, node.nextElementSibling)) {
 			node = node.nextElementSibling;
 		}
 
-        var label = dom.create('label')
-        dom.assign(label, {
+        var label = dom.create('label', {
             textContent: error.text,
 			for:         input.id,
             class:       'error-label'
@@ -102,7 +97,7 @@
 			node.setCustomValidity(error.text);
 
 			dom
-			.on('input', node)
+			.events('input', node)
 			.take(1)
 			.each(function() {
 				node.setCustomValidity('');
@@ -123,20 +118,20 @@
 	}
 
 	dom
-	.event('input', document)
+	.events('input', document)
 	.map(get('target'))
     .filter(isValidateable)
 	.filter(isValid)
 	.each(removeMessages);
 
 	dom
-	.event('focusout', document)
+	.events('focusout', document)
 	.map(get('target'))
 	.filter(isValidateable)
-	.each(invoke('checkValidity', nothing));
+	.each(validate);
 
     dom
-	.event('submit', document)
+	.events('submit', document)
 	.map(get('target'))
 	.filter(isValidateable)
 	.each(addValidatedClass);
@@ -159,10 +154,11 @@
 		true
 	);
 
-    dom.validation = {
+	dom.validation = {
 		errorClass: 'error-label',
 
-		// Class added to validated nodes (note: not valid nodes, necessarily)
+		// Class added to validated nodes (note: not valid nodes, necessarily,
+		// but nodes that have been validated).
 		validatedClass: 'validated',
 
         // Prefix for input attributes containing validation messages.
@@ -180,4 +176,4 @@
         }
     };
 
-})(this);
+})(window);

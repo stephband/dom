@@ -1,7 +1,7 @@
 (function(window) {
 	if (!window.console || !window.console.log) { return; }
 	console.log('dom         – https://github.com/stephband/dom');
-})(this);
+})(window);
 
 (function(window) {
 	"use strict";
@@ -18,7 +18,6 @@
 	var assign      = Object.assign;
 	var define      = Object.defineProperties;
 	var cache       = Fn.cache;
-	var compose     = Fn.compose;
 	var curry       = Fn.curry;
 	var denormalise = Fn.denormalise;
 	var deprecate   = Fn.deprecate;
@@ -133,15 +132,6 @@
 			enumerable: true
 		},
 
-		transitionend: {
-			get: function() {
-				console.warn('dom.features.transitionend deprecated in favour of dom.features.events.transitionend.');
-				return features.events.transitionend;
-			},
-
-			enumerable: true
-		},
-
 		fullscreen: {
 			get: cache(function testFullscreen() {
 				var node = document.createElement('div');
@@ -150,6 +140,17 @@
 					node.mozRequestFullScreen ||
 					node.msRequestFullscreen);
 			}),
+
+			enumerable: true
+		},
+
+		// Deprecated
+
+		transitionend: {
+			get: function() {
+				console.warn('dom.features.transitionend deprecated in favour of dom.features.events.transitionend.');
+				return features.events.transitionend;
+			},
 
 			enumerable: true
 		}
@@ -405,6 +406,10 @@
 			location.pathname === prefixSlash(node.pathname);
 	}
 
+	function isValid(node) {
+		return node.validity ? node.validity.valid : true ;
+	}
+
 	function identify(node) {
 		var id = node.id;
 
@@ -643,91 +648,12 @@
 			0 ;
 	}
 
-	function viewportLeft(elem) {
-		var body = document.body;
-		var html = document.documentElement;
-		var box  = elem.getBoundingClientRect();
-		var scrollLeft = window.pageXOffset || html.scrollLeft || body.scrollLeft;
-		var clientLeft = html.clientLeft || body.clientLeft || 0;
-		return (box.left + scrollLeft - clientLeft);
-	}
-
-	function viewportTop(elem) {
-		var body = document.body;
-		var html = document.documentElement;
-		var box  = elem.getBoundingClientRect();
-		var scrollTop = window.pageYOffset || html.scrollTop || body.scrollTop;
-		var clientTop = html.clientTop || body.clientTop || 0;
-		return box.top +  scrollTop - clientTop;
-	}
-
-/*
-function getPositionParent(node) {
-	var offsetParent = node.offsetParent;
-
-	while (offsetParent && style("position", offsetParent) === "static") {
-		offsetParent = offsetParent.offsetParent;
-	}
-
-	return offsetParent || document.documentElement;
-}
-
-	function offset(node) {
-		// Pinched from jQuery.offset...
-	    // Return zeros for disconnected and hidden (display: none) elements
-	    // Support: IE <=11 only
-	    // Running getBoundingClientRect on a
-	    // disconnected node in IE throws an error
-	    if (!node.getClientRects().length) { return [0, 0]; }
-
-	    var rect     = node.getBoundingClientRect();
-	    var document = node.ownerDocument;
-	    var window   = document.defaultView;
-	    var docElem  = document.documentElement;
-
-	    return [
-			 rect.left + window.pageXOffset - docElem.clientLeft,
-			 rect.top  + window.pageYOffset - docElem.clientTop
-	    ];
-	}
-
-	function position(node) {
-		var rect;
-
-	    // Fixed elements are offset from window (parentOffset = {top:0, left: 0},
-	    // because it is its only offset parent
-	    if (style('position', node) === 'fixed') {
-	        rect = node.getBoundingClientRect();
-
-	        return [
-		        rect.left - (parseFloat(style("marginLeft", node)) || 0),
-		        rect.top  - (parseFloat(style("marginTop", node)) || 0)
-	        ];
-	    }
-
-		// Get *real* offsetParent
-		var parent = getPositionParent(node);
-
-		// Get correct offsets
-		var nodeOffset = offset(node);
-		var parentOffset = tag(parent) !== "html" ? [0, 0] : offset(parent);
-
-		// Add parent borders
-		parentOffset[0] += parseFloat(style("borderLeftWidth", parent)) || 0;
-		parentOffset[1] += parseFloat(style("borderTopWidth", parent)) || 0;
-
-	    // Subtract parent offsets and element margins
-		nodeOffset[0] -= (parentOffset[0] + (parseFloat(style("marginLeft", node)) || 0)),
-		nodeOffset[1] -= (parentOffset[1] + (parseFloat(style("marginTop", node)) || 0))
-
-		return nodeOffset;
-	}
-*/
-
 	function windowBox() {
 		return {
 			left:   0,
 			top:    0,
+			right:  window.innerWidth,
+			bottom: window.innerHeight,
 			width:  window.innerWidth,
 			height: window.innerHeight
 		};
@@ -741,11 +667,6 @@ function getPositionParent(node) {
 
 	function bounds(node) {
 		return node.getBoundingClientRect();
-	}
-
-	function position(node) {
-		var rect = box(node);
-		return [rect.left, rect.top];
 	}
 
 	//function offset(node) {
@@ -763,10 +684,6 @@ function getPositionParent(node) {
 
 
 	// DOM Events
-
-	var eventOptions = { bubbles: true };
-
-	var eventsSymbol = Symbol('events');
 
 	var keyCodes = {
 		8:  'backspace',
@@ -840,6 +757,10 @@ function getPositionParent(node) {
 		224: 'cmd'
 	};
 
+	var eventOptions = { bubbles: true };
+
+	var eventsSymbol = Symbol('events');
+
 	var untrapFocus = noop;
 
 	function Event(type, properties) {
@@ -858,6 +779,10 @@ function getPositionParent(node) {
 		e.preventDefault();
 	}
 
+	function isTargetEvent(e) {
+		return e.target === e.currentTarget;
+	}
+
 	function isPrimaryButton(e) {
 		// Ignore mousedowns on any button other than the left (or primary)
 		// mouse button, or when a modifier key is pressed.
@@ -868,29 +793,48 @@ function getPositionParent(node) {
 		return keyCodes[e.keyCode];
 	}
 
-	function on(node, types, fn, data) {
-		types = types.split(rspaces);
+	function on(node, type, fn, data) {
+		var options;
 
+		if (typeof type === 'object') {
+			options = type;
+			type    = options.type;
+		}
+
+		var types   = type.split(rspaces);
 		var events  = node[eventsSymbol] || (node[eventsSymbol] = {});
-		var handler = bindTail(fn, data);
-		var handlers, type;
+		var handler = data ? bindTail(fn, data) : fn ;
+		var handlers;
 
 		var n = -1;
-		while (n++ < types.length) {
+		while (++n < types.length) {
 			type = types[n];
 			handlers = events[type] || (events[type] = []);
 			handlers.push([fn, handler]);
-			node.addEventListener(type, handler);
+			node.addEventListener(type, handler, options);
 		}
 
 		return node;
 	}
 
-	function off(node, types, fn) {
-		types = types.split(rspaces);
+	function once(node, types, fn, data) {
+		on(node, types, function once() {
+			off(node, types, once);
+			fn.apply(null, arguments);
+		}, data);
+	}
 
-		var events = node[eventsSymbol];
-		var type, handlers, i;
+	function off(node, type, fn) {
+		var options;
+
+		if (typeof type === 'object') {
+			options = type;
+			type    = options.type;
+		}
+
+		var types   = type.split(rspaces);
+		var events  = node[eventsSymbol];
+		var handlers, i;
 
 		if (!events) { return node; }
 
@@ -952,8 +896,15 @@ function getPositionParent(node) {
 		return features.events[type] || type ;
 	}
 
-	function event(types, node) {
-		types = types.split(rspaces).map(prefixType);
+	function event(type, node) {
+		var options;
+
+		if (typeof type === 'object') {
+			options = type;
+			type    = options.type;
+		}
+
+		var types = type.split(rspaces).map(prefixType);
 
 		return new Stream(function setup(notify, stop) {
 			var buffer = [];
@@ -964,7 +915,7 @@ function getPositionParent(node) {
 			}
 
 			types.forEach(function(type) {
-				node.addEventListener(type, update);
+				node.addEventListener(type, update, options);
 			});
 
 			return {
@@ -1113,8 +1064,6 @@ function getPositionParent(node) {
 	// Units
 
 	var runit = /(\d*\.?\d+)(r?em|vw|vh)/;
-	var rvw = /(\d*\.?\d+)vw/;
-	var rvh = /(\d*\.?\d+)vh/;
 	//var rpercent = /(\d*\.?\d+)%/;
 
 	var fontSize;
@@ -1273,7 +1222,6 @@ function getPositionParent(node) {
 		//remove(document, 'touchmove', preventDefaultOutside);
 	}
 
-
 	// dom
 
 	function dom(selector) {
@@ -1295,7 +1243,12 @@ function getPositionParent(node) {
 
 		// DOM lifecycle
 
-		ready:    ready.then.bind(ready),
+		ready:   ready.then.bind(ready),
+
+		now:     function() {
+			// Return DOM time in seconds
+			return window.performance.now() / 1000;
+		},
 
 		// DOM traversal
 
@@ -1325,27 +1278,11 @@ function getPositionParent(node) {
 		empty:    empty,
 		remove:   remove,
 
+		validate: function(node) {
+			return node.checkValidity ? node.checkValidity() : true ;
+		},
+
 		fullscreen: function fullscreen(node) {
-
-			/*
-				This hack was used in a previous project, is no longer
-				required
-			*/
-			/*
-			// Hack around a Chrome layout bug by forcing the page to refresh when
-			// exiting full screen mode. Nasty nasty.
-			on(document, 'webkitfullscreenchange', function enter(e) {
-				// Ignore the first event, as it is the one caused by going into
-				// fullscreen mode.
-
-				off(document, 'webkitfullscreenchange', enter);
-				on(document, 'webkitfullscreenchange', function exit(e) {
-					window.location.reload();
-					off(document, 'webkitfullscreenchange', exit);
-				});
-			});
-			*/
-
 			// Find the right method and call it
 			return node.requestFullscreen ? node.requestFullscreen() :
 				node.webkitRequestFullscreen ? node.webkitRequestFullscreen() :
@@ -1354,6 +1291,21 @@ function getPositionParent(node) {
 				undefined ;
 		},
 
+		// EXAMPLE CODE for mutation observers  ------
+
+		//		var observer = new MutationObserver(function(mutationsList) {
+		//		    var mutation;
+		//		    for(mutation of mutationsList) {
+		//		        if (mutation.addedNodes.length) {
+		//		            dom
+		//		            .query('a[href="' + router.path + '"]', mutation.target)
+		//		            .forEach(dom.addClass('current'));
+		//		        }
+		//		    }
+		//		});
+		//
+		//		observer.observe(dom.get('calendar'), { childList: true, subtree: true });
+
 		// DOM inspection
 
 		isElementNode:  isElementNode,
@@ -1361,6 +1313,7 @@ function getPositionParent(node) {
 		isCommentNode:  isCommentNode,
 		isFragmentNode: isFragmentNode,
 		isInternalLink: isInternalLink,
+		isValid:        isValid,
 
 		type:        type,
 		tag:         tag,
@@ -1372,10 +1325,7 @@ function getPositionParent(node) {
 
 		box:         box,
 		bounds:      bounds,
-		rectangle:   deprecate(box, 'dom.rectangle(node) now dom.box(node)'),
-
 		offset:      curry(offset, true),
-		position:    position,
 
 		prefix:      prefix,
 		style: curry(function(name, node) {
@@ -1394,8 +1344,6 @@ function getPositionParent(node) {
 		toRem:          toRem,
 		toVw:           toVw,
 		toVh:           toVh,
-		viewportLeft:   viewportLeft,
-		viewportTop:    viewportTop,
 
 		// DOM fragments and templates
 
@@ -1411,25 +1359,26 @@ function getPositionParent(node) {
 		Event:           Event,
 		delegate:        delegate,
 		isPrimaryButton: isPrimaryButton,
+		isTargetEvent:   isTargetEvent,
 		preventDefault:  preventDefault,
 		toKey:           toKey,
 		trapFocus:       trapFocus,
 		trap:            Fn.deprecate(trapFocus, 'dom.trap() is now dom.trapFocus()'),
-
-		events: {
-			on:      on,
-			off:     off,
-			trigger: trigger
-		},
-
-		on:     Fn.deprecate(curry(event, true), 'dom.on() is now dom.event()'),
 
 		trigger: curry(function(type, node) {
 			trigger(node, type);
 			return node;
 		}, true),
 
-		event: curry(event, true),
+		events: assign(curry(event, true), {
+			on:      on,
+			once:    once,
+			off:     off,
+			trigger: trigger
+		}),
+
+		on:    Fn.deprecate(curry(event, true), 'dom.on() is now dom.events()'),
+		event: Fn.deprecate(curry(event, true), 'Deprecated dom.event() – now dom.events()'),
 
 		// DOM animation adn scrolling
 
@@ -1499,7 +1448,7 @@ function getPositionParent(node) {
 			left: 0
 		}, {
 			right:  { get: function() { return window.innerWidth; }, enumerable: true, configurable: true },
-			top:    { get: function() { return style('padding-top', document.body); }, enumerable: true, configurable: true },
+			top:    { get: function() { return dom.style('padding-top', document.body); }, enumerable: true, configurable: true },
 			bottom: { get: function() { return window.innerHeight; }, enumerable: true, configurable: true }
 		})
 	});
@@ -1509,15 +1458,11 @@ function getPositionParent(node) {
 		root: { value: document.documentElement, enumerable: true },
 		head: { value: document.head, enumerable: true },
 		body: { get: function() { return document.body; }, enumerable: true	},
-		view: { get: function() { return document.scrollingElement; }, enumerable: true },
-		viewport: { get: function() {
-			console.warn('Deprecated: dom.viewport is now dom.view');
-			return document.scrollingElement;
-		}, enumerable: true }
+		view: { get: function() { return document.scrollingElement; }, enumerable: true }
 	});
 
 
 	// Export
 
 	window.dom = dom;
-})(this);
+})(window);

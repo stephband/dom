@@ -35,4 +35,4 @@
 	}
 
 	on(document, 'mousedown', mousedown);
-})(this);
+})(window);

@@ -74,4 +74,4 @@
 	});
 
 	dom.activeMatchers.push(matches);
-})(this);
+})(window);

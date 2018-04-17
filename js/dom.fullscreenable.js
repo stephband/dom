@@ -31,4 +31,4 @@
 
     on(document, 'dom-activate', activate);
     dom.activeMatchers.push(matches);
-})(this);
+})(window);

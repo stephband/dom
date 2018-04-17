@@ -22,4 +22,4 @@
 		'dom-swipe': definition
 	});
 
-})(this);
+})(window);

@@ -24,7 +24,7 @@
 	};
 
 	var touchevents = {
-		move:   'touchmove',
+		move:   { type: 'touchmove', passive: false },
 		cancel: 'touchend',
 		end:    'touchend'
 	};
@@ -276,4 +276,4 @@
 	on(document, 'mousedown', mousedown);
 	on(document, 'touchstart', touchstart);
 
-})(this);
+})(window);

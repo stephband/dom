@@ -1,40 +1,41 @@
 // dom.postable
 
 (function(window) {
-    "use strict";
+	"use strict";
 
-    var dom     = window.dom;
-    var Fn      = window.Fn;
-    var get     = Fn.get;
+	var axios   = window.axios;
+	var dom     = window.dom;
+	var Fn      = window.Fn;
+	var compose = Fn.compose;
+	var get     = Fn.get;
 
-    // Define
+	// Define
 
-    var matches = dom.matches('.postable, [postable]');
+	var matches = dom.matches('.postable, [postable]');
 
-    // Functions
-    dom.event('submit', document)
-        .filter(function(event){
-            return matches(event.target);
-        })
-        .tap(dom.preventDefault)
-        .map(get('target'))
-        .each(function(node){
-            var action = node.getAttribute('action');
-            var post_data = new FormData(node);
-            console.log(post_data);
-            axios.post(action, post_data)
-            .then(function(response){
-                if(response.status < 300) {
-                    dom.events.trigger(node, 'dom-posted', {detail: response.data});
-                } else {
-                    var error = new Error(response.statusText);
-                    error.response = response;
-                    dom.events.trigger(node, 'dom-error', {detail: error})
-                }
-            })
-            .catch(function(error_response){
-                dom.events.trigger(node, 'dom-error', {detail: error_response})
-            });
-        });
 
-})(this);
+	// Functions
+	dom
+	.events('submit', document)
+	.filter(compose(matches, get('target')))
+	.tap(dom.preventDefault)
+	.map(get('target'))
+	.each(function(form){
+		var action = form.getAttribute('action');
+		var post_data = new FormData(form);
+
+		axios
+		.post(action, post_data)
+		.then(function(response){
+			if(response.status < 300) {
+				dom.events.trigger(form, 'dom-posted', { detail: response.data });
+			}
+			else {
+				dom.events.trigger(form, 'dom-error', { detail: response.data.errors });
+			}
+		})
+		.catch(function(error) {
+			dom.events.trigger(form, 'dom-error', { detail: error.response.data.errors });
+		});
+	});
+})(window);

@@ -81,21 +81,10 @@
         }
 	}
 
-    function windowBox() {
-        return {
-            left:   0,
-            top:    0,
-            right:  window.innerWidth,
-            bottom: window.innerHeight,
-            width:  window.innerWidth,
-            height: window.innerHeight
-        };
-    }
-
     function update() {
         var locateables = dom('.locateable');
         var boxes       = locateables.map(box).sort(by('top'));
-        var winBox      = windowBox();
+        var winBox      = box(window);
 
         var n = -1;
         while (boxes[++n]) {
@@ -135,4 +124,4 @@
     on(window, 'scroll', scroll);
     update();
     dom.activeMatchers.push(matches);
-})(this);
+})(window);

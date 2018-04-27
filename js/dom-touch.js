@@ -205,8 +205,8 @@
 
 		if (!touch) { return; }
 
-		// Stop the interface from gesturing
-		e.preventDefault();
+		// Stop the interface from gesturing in iOS
+		//e.preventDefault();
 
 		data.touch = touch;
 		data.timeStamp = e.timeStamp;

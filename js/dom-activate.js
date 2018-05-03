@@ -124,7 +124,6 @@
 
 	on(document, 'dom-deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
-
 		var data = cacheData(e.target);
 
 		// Don't do anything if elem is already inactive

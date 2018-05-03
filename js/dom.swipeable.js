@@ -19,7 +19,7 @@
 	}
 
 	function xMinFromChildren(node) {
-		var child = last(dom.children(node).filter(dom.matches('.switchable')));
+		var child = last(dom.children(node).filter(dom.matches('.switchable, [switchable]')));
 
 		// Get the right-most x of the last switchable child's right-most edge
 		var w1 = child.offsetLeft + child.clientWidth;
@@ -30,7 +30,7 @@
 	on(document, 'dom-touch', function touch(e) {
 		if (e.defaultPrevented) { return; }
 
-		var node = closest('.swipeable', e.target);
+		var node = closest('.swipeable, [swipeable]', e.target);
 		if (!node) { return; }
 
 		var classes = dom.classes(node);
@@ -127,7 +127,7 @@
 	on(document, 'dom-swipe', function swipe(e) {
 		if (e.defaultPrevented) { return; }
 
-		var node = closest('.swipeable', e.target);
+		var node = closest('.swipeable, [swipeable]', e.target);
 		if (!node) { return; }
 
 		var angle = Fn.wrap(0, tau, e.angle || 0);
@@ -167,7 +167,7 @@
 		var node   = e.target;
 		var parent = node.parentNode;
 
-		if (!dom.matches('.swipeable', parent)) { return; }
+		if (!dom.matches('.swipeable, [swipeable]', parent)) { return; }
 
 		var classes = dom.classes(parent);
 		classes.remove('no-transition');
@@ -180,7 +180,7 @@
 
 	on(window, 'resize', function resize() {
 		// Update swipeable positions
-		dom('.swipeable').forEach(function(swipeable) {
+		dom('.swipeable, [swipeable]').forEach(function(swipeable) {
 			var node = dom.children(swipeable).find(matches('.active'));
 			if (!node) { return; }
 			var classes = dom.classes(swipeable);

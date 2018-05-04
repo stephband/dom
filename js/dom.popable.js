@@ -3,7 +3,7 @@
 // Extends the default behaviour of events for the .tip class.
 
 import { noop } from '../../fn/fn.js';
-import { default as dom, events, matches } from './dom.js';
+import { default as dom, events, matches } from '../dom.js';
 
 
 (function(window) {

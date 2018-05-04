@@ -1,6 +1,6 @@
 
 import { noop } from '../../fn/fn.js';
-import { default as dom, events, matches, preventDefault } from './dom.js';
+import { default as dom, events, matches, preventDefault } from '../dom.js';
 
 
 // dom.postable

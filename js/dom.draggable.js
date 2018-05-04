@@ -1,5 +1,5 @@
 import { requestTick, Stream } from '../../fn/fn.js';
-import { default as dom, delegate, identity, events } from './dom.js';
+import { default as dom, delegate, identity, events } from '../dom.js';
 import Sparky from '../../sparky/sparky.js';
 
 (function(window) {

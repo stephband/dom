@@ -1,6 +1,6 @@
 
 import { last, wrap } from '../../fn/fn.js';
-import { default as dom, events, closest, matches } from './dom.js';
+import { default as dom, events, closest, matches } from '../dom.js';
 
 
 (function(window) {

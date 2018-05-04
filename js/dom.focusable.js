@@ -1,5 +1,5 @@
 import { requestTick, Stream } from '../../fn/fn.js';
-import { default as dom, disableScroll, enableScroll, trapFocus, events, matches } from './dom.js';
+import { default as dom, disableScroll, enableScroll, trapFocus, events, matches } from '../dom.js';
 
 (function(window) {
 	"use strict";

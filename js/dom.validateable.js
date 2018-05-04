@@ -1,6 +1,6 @@
 
 import { get, Stream } from '../../fn/fn.js';
-import { default as dom, create, remove, next, validate, isValid, classes, after } from './dom.js';
+import { default as dom, create, remove, next, validate, isValid, classes, after } from '../dom.js';
 
 
 (function(window) {

@@ -1,5 +1,5 @@
 
-import { default as dom, events } from './dom.js';
+import { default as dom, events } from '../dom.js';
 
 (function(window) {
 	"use strict";

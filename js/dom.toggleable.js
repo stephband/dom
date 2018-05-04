@@ -1,7 +1,7 @@
 // dom.toggleable
 
 import { remove } from '../../fn/fn.js';
-import { default as dom, get, events, closest, matches, children, isPrimaryButton, isInternalLink, identify } from './dom.js';
+import { default as dom, get, events, closest, matches, children, isPrimaryButton, isInternalLink, identify } from '../dom.js';
 
 
 (function(window) {

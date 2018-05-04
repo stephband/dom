@@ -4,7 +4,7 @@
 // events with things to do when they are triggered on nodes.
 
 import { Functor as Fn } from '../../fn/fn.js';
-import { default as dom, events, trigger, matches, children } from './dom.js';
+import { default as dom, events, trigger, matches, children } from '../dom.js';
 
 (function(window) {
 	"use strict";

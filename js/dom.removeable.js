@@ -1,7 +1,7 @@
 // dom.toggleable
 
 import { noop } from '../../fn/fn.js';
-import { default as dom, remove, events, matches } from './dom.js';
+import { default as dom, remove, events, matches } from '../dom.js';
 
 (function(window) {
 	"use strict";

@@ -1,7 +1,7 @@
 // dom.fullscreenable
 
 import { noop } from '../../fn/fn.js';
-import { default as dom, closest, fullscreen, isInternalLink, isPrimaryButton, events, matches } from './dom.js';
+import { default as dom, closest, fullscreen, isInternalLink, isPrimaryButton, events, matches } from '../dom.js';
 
 (function(window) {
     "use strict";

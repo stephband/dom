@@ -1,5 +1,5 @@
 
-import { default as dom, matches, events } from './dom.js';
+import { default as dom, matches, events } from '../dom.js';
 
 
 // dom.toggleable

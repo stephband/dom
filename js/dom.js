@@ -447,7 +447,6 @@ function find(selector, node) {
 }
 
 function query(selector, node) {
-	node = node || document;
 	return toArray(node.querySelectorAll(selector));
 }
 

@@ -1,22 +1,21 @@
 // dom.toggleable
 
+import { remove } from '../../fn/fn.js';
+import { default as dom, get, events, closest, matches, children, isPrimaryButton, isInternalLink, identify } from './dom.js';
+
+
 (function(window) {
 	"use strict";
 
-	var dom     = window.dom;
-	var Fn      = window.Fn;
-
 	// Define
 
-	var matches = dom.matches('.toggleable, [toggleable]');
+	var match = matches('.toggleable, [toggleable]');
 
 	// Functions
 
-	var closest = dom.closest;
-	var on      = dom.events.on;
-	var off     = dom.events.off;
-	var trigger = dom.events.trigger;
-	var remove  = Fn.remove;
+	var on      = events.on;
+	var off     = events.off;
+	var trigger = events.trigger;
 
 	var actives = [];
 
@@ -30,18 +29,18 @@
 	function click(e) {
 		// A prevented default means this link has already been handled.
 		if (e.defaultPrevented) { return; }
-		if (!dom.isPrimaryButton(e)) { return; }
+		if (!isPrimaryButton(e)) { return; }
 
 		var node = closest('a[href]', e.target);
 		if (!node) { return; }
-		if (node.hostname && !dom.isInternalLink(node)) { return; }
+		if (node.hostname && !isInternalLink(node)) { return; }
 
 		// Does it point to an id?
 		var id = getHash(node);
 		if (!id) { return; }
 		if (actives.indexOf(id) === -1) { return; }
 
-		trigger(dom.get(id), 'dom-deactivate', {
+		trigger(get(id), 'dom-deactivate', {
 			relatedTarget: node
 		});
 
@@ -54,9 +53,9 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
-		actives.push(dom.identify(target));
+		actives.push(identify(target));
 		e.default();
 	}
 
@@ -64,9 +63,9 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
-		remove(actives, target.id)
+		remove(actives, target.id);
 		e.default();
 	}
 
@@ -74,5 +73,5 @@
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
 
-	dom.activeMatchers.push(matches);
+	dom.activeMatchers.push(match);
 })(window);

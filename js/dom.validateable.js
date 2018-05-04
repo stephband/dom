@@ -1,3 +1,8 @@
+
+import { get, Stream } from '../../fn/fn.js';
+import { default as dom, create, remove, next, validate, isValid, classes, after } from './dom.js';
+
+
 (function(window) {
 	"use strict";
 
@@ -18,20 +23,7 @@
     // Inputs inside or with .validateable are given .validated after they are
     // first validated, enabling pre- as well as post- validation styles.
 
-	var Fn             = window.Fn;
-	var Stream         = window.Stream;
-	var dom            = window.dom;
-
-	var get            = Fn.get;
-
-	var after          = dom.after;
-	var classes        = dom.classes;
-	var isValid        = dom.isValid;
-    var matches        = dom.matches;
-    var next           = dom.next;
-	var remove         = dom.remove;
-	var validate       = dom.validate;
-    var isValidateable = dom.matches('.validateable, .validateable input, .validateable textarea, .validateable select, [validateable], [validateable] input, [validateable] textarea, [validateable] select');
+    var isValidateable = matches('.validateable, .validateable input, .validateable textarea, .validateable select, [validateable], [validateable] input, [validateable] textarea, [validateable] select');
 
 	var types = {
 		patternMismatch: 'pattern',
@@ -85,7 +77,7 @@
 			node = node.nextElementSibling;
 		}
 
-        var label = dom.create('label', {
+        var label = create('label', {
             textContent: error.text,
 			for:         input.id,
             class:       'error-label'

@@ -1,18 +1,14 @@
+import { curry, isDefined, overload } from '../../fn/fn.js';
+import { default as dom, classes, tag, events } from '../dom.js';
+
 (function(window) {
 	"use strict";
 
 	var debug     = false;
 
-	var Fn        = window.Fn;
-	var dom       = window.dom;
-	var classes   = dom.classes;
-	var tag       = dom.tag;
-	var on        = dom.events.on;
-	var off       = dom.events.off;
-	var trigger   = dom.events.trigger;
-	var curry     = Fn.curry;
-	var isDefined = Fn.isDefined;
-	var overload  = Fn.overload;
+	var on        = events.on;
+	var off       = events.off;
+	var trigger   = events.trigger;
 
 	var location  = window.location;
 	var id        = location.hash;

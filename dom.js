@@ -1,7 +1,8 @@
-import './js/dom.js';
+if (window.console && window.console.log) {
+    console.log('dom         – https://github.com/stephband/dom');
+}
 
-var dom = window.dom;
-
+import dom from './js/dom.js';
 export default dom;
 
 // Lifecycle

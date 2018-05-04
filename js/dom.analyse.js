@@ -1,10 +1,9 @@
+import { rspaces, get } from '../../fn/fn.js';
+import { closest, attribute } from './dom.js';
+
+
 (function(window) {
     "use strict";
-
-    var Fn      = window.Fn;
-    var dom     = window.dom;
-
-    var rspaces = Fn.rspaces;
 
     function analyse(category, action, label, value) {
         window.ga && window.ga('send', 'event', category, action, label, value);
@@ -22,10 +21,10 @@
 
     dom
     .events('change', document)
-    .map(Fn.get('target'))
-    .map(dom.closest('[data-analyse]'))
+    .map(get('target'))
+    .map(closest('[data-analyse]'))
     .each(function(node) {
-        var property = dom.attribute('data-analyse', node);
+        var property = attribute('data-analyse', node);
         var labels   = property.split(rspaces).map(dashesToSpaces);
         analyse.apply(null, labels);
     });

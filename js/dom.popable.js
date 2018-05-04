@@ -2,11 +2,13 @@
 //
 // Extends the default behaviour of events for the .tip class.
 
-(function(window) {
+import { noop } from '../../fn/fn.js';
+import { default as dom, events, matches } from './dom.js';
 
-	var dom     = window.dom;
-	var trigger = dom.events.trigger;
-	var matches = dom.matches('.popable, [popable]');
+
+(function(window) {
+	var trigger = events.trigger;
+	var match   = matches('.popable, [popable]');
 
 	function activate(e) {
 		// Use method detection - e.defaultPrevented is not set in time for
@@ -14,7 +16,7 @@
 		if (!e.default) { return; }
 
 		var node    = e.target;
-		if (!matches(node)) { return; }
+		if (!match(node)) { return; }
 
 		// Make user actions outside node deactivat the node
 
@@ -42,11 +44,11 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 		e.default();
 	}
 
 	document.addEventListener('dom-activate', activate);
 	document.addEventListener('dom-deactivate', deactivate);
-	dom.activeMatchers.push(matches);
+	dom.activeMatchers.push(match);
 })(window);

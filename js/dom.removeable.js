@@ -1,21 +1,20 @@
 // dom.toggleable
 
+import { noop } from '../../fn/fn.js';
+import { default as dom, remove, events, matches } from './dom.js';
+
 (function(window) {
 	"use strict";
 
-	// Import
-	var dom         = window.dom;
-
 	// Define
-	var matches     = dom.matches('.removeable, [removeable]');
+	var match       = matches('.removeable, [removeable]');
 
 	// Max duration of deactivation transition in seconds
 	var maxDuration = 1;
 
 	// Functions
-	var on      = dom.events.on;
-	var off     = dom.events.off;
-	var remove  = dom.remove;
+	var on      = events.on;
+	var off     = events.off;
 
     function activate(e) {
         // Use method detection - e.defaultPrevented is not set in time for
@@ -23,7 +22,7 @@
         if (!e.default) { return; }
 
         var target = e.target;
-        if (!matches(target)) { return; }
+        if (!match(target)) { return; }
 
         //dom.identify(target);
         e.default();
@@ -33,7 +32,7 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
 		function update() {
 			clearTimeout(timer);

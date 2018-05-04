@@ -1,14 +1,13 @@
+import { requestTick, Stream } from '../../fn/fn.js';
+import { default as dom, delegate, identity, events } from './dom.js';
+import Sparky from '../../sparky/sparky.js';
+
 (function(window) {
 	"use strict";
 
 	var debug  = true;
-	var dom    = window.dom;
-	var Sparky = window.Sparky;
-
-	var on       = dom.events.on;
-	var off      = dom.events.off;
-	var delegate = dom.delegate;
-	var identify = dom.identify;
+	var on     = events.on;
+	var off    = events.off;
 
 	function dragstartButton(e) {
 		var data = {

@@ -1,17 +1,19 @@
+
+import { default as dom, matches, events } from './dom.js';
+
+
 // dom.toggleable
 
 (function(window) {
 	"use strict";
 
-	var dom     = window.dom;
-
 	// Define
 
-	var matches = dom.matches('.activateable, [activateable]');
+	var match = matches('.activateable, [activateable]');
 
 	// Functions
 
-	var on      = dom.events.on;
+	var on = events.on;
 
 	function activate(e) {
 		// Use method detection - e.defaultPrevented is not set in time for
@@ -19,7 +21,7 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
 		//dom.identify(target);
 		e.default();
@@ -29,7 +31,7 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
 		//dom.identify(target);
 		e.default();
@@ -37,5 +39,5 @@
 
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
-	dom.activeMatchers.push(matches);
+	dom.activeMatchers.push(match);
 })(window);

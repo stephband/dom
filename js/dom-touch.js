@@ -1,9 +1,8 @@
+import { requestTick, Stream } from '../../fn/fn.js';
+import { default as dom, closest, events } from './dom.js';
+
 (function(window) {
 	"use strict";
-
-	var Fn     = window.Fn;
-	var Stream = window.Stream;
-	var dom    = window.dom;
 
 
 	// Number of pixels a pressed pointer travels before movestart
@@ -32,7 +31,6 @@
 
 	// Functions
 
-	var requestTick     = Fn.requestTick;
 	var on              = dom.events.on;
 	var off             = dom.events.off;
 	var trigger         = dom.events.trigger;

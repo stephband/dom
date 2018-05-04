@@ -1,12 +1,11 @@
+import { toPolar } from '../../fn/fn.js';
+import { default as dom, closest, events } from './dom.js';
+
 (function(window) {
 	"use strict";
 
-	var Fn      = window.Fn;
-	var dom     = window.dom;
-
-	var on      = dom.events.on;
-	var trigger = dom.events.trigger;
-	var closest = dom.closest;
+	var on      = events.on;
+	var trigger = events.trigger;
 
 //	var settings = {
 //		// Ratio of distance over target finger must travel to be
@@ -24,7 +23,7 @@
 		//var y = data.y;
 		//var w = node.offsetWidth;
 		//var h = node.offsetHeight;
-		var polar = Fn.toPolar([data.x, data.y]);
+		var polar = toPolar([data.x, data.y]);
 
 		// Todo: check if swipe has enough velocity and distance
 		//x/w > settings.threshold || e.velocityX * x/w * settings.sensitivity > 1

@@ -1,13 +1,13 @@
+
+import { last, wrap } from '../../fn/fn.js';
+import { default as dom, events, closest, matches } from './dom.js';
+
+
 (function(window) {
 	"use strict";
 
-	var Fn       = window.Fn;
-	var last     = Fn.last;
-	var dom      = window.dom;
-	var on       = dom.events.on;
-	var trigger  = dom.events.trigger;
-	var closest  = dom.closest;
-	var matches  = dom.matches;
+	var on       = events.on;
+	var trigger  = events.trigger;
 	var tau      = Math.PI * 2;
 
 	var elasticDistance = 800;
@@ -19,7 +19,7 @@
 	}
 
 	function xMinFromChildren(node) {
-		var child = last(dom.children(node).filter(dom.matches('.switchable, [switchable]')));
+		var child = last(dom.children(node).filter(matches('.switchable, [switchable]')));
 
 		// Get the right-most x of the last switchable child's right-most edge
 		var w1 = child.offsetLeft + child.clientWidth;
@@ -130,7 +130,7 @@
 		var node = closest('.swipeable, [swipeable]', e.target);
 		if (!node) { return; }
 
-		var angle = Fn.wrap(0, tau, e.angle || 0);
+		var angle = wrap(0, tau, e.angle || 0);
 
 			// If angle is rightwards
 		var prop = (angle > tau * 1/8 && angle < tau * 3/8) ?
@@ -148,7 +148,7 @@
 		// HTML may not specify an active child – in which case we assume the
 		// first child is displayed
 		var active = children
-		.filter(dom.matches('.active'))
+		.filter(matches('.active'))
 		.shift() || children.shift();
 
 		if (active[prop]) {
@@ -167,7 +167,7 @@
 		var node   = e.target;
 		var parent = node.parentNode;
 
-		if (!dom.matches('.swipeable, [swipeable]', parent)) { return; }
+		if (!matches('.swipeable, [swipeable]', parent)) { return; }
 
 		var classes = dom.classes(parent);
 		classes.remove('no-transition');

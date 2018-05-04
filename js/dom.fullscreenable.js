@@ -1,24 +1,15 @@
 // dom.fullscreenable
 
+import { noop } from '../../fn/fn.js';
+import { default as dom, closest, fullscreen, isInternalLink, isPrimaryButton, events, matches } from './dom.js';
+
 (function(window) {
     "use strict";
 
-    // Import
-
-	var Fn      = window.Fn;
-	var dom     = window.dom;
-
-    // Define
-
-    var noop            = Fn.noop;
-    var matches         = dom.matches('.fullscreenable, [fullscreenable]');
-    var closest         = dom.closest;
-	var on              = dom.events.on;
-	var off             = dom.events.off;
-	var trigger         = dom.events.trigger;
-    var fullscreen      = dom.fullscreen;
-    var isInternalLink  = dom.isInternalLink;
-    var isPrimaryButton = dom.isPrimaryButton;
+    var match           = matches('.fullscreenable, [fullscreenable]');
+	var on              = events.on;
+	var off             = events.off;
+	var trigger         = events.trigger;
 
     function getHash(node) {
 		return (node.hash ?
@@ -51,7 +42,7 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
         fullscreen(e.target);
         on(e.target, 'click', click);
@@ -67,7 +58,7 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
         document.exitFullscreen ? document.exitFullscreen() :
         document.webkitExitFullscreen ? document.webkitExitFullscreen() :
@@ -81,5 +72,5 @@
 
     on(document, 'dom-activate', activate);
     on(document, 'dom-deactivate', deactivate);
-    dom.activeMatchers.push(matches);
+    dom.activeMatchers.push(match);
 })(window);

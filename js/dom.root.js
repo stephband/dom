@@ -1,4 +1,6 @@
 
+import { default as dom, events } from './dom.js';
+
 (function(window) {
 	"use strict";
 
@@ -7,9 +9,8 @@
 	// responible for focus. Hopefully. Not foolproof, but better than getting
 	// rid of focus outlines altogether.
 
-	var dom        = window.dom;
-	var on         = dom.events.on;
-	var off        = dom.events.off;
+	var on         = events.on;
+	var off        = events.off;
 	var keyClass   = 'keyboard';
 	var mouseClass = 'mouse';
 

@@ -1,3 +1,8 @@
+
+import { noop } from '../../fn/fn.js';
+import { default as dom, events, matches, preventDefault } from './dom.js';
+
+
 // dom.postable
 
 (function(window) {
@@ -11,13 +16,13 @@
 
 	// Define
 
-	var matches = dom.matches('.postable, [postable]');
+	var match = matches('.postable, [postable]');
 
 
 	// Functions
 	dom
 	.events('submit', document)
-	.filter(compose(matches, get('target')))
+	.filter(compose(match, get('target')))
 	.tap(dom.preventDefault)
 	.map(get('target'))
 	.each(function(form){

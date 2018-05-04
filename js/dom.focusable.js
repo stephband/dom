@@ -1,3 +1,6 @@
+import { requestTick, Stream } from '../../fn/fn.js';
+import { default as dom, disableScroll, enableScroll, trapFocus, events, matches } from './dom.js';
+
 (function(window) {
 	"use strict";
 
@@ -5,20 +8,17 @@
 	var dom     = window.dom;
 
 	var noop          = Fn.noop;
-	var on            = dom.events.on;
-	var off           = dom.events.off;
-	var trigger       = dom.events.trigger;
-	var disableScroll = dom.disableScroll;
-	var enableScroll  = dom.enableScroll;
-	var trapFocus     = dom.trapFocus;
+	var on            = events.on;
+	var off           = events.off;
+	var trigger       = events.trigger;
 	var untrapFocus   = noop;
 
-	var matches = dom.matches('.focusable, [focusable]');
-	var delay   = 600;
+	var match = matches('.focusable, [focusable]');
+	var delay = 600;
 
 	on(document, 'dom-activate', function(e) {
 		if (e.defaultPrevented) { return; }
-		if (!matches(e.target)) { return; }
+		if (!match(e.target)) { return; }
 
 		// Trap focus
 
@@ -59,7 +59,7 @@
 
 	on(document, 'dom-deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
-		if (!matches(e.target)) { return; }
+		if (!match(e.target)) { return; }
 
 		var untrap = function untrap(e) {
 			clearTimeout(timer);
@@ -73,5 +73,5 @@
 		enableScroll(dom.root);
 	});
 
-	dom.activeMatchers.push(matches);
+	dom.activeMatchers.push(match);
 })(window);

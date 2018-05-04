@@ -1,18 +1,10 @@
+import '../../prism/prism.js';
+import { overload } from '../../fn/fn.js';
+import { default as dom, attribute, before, clone, create, query, remove } from '../dom.js';
+
 (function() {
     // Find code elements with an attribute code="html|sparky|js|css" and
     // insert a highlighted code block in front of it.
-
-    var Fn    = window.Fn;
-    var dom   = window.dom;
-    var Prism = window.Prism;
-
-    var attribute = dom.attribute;
-    var before    = dom.before;
-    var clone     = dom.clone;
-    var create    = dom.create;
-    var overload  = Fn.overload;
-    var query     = dom.query;
-    var remove    = dom.remove;
 
     Prism.languages.django.property.pattern = /(?:{\[)[\s\S]*?(?:]})/g;
 

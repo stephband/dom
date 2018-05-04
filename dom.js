@@ -4,6 +4,7 @@ if (window.console && window.console.log) {
 
 import dom from './js/dom.js';
 export default dom;
+window.dom = dom;
 
 // Lifecycle
 

@@ -3,6 +3,8 @@ if (window.console && window.console.log) {
 }
 
 import dom from './js/dom.js';
+
+// Support the old way
 export default dom;
 window.dom = dom;
 

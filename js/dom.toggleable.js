@@ -2,7 +2,7 @@
 
 import { remove } from '../../fn/fn.js';
 import { default as dom, get, events, closest, matches, children, isPrimaryButton, isInternalLink, identify } from '../dom.js';
-
+import './dom-activate.js';
 
 (function(window) {
 	"use strict";

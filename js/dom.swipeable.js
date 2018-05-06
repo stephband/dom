@@ -1,7 +1,8 @@
 
 import { last, wrap } from '../../fn/fn.js';
 import { default as dom, events, closest, matches } from '../dom.js';
-
+import './dom-swipe.js';
+import './dom-touch.js';
 
 (function(window) {
 	"use strict";

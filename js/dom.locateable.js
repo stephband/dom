@@ -2,6 +2,8 @@
 //
 // Extends the default behaviour of events for the .tip class.
 
+import './dom-activate.js';
+
 (function(window) {
 
     var Fn       = window.Fn;

@@ -814,6 +814,23 @@ stream.stop()</code></pre>
 		</div>
 	</div-->
 
+	<style>
+	.dragover { background-color: green; }
+	</style>
+
+
+	<div class="drag-block block" draggable="true" draggable-mimetypes="text/html: inner-html; ">
+		DRAG 1
+	</div>
+
+	<div class="drag-block block" draggable="true" draggable-mimetypes="text/html: inner-html; application/json: [2];">
+		DRAG 2
+	</div>
+
+	<div class="drag-block block" droppable="true" droppable-mimetypes="application/json">
+		DROP
+	</div>
+
 	<script src="../fn/polyfills/number.isnan.js"></script>
 	<script src="../fn/polyfills/object.assign.js"></script>
 	<script src="../fn/polyfills/object.setprototypeof.js"></script>
@@ -823,33 +840,23 @@ stream.stop()</code></pre>
 	<script src="../fn/polyfills/array.of.js"></script>
 	<script src="../fn/polyfills/array.from.js"></script>
 	<script src="../fn/polyfills/array.find.js"></script>
-	<script src="../fn/js/fn.js"></script>
-	<script src="../fn/js/stream.js"></script>
-
-	<script src="http://stephen.band/Fn/polyfills/number.isnan.js"></script>
-	<script src="http://stephen.band/Fn/polyfills/object.assign.js"></script>
-	<script src="http://stephen.band/Fn/js/fn.js"></script>
-	<script src="http://stephen.band/Fn/js/stream.js"></script>
 
 	<script src="polyfills/requestanimationframe.js"></script>
 	<script src="polyfills/customevent.js"></script>
-	<script src="test/config.js"></script>
 
-	<script src="js/dom.js"></script>
-	<script src="js/dom-activate.js"></script>
-	<script src="js/dom-touch.js"></script>
-	<script src="js/dom-swipe.js"></script>
-	<script src="js/dom.popable.js"></script>
-	<script src="js/dom.toggleable.js"></script>
-	<script src="js/dom.switchable.js"></script>
-	<script src="js/dom.moveable.js"></script>
-	<script src="js/dom.swipeable.js"></script>
-	<script src="js/dom.focusable.js"></script>
-	<script src="js/dom.validateable.js"></script>
-	<script src="js/dom.root.js"></script>
+	<script type="module">
+	import { default as dom } from './dom.js';
+	import './js/dom.popable.js';
+	import './js/dom.toggleable.js';
+	import './js/dom.switchable.js';
+	import './js/dom.moveable.js';
+	import './js/dom.swipeable.js';
+	import './js/dom.focusable.js';
+	import './js/dom.validateable.js';
+	import './js/dom.draggable.js';
+	import './js/dom.droppable.js';
+	import './js/dom.root.js';
 
-	<script>
-	var dom = window.dom;
 	dom.validation.attributePrefix = 'data-val-';
 	dom.validation.messages = {
 		pattern:   'Doesnt match',

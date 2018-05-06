@@ -5,6 +5,7 @@
 
 import { Functor as Fn } from '../../fn/fn.js';
 import { default as dom, events, trigger, matches, children } from '../dom.js';
+import './dom-activate.js';
 
 (function(window) {
 	"use strict";

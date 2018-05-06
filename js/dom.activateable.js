@@ -1,6 +1,6 @@
 
 import { default as dom, matches, events } from '../dom.js';
-
+import './dom-activate.js';
 
 // dom.toggleable
 

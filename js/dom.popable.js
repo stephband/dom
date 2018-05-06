@@ -4,7 +4,7 @@
 
 import { noop } from '../../fn/fn.js';
 import { default as dom, events, matches } from '../dom.js';
-
+import './dom-activate.js';
 
 (function(window) {
 	var trigger = events.trigger;

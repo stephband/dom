@@ -2,6 +2,7 @@
 
 import { noop } from '../../fn/fn.js';
 import { default as dom, closest, fullscreen, isInternalLink, isPrimaryButton, events, matches } from '../dom.js';
+import './dom-activate.js';
 
 (function(window) {
     "use strict";

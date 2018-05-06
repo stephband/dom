@@ -1,33 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head sparky-fn="import:package.json" class="{[name]}">
 	<meta charset="utf-8" />
-	<meta name="author" content="">
-	<meta name="description" content="">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5">
+	<meta name="author" content="@{[author.twitter]}" />
+	<meta name="description" content="Documentation for {[title]}. {[description]}" />
+	<meta name="viewport" content="width=device-width" />
 
-	<title>dom</title>
+	<title>{[title]}</title>
+
 	<script>
 		document.documentElement.className = 'js';
+		window.DEBUG = true;
 	</script>
 
 	<link rel="icon" type="image/png" href="images/favicon.png" />
-	<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/bolt/dist/bolt.min.css" />
-	<link rel="stylesheet" type="text/css" href="../bolt/dist/bolt.min.css" />
-	<!--link rel="stylesheet" type="text/css" href="http://stephen.band/css/template.theme.min.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.layout.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/docs.classes.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.highlight.light.css" /-->
-
-	<link rel="stylesheet" type="text/css" href="fn/css/grid.css" />
-	<link rel="stylesheet" type="text/css" href="fn/css/docs.css" />
-	<link rel="stylesheet" type="text/css" href="css/dom.css" />
-	<link rel="stylesheet" type="text/css" href="css/demo.css" />
-	<link rel="stylesheet" type="text/css" href="css/slide.css" />
-
-	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" />
+	<link rel="stylesheet" href="http://stephen.band/bolt/dist/bolt.css" />
+	<link rel="stylesheet" href="http://stephen.band/dom/css/dom.css" />
+	<link rel="stylesheet" href="../fn/css/prism.cruncher.css" />
+	<link rel="stylesheet" href="../fn/css/docs.css" />
+	<link rel="stylesheet" href="../fn/css/tests.css" />
+    <link rel="stylesheet" href="../fn/css/theme.css" />
 
 	<style>
 		body {
@@ -584,6 +579,50 @@ stream.stop()</code></pre>
 			<pre class="text-5"><code class="js">dom.trigger('dom-activate', element);</code></pre>
 		</div>
 
+		<div class="block @2-grid-4/15 @2-grid-left-1/15 @3-grid-left-1/9">
+			<h3 class="text-2" style="top: -3px;">
+				draggable
+				<span class="block text-8">dom.draggable.js</span>
+			</h3>
+		</div
+
+		><div class="block @2-grid-7/15 @2-grid-left-1/15 @3-grid-left-1/9">
+			<p>The native behaviour of the <strong>draggable="true"</strong>*
+			attribute is extended with the <code>draggable-mimetypes</code>
+			attribute, which defines data to be carried by a drag action:</p>
+
+			<script type="text/html">
+			<div draggable="true" draggable-mimetypes="application/json: [0,1,2,3]">
+				Drag me
+			</div>
+			</script>
+
+			<small class="block">* Note that <strong>draggable</strong> must be
+			<strong>"true"</strong>. It is not a boolean attribute.</small>
+		</div>
+
+		<div class="block @2-grid-4/15 @2-grid-left-1/15 @3-grid-left-1/9">
+			<h3 class="text-2" style="top: -3px;">
+				droppable
+				<span class="block text-8">dom.droppable.js</span>
+			</h3>
+		</div
+
+		><div class="block @2-grid-7/15 @2-grid-left-1/15 @3-grid-left-1/9">
+			<p>The <code>droppable</code> attribute turns an element into
+			a drop target for drag-and-drop actions, and is given the class
+			<code>dragover</code> while data of an accepted mimetype is being
+			dragged over it.</p>
+			<p>Define the mimetypes of data to accept in the <code>droppable-mimetypes</code>
+			attribute:</p>
+
+			<script type="text/html">
+			<div droppable droppable-mimetypes="application/json">
+				Drop JSON on me.
+			</div>
+			</script>
+		</div>
+
 		<h3 class="block @2-grid-4/15 @2-grid-left-1/15 @3-grid-left-1/9 text-2" style="top: -3px;">
 			popable
 			<span class="block text-8">dom.popable.js</span>
@@ -817,19 +856,6 @@ stream.stop()</code></pre>
 	<style>
 	.dragover { background-color: green; }
 	</style>
-
-
-	<div class="drag-block block" draggable="true" draggable-mimetypes="text/html: inner-html; ">
-		DRAG 1
-	</div>
-
-	<div class="drag-block block" draggable="true" draggable-mimetypes="text/html: inner-html; application/json: [2];">
-		DRAG 2
-	</div>
-
-	<div class="drag-block block" droppable="true" droppable-mimetypes="application/json">
-		DROP
-	</div>
 
 	<script src="../fn/polyfills/number.isnan.js"></script>
 	<script src="../fn/polyfills/object.assign.js"></script>

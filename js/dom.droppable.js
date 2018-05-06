@@ -7,8 +7,9 @@
 import { Functor as Fn, choose, id, intersect, nothing, prepend, requestTick, Stream } from '../../fn/fn.js';
 import { after, attribute, classes, closest, delegate, events, preventDefault, query, remove } from '../dom.js';
 
-const on  = events.on;
-const off = events.off;
+const on      = events.on;
+const off     = events.off;
+const trigger = events.trigger;
 
 let overnode;
 let overclasses;
@@ -111,10 +112,9 @@ function drop(e) {
         } || undefined ;
     });
 
-    console.log(data.toArray());
     // We need a mechanism to do something useful with this data...
-    // emit another event?
-    //trigger({ type: 'dom-drop', detail: data }, droppable);
+    // Emit another event.
+    trigger(droppable, 'dom-drop', { detail: data });
 }
 
 

@@ -102,9 +102,7 @@ function drop(e) {
     var types = intersect(dragtypes, droptypes);
     if (!types.length) { return; }
 
-    var data = Fn
-    .from(types)
-    .map(function(mimetype) {
+    var data = types.map(function(mimetype) {
         var data = e.dataTransfer.getData(mimetype);
         return data && {
             mimetype: mimetype,
@@ -121,3 +119,9 @@ function drop(e) {
 on(document, 'dragenter', dragenter);
 on(document, 'dragover', dragover);
 on(document, 'drop', drop);
+
+if (window.console) {
+    on(document, 'dom-drop', function(e) {
+        console.log('Dropped data:', e.detail);
+    });
+}

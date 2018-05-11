@@ -1,18 +1,14 @@
+import { curry, isDefined, overload } from '../../fn/fn.js';
+import { default as dom, classes, tag, events } from '../dom.js';
+
 (function(window) {
 	"use strict";
 
 	var debug     = false;
 
-	var Fn        = window.Fn;
-	var dom       = window.dom;
-	var classes   = dom.classes;
-	var tag       = dom.tag;
-	var on        = dom.events.on;
-	var off       = dom.events.off;
-	var trigger   = dom.events.trigger;
-	var curry     = Fn.curry;
-	var isDefined = Fn.isDefined;
-	var overload  = Fn.overload;
+	var on        = events.on;
+	var off       = events.off;
+	var trigger   = events.trigger;
 
 	var location  = window.location;
 	var id        = location.hash;
@@ -124,7 +120,6 @@
 
 	on(document, 'dom-deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
-
 		var data = cacheData(e.target);
 
 		// Don't do anything if elem is already inactive
@@ -278,7 +273,10 @@
 		//	return;
 		//}
 
-		trigger(node, 'dom-activate', { relatedTarget: e.currentTarget });
+		// TODO: This doesnt seemt o set relatedTarget
+		// trigger(node, 'dom-activate', { relatedTarget: e.delegateTarget });
+		var a = dom.Event('dom-activate', { relatedTarget: e.delegateTarget });
+		node.dispatchEvent(a);
 	}
 
 	function getHash(node) {
@@ -294,7 +292,7 @@
 		if (!node) { return; }
 
 		// Is the node popable, switchable or toggleable?
-		var classes = dom.classes(node);
+		//var classes = dom.classes(node);
 
 		if (dom.activeMatchers.find(apply(node))) {
 			activate(e, node);
@@ -354,4 +352,4 @@
 		activeClass: 'active',
 		onClass:     'on'
 	};
-})(this);
+})(window);

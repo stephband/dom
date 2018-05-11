@@ -1,30 +1,47 @@
 // dom.toggleable
 
+import { remove } from '../../fn/fn.js';
+import { default as dom, get, events, closest, matches, children, isPrimaryButton, isInternalLink, identify } from '../dom.js';
+import './dom-activate.js';
+
 (function(window) {
 	"use strict";
 
-	var dom     = window.dom;
-
 	// Define
 
-	var matches = dom.matches('.toggleable, [toggleable]');
+	var match = matches('.toggleable, [toggleable]');
 
 	// Functions
 
-	var on      = dom.events.on;
-	var off     = dom.events.off;
-	var trigger = dom.events.trigger;
+	var on      = events.on;
+	var off     = events.off;
+	var trigger = events.trigger;
 
-	function click(e, activeTarget) {
+	var actives = [];
+
+	function getHash(node) {
+		return (node.hash ?
+			node.hash :
+			node.getAttribute('href')
+		).substring(1);
+	}
+
+	function click(e) {
 		// A prevented default means this link has already been handled.
 		if (e.defaultPrevented) { return; }
-		if (!dom.isPrimaryButton(e)) { return; }
+		if (!isPrimaryButton(e)) { return; }
 
-		var node = e.currentTarget;
+		var node = closest('a[href]', e.target);
 		if (!node) { return; }
+		if (node.hostname && !isInternalLink(node)) { return; }
 
-		trigger(activeTarget, 'dom-deactivate', {
-			relatedTarget: e.target
+		// Does it point to an id?
+		var id = getHash(node);
+		if (!id) { return; }
+		if (actives.indexOf(id) === -1) { return; }
+
+		trigger(get(id), 'dom-deactivate', {
+			relatedTarget: node
 		});
 
 		e.preventDefault();
@@ -36,15 +53,9 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
-		var id = dom.identify(target);
-
-		dom('a[href$="#' + id + '"]')
-		.forEach(function(node) {
-			on(node, 'click', click, e.target);
-		});
-
+		actives.push(identify(target));
 		e.default();
 	}
 
@@ -52,20 +63,15 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
-		var id = e.target.id;
-
-		dom('a[href$="#' + id + '"]')
-		.forEach(function(node) {
-			off(node, 'click', click);
-		});
-
+		remove(actives, target.id);
 		e.default();
 	}
 
+	on(dom.root, 'click', click);
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
 
-	dom.activeMatchers.push(matches);
-})(this);
+	dom.activeMatchers.push(match);
+})(window);

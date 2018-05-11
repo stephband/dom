@@ -47,4 +47,4 @@
 	document.addEventListener('dom-activate', activate);
 
 	dom.alignPosition = alignPosition;
-})(this);
+})(window);

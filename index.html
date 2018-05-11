@@ -1,33 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head sparky-fn="import:package.json" class="{[name]}">
 	<meta charset="utf-8" />
-	<meta name="author" content="">
-	<meta name="description" content="">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.5">
+	<meta name="author" content="@{[author.twitter]}" />
+	<meta name="description" content="Documentation for {[title]}. {[description]}" />
+	<meta name="viewport" content="width=device-width" />
 
-	<title>dom</title>
+	<title>{[title]}</title>
+
 	<script>
 		document.documentElement.className = 'js';
+		window.DEBUG = true;
 	</script>
 
 	<link rel="icon" type="image/png" href="images/favicon.png" />
-	<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/bolt/dist/bolt.min.css" />
-	<link rel="stylesheet" type="text/css" href="../bolt/dist/bolt.min.css" />
-	<!--link rel="stylesheet" type="text/css" href="http://stephen.band/css/template.theme.min.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.layout.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/docs.classes.css" />
-	<link rel="stylesheet" type="text/css" href="http://stephen.band/css/site.highlight.light.css" /-->
-
-	<link rel="stylesheet" type="text/css" href="fn/css/grid.css" />
-	<link rel="stylesheet" type="text/css" href="fn/css/docs.css" />
-	<link rel="stylesheet" type="text/css" href="css/dom.css" />
-	<link rel="stylesheet" type="text/css" href="css/demo.css" />
-	<link rel="stylesheet" type="text/css" href="css/slide.css" />
-
-	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" />
+	<link rel="stylesheet" href="http://stephen.band/bolt/dist/bolt.css" />
+	<link rel="stylesheet" href="http://stephen.band/dom/css/dom.css" />
+	<link rel="stylesheet" href="../fn/css/prism.cruncher.css" />
+	<link rel="stylesheet" href="../fn/css/docs.css" />
+	<link rel="stylesheet" href="../fn/css/tests.css" />
+    <link rel="stylesheet" href="../fn/css/theme.css" />
 
 	<style>
 		body {
@@ -69,7 +64,7 @@
 			</div>
 		</article
 
-	><article class="grid-block block @2-span-4/15 @2-span-left-2/15 @3-span-2/9 @3-span-left-1/9">
+		><article class="grid-block block @2-span-4/15 @2-span-left-2/15 @3-span-2/9 @3-span-left-1/9">
 			<h2 class="block">select.</h2>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="dom">
@@ -80,39 +75,38 @@
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="closest">
 				<h3 class="dot-indent text-5"><a href="#closest"><code class="js">.closest(selector, node)</code></a></h3>
-
-				Returns <code class="js">node</code> or the closest ancestor that matches <code>selector</code>.
-				If no match is found, returns <code class="js">undefined</code>.
+				<p>Returns <code class="js">node</code> or the closest ancestor that matches <code>selector</code>.
+				If no match is found, returns <code class="js">undefined</code>.</p>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="children">
 				<h3 class="dot-indent text-5"><a href="#children"><code class="js">.children(node)</code></a></h3>
+				<p>Returns an array of child elements of <code class="js">node</code>.</p>
+			</div>
 
-				Returns an array of child elements of <code class="js">node</code>.
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="matches">
+				<h3 class="dot-indent text-5"><a href="#find"><code class="js">.find(selector, node)</code></a></h3>
+				<p>Returns the first descendant of <code class="js">node</code> that matches <code class="js">selector</code>.</p>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="matches">
 				<h3 class="dot-indent text-5"><a href="#matches"><code class="js">.matches(selector, node)</code></a></h3>
-
-				Returns <code class="js">true</code> if <code class="js">node</code> matches <code class="js">selector</code>, otherwise <code class="js">false</code>.
+				<p>Returns <code class="js">true</code> if <code class="js">node</code> matches <code class="js">selector</code>, otherwise <code class="js">false</code>.</p>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="next">
 				<h3 class="dot-indent text-5"><a href="#next"><code class="js">.next(node)</code></a></h3>
-
-				Returns the next sibling element node, or <code class="js">undefined</code>.
+				<p>Returns the next sibling element node, or <code class="js">undefined</code>.</p>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="previous">
 				<h3 class="dot-indent text-5"><a href="#previous"><code class="js">.previous(node)</code></a></h3>
-
-				Returns the previous sibling element node, or <code class="js">undefined</code>.
+				<p>Returns the previous sibling element node, or <code class="js">undefined</code>.</p>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="query">
 				<h3 class="dot-indent text-5"><a href="#query"><code class="js">.query(selector, node)</code></a></h3>
-
-				Returns an array of all descendants of <code class="js">node</code> that match <code class="js">selector</code>.
+				<p>Returns an array of all descendants of <code class="js">node</code> that match <code class="js">selector</code>.</p>
 			</div>
 		</article
 
@@ -183,20 +177,17 @@
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="addClass">
 				<h3 class="dot-indent text-5"><a href="#addClass"><code class="js">.addClass(class, node)</code></a></h3>
-
-			Adds <code class="js">class</code> to the classList of <code class="js">node</code>.
+				<p>Adds <code class="js">class</code> to the classList of <code class="js">node</code>.</p>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="after">
 				<h3 class="dot-indent text-5"><a href="#after"><code class="js">.after(target, node)</code></a></h3>
-
-			Inserts <code class="js">node</code> after <code class="js">target</code>.
+				<p>Inserts <code class="js">node</code> after <code class="js">target</code>.</p>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="append">
 				<h3 class="dot-indent text-5"><a href="#append"><code class="js">.append(target, node)</code></a></h3>
-
-			Appends node to <code class="js">target</code>.
+				<p>Appends node to <code class="js">target</code>.</p>
 
 			If <code class="js">node</code> is a collection of nodes, appends each node to <code class="js">target</code>.
 			</div>
@@ -273,21 +264,48 @@
 		><article class="grid-block block @2-span-4/15 @2-span-left-2/15 @3-span-2/9 @3-span-left-1/9">
 			<h2 class="block">events.</h2>
 
-			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="event">
-				<h3 class="dot-indent text-5"><a href="#event"><code class="js">.event(type, node)</code></a></h3>
+			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="events">
+				<h3 class="dot-indent text-5"><a href="#events"><code class="js">.events(type, node)</code></a></h3>
 
-			Returns a mappable stream of events heard on <code class="js">node</code>:
+				<p>Returns a stream of events of <code class="js">type</code> heard on <code class="js">node</code>:</p>
 
-			    var stream = dom
-			    .event('click', dom.body);
-			    .map(Fn.get('timeStamp'))
-			    .each(function(time) {
-			        // Do something with times
-			    });
+				<pre><code class="js">dom.events('click', dom.body)
+.each(function(e) {
+    // Do something with event object e
+});</code></pre>
 
-			Stopping the stream removes the event listeners:
+				<p>Event streams are filterable, mappable, etc. See <a href="//stephen.band/fn/index.html#stream"></a> for a
+				list of methods fund on streams.</p>
 
-			    stream.stop();
+				<pre><code class="js">dom.events('click', dom.body)
+.map(get('target'))
+.filter(closest('a'))
+.each(function(target) {
+    // Do something with target node
+});</code></pre>
+
+				<p><code class="js">type</code> is either a string of space-seperated event types, or
+				an object with a property <code class="js">type</code> that is a string of space-seperated
+				event types. The object may also be used to pass in options such as the boolean property
+				<code class="js">passive</code>.</p>
+
+				<pre><code class="js">dom.events({ type: 'touchmove', passive: false }, dom.body)
+.each(function(e) {
+    // Do something with event object e
+});</code></pre>
+
+				<p>Stopping an event stream removes event listeners. A stream can be stopped
+				from inside or outside its consumer:</p>
+
+				<pre><code class="js">var stream = dom.events('click', dom.body)
+.each(function(e) {
+    // Remove event listeners
+	// Inside a consumer, `this` is the stream
+    this.stop();
+});
+
+// Remove event listeners
+stream.stop()</code></pre>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="requestEvent">
@@ -345,8 +363,18 @@
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="box">
 				<h3 class="dot-indent text-5"><a href="#box"><code class="js">.box(node)</code></a></h3>
 
-			Returns a <code class="js">DOMRect</code> object describing the draw box of <code class="js">node</code>.
-			(If <code class="js">node</code> is <code class="js">window</code> a plain object is returned).
+				<p>Returns a <code class="js">DOMRect</code> object describing the draw box of <code class="js">node</code>.
+				(If <code class="js">node</code> is <code class="js">window</code> a simulated <code class="js">DOMRect</code>
+				object is returned). A <code class="js">DOMRect</code> object has the form:</p>
+
+				<pre><code class="js">{
+    top:    <i>n</i>px,
+    bottom: <i>n</i>px,
+    left:   <i>n</i>px,
+    right:  <i>n</i>px,
+    width:  <i>n</i>px,
+    height: <i>n</i>px
+}</code></pre>
 			</div>
 
 			<div class="toggleable toggle-block block span-1/1 @1-span-1/1 @2-span-1/1 @3-span-1/1" id="bounds">
@@ -551,6 +579,50 @@
 			<pre class="text-5"><code class="js">dom.trigger('dom-activate', element);</code></pre>
 		</div>
 
+		<div class="block @2-grid-4/15 @2-grid-left-1/15 @3-grid-left-1/9">
+			<h3 class="text-2" style="top: -3px;">
+				draggable
+				<span class="block text-8">dom.draggable.js</span>
+			</h3>
+		</div
+
+		><div class="block @2-grid-7/15 @2-grid-left-1/15 @3-grid-left-1/9">
+			<p>The native behaviour of the <strong>draggable="true"</strong>*
+			attribute is extended with the <code>draggable-mimetypes</code>
+			attribute, which defines data to be carried by a drag action:</p>
+
+			<script type="text/html">
+			<div draggable="true" draggable-mimetypes="application/json: [0,1,2,3]">
+				Drag me
+			</div>
+			</script>
+
+			<small class="block">* Note that <strong>draggable</strong> must be
+			<strong>"true"</strong>. It is not a boolean attribute.</small>
+		</div>
+
+		<div class="block @2-grid-4/15 @2-grid-left-1/15 @3-grid-left-1/9">
+			<h3 class="text-2" style="top: -3px;">
+				droppable
+				<span class="block text-8">dom.droppable.js</span>
+			</h3>
+		</div
+
+		><div class="block @2-grid-7/15 @2-grid-left-1/15 @3-grid-left-1/9">
+			<p>The <code>droppable</code> attribute turns an element into
+			a drop target for drag-and-drop actions, and is given the class
+			<code>dragover</code> while data of an accepted mimetype is being
+			dragged over it.</p>
+			<p>Define the mimetypes of data to accept in the <code>droppable-mimetypes</code>
+			attribute:</p>
+
+			<script type="text/html">
+			<div droppable droppable-mimetypes="application/json">
+				Drop JSON on me.
+			</div>
+			</script>
+		</div>
+
 		<h3 class="block @2-grid-4/15 @2-grid-left-1/15 @3-grid-left-1/9 text-2" style="top: -3px;">
 			popable
 			<span class="block text-8">dom.popable.js</span>
@@ -687,6 +759,9 @@
 			<label for="text">text</label>
 			<input type="text" id="text" name="text" required maxlength="20" />
 
+			<label for="password">password</label>
+			<input type="password" id="password" name="password" required />
+
 			<label for="number">number</label>
 			<input type="number" id="number" name="number" min="0" max="1" step="0.1" />
 
@@ -746,7 +821,7 @@
 			</ul>
 		</div
 
-		><div class="block @2-grid-3/5 @2-grid-left-1/3 @3-grid-4/9 @3-grid-left-1/3">
+	--><div class="block @2-grid-3/5 @2-grid-left-1/3 @3-grid-4/9 @3-grid-left-1/3">
 			<h2>switchable</h2>
 
 			<p>For any group of siblings with the class <code>switchable</code>,
@@ -771,42 +846,35 @@
 			</div>
 		</div
 
-		><div class="block @2-grid-3/5 @2-grid-left-1/3 @3-grid-4/9 @3-grid-left-1/9">
+		><!--div class="block @2-grid-3/5 @2-grid-left-1/3 @3-grid-4/9 @3-grid-left-1/9">
 			<h2>removeable</h2>
 
 			<p>Is removed from the DOM on <code class="js">dom-deactivate</code>.</p>
 		</div>
 	</div-->
 
+	<style>
+	.dragover { background-color: green; }
+	</style>
+
 	<script src="../fn/polyfills/number.isnan.js"></script>
 	<script src="../fn/polyfills/object.assign.js"></script>
-	<script src="../fn/js/fn.js"></script>
-	<script src="../fn/js/stream.js"></script>
-
-	<script src="http://stephen.band/Fn/polyfills/number.isnan.js"></script>
-	<script src="http://stephen.band/Fn/polyfills/object.assign.js"></script>
-	<script src="http://stephen.band/Fn/js/fn.js"></script>
-	<script src="http://stephen.band/Fn/js/stream.js"></script>
+	<script src="../fn/polyfills/object.setprototypeof.js"></script>
+	<script src="../fn/polyfills/math.log10.js"></script>
+	<script src="../fn/polyfills/promise.js"></script>
+	<script src="../fn/polyfills/symbol.js"></script>
+	<script src="../fn/polyfills/array.of.js"></script>
+	<script src="../fn/polyfills/array.from.js"></script>
+	<script src="../fn/polyfills/array.find.js"></script>
 
 	<script src="polyfills/requestanimationframe.js"></script>
 	<script src="polyfills/customevent.js"></script>
-	<script src="test/config.js"></script>
 
-	<script src="js/dom.js"></script>
-	<script src="js/dom-activate.js"></script>
-	<script src="js/dom-touch.js"></script>
-	<script src="js/dom-swipe.js"></script>
-	<script src="js/dom.popable.js"></script>
-	<script src="js/dom.toggleable.js"></script>
-	<script src="js/dom.switchable.js"></script>
-	<script src="js/dom.moveable.js"></script>
-	<script src="js/dom.swipeable.js"></script>
-	<script src="js/dom.focusable.js"></script>
-	<script src="js/dom.validateable.js"></script>
-	<script src="js/dom.root.js"></script>
+	<script type="module">
+	import { default as dom } from './dom.js';
+	import './dom-modules';
 
-	<script>
-	var dom = window.dom;
+	dom.validation.attributePrefix = 'data-val-';
 	dom.validation.messages = {
 		pattern:   'Doesnt match',
 		max:       'Higher than possible',

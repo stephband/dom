@@ -2,26 +2,21 @@
 //
 // Extends the default behaviour of events for the .tip class.
 
+import { by, exponentialOut as expOut, noop } from '../../fn/fn.js';
+import { default as dom, box, offset, events, matches } from '../dom.js';
+import './dom-activate.js';
+
 (function(window) {
 
-    var Fn       = window.Fn;
-    var dom      = window.dom;
-
-    var by       = Fn.by;
-    var noop     = Fn.noop;
-    var powOut   = Fn.exponentialOut;
-    var animate  = dom.animate;
-    var box      = dom.box;
-    var offset   = dom.offset;
-    var on       = dom.events.on;
-    var matches  = dom.matches(".locateable, [locateable]");
+    var match = matches(".locateable, [locateable]");
+    var on    = events.on;
 
     // Time after scroll event to consider the document is scrolling
     var idleTime = 90;
 
     // Duration and easing of scroll animation
     var scrollDuration  = 0.8;
-    var scrollTransform = powOut(6);
+    var scrollTransform = expOut(6);
 
     // Time of latest scroll event
     var scrollTime = 0;
@@ -33,7 +28,7 @@
         if (!e.default) { return; }
 
         var target = e.target;
-        if (!matches(target)) { return; }
+        if (!match(target)) { return; }
 
         // If node is already active, ignore
         if (target === activeNode) { return; }
@@ -71,7 +66,7 @@
 
         var target = e.target;
 
-        if (!matches(target)) { return; }
+        if (!match(target)) { return; }
 
         e.default();
 
@@ -81,21 +76,10 @@
         }
 	}
 
-    function windowBox() {
-        return {
-            left:   0,
-            top:    0,
-            right:  window.innerWidth,
-            bottom: window.innerHeight,
-            width:  window.innerWidth,
-            height: window.innerHeight
-        };
-    }
-
     function update() {
         var locateables = dom('.locateable');
         var boxes       = locateables.map(box).sort(by('top'));
-        var winBox      = windowBox();
+        var winBox      = box(window);
 
         var n = -1;
         while (boxes[++n]) {
@@ -134,5 +118,5 @@
     on(document, 'dom-deactivate', deactivate);
     on(window, 'scroll', scroll);
     update();
-    dom.activeMatchers.push(matches);
-})(this);
+    dom.activeMatchers.push(match);
+})(window);

@@ -3,27 +3,26 @@
 // Extends the default behaviour of the activate and deactivate
 // events with things to do when they are triggered on nodes.
 
+import { Functor as Fn } from '../../fn/fn.js';
+import { default as dom, events, trigger, matches, children } from '../dom.js';
+import './dom-activate.js';
+
 (function(window) {
 	"use strict";
 
-	// Import
-
-	var Fn      = window.Fn;
-	var dom     = window.dom;
-
 	// Define
 
-	var matches = dom.matches('.switchable, [switchable]');
-	var on      = dom.events.on;
-	var triggerDeactivate = dom.trigger('dom-deactivate');
+	var match   = matches('.switchable, [switchable]');
+	var on      = events.on;
+	var triggerDeactivate = trigger('dom-deactivate');
 
 	function activate(e) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
-		var nodes = dom.query('.switchable', target.parentNode);
+		var nodes = children(target.parentNode).filter(match);
 		var i     = nodes.indexOf(target);
 
 		nodes.splice(i, 1);
@@ -41,12 +40,12 @@
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
 		e.default();
 	}
 
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
-	dom.activeMatchers.push(matches);
-})(this);
+	dom.activeMatchers.push(match);
+})(window);

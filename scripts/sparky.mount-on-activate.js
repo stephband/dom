@@ -1,19 +1,15 @@
-(function(window) {
-    "use strict";
 
-    var dom = window.dom;
-    var isTargetEvent = dom.isTargetEvent;
+import { events, isTargetEvent } from '/static/dom/dom.js';
+import Sparky from '/static/sparky/sparky.js';
 
-    Sparky.fn['mount-on-activate'] = function(node, scopes) {
-        const sparky = this;
-        sparky.interrupt();
+Sparky.fn['mount-on-activate'] = function(node, scopes) {
+    const sparky = this;
+    sparky.interrupt();
 
-        dom
-        .events('dom-activate', node)
-        .filter(isTargetEvent)
-        .each(function(e) {
-            this.stop();
-            sparky.continue();
-        });
-    };
-})(window);
+    events('dom-activate', node)
+    .filter(isTargetEvent)
+    .each(function(e) {
+        this.stop();
+        sparky.continue();
+    });
+};

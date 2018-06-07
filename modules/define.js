@@ -3,7 +3,7 @@ import { fragmentFromHTML } from '../dom.js';
 
 const shadowOptions = { mode: 'open' };
 
-export default function defineCustomElement(name, setup, attributes, dom) {
+export default function defineElement(name, setup, attributes, dom) {
     let content;
 
     function CustomElement() {

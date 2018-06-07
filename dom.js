@@ -13,6 +13,8 @@ window.dom = dom;
 export const ready                  = dom.ready;
 export const now                    = dom.now;
 
+export { default as define } from './modules/define.js';
+
 // HTML
 
 export const escape                 = dom.escape;

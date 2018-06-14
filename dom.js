@@ -18,7 +18,7 @@ export const now                    = dom.now;
 
 export { default as escape } from './modules/escape.js';
 
-import _parse from './modules/assign.js';
+import _parse from './modules/parse.js';
 export const parse = curry(_parse, true);
 
 // Inspect
@@ -46,14 +46,19 @@ export const isValid                = dom.isValid;
 // Mutate
 
 import _assign from './modules/assign.js';
-export const assign = curry(_assign, true);
+export const assign  = curry(_assign, true);
+
+import _append from './modules/append.js';
+export const append  = curry(_append, true);
+
+import _prepend from './modules/prepend.js';
+export const prepend = curry(_prepend, true);
 
 export { default as create } from './modules/create.js';
 export { default as define } from './modules/define.js';
 
 export const clone                  = dom.clone;
 export const identify               = dom.identify;
-export const append                 = dom.append;
 export const before                 = dom.before;
 export const after                  = dom.after;
 export const replace                = dom.replace;

@@ -64,11 +64,11 @@ var features = define({
 			var testEvent = Event('featuretest');
 			var result    = false;
 
-			appendChild(document.body, input);
+			document.body.appendChild(input);
 			input.disabled = true;
 			input.addEventListener('featuretest', function(e) { result = true; });
 			input.dispatchEvent(testEvent);
-			removeNode(input);
+			input.remove();
 
 			return result;
 		}),
@@ -400,20 +400,6 @@ function appendChild(target, node) {
 
 	// Use this fn as a reducer
 	return target;
-}
-
-function append(target, node) {
-	if (node instanceof Node || node instanceof SVGElement) {
-		appendChild(target, node);
-		return node;
-	}
-
-	if (!node.length) { return; }
-
-	var array = node.reduce ? node : A.slice.call(node) ;
-	array.reduce(appendChild, target);
-
-	return node;
 }
 
 function empty(node) {
@@ -956,7 +942,6 @@ assign(dom, {
 
 	clone:    clone,
 	identify: identify,
-	append:   curry(append,  true),
 	before:   curry(before,  true),
 	after:    curry(after,   true),
 	replace:  curry(replace, true),

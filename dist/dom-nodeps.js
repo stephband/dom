@@ -1,98 +1,34 @@
-(function(window) {
-	if (!window.console || !window.console.log) { return; }
-	console.log('dom         – https://github.com/stephband/dom');
-})(this);
 
-(function(window) {
-	"use strict";
+import { cache, curry, denormalise, deprecate, id, noop, overload, pipe, pow, set, Stream, requestTick, toType } from '../../fn/fn.js';
+import create from '../modules/create.js';
+import prefix from '../modules/prefix.js';
+import style  from '../modules/style.js';
 
+var Node        = window.Node;
+var SVGElement  = window.SVGElement;
+var CustomEvent = window.CustomEvent;
 
-	// Import
+var assign      = Object.assign;
+var define      = Object.defineProperties;
 
-	var Fn          = window.Fn;
-	var Node        = window.Node;
-	var SVGElement  = window.SVGElement;
-	var CustomEvent = window.CustomEvent;
-	var Stream      = window.Stream;
-
-	var assign      = Object.assign;
-	var define      = Object.defineProperties;
-	var cache       = Fn.cache;
-	var compose     = Fn.compose;
-	var curry       = Fn.curry;
-	var denormalise = Fn.denormalise;
-	var deprecate   = Fn.deprecate;
-	var id          = Fn.id;
-	var noop        = Fn.noop;
-	var overload    = Fn.overload;
-	var pipe        = Fn.pipe;
-	var pow         = Fn.pow;
-	var set         = Fn.set;
-	var requestTick = Fn.requestTick;
-	var toType      = Fn.toType;
+var A            = Array.prototype;
+var svgNamespace = 'http://www.w3.org/2000/svg';
+var rspaces      = /\s+/;
+var rpx          = /px$/;
 
 
-	// Var
+// Features
 
-	var A            = Array.prototype;
-	var svgNamespace = 'http://www.w3.org/2000/svg';
-	var rspaces      = /\s+/;
-	var rpx          = /px$/;
-
-
-	// Features
-
-	var features = define({}, {
-		inputEventsWhileDisabled: {
-			// FireFox won't dispatch any events on disabled inputs:
-			// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
-
+var features = define({
+	events: define({}, {
+		fullscreenchange: {
 			get: cache(function() {
-				var input     = document.createElement('input');
-				var testEvent = Event('featuretest');
-				var result    = false;
-
-				appendChild(document.body, input);
-				input.disabled = true;
-				input.addEventListener('featuretest', function(e) { result = true; });
-				input.dispatchEvent(testEvent);
-				removeNode(input);
-
-				return result;
-			}),
-
-			enumerable: true
-		},
-
-		template: {
-			get: cache(function() {
-				// Older browsers don't know about the content property of templates.
-				return 'content' in document.createElement('template');
-			}),
-
-			enumerable: true
-		},
-
-		textareaPlaceholderSet: {
-			// IE sets textarea innerHTML (but not value) to the placeholder
-			// when setting the attribute and cloning and so on. The twats have
-			// marked it "Won't fix":
-			//
-			// https://connect.microsoft.com/IE/feedback/details/781612/placeholder-text-becomes-actual-value-after-deep-clone-on-textarea
-
-			get: cache(function() {
-				var node = document.createElement('textarea');
-				node.setAttribute('placeholder', '---');
-				return node.innerHTML === '';
-			}),
-
-			enumerable: true
-		},
-
-		transition: {
-			get: cache(function testTransition() {
-				var prefixed = prefix('transition');
-				return prefixed || false;
+				// TODO: untested event names
+				return ('fullscreenElement' in document) ? 'fullscreenchange' :
+				('webkitFullscreenElement' in document) ? 'webkitfullscreenchange' :
+				('mozFullScreenElement' in document) ? 'mozfullscreenchange' :
+				('msFullscreenElement' in document) ? 'MSFullscreenChange' :
+				'fullscreenchange' ;
 			}),
 
 			enumerable: true
@@ -117,1309 +53,1080 @@
 
 			enumerable: true
 		}
-	});
+	})
+}, {
+	inputEventsWhileDisabled: {
+		// FireFox won't dispatch any events on disabled inputs:
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
 
+		get: cache(function() {
+			var input     = document.createElement('input');
+			var testEvent = Event('featuretest');
+			var result    = false;
 
-	// Utilities
+			document.body.appendChild(input);
+			input.disabled = true;
+			input.addEventListener('featuretest', function(e) { result = true; });
+			input.dispatchEvent(testEvent);
+			input.remove();
 
-	function bindTail(fn) {
-		// Takes arguments 1 and up and appends them to arguments
-		// passed to fn.
-		var args = A.slice.call(arguments, 1);
-		return function() {
-			A.push.apply(arguments, args);
-			fn.apply(null, arguments);
-		};
-	}
+			return result;
+		}),
 
-	function prefixSlash(str) {
-		// Prefixes a slash when there is not an existing one
-		return (/^\//.test(str) ? '' : '/') + str ;
-	}
+		enumerable: true
+	},
 
-	function toArray(object) {
-		// Speed test for array conversion:
-		// https://jsperf.com/nodelist-to-array/27
+	template: {
+		get: cache(function() {
+			// Older browsers don't know about the content property of templates.
+			return 'content' in document.createElement('template');
+		}),
 
-		var array = [];
-		var l = array.length = object.length;
-		var i;
+		enumerable: true
+	},
 
-		for (i = 0; i < l; i++) {
-			array[i] = object[i];
-		}
+	textareaPlaceholderSet: {
+		// IE sets textarea innerHTML (but not value) to the placeholder
+		// when setting the attribute and cloning and so on. The twats have
+		// marked it "Won't fix":
+		//
+		// https://connect.microsoft.com/IE/feedback/details/781612/placeholder-text-becomes-actual-value-after-deep-clone-on-textarea
 
-		return array;
-	}
+		get: cache(function() {
+			var node = document.createElement('textarea');
+			node.setAttribute('placeholder', '---');
+			return node.innerHTML === '';
+		}),
 
+		enumerable: true
+	},
 
-	// TokenList
-	// TokenList constructor to emulate classList property. The get fn should
-	// take the arguments (node), and return a string of tokens. The set fn
-	// should take the arguments (node, string).
+	transition: {
+		get: cache(function testTransition() {
+			var prefixed = prefix('transition');
+			return prefixed || false;
+		}),
 
-	function TokenList(node, get, set) {
-		this.node = node;
-		this.get = get;
-		this.set = set;
-	}
+		enumerable: true
+	},
 
-	TokenList.prototype = {
-		add: function() {
-			var n = arguments.length;
-			var tokens = this.get(this.node);
-			var array = tokens ? tokens.trim().split(rspaces) : [] ;
+	fullscreen: {
+		get: cache(function testFullscreen() {
+			var node = document.createElement('div');
+			return !!(node.requestFullscreen ||
+				node.webkitRequestFullscreen ||
+				node.mozRequestFullScreen ||
+				node.msRequestFullscreen);
+		}),
 
-			while (n--) {
-				if (array.indexOf(arguments[n]) === -1) {
-					array.push(arguments[n]);
-				}
-			}
+		enumerable: true
+	},
 
-			this.set(this.node, array.join(' '));
+	// Deprecated
+
+	transitionend: {
+		get: function() {
+			console.warn('dom.features.transitionend deprecated in favour of dom.features.events.transitionend.');
+			return features.events.transitionend;
 		},
 
-		remove: function() {
-			var n = arguments.length;
-			var tokens = this.get(this.node);
-			var array = tokens ? tokens.trim().split(rspaces) : [] ;
-			var i;
+		enumerable: true
+	}
+});
 
-			while (n--) {
-				i = array.indexOf(arguments[n]);
-				if (i !== -1) { array.splice(i, 1); }
-			}
 
-			this.set(this.node, array.join(' '));
-		},
+// Utilities
 
-		contains: function(string) {
-			var tokens = this.get(this.node);
-			var array = tokens ? tokens.trim().split(rspaces) : [] ;
-			return array.indexOf(string) !== -1;
-		}
+function bindTail(fn) {
+	// Takes arguments 1 and up and appends them to arguments
+	// passed to fn.
+	var args = A.slice.call(arguments, 1);
+	return function() {
+		A.push.apply(arguments, args);
+		fn.apply(null, arguments);
 	};
-
-
-	// DOM Nodes
-
-	var testDiv = document.createElement('div');
-
-	var types = {
-		1:  'element',
-		3:  'text',
-		8:  'comment',
-		9:  'document',
-		10: 'doctype',
-		11: 'fragment'
-	};
-
-	var svgs = [
-		'circle',
-		'ellipse',
-		'g',
-		'line',
-		'rect',
-		//'text',
-		'use',
-		'path',
-		'polygon',
-		'polyline',
-		'svg'
-	];
-
-	var constructors = {
-		text: function(text) {
-			return document.createTextNode(text || '');
-		},
-
-		comment: function(text) {
-			return document.createComment(text || '');
-		},
-
-		fragment: function(html) {
-			var fragment = document.createDocumentFragment();
-
-			if (html) {
-				testDiv.innerHTML = html;
-				append(fragment, testDiv.childNodes);
-				testDiv.innerHTML = '';
-			}
-
-			return fragment;
-		}
-	};
-
-	svgs.forEach(function(tag) {
-		constructors[tag] = function(attributes) {
-			var node = document.createElementNS(svgNamespace, tag);
-			if (attributes) { setSVGAttributes(node, attributes); }
-			return node;
-		};
-	});
-
-	function assignAttributes(node, attributes) {
-		var names = Object.keys(attributes);
-		var n = names.length;
-
-		while (n--) {
-			if (names[n] in node) {
-				node[names[n]] = attributes[names[n]];
-			}
-			else {
-				node.setAttribute(names[n], attributes[names[n]]);
-			}
-		}
-	}
-
-	function setSVGAttributes(node, attributes) {
-		var names = Object.keys(attributes);
-		var n = names.length;
-
-		while (n--) {
-			node.setAttributeNS(null, names[n], attributes[names[n]]);
-		}
-	}
-
-	function create(name) {
-		// create(type)
-		// create(type, text)
-		// create(tag, attributes)
-		// create(tag, text, attributes)
-
-		if (constructors[name]) {
-			return constructors[name](arguments[1]);
-		}
-
-		var node = document.createElement(name);
-		var attributes;
-
-		if (typeof arguments[1] === 'string') {
-			node.innerHTML = arguments[1];
-			attributes = arguments[2];
-		}
-		else {
-			attributes = arguments[1];
-		}
-
-		if (attributes) {
-			assignAttributes(node, attributes);
-		}
-
-		return node;
-	}
-
-	var clone = features.textareaPlaceholderSet ?
-
-		function clone(node) {
-			return node.cloneNode(true);
-		} :
-
-		function cloneWithHTML(node) {
-			// IE sets textarea innerHTML to the placeholder when cloning.
-			// Reset the resulting value.
-
-			var clone     = node.cloneNode(true);
-			var textareas = dom.query('textarea', node);
-			var n         = textareas.length;
-			var clones;
-
-			if (n) {
-				clones = dom.query('textarea', clone);
-
-				while (n--) {
-					clones[n].value = textareas[n].value;
-				}
-			}
-
-			return clone;
-		} ;
-
-	function type(node) {
-		return types[node.nodeType];
-	}
-
-	function isElementNode(node) {
-		return node.nodeType === 1;
-	}
-
-	function isTextNode(node) {
-		return node.nodeType === 3;
-	}
-
-	function isCommentNode(node) {
-		return node.nodeType === 8;
-	}
-
-	function isFragmentNode(node) {
-		return node.nodeType === 11;
-	}
-
-	function isInternalLink(node) {
-		var location = window.location;
-
-			// IE does not give us a .hostname for links to
-			// xxx.xxx.xxx.xxx URLs
-		return node.hostname &&
-			// IE gives us the port on node.host, even where it is not
-			// specified. Use node.hostname
-			location.hostname === node.hostname &&
-			// IE gives us node.pathname without a leading slash, so
-			// add one before comparing
-			location.pathname === prefixSlash(node.pathname);
-	}
-
-	function identify(node) {
-		var id = node.id;
-
-		if (!id) {
-			do { id = Math.ceil(Math.random() * 100000); }
-			while (document.getElementById(id));
-			node.id = id;
-		}
-
-		return id;
-	}
-
-	function tag(node) {
-		return node.tagName && node.tagName.toLowerCase();
-	}
-
-	function attribute(name, node) {
-		return node.getAttribute && node.getAttribute(name) || undefined ;
-	}
-
-	function setClass(node, classes) {
-		if (node instanceof SVGElement) {
-			node.setAttribute('class', classes);
-		}
-		else {
-			node.className = classes;
-		}
-	}
-
-	function classes(node) {
-		return node.classList || new TokenList(node, dom.attribute('class'), setClass);
-	}
-
-	function addClass(string, node) {
-		classes(node).add(string);
-	}
-
-	function removeClass(string, node) {
-		classes(node).remove(string);
-	}
-
-	function flashClass(string, node) {
-		var list = classes(node);
-		list.add(string);
-		requestAnimationFrame(function() {
-			list.remove(string);
-		});
-	}
-
-	function children(node) {
-		// In IE and Safari, document fragments do not have .children
-		return toArray(node.children || node.querySelectorAll('*'));
-	}
-
-
-	// DOM Traversal
-
-	function query(selector, node) {
-		node = node || document;
-		return toArray(node.querySelectorAll(selector));
-	}
-
-	function contains(child, node) {
-		return node.contains ?
-			node.contains(child) :
-		child.parentNode ?
-			child.parentNode === node || contains(child.parentNode, node) :
-		false ;
-	}
-
-	function matches(selector, node) {
-		return node.matches ? node.matches(selector) :
-			node.matchesSelector ? node.matchesSelector(selector) :
-			node.webkitMatchesSelector ? node.webkitMatchesSelector(selector) :
-			node.mozMatchesSelector ? node.mozMatchesSelector(selector) :
-			node.msMatchesSelector ? node.msMatchesSelector(selector) :
-			node.oMatchesSelector ? node.oMatchesSelector(selector) :
-			// Dumb fall back to simple tag name matching. Nigh-on useless.
-			tag(node) === selector ;
-	}
-
-	function closest(selector, node) {
-		var root = arguments[2];
-
-		if (!node || node === document || node === root || node.nodeType === 11) { return; }
-
-		// SVG <use> elements store their DOM reference in
-		// .correspondingUseElement.
-		node = node.correspondingUseElement || node ;
-
-		return matches(selector, node) ?
-			 node :
-			 closest(selector, node.parentNode, root) ;
-	}
-
-	function next(node) {
-		return node.nextElementSibling || undefined;
-	}
-
-	function previous(node) {
-		return node.previousElementSibling || undefined;
-	}
-
-
-	// DOM Mutation
-
-	function appendChild(target, node) {
-		target.appendChild(node);
-
-		// Use this fn as a reducer
-		return target;
-	}
-
-	function append(target, node) {
-		if (node instanceof Node || node instanceof SVGElement) {
-			appendChild(target, node);
-			return node;
-		}
-
-		if (!node.length) { return; }
-
-		var array = node.reduce ? node : A.slice.call(node) ;
-		array.reduce(appendChild, target);
-
-		return node;
-	}
-
-	function empty(node) {
-		while (node.lastChild) { node.removeChild(node.lastChild); }
-	}
-
-	function removeNode(node) {
-		node.parentNode && node.parentNode.removeChild(node);
-	}
-
-	function remove(node) {
-		if (node instanceof Node || node instanceof SVGElement) {
-			removeNode(node);
-		}
-		else {
-			A.forEach.call(node, removeNode);
-		}
-	}
-
-	function before(target, node) {
-		target.parentNode && target.parentNode.insertBefore(node, target);
-	}
-
-	function after(target, node) {
-		target.parentNode && target.parentNode.insertBefore(node, target.nextSibling);
-	}
-
-	function replace(target, node) {
-		before(target, node);
-		remove(target);
-		return target;
-	}
-
-
-	// CSS
-
-	var styleParsers = {
-		"transform:translateX": function(node) {
-			var matrix = style('transform', node);
-			if (!matrix || matrix === "none") { return 0; }
-			var values = valuesFromCssFn(matrix);
-			return parseFloat(values[4]);
-		},
-
-		"transform:translateY": function(node) {
-			var matrix = style('transform', node);
-			if (!matrix || matrix === "none") { return 0; }
-			var values = valuesFromCssFn(matrix);
-			return parseFloat(values[5]);
-		},
-
-		"transform:scale": function(node) {
-			var matrix = style('transform', node);
-			if (!matrix || matrix === "none") { return 0; }
-			var values = valuesFromCssFn(matrix);
-			var a = parseFloat(values[0]);
-			var b = parseFloat(values[1]);
-			return Math.sqrt(a * a + b * b);
-		},
-
-		"transform:rotate": function(node) {
-			var matrix = style('transform', node);
-			if (!matrix || matrix === "none") { return 0; }
-			var values = valuesFromCssFn(matrix);
-			var a = parseFloat(values[0]);
-			var b = parseFloat(values[1]);
-			return Math.atan2(b, a);
-		}
-	};
-
-	var prefix = (function(prefixes) {
-		var node = document.createElement('div');
-		var cache = {};
-
-		function testPrefix(prop) {
-			if (prop in node.style) { return prop; }
-
-			var upper = prop.charAt(0).toUpperCase() + prop.slice(1);
-			var l = prefixes.length;
-			var prefixProp;
-
-			while (l--) {
-				prefixProp = prefixes[l] + upper;
-
-				if (prefixProp in node.style) {
-					return prefixProp;
-				}
-			}
-
-			return false;
-		}
-
-		return function prefix(prop){
-			return cache[prop] || (cache[prop] = testPrefix(prop));
-		};
-	})(['Khtml','O','Moz','Webkit','ms']);
-
-	function valuesFromCssFn(string) {
-		return string.split('(')[1].split(')')[0].split(/\s*,\s*/);
-	}
-
-	function style(name, node) {
-		return window.getComputedStyle ?
-			window
-			.getComputedStyle(node, null)
-			.getPropertyValue(name) :
-			0 ;
-	}
-
-	function viewportLeft(elem) {
-		var body = document.body;
-		var html = document.documentElement;
-		var box  = elem.getBoundingClientRect();
-		var scrollLeft = window.pageXOffset || html.scrollLeft || body.scrollLeft;
-		var clientLeft = html.clientLeft || body.clientLeft || 0;
-		return (box.left + scrollLeft - clientLeft);
-	}
-
-	function viewportTop(elem) {
-		var body = document.body;
-		var html = document.documentElement;
-		var box  = elem.getBoundingClientRect();
-		var scrollTop = window.pageYOffset || html.scrollTop || body.scrollTop;
-		var clientTop = html.clientTop || body.clientTop || 0;
-		return box.top +  scrollTop - clientTop;
-	}
-
-/*
-function getPositionParent(node) {
-	var offsetParent = node.offsetParent;
-
-	while (offsetParent && style("position", offsetParent) === "static") {
-		offsetParent = offsetParent.offsetParent;
-	}
-
-	return offsetParent || document.documentElement;
 }
 
-	function offset(node) {
-		// Pinched from jQuery.offset...
-	    // Return zeros for disconnected and hidden (display: none) elements
-	    // Support: IE <=11 only
-	    // Running getBoundingClientRect on a
-	    // disconnected node in IE throws an error
-	    if (!node.getClientRects().length) { return [0, 0]; }
+function prefixSlash(str) {
+	// Prefixes a slash when there is not an existing one
+	return (/^\//.test(str) ? '' : '/') + str ;
+}
 
-	    var rect     = node.getBoundingClientRect();
-	    var document = node.ownerDocument;
-	    var window   = document.defaultView;
-	    var docElem  = document.documentElement;
+function toArray(object) {
+	// Speed test for array conversion:
+	// https://jsperf.com/nodelist-to-array/27
 
-	    return [
-			 rect.left + window.pageXOffset - docElem.clientLeft,
-			 rect.top  + window.pageYOffset - docElem.clientTop
-	    ];
+	var array = [];
+	var l = array.length = object.length;
+	var i;
+
+	for (i = 0; i < l; i++) {
+		array[i] = object[i];
 	}
 
-	function position(node) {
-		var rect;
+	return array;
+}
 
-	    // Fixed elements are offset from window (parentOffset = {top:0, left: 0},
-	    // because it is its only offset parent
-	    if (style('position', node) === 'fixed') {
-	        rect = node.getBoundingClientRect();
 
-	        return [
-		        rect.left - (parseFloat(style("marginLeft", node)) || 0),
-		        rect.top  - (parseFloat(style("marginTop", node)) || 0)
-	        ];
-	    }
+// TokenList
+// TokenList constructor to emulate classList property. The get fn should
+// take the arguments (node), and return a string of tokens. The set fn
+// should take the arguments (node, string).
 
-		// Get *real* offsetParent
-		var parent = getPositionParent(node);
+function TokenList(node, get, set) {
+	this.node = node;
+	this.get = get;
+	this.set = set;
+}
 
-		// Get correct offsets
-		var nodeOffset = offset(node);
-		var parentOffset = tag(parent) !== "html" ? [0, 0] : offset(parent);
+TokenList.prototype = {
+	add: function() {
+		var n = arguments.length;
+		var tokens = this.get(this.node);
+		var array = tokens ? tokens.trim().split(rspaces) : [] ;
 
-		// Add parent borders
-		parentOffset[0] += parseFloat(style("borderLeftWidth", parent)) || 0;
-		parentOffset[1] += parseFloat(style("borderTopWidth", parent)) || 0;
+		while (n--) {
+			if (array.indexOf(arguments[n]) === -1) {
+				array.push(arguments[n]);
+			}
+		}
 
-	    // Subtract parent offsets and element margins
-		nodeOffset[0] -= (parentOffset[0] + (parseFloat(style("marginLeft", node)) || 0)),
-		nodeOffset[1] -= (parentOffset[1] + (parseFloat(style("marginTop", node)) || 0))
+		this.set(this.node, array.join(' '));
+	},
 
-		return nodeOffset;
+	remove: function() {
+		var n = arguments.length;
+		var tokens = this.get(this.node);
+		var array = tokens ? tokens.trim().split(rspaces) : [] ;
+		var i;
+
+		while (n--) {
+			i = array.indexOf(arguments[n]);
+			if (i !== -1) { array.splice(i, 1); }
+		}
+
+		this.set(this.node, array.join(' '));
+	},
+
+	contains: function(string) {
+		var tokens = this.get(this.node);
+		var array = tokens ? tokens.trim().split(rspaces) : [] ;
+		return array.indexOf(string) !== -1;
 	}
-*/
+};
 
-	function windowBox() {
-		return {
-			left:   0,
-			top:    0,
-			width:  window.innerWidth,
-			height: window.innerHeight
-		};
+
+// DOM Nodes
+
+var types = {
+	1:  'element',
+	3:  'text',
+	8:  'comment',
+	9:  'document',
+	10: 'doctype',
+	11: 'fragment'
+};
+
+var clone = features.textareaPlaceholderSet ?
+
+	function clone(node) {
+		return node.cloneNode(true);
+	} :
+
+	function cloneWithHTML(node) {
+		// IE sets textarea innerHTML to the placeholder when cloning.
+		// Reset the resulting value.
+
+		var clone     = node.cloneNode(true);
+		var textareas = dom.query('textarea', node);
+		var n         = textareas.length;
+		var clones;
+
+		if (n) {
+			clones = dom.query('textarea', clone);
+
+			while (n--) {
+				clones[n].value = textareas[n].value;
+			}
+		}
+
+		return clone;
+	} ;
+
+function type(node) {
+	return types[node.nodeType];
+}
+
+function isElementNode(node) {
+	return node.nodeType === 1;
+}
+
+function isTextNode(node) {
+	return node.nodeType === 3;
+}
+
+function isCommentNode(node) {
+	return node.nodeType === 8;
+}
+
+function isFragmentNode(node) {
+	return node.nodeType === 11;
+}
+
+function isInternalLink(node) {
+	var location = window.location;
+
+		// IE does not give us a .hostname for links to
+		// xxx.xxx.xxx.xxx URLs. file:// URLs don't have a hostname
+		// anywhere. This logic is not foolproof, it will let through
+		// links to different protocols for example
+	return (!node.hostname ||
+		// IE gives us the port on node.host, even where it is not
+		// specified. Use node.hostname
+		location.hostname === node.hostname) &&
+		// IE gives us node.pathname without a leading slash, so
+		// add one before comparing
+		location.pathname === prefixSlash(node.pathname);
+}
+
+function isValid(node) {
+	return node.validity ? node.validity.valid : true ;
+}
+
+function identify(node) {
+	var id = node.id;
+
+	if (!id) {
+		do { id = Math.ceil(Math.random() * 100000); }
+		while (document.getElementById(id));
+		node.id = id;
 	}
 
-	function box(node) {
-		return node === window ?
-			windowBox() :
-			node.getClientRects()[0] ;
+	return id;
+}
+
+function tag(node) {
+	return node.tagName && node.tagName.toLowerCase();
+}
+
+function attribute(name, node) {
+	return node.getAttribute && node.getAttribute(name) || undefined ;
+}
+
+function setClass(node, classes) {
+	if (node instanceof SVGElement) {
+		node.setAttribute('class', classes);
 	}
-
-	function bounds(node) {
-		return node.getBoundingClientRect();
+	else {
+		node.className = classes;
 	}
+}
 
-	function position(node) {
-		var rect = box(node);
-		return [rect.left, rect.top];
+function classes(node) {
+	return node.classList || new TokenList(node, dom.attribute('class'), setClass);
+}
+
+function addClass(string, node) {
+	classes(node).add(string);
+}
+
+function removeClass(string, node) {
+	classes(node).remove(string);
+}
+
+function flashClass(string, node) {
+	var list = classes(node);
+	list.add(string);
+	requestAnimationFrame(function() {
+		list.remove(string);
+	});
+}
+
+
+// DOM Traversal
+
+function find(selector, node) {
+	return node.querySelector(selector);
+}
+
+function query(selector, node) {
+	return toArray(node.querySelectorAll(selector));
+}
+
+function contains(child, node) {
+	return node.contains ?
+		node.contains(child) :
+	child.parentNode ?
+		child.parentNode === node || contains(child.parentNode, node) :
+	false ;
+}
+
+function matches(selector, node) {
+	return node.matches ? node.matches(selector) :
+		node.matchesSelector ? node.matchesSelector(selector) :
+		node.webkitMatchesSelector ? node.webkitMatchesSelector(selector) :
+		node.mozMatchesSelector ? node.mozMatchesSelector(selector) :
+		node.msMatchesSelector ? node.msMatchesSelector(selector) :
+		node.oMatchesSelector ? node.oMatchesSelector(selector) :
+		// Dumb fall back to simple tag name matching. Nigh-on useless.
+		tag(node) === selector ;
+}
+
+function closest(selector, node) {
+	var root = arguments[2];
+
+	if (!node || node === document || node === root || node.nodeType === 11) { return; }
+
+	// SVG <use> elements store their DOM reference in
+	// .correspondingUseElement.
+	node = node.correspondingUseElement || node ;
+
+	return matches(selector, node) ?
+		 node :
+		 closest(selector, node.parentNode, root) ;
+}
+
+function next(node) {
+	return node.nextElementSibling || undefined;
+}
+
+function previous(node) {
+	return node.previousElementSibling || undefined;
+}
+
+
+// DOM Mutation
+
+function appendChild(target, node) {
+	target.appendChild(node);
+
+	// Use this fn as a reducer
+	return target;
+}
+
+function empty(node) {
+	while (node.lastChild) { node.removeChild(node.lastChild); }
+}
+
+function removeNode(node) {
+	node.parentNode && node.parentNode.removeChild(node);
+}
+
+function remove(node) {
+	if (node instanceof Node || node instanceof SVGElement) {
+		removeNode(node);
 	}
-
-	//function offset(node) {
-	//	var rect = box(node);
-	//	var scrollX = window.scrollX === undefined ? window.pageXOffset : window.scrollX ;
-	//	var scrollY = window.scrollY === undefined ? window.pageYOffset : window.scrollY ;
-	//	return [rect.left + scrollX, rect.top + scrollY];
-	//}
-
-	function offset(node1, node2) {
-		var box1 = box(node1);
-		var box2 = box(node2);
-		return [box2.left - box1.left, box2.top - box1.top];
+	else {
+		A.forEach.call(node, removeNode);
 	}
+}
+
+function before(target, node) {
+	target.parentNode && target.parentNode.insertBefore(node, target);
+}
+
+function after(target, node) {
+	target.parentNode && target.parentNode.insertBefore(node, target.nextSibling);
+}
+
+function replace(target, node) {
+	before(target, node);
+	remove(target);
+	return target;
+}
 
 
-	// DOM Events
+// CSS
 
-	var eventOptions = { bubbles: true };
-
-	var eventsSymbol = Symbol('events');
-
-	var keyCodes = {
-		8:  'backspace',
-		9:  'tab',
-		13: 'enter',
-		16: 'shift',
-		17: 'ctrl',
-		18: 'alt',
-		27: 'escape',
-		32: 'space',
-		33: 'pageup',
-		34: 'pagedown',
-		35: 'pageright',
-		36: 'pageleft',
-		37: 'left',
-		38: 'up',
-		39: 'right',
-		40: 'down',
-		46: 'delete',
-		48: '0',
-		49: '1',
-		50: '2',
-		51: '3',
-		52: '4',
-		53: '5',
-		54: '6',
-		55: '7',
-		56: '8',
-		57: '9',
-		65: 'a',
-		66: 'b',
-		67: 'c',
-		68: 'd',
-		69: 'e',
-		70: 'f',
-		71: 'g',
-		72: 'h',
-		73: 'i',
-		74: 'j',
-		75: 'k',
-		76: 'l',
-		77: 'm',
-		78: 'n',
-		79: 'o',
-		80: 'p',
-		81: 'q',
-		82: 'r',
-		83: 's',
-		84: 't',
-		85: 'u',
-		86: 'v',
-		87: 'w',
-		88: 'x',
-		89: 'y',
-		90: 'z',
-		// Mac Chrome left CMD
-		91: 'cmd',
-		// Mac Chrome right CMD
-		93: 'cmd',
-		186: ';',
-		187: '=',
-		188: ',',
-		189: '-',
-		190: '.',
-		191: '/',
-		219: '[',
-		220: '\\',
-		221: ']',
-		222: '\'',
-		// Mac FF
-		224: 'cmd'
+function windowBox() {
+	return {
+		left:   0,
+		top:    0,
+		right:  window.innerWidth,
+		bottom: window.innerHeight,
+		width:  window.innerWidth,
+		height: window.innerHeight
 	};
+}
 
-	var untrapFocus = noop;
+function box(node) {
+	return node === window ?
+		windowBox() :
+		node.getClientRects()[0] ;
+}
 
-	function Event(type, properties) {
-		var options = assign({}, eventOptions, properties);
-		var event   = new CustomEvent(type, options);
+function bounds(node) {
+	return node.getBoundingClientRect();
+}
 
-		if (properties) {
-			delete properties.detail;
-			assign(event, properties);
-		}
+//function offset(node) {
+//	var rect = box(node);
+//	var scrollX = window.scrollX === undefined ? window.pageXOffset : window.scrollX ;
+//	var scrollY = window.scrollY === undefined ? window.pageYOffset : window.scrollY ;
+//	return [rect.left + scrollX, rect.top + scrollY];
+//}
 
-		return event;
+function offset(node1, node2) {
+	var box1 = box(node1);
+	var box2 = box(node2);
+	return [box2.left - box1.left, box2.top - box1.top];
+}
+
+
+// DOM Events
+
+var eventOptions = { bubbles: true };
+
+var eventsSymbol = Symbol('events');
+
+var untrapFocus = noop;
+
+function Event(type, properties) {
+	var options = assign({}, eventOptions, properties);
+	var event   = new CustomEvent(type, options);
+
+	if (properties) {
+		delete properties.detail;
+		assign(event, properties);
 	}
 
-	function preventDefault(e) {
-		e.preventDefault();
+	return event;
+}
+
+function preventDefault(e) {
+	e.preventDefault();
+}
+
+function isTargetEvent(e) {
+	return e.target === e.currentTarget;
+}
+
+function isPrimaryButton(e) {
+	// Ignore mousedowns on any button other than the left (or primary)
+	// mouse button, or when a modifier key is pressed.
+	return (e.which === 1 && !e.ctrlKey && !e.altKey && !e.shiftKey);
+}
+
+function on(node, type, fn, data) {
+	var options;
+
+	if (typeof type === 'object') {
+		options = type;
+		type    = options.type;
 	}
 
-	function isPrimaryButton(e) {
-		// Ignore mousedowns on any button other than the left (or primary)
-		// mouse button, or when a modifier key is pressed.
-		return (e.which === 1 && !e.ctrlKey && !e.altKey && !e.shiftKey);
+	var types   = type.split(rspaces);
+	var events  = node[eventsSymbol] || (node[eventsSymbol] = {});
+	var handler = data ? bindTail(fn, data) : fn ;
+	var handlers;
+
+	var n = -1;
+	while (++n < types.length) {
+		type = types[n];
+		handlers = events[type] || (events[type] = []);
+		handlers.push([fn, handler]);
+		node.addEventListener(type, handler, options);
 	}
 
-	function toKey(e) {
-		return keyCodes[e.keyCode];
+	return node;
+}
+
+function once(node, types, fn, data) {
+	on(node, types, function once() {
+		off(node, types, once);
+		fn.apply(null, arguments);
+	}, data);
+}
+
+function off(node, type, fn) {
+	var options;
+
+	if (typeof type === 'object') {
+		options = type;
+		type    = options.type;
 	}
 
-	function on(node, types, fn, data) {
-		types = types.split(rspaces);
+	var types   = type.split(rspaces);
+	var events  = node[eventsSymbol];
+	var handlers, i;
 
-		var events  = node[eventsSymbol] || (node[eventsSymbol] = {});
-		var handler = bindTail(fn, data);
-		var handlers, type;
+	if (!events) { return node; }
 
-		var n = -1;
-		while (n++ < types.length) {
-			type = types[n];
-			handlers = events[type] || (events[type] = []);
-			handlers.push([fn, handler]);
-			node.addEventListener(type, handler);
-		}
-
-		return node;
-	}
-
-	function off(node, types, fn) {
-		types = types.split(rspaces);
-
-		var events = node[eventsSymbol];
-		var type, handlers, i;
-
-		if (!events) { return node; }
-
-		var n = -1;
-		while (n++ < types.length) {
-			type = types[n];
-			handlers = events[type];
-			if (!handlers) { continue; }
-			i = handlers.length;
-			while (i--) {
-				if (handlers[i][0] === fn) {
-					node.removeEventListener(type, handlers[i][1]);
-					handlers.splice(i, 1);
-				}
+	var n = -1;
+	while (n++ < types.length) {
+		type = types[n];
+		handlers = events[type];
+		if (!handlers) { continue; }
+		i = handlers.length;
+		while (i--) {
+			if (handlers[i][0] === fn) {
+				node.removeEventListener(type, handlers[i][1]);
+				handlers.splice(i, 1);
 			}
 		}
-
-		return node;
 	}
 
-	function trigger(node, type, properties) {
-		// Don't cache events. It prevents you from triggering an event of a
-		// given type from inside the handler of another event of that type.
-		var event = Event(type, properties);
-		node.dispatchEvent(event);
-	}
+	return node;
+}
 
-	function end(e, fn) {
-		off(e.currentTarget, features.transitionend, end);
-		fn(e.timeStamp);
-	}
+function trigger(node, type, properties) {
+	// Don't cache events. It prevents you from triggering an event of a
+	// given type from inside the handler of another event of that type.
+	var event = Event(type, properties);
+	node.dispatchEvent(event);
+}
 
-	function requestEvent(type, fn, node) {
-		if (type === 'transitionend') {
-			if (!features.transition) {
-				fn(performance.now());
-				return;
-			}
+function end(e, fn) {
+	off(e.currentTarget, features.events.transitionend, end);
+	fn(e.timeStamp);
+}
 
-			type = features.transitionend;
+function requestEvent(type, fn, node) {
+	if (type === 'transitionend') {
+		if (!features.transition) {
+			fn(performance.now());
+			return;
 		}
 
-		on(node, type, end, fn);
+		type = features.events.transitionend;
 	}
 
-	function delegate(selector, fn) {
-		// Create an event handler that looks up the ancestor tree
-		// to find selector.
-		return function handler(e) {
-			var node = closest(selector, e.target, e.currentTarget);
-			if (!node) { return; }
-			e.delegateTarget = node;
-			fn(e, node);
-			e.delegateTarget = undefined;
-		};
+	on(node, type, end, fn);
+}
+
+function delegate(selector, fn) {
+	// Create an event handler that looks up the ancestor tree
+	// to find selector.
+	return function handler(e) {
+		var node = closest(selector, e.target, e.currentTarget);
+		if (!node) { return; }
+		e.delegateTarget = node;
+		fn(e, node);
+		e.delegateTarget = undefined;
+	};
+}
+
+function prefixType(type) {
+	return features.events[type] || type ;
+}
+
+function event(type, node) {
+	var options;
+
+	if (typeof type === 'object') {
+		options = type;
+		type    = options.type;
 	}
 
-	function event(types, node) {
-		types = types.split(rspaces);
+	var types = type.split(rspaces).map(prefixType);
 
-		return new Stream(function setup(notify, stop) {
-			var buffer = [];
+	return new Stream(function setup(notify, stop) {
+		var buffer = [];
 
-			function update(value) {
-				buffer.push(value);
-				notify('push');
-			}
+		function update(value) {
+			buffer.push(value);
+			notify('push');
+		}
 
-			types.forEach(function(type) {
-				node.addEventListener(type, update);
-			});
-
-			return {
-				shift: function() {
-					return buffer.shift();
-				},
-
-				stop: function stop() {
-					types.forEach(function(type) {
-						node.removeEventListener(type, update);
-					});
-
-					stop(buffer.length);
-				}
-			};
+		types.forEach(function(type) {
+			node.addEventListener(type, update, options);
 		});
-	}
 
-	function trapFocus(node) {
-		// Trap focus as described by Nikolas Zachas:
-		// http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
+		return {
+			shift: function shiftEvent() {
+				return buffer.shift();
+			},
 
-		// If there is an existing focus trap, remove it
-		untrapFocus();
+			stop: function stopEvent() {
+				types.forEach(function(type) {
+					node.removeEventListener(type, update);
+				});
 
-		// Cache the currently focused node
-		var focusNode = document.activeElement || document.body;
-
-		function resetFocus() {
-			var focusable = dom.query('[tabindex], a, input, textarea, button', node)[0];
-			if (focusable) { focusable.focus(); }
-		}
-
-		function preventFocus(e) {
-			if (node.contains(e.target)) { return; }
-
-			// If trying to focus outside node, set the focus back
-			// to the first thing inside.
-			resetFocus();
-			e.preventDefault();
-			e.stopPropagation();
-		}
-
-		// Prevent focus in capture phase
-		document.addEventListener("focus", preventFocus, true);
-
-		// Move focus into node
-		requestTick(resetFocus);
-
-		return untrapFocus = function() {
-			untrapFocus = noop;
-			document.removeEventListener('focus', preventFocus, true);
-
-			// Set focus back to the thing that was last focused when the
-			// dialog was opened.
-			requestTick(function() {
-				focusNode.focus();
-			});
+				stop(buffer.length);
+			}
 		};
+	});
+}
+
+function trapFocus(node) {
+	// Trap focus as described by Nikolas Zachas:
+	// http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
+
+	// If there is an existing focus trap, remove it
+	untrapFocus();
+
+	// Cache the currently focused node
+	var focusNode = document.activeElement || document.body;
+
+	function resetFocus() {
+		var focusable = dom.query('[tabindex], a, input, textarea, button', node)[0];
+		if (focusable) { focusable.focus(); }
 	}
 
+	function preventFocus(e) {
+		if (node.contains(e.target)) { return; }
 
-	// DOM Fragments and Templates
+		// If trying to focus outside node, set the focus back
+		// to the first thing inside.
+		resetFocus();
+		e.preventDefault();
+		e.stopPropagation();
+	}
 
-	var mimetypes = {
-		xml:  'application/xml',
-		html: 'text/html',
-		svg:  'image/svg+xml'
+	// Prevent focus in capture phase
+	document.addEventListener("focus", preventFocus, true);
+
+	// Move focus into node
+	requestTick(resetFocus);
+
+	return untrapFocus = function() {
+		untrapFocus = noop;
+		document.removeEventListener('focus', preventFocus, true);
+
+		// Set focus back to the thing that was last focused when the
+		// dialog was opened.
+		requestTick(function() {
+			focusNode.focus();
+		});
 	};
+}
 
-	function fragmentFromChildren(node) {
-		if (node.domFragmentFromChildren) {
-			return node.domFragmentFromChildren;
+
+// DOM Fragments and Templates
+
+function fragmentFromChildren(node) {
+	if (node.domFragmentFromChildren) {
+		return node.domFragmentFromChildren;
+	}
+
+	var fragment = create('fragment');
+	node.domFragmentFromChildren = fragment;
+	append(fragment, node.childNodes);
+	return fragment;
+}
+
+function fragmentFromHTML(html, tag) {
+	var node = document.createElement(tag || 'div');
+	node.innerHTML = html;
+	return fragmentFromChildren(node);
+}
+
+function fragmentFromTemplate(node) {
+	// A template tag has a content property that gives us a document
+	// fragment. If that doesn't exist we must make a document fragment.
+	return node.content || fragmentFromChildren(node);
+}
+
+function fragmentFromId(id) {
+	var node = document.getElementById(id);
+
+	if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }
+
+	var t = tag(node);
+
+	// In browsers where templates are not inert their content can clash
+	// with content in the DOM - ids, for example. Remove the template as
+	// a precaution.
+	if (t === 'template' && !features.template) {
+		remove(node);
+	}
+
+	return t === 'template' ? fragmentFromTemplate(node) :
+		t === 'script' ? fragmentFromHTML(node.innerHTML, attribute('data-parent-tag', node)) :
+		fragmentFromChildren(node) ;
+}
+
+
+// Units
+
+var runit = /(\d*\.?\d+)(r?em|vw|vh)/;
+//var rpercent = /(\d*\.?\d+)%/;
+
+var fontSize;
+
+var units = {
+	em: function(n) {
+		return getFontSize() * n;
+	},
+
+	rem: function(n) {
+		return getFontSize() * n;
+	},
+
+	vw: function(n) {
+		return window.innerWidth * n / 100;
+	},
+
+	vh: function(n) {
+		return window.innerHeight * n / 100;
+	}
+};
+
+var toPx = overload(toType, {
+	'number': id,
+
+	'string': function(string) {
+		var data = runit.exec(string);
+
+		if (data) {
+			return units[data[2]](parseFloat(data[1]));
 		}
 
-		var fragment = create('fragment');
-		node.domFragmentFromChildren = fragment;
-		append(fragment, node.childNodes);
-		return fragment;
+		throw new Error('dom: "' + string + '" cannot be parsed as rem, em, vw or vh units.');
 	}
+});
 
-	function fragmentFromHTML(html, tag) {
-		var node = document.createElement(tag || 'div');
-		node.innerHTML = html;
-		return fragmentFromChildren(node);
-	}
+function toRem(n) {
+	return (toPx(n) / getFontSize()) + 'rem';
+}
 
-	function fragmentFromTemplate(node) {
-		// A template tag has a content property that gives us a document
-		// fragment. If that doesn't exist we must make a document fragment.
-		return node.content || fragmentFromChildren(node);
-	}
+function toVw(n) {
+	return (100 * toPx(n) / window.innerWidth) + 'vw';
+}
 
-	function fragmentFromId(id) {
-		var node = document.getElementById(id);
+function toVh(n) {
+	return (100 * toPx(n) / window.innerHeight) + 'vh';
+}
 
-		if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }
-
-		var t = tag(node);
-
-		// In browsers where templates are not inert their content can clash
-		// with content in the DOM - ids, for example. Remove the template as
-		// a precaution.
-		if (t === 'template' && !features.template) {
-			remove(node);
-		}
-
-		return t === 'template' ? fragmentFromTemplate(node) :
-			t === 'script' ? fragmentFromHTML(node.innerHTML, attribute('data-parent-tag', node)) :
-			fragmentFromChildren(node) ;
-	}
-
-	function parse(type, string) {
-		var mimetype = mimetypes[type];
-		var xml;
-
-		// From jQuery source...
-		try {
-			xml = (new window.DOMParser()).parseFromString(string, mimetype);
-		} catch (e) {
-			xml = undefined;
-		}
-
-		if (!xml || xml.getElementsByTagName("parsererror").length) {
-			throw new Error("dom: Invalid XML: " + string);
-		}
-
-		return xml;
-	}
-
-	var escape = (function() {
-		var pre  = document.createElement('pre');
-		var text = document.createTextNode('');
-
-		pre.appendChild(text);
-
-		return function escape(value) {
-			text.textContent = value;
-			return pre.innerHTML;
-		};
-	})();
+function getFontSize() {
+	return fontSize ||
+		(fontSize = parseFloat(style("font-size", document.documentElement), 10));
+}
 
 
-	// Units
+// Animation and scrolling
 
-	var rem = /(\d*\.?\d+)r?em/;
-	//var rpercent = /(\d*\.?\d+)%/;
+function transition(duration, fn) {
+	var t0 = performance.now();
 
-	var fontSize;
+	function frame(t1) {
+		// Progress from 0-1
+		var progress = (t1 - t0) / (duration * 1000);
 
-	var toPx = overload(toType, {
-		'number': id,
-
-		'string': function(string) {
-			var data, n;
-
-			data = rem.exec(string);
-			if (data) {
-				n = parseFloat(data[1]);
-				return getFontSize() * n;
+		if (progress < 1) {
+			if (progress > 0) {
+				fn(progress);
 			}
-
-			//data = rpercent.exec(string);
-			//if (data) {
-			//	n = parseFloat(data[1]) / 100;
-			//	return width * n;
-			//}
-
-			throw new Error('dom: ' + string + '\' cannot be parsed as rem, em or %.');
+			id = requestAnimationFrame(frame);
 		}
-	});
-
-	var toRem = overload(toType, {
-		'number': function(n) {
-			return n / getFontSize();
+		else {
+			fn(1);
 		}
-	});
-
-	function getFontSize() {
-		return fontSize ||
-			(fontSize = parseFloat(style("font-size", document.documentElement), 10));
 	}
 
+	var id = requestAnimationFrame(frame);
 
-	// Animation and scrolling
+	return function cancel() {
+		cancelAnimationFrame(id);
+	};
+}
 
-	function transition(duration, fn) {
-		var t0 = performance.now();
+function animate(duration, transform, name, object, value) {
+	return transition(
+		duration,
+		pipe(transform, denormalise(object[name], value), set(name, object))
+	);
+}
 
-		function frame(t1) {
-			// Progress from 0-1
-			var progress = (t1 - t0) / (duration * 1000);
+function animateScroll(coords) {
+	var duration = 0.6;
+	var ease = pow(2);
 
-			if (progress < 1) {
-				if (progress > 0) {
-					fn(progress);
-				}
-				id = requestAnimationFrame(frame);
-			}
-			else {
-				fn(1);
-			}
-		}
+	// coords may be a single y value or a an [x, y] array
+	var x, y;
 
-		var id = requestAnimationFrame(frame);
-
-		return function cancel() {
-			cancelAnimationFrame(id);
-		};
+	if (typeof coords === "number") {
+		x = false;
+		y = coords;
+	}
+	else {
+		x = coords[0];
+		y = coords[1];
 	}
 
-	function animate(duration, transform, name, object, value) {
-		return transition(
-			duration,
-			pipe(transform, denormalise(object[name], value), set(name, object))
-		);
-	}
-
-	function animateScroll(value) {
-		return animate(0.6, pow(2), 'scrollTop', dom.view, toPx(value));
-	}
-
-	function scrollRatio(node) {
-		return node.scrollTop / (node.scrollHeight - node.clientHeight);
-	}
-
-	function disableScroll(node) {
-		node = node || document.documentElement;
-
-		var scrollLeft = node.scrollLeft;
-		var scrollTop  = node.scrollTop;
-
-		// Remove scrollbars from the documentElement
-		//docElem.css({ overflow: 'hidden' });
-		node.style.overflow = 'hidden';
-
-		// FF has a nasty habit of linking the scroll parameters
-		// of document with the documentElement, causing the page
-		// to jump when overflow is hidden on the documentElement.
-		// Reset the scroll position.
-		if (scrollTop)  { node.scrollTop = scrollTop; }
-		if (scrollLeft) { node.scrollLeft = scrollLeft; }
-
-		// Disable gestures on touch devices
-		//add(document, 'touchmove', preventDefaultOutside, layer);
-	}
-
-	function enableScroll(node) {
-		node = node || document.documentElement;
-
-		var scrollLeft = node.scrollLeft;
-		var scrollTop  = node.scrollTop;
-
-		// Put scrollbars back onto docElem
-		node.style.overflow = '';
-
-		// FF fix. Reset the scroll position.
-		if (scrollTop) { node.scrollTop = scrollTop; }
-		if (scrollLeft) { node.scrollLeft = scrollLeft; }
-
-		// Enable gestures on touch devices
-		//remove(document, 'touchmove', preventDefaultOutside);
-	}
-
-
-	// dom
-
-	function dom(selector) {
-		return query(selector, document);
-	}
-
-	var ready = new Promise(function(accept, reject) {
-		function handle() {
-			document.removeEventListener('DOMContentLoaded', handle);
-			window.removeEventListener('load', handle);
-			accept();
-		}
-
-		document.addEventListener('DOMContentLoaded', handle);
-		window.addEventListener('load', handle);
-	});
-
-	assign(dom, {
-
-		// DOM lifecycle
-
-		ready:    ready.then.bind(ready),
-
-		// DOM traversal
-
-		get: function get(id) {
-			return document.getElementById(id) || undefined;
-		},
-
-		find:     Fn.deprecate(function get(id) {
-			return document.getElementById(id) || undefined;
-		}, 'dom.find(id) is now dom.get(id)'),
-
-		query:    curry(query,    true),
-		closest:  curry(closest,  true),
-		contains: curry(contains, true),
-		matches:  curry(matches,  true),
-		children: children,
-		next:     next,
-		previous: previous,
-
-		// DOM mutation
-
-		assign:   curry(assignAttributes,  true),
-		create:   create,
-		clone:    clone,
-		identify: identify,
-		append:   curry(append,  true),
-		before:   curry(before,  true),
-		after:    curry(after,   true),
-		replace:  curry(replace, true),
-		empty:    empty,
-		remove:   remove,
-
-		// DOM inspection
-
-		isElementNode:  isElementNode,
-		isTextNode:     isTextNode,
-		isCommentNode:  isCommentNode,
-		isFragmentNode: isFragmentNode,
-		isInternalLink: isInternalLink,
-
-		type:        type,
-		tag:         tag,
-		attribute:   curry(attribute, true),
-		classes:     classes,
-		addClass:    curry(addClass,    true),
-		removeClass: curry(removeClass, true),
-		flashClass:  curry(flashClass,  true),
-
-		box:         box,
-		bounds:      bounds,
-		rectangle:   deprecate(box, 'dom.rectangle(node) now dom.box(node)'),
-
-		offset:      curry(offset, true),
-		position:    position,
-
-		prefix:      prefix,
-		style: curry(function(name, node) {
-			// If name corresponds to a custom property name in styleParsers...
-			if (styleParsers[name]) { return styleParsers[name](node); }
-
-			var value = style(name, node);
-
-			// Pixel values are converted to number type
-			return typeof value === 'string' && rpx.test(value) ?
-				parseFloat(value) :
-				value ;
-		}, true),
-
-		toPx:           toPx,
-		toRem:          toRem,
-		viewportLeft:   viewportLeft,
-		viewportTop:    viewportTop,
-
-		// DOM fragments and templates
-
-		fragmentFromTemplate: fragmentFromTemplate,
-		fragmentFromChildren: fragmentFromChildren,
-		fragmentFromHTML:     fragmentFromHTML,
-		fragmentFromId:       fragmentFromId,
-		escape:               escape,
-		parse:                curry(parse),
-
-		// DOM events
-
-		Event:           Event,
-		delegate:        delegate,
-		isPrimaryButton: isPrimaryButton,
-		preventDefault:  preventDefault,
-		toKey:           toKey,
-		trapFocus:       trapFocus,
-		trap:            Fn.deprecate(trapFocus, 'dom.trap() is now dom.trapFocus()'),
-
-		events: {
-			on:      on,
-			off:     off,
-			trigger: trigger
-		},
-
-		on:     Fn.deprecate(curry(event, true), 'dom.on() is now dom.event()'),
-
-		trigger: curry(function(type, node) {
-			trigger(node, type);
-			return node;
-		}, true),
-
-		event: curry(event, true),
-
-		// DOM animation adn scrolling
-
-		// transition(duration, fn)
-		//
-		// duration  - duration seconds
-		// fn        - callback that is called with a float representing
-		//             progress in the range 0-1
-
-		transition: curry(transition, true),
-		schedule:   deprecate(transition, 'dom: .schedule() is now .transition()'),
-
-		// animate(duration, transform, value, name, object)
-		//
-		// duration  - in seconds
-		// transform - function that maps x (0-1) to y (0-1)
-		// name      - name of property to animate
-		// object    - object to animate
-		// value     - target value
-
-		animate: curry(animate, true),
-
-		// animateScroll(n)
-		//
-		// Animate scrollTop of scrollingElement to n (in px)
-
-		animateScroll: animateScroll,
-		scrollTo: deprecate(animateScroll, 'scrollTo(px, node) renamed to animateScroll(px)'),
-
-		// scrollRatio(node)
-		//
-		// Returns scrollTop as ratio of scrollHeight
-
-		scrollRatio: scrollRatio,
-
-		// disableScroll(node)
-		//
-		// Disables scrolling without causing node's content to jump
-
-		disableScroll: disableScroll,
-
-		// enableScroll(node)
-		//
-		// Enables scrolling without causing node's content to jump
-
-		enableScroll: enableScroll,
-
-		// requestEvent(type, fn, node)
-
-		requestEvent: requestEvent,
-
-		requestFrame: requestAnimationFrame.bind(null),
-
-		requestFrameN: curry(deprecate(function requestFrameN(n, fn) {
-			(function frame() {
-				return requestAnimationFrame(--n ? frame : fn);
-			}());
-		}, 'requestFrameN() will be removed soon'), true),
-
-		// Features
-
-		features: features,
-
-		// Safe visible area
-
-		safe: define({
-			left: 0
-		}, {
-			right:  { get: function() { return window.innerWidth; }, enumerable: true, configurable: true },
-			top:    { get: function() { return style('padding-top', document.body); }, enumerable: true, configurable: true },
-			bottom: { get: function() { return window.innerHeight; }, enumerable: true, configurable: true }
+	var denormaliseX = x !== false && denormalise(dom.view.scrollLeft, x);
+	var denormaliseY = denormalise(dom.view.scrollTop, y);
+
+	return transition(
+		duration,
+		pipe(ease, function(progress) {
+			x !== false && (dom.view.scrollLeft = denormaliseX(progress));
+			dom.view.scrollTop  = denormaliseY(progress);
 		})
-	});
+	);
+}
 
-	define(dom, {
-		// Element shortcuts
-		root: { value: document.documentElement, enumerable: true },
-		head: { value: document.head, enumerable: true },
-		body: { get: function() { return document.body; }, enumerable: true	},
-		view: { get: function() { return document.scrollingElement; }, enumerable: true },
-		viewport: { get: function() {
-			console.warn('Deprecated: dom.viewport is now dom.view');
-			return document.scrollingElement;
-		}, enumerable: true }
-	});
+function scrollRatio(node) {
+	return node.scrollTop / (node.scrollHeight - node.clientHeight);
+}
 
+function disableScroll(node) {
+	node = node || document.documentElement;
 
-	// Export
+	var scrollLeft = node.scrollLeft;
+	var scrollTop  = node.scrollTop;
 
-	window.dom = dom;
-})(this);
+	// Remove scrollbars from the documentElement
+	//docElem.css({ overflow: 'hidden' });
+	node.style.overflow = 'hidden';
+
+	// FF has a nasty habit of linking the scroll parameters
+	// of document with the documentElement, causing the page
+	// to jump when overflow is hidden on the documentElement.
+	// Reset the scroll position.
+	if (scrollTop)  { node.scrollTop = scrollTop; }
+	if (scrollLeft) { node.scrollLeft = scrollLeft; }
+
+	// Disable gestures on touch devices
+	//add(document, 'touchmove', preventDefaultOutside, layer);
+}
+
+function enableScroll(node) {
+	node = node || document.documentElement;
+
+	var scrollLeft = node.scrollLeft;
+	var scrollTop  = node.scrollTop;
+
+	// Put scrollbars back onto docElem
+	node.style.overflow = '';
+
+	// FF fix. Reset the scroll position.
+	if (scrollTop) { node.scrollTop = scrollTop; }
+	if (scrollLeft) { node.scrollLeft = scrollLeft; }
+
+	// Enable gestures on touch devices
+	//remove(document, 'touchmove', preventDefaultOutside);
+}
+
+// dom
+
+export default function dom(selector) {
+	return query(selector, document);
+};
+
+var ready = new Promise(function(accept, reject) {
+	function handle() {
+		document.removeEventListener('DOMContentLoaded', handle);
+		window.removeEventListener('load', handle);
+		accept();
+	}
+
+	document.addEventListener('DOMContentLoaded', handle);
+	window.addEventListener('load', handle);
+});
+
+assign(dom, {
+
+	// DOM lifecycle
+
+	ready:   ready.then.bind(ready),
+
+	now:     function() {
+		// Return DOM time in seconds
+		return window.performance.now() / 1000;
+	},
+
+	// DOM traversal
+
+	get: function get(id) {
+		return document.getElementById(id) || undefined;
+	},
+
+	find:     curry(find,     true),
+	query:    curry(query,    true),
+	closest:  curry(closest,  true),
+	contains: curry(contains, true),
+	matches:  curry(matches,  true),
+	next:     next,
+	previous: previous,
+
+	// DOM mutation
+
+	clone:    clone,
+	identify: identify,
+	before:   curry(before,  true),
+	after:    curry(after,   true),
+	replace:  curry(replace, true),
+	empty:    empty,
+	remove:   remove,
+
+	validate: function(node) {
+		return node.checkValidity ? node.checkValidity() : true ;
+	},
+
+	fullscreen: function fullscreen(node) {
+		// Find the right method and call it
+		return node.requestFullscreen ? node.requestFullscreen() :
+			node.webkitRequestFullscreen ? node.webkitRequestFullscreen() :
+			node.mozRequestFullScreen ? node.mozRequestFullScreen() :
+			node.msRequestFullscreen ? node.msRequestFullscreen() :
+			undefined ;
+	},
+
+	// EXAMPLE CODE for mutation observers  ------
+
+	//		var observer = new MutationObserver(function(mutationsList) {
+	//		    var mutation;
+	//		    for(mutation of mutationsList) {
+	//		        if (mutation.addedNodes.length) {
+	//		            dom
+	//		            .query('a[href="' + router.path + '"]', mutation.target)
+	//		            .forEach(dom.addClass('current'));
+	//		        }
+	//		    }
+	//		});
+	//
+	//		observer.observe(dom.get('calendar'), { childList: true, subtree: true });
+
+	// DOM inspection
+
+	isElementNode:  isElementNode,
+	isTextNode:     isTextNode,
+	isCommentNode:  isCommentNode,
+	isFragmentNode: isFragmentNode,
+	isInternalLink: isInternalLink,
+	isValid:        isValid,
+
+	type:        type,
+	tag:         tag,
+	attribute:   curry(attribute, true),
+	classes:     classes,
+	addClass:    curry(addClass,    true),
+	removeClass: curry(removeClass, true),
+	flashClass:  curry(flashClass,  true),
+
+	box:         box,
+	bounds:      bounds,
+	offset:      curry(offset, true),
+
+	toPx:           toPx,
+	toRem:          toRem,
+	toVw:           toVw,
+	toVh:           toVh,
+
+	// DOM fragments and templates
+
+	fragmentFromTemplate: fragmentFromTemplate,
+	fragmentFromChildren: fragmentFromChildren,
+	fragmentFromHTML:     fragmentFromHTML,
+	fragmentFromId:       fragmentFromId,
+
+	// DOM events
+
+	Event:           Event,
+	delegate:        delegate,
+	isPrimaryButton: isPrimaryButton,
+	isTargetEvent:   isTargetEvent,
+	preventDefault:  preventDefault,
+	trapFocus:       trapFocus,
+	trap:            deprecate(trapFocus, 'dom.trap() is now dom.trapFocus()'),
+
+	trigger: curry(function(type, node) {
+		trigger(node, type);
+		return node;
+	}, true),
+
+	events: assign(curry(event, true), {
+		on:      on,
+		once:    once,
+		off:     off,
+		trigger: trigger
+	}),
+
+	on:    deprecate(curry(event, true), 'dom.on() is now dom.events()'),
+	event: deprecate(curry(event, true), 'Deprecated dom.event() – now dom.events()'),
+
+	// DOM animation adn scrolling
+
+	// transition(duration, fn)
+	//
+	// duration  - duration seconds
+	// fn        - callback that is called with a float representing
+	//             progress in the range 0-1
+
+	transition: curry(transition, true),
+	schedule:   deprecate(transition, 'dom: .schedule() is now .transition()'),
+
+	// animate(duration, transform, value, name, object)
+	//
+	// duration  - in seconds
+	// transform - function that maps x (0-1) to y (0-1)
+	// name      - name of property to animate
+	// object    - object to animate
+	// value     - target value
+
+	animate: curry(animate, true),
+
+	// animateScroll(n)
+	//
+	// Animate scrollTop of scrollingElement to n (in px)
+
+	animateScroll: animateScroll,
+	scrollTo: deprecate(animateScroll, 'scrollTo(px, node) renamed to animateScroll(px)'),
+
+	// scrollRatio(node)
+	//
+	// Returns scrollTop as ratio of scrollHeight
+
+	scrollRatio: scrollRatio,
+
+	// disableScroll(node)
+	//
+	// Disables scrolling without causing node's content to jump
+
+	disableScroll: disableScroll,
+
+	// enableScroll(node)
+	//
+	// Enables scrolling without causing node's content to jump
+
+	enableScroll: enableScroll,
+
+	// requestEvent(type, fn, node)
+
+	requestEvent: requestEvent,
+
+	requestFrame: requestAnimationFrame.bind(null),
+
+	requestFrameN: curry(deprecate(function requestFrameN(n, fn) {
+		(function frame() {
+			return requestAnimationFrame(--n ? frame : fn);
+		}());
+	}, 'requestFrameN() will be removed soon'), true),
+
+	// Features
+
+	features: features,
+
+	// Safe visible area
+
+	safe: define({
+		left: 0
+	}, {
+		right:  { get: function() { return window.innerWidth; }, enumerable: true, configurable: true },
+		top:    { get: function() { return style('padding-top', document.body); }, enumerable: true, configurable: true },
+		bottom: { get: function() { return window.innerHeight; }, enumerable: true, configurable: true }
+	})
+});
+
+define(dom, {
+	// Element shortcuts
+	root: { value: document.documentElement, enumerable: true },
+	head: { value: document.head, enumerable: true },
+	body: { get: function() { return document.body; }, enumerable: true	},
+	view: { get: function() { return document.scrollingElement; }, enumerable: true }
+});
+import { curry, isDefined, overload } from '../../fn/fn.js';
+import { default as dom, classes, tag, events } from '../dom.js';
+
 (function(window) {
 	"use strict";
 
 	var debug     = false;
 
-	var Fn        = window.Fn;
-	var dom       = window.dom;
-	var classes   = dom.classes;
-	var tag       = dom.tag;
-	var on        = dom.events.on;
-	var off       = dom.events.off;
-	var trigger   = dom.events.trigger;
-	var curry     = Fn.curry;
-	var isDefined = Fn.isDefined;
-	var overload  = Fn.overload;
+	var on        = events.on;
+	var off       = events.off;
+	var trigger   = events.trigger;
 
 	var location  = window.location;
 	var id        = location.hash;
@@ -1531,7 +1238,6 @@ function getPositionParent(node) {
 
 	on(document, 'dom-deactivate', function(e) {
 		if (e.defaultPrevented) { return; }
-
 		var data = cacheData(e.target);
 
 		// Don't do anything if elem is already inactive
@@ -1685,7 +1391,10 @@ function getPositionParent(node) {
 		//	return;
 		//}
 
-		trigger(node, 'dom-activate', { relatedTarget: e.currentTarget });
+		// TODO: This doesnt seemt o set relatedTarget
+		// trigger(node, 'dom-activate', { relatedTarget: e.delegateTarget });
+		var a = dom.Event('dom-activate', { relatedTarget: e.delegateTarget });
+		node.dispatchEvent(a);
 	}
 
 	function getHash(node) {
@@ -1701,7 +1410,7 @@ function getPositionParent(node) {
 		if (!node) { return; }
 
 		// Is the node popable, switchable or toggleable?
-		var classes = dom.classes(node);
+		//var classes = dom.classes(node);
 
 		if (dom.activeMatchers.find(apply(node))) {
 			activate(e, node);
@@ -1761,295 +1470,285 @@ function getPositionParent(node) {
 		activeClass: 'active',
 		onClass:     'on'
 	};
-})(this);
+})(window);
+import { requestTick, Stream } from '../../fn/fn.js';
+import { closest, events, isPrimaryButton, preventDefault } from '../dom.js';
+
+// Number of pixels a pressed pointer travels before movestart
+// event is fired.
+var threshold = 8;
+
+var ignoreTags = {
+		textarea: true,
+		input: true,
+		select: true,
+		button: true
+	};
+
+var mouseevents = {
+	move:   'mousemove',
+	cancel: 'mouseup dragstart',
+	end:    'mouseup'
+};
+
+var touchevents = {
+	move:   { type: 'touchmove', passive: false },
+	cancel: 'touchend',
+	end:    'touchend'
+};
+
+
+// Functions
+
+var on              = events.on;
+var off             = events.off;
+var trigger         = events.trigger;
+
+function isIgnoreTag(e) {
+	var tag = e.target.tagName;
+	return tag && !!ignoreTags[tag.toLowerCase()];
+}
+
+function identifiedTouch(touchList, id) {
+	var i, l;
+
+	if (touchList.identifiedTouch) {
+		return touchList.identifiedTouch(id);
+	}
+
+	// touchList.identifiedTouch() does not exist in
+	// webkit yet… we must do the search ourselves...
+
+	i = -1;
+	l = touchList.length;
+
+	while (++i < l) {
+		if (touchList[i].identifier === id) {
+			return touchList[i];
+		}
+	}
+}
+
+function changedTouch(e, data) {
+	var touch = identifiedTouch(e.changedTouches, data.identifier);
+
+	// This isn't the touch you're looking for.
+	if (!touch) { return; }
+
+	// Chrome Android (at least) includes touches that have not
+	// changed in e.changedTouches. That's a bit annoying. Check
+	// that this touch has changed.
+	if (touch.pageX === data.pageX && touch.pageY === data.pageY) { return; }
+
+	return touch;
+}
+
+
+// Handlers that decide when the first movestart is triggered
+
+function mousedown(e){
+	// Ignore non-primary buttons
+	if (!isPrimaryButton(e)) { return; }
+
+	// Ignore form and interactive elements
+	if (isIgnoreTag(e)) { return; }
+
+	on(document, mouseevents.move, mousemove, [e]);
+	on(document, mouseevents.cancel, mouseend, [e]);
+}
+
+function mousemove(e, events){
+	events.push(e);
+	checkThreshold(e, events, e, removeMouse);
+}
+
+function mouseend(e, data) {
+	removeMouse();
+}
+
+function removeMouse() {
+	off(document, mouseevents.move, mousemove);
+	off(document, mouseevents.cancel, mouseend);
+}
+
+function touchstart(e) {
+	// Don't get in the way of interaction with form elements
+	if (ignoreTags[e.target.tagName.toLowerCase()]) { return; }
+
+	var touch = e.changedTouches[0];
+
+	// iOS live updates the touch objects whereas Android gives us copies.
+	// That means we can't trust the touchstart object to stay the same,
+	// so we must copy the data. This object acts as a template for
+	// movestart, move and moveend event objects.
+	var event = {
+		target:     touch.target,
+		pageX:      touch.pageX,
+		pageY:      touch.pageY,
+		identifier: touch.identifier,
+
+		// The only way to make handlers individually unbindable is by
+		// making them unique. This is a crap place to put them, but it
+		// will work.
+		touchmove:  function() { touchmove.apply(this, arguments); },
+		touchend:   function() { touchend.apply(this, arguments); }
+	};
+
+	on(document, touchevents.move, event.touchmove, [event]);
+	on(document, touchevents.cancel, event.touchend, [event]);
+}
+
+function touchmove(e, events) {
+	var touch = changedTouch(e, events[0]);
+	if (!touch) { return; }
+	checkThreshold(e, events, touch, removeTouch);
+}
+
+function touchend(e, events) {
+	var touch = identifiedTouch(e.changedTouches, events[0].identifier);
+	if (!touch) { return; }
+	removeTouch(events);
+}
+
+function removeTouch(events) {
+	off(document, touchevents.move, events[0].touchmove);
+	off(document, touchevents.cancel, events[0].touchend);
+}
+
+function checkThreshold(e, events, touch, fn) {
+	var distX = touch.pageX - events[0].pageX;
+	var distY = touch.pageY - events[0].pageY;
+
+	// Do nothing if the threshold has not been crossed.
+	if ((distX * distX) + (distY * distY) < (threshold * threshold)) { return; }
+
+	var e0   = events[0];
+	var node = events[0].target;
+	var stream;
+
+	// Unbind handlers that tracked the touch or mouse up till now.
+	fn(events);
+
+	// Trigger the touch event
+	trigger(events[0].target, 'dom-touch', {
+		pageX:  e0.pageX,
+		pageY:  e0.pageY,
+		detail: function() {
+			if (!stream) {
+				stream = TouchStream(node, events);
+			}
+
+			//return stream.clone();
+			return stream;
+		}
+	});
+}
+
+
+// Handlers that control what happens following a movestart
+
+function activeMousemove(e, data) {
+	data.touch = e;
+	data.timeStamp = e.timeStamp;
+	data.stream.push(e);
+}
+
+function activeMouseend(e, data) {
+	var target = data.target;
+
+	removeActiveMouse();
+	data.stream.stop();
+}
+
+function removeActiveMouse() {
+	off(document, mouseevents.move, activeMousemove);
+	off(document, mouseevents.end, activeMouseend);
+}
+
+function activeTouchmove(e, data) {
+	var touch = changedTouch(e, data);
+
+	if (!touch) { return; }
+
+	// Stop the interface from gesturing
+	e.preventDefault();
+
+	data.touch = touch;
+	data.timeStamp = e.timeStamp;
+	data.stream.push(touch);
+}
+
+function activeTouchend(e, data) {
+	var touch  = identifiedTouch(e.changedTouches, data.identifier);
+
+	// This isn't the touch you're looking for.
+	if (!touch) { return; }
+
+	removeActiveTouch(data);
+	data.stream.stop();
+}
+
+function removeActiveTouch(data) {
+	off(document, touchevents.move, data.activeTouchmove);
+	off(document, touchevents.end, data.activeTouchend);
+}
+
+function TouchStream(node, events) {
+	var stream = Stream.from(events).map(function(e) {
+		return {
+			x:    e.pageX - events[0].pageX,
+			y:    e.pageY - events[0].pageY,
+			time: (e.timeStamp - events[0].timeStamp) / 1000
+		};
+	});
+
+	var data = {
+		stream:     stream,
+		target:     node,
+		touch:      undefined,
+		identifier: events[0].identifier
+	};
+
+	if (data.identifier === undefined) {
+		// We're dealing with a mouse event.
+		// Stop clicks from propagating during a move
+		on(node, 'click', preventDefault);
+		on(document, mouseevents.move, activeMousemove, data);
+		on(document, mouseevents.cancel, activeMouseend, data);
+	}
+	else {
+		// In order to unbind correct handlers they have to be unique
+		data.activeTouchmove = function(e, data) { activeTouchmove(e, data); };
+		data.activeTouchend  = function(e, data) { activeTouchend(e, data); };
+
+		// We're dealing with a touch.
+		on(document, touchevents.move, data.activeTouchmove, data);
+		on(document, touchevents.end, data.activeTouchend, data);
+	}
+
+	stream.then(function() {
+		// Unbind the click suppressor, waiting until after mouseup
+		// has been handled. I don't know why it has to be any longer than
+		// a tick, but it does, in Chrome at least.
+		setTimeout(function() {
+			off(node, 'click', preventDefault);
+		}, 200);
+	});
+
+	return stream;
+}
+
+on(document, 'mousedown', mousedown);
+on(document, 'touchstart', touchstart);
+import { toPolar } from '../../fn/fn.js';
+import { closest, events } from '../dom.js';
+import './dom-touch.js';
+
 (function(window) {
 	"use strict";
 
-	var Fn     = window.Fn;
-	var Stream = window.Stream;
-	var dom    = window.dom;
-
-
-	// Number of pixels a pressed pointer travels before movestart
-	// event is fired.
-	var threshold = 8;
-
-	var ignoreTags = {
-			textarea: true,
-			input: true,
-			select: true,
-			button: true
-		};
-
-	var mouseevents = {
-		move:   'mousemove',
-		cancel: 'mouseup dragstart',
-		end:    'mouseup'
-	};
-
-	var touchevents = {
-		move:   'touchmove',
-		cancel: 'touchend',
-		end:    'touchend'
-	};
-
-
-	// Functions
-
-	var requestTick     = Fn.requestTick;
-	var on              = dom.events.on;
-	var off             = dom.events.off;
-	var trigger         = dom.events.trigger;
-	var isPrimaryButton = dom.isPrimaryButton;
-	var preventDefault  = dom.preventDefault;
-
-	function isIgnoreTag(e) {
-		var tag = e.target.tagName;
-		return tag && !!ignoreTags[tag.toLowerCase()];
-	}
-
-	function identifiedTouch(touchList, id) {
-		var i, l;
-
-		if (touchList.identifiedTouch) {
-			return touchList.identifiedTouch(id);
-		}
-
-		// touchList.identifiedTouch() does not exist in
-		// webkit yet… we must do the search ourselves...
-
-		i = -1;
-		l = touchList.length;
-
-		while (++i < l) {
-			if (touchList[i].identifier === id) {
-				return touchList[i];
-			}
-		}
-	}
-
-	function changedTouch(e, data) {
-		var touch = identifiedTouch(e.changedTouches, data.identifier);
-
-		// This isn't the touch you're looking for.
-		if (!touch) { return; }
-
-		// Chrome Android (at least) includes touches that have not
-		// changed in e.changedTouches. That's a bit annoying. Check
-		// that this touch has changed.
-		if (touch.pageX === data.pageX && touch.pageY === data.pageY) { return; }
-
-		return touch;
-	}
-
-
-	// Handlers that decide when the first movestart is triggered
-
-	function mousedown(e){
-		// Ignore non-primary buttons
-		if (!isPrimaryButton(e)) { return; }
-
-		// Ignore form and interactive elements
-		if (isIgnoreTag(e)) { return; }
-
-		on(document, mouseevents.move, mousemove, [e]);
-		on(document, mouseevents.cancel, mouseend, [e]);
-	}
-
-	function mousemove(e, events){
-		events.push(e);
-		checkThreshold(e, events, e, removeMouse);
-	}
-
-	function mouseend(e, data) {
-		removeMouse();
-	}
-
-	function removeMouse() {
-		off(document, mouseevents.move, mousemove);
-		off(document, mouseevents.cancel, mouseend);
-	}
-
-	function touchstart(e) {
-		// Don't get in the way of interaction with form elements
-		if (ignoreTags[e.target.tagName.toLowerCase()]) { return; }
-
-		var touch = e.changedTouches[0];
-
-		// iOS live updates the touch objects whereas Android gives us copies.
-		// That means we can't trust the touchstart object to stay the same,
-		// so we must copy the data. This object acts as a template for
-		// movestart, move and moveend event objects.
-		var event = {
-			target:     touch.target,
-			pageX:      touch.pageX,
-			pageY:      touch.pageY,
-			identifier: touch.identifier,
-
-			// The only way to make handlers individually unbindable is by
-			// making them unique. This is a crap place to put them, but it
-			// will work.
-			touchmove:  function() { touchmove.apply(this, arguments); },
-			touchend:   function() { touchend.apply(this, arguments); }
-		};
-
-		on(document, touchevents.move, event.touchmove, [event]);
-		on(document, touchevents.cancel, event.touchend, [event]);
-	}
-
-	function touchmove(e, events) {
-		var touch = changedTouch(e, events[0]);
-		if (!touch) { return; }
-		checkThreshold(e, events, touch, removeTouch);
-	}
-
-	function touchend(e, events) {
-		var touch = identifiedTouch(e.changedTouches, events[0].identifier);
-		if (!touch) { return; }
-		removeTouch(events);
-	}
-
-	function removeTouch(events) {
-		off(document, touchevents.move, events[0].touchmove);
-		off(document, touchevents.cancel, events[0].touchend);
-	}
-
-	function checkThreshold(e, events, touch, fn) {
-		var distX = touch.pageX - events[0].pageX;
-		var distY = touch.pageY - events[0].pageY;
-
-		// Do nothing if the threshold has not been crossed.
-		if ((distX * distX) + (distY * distY) < (threshold * threshold)) { return; }
-
-		var e0   = events[0];
-		var node = events[0].target;
-		var stream;
-
-		// Unbind handlers that tracked the touch or mouse up till now.
-		fn(events);
-
-		// Trigger the touch event
-		trigger(events[0].target, 'dom-touch', {
-			pageX:  e0.pageX,
-			pageY:  e0.pageY,
-			detail: function() {
-				if (!stream) {
-					stream = TouchStream(node, events);
-				}
-
-				//return stream.clone();
-				return stream;
-			}
-		});
-	}
-
-
-	// Handlers that control what happens following a movestart
-
-	function activeMousemove(e, data) {
-		data.touch = e;
-		data.timeStamp = e.timeStamp;
-		data.stream.push(e);
-	}
-
-	function activeMouseend(e, data) {
-		var target = data.target;
-
-		removeActiveMouse();
-		data.stream.stop();
-	}
-
-	function removeActiveMouse() {
-		off(document, mouseevents.move, activeMousemove);
-		off(document, mouseevents.end, activeMouseend);
-	}
-
-	function activeTouchmove(e, data) {
-		var touch = changedTouch(e, data);
-
-		if (!touch) { return; }
-
-		// Stop the interface from gesturing
-		e.preventDefault();
-
-		data.touch = touch;
-		data.timeStamp = e.timeStamp;
-		data.stream.push(touch);
-	}
-
-	function activeTouchend(e, data) {
-		var touch  = identifiedTouch(e.changedTouches, data.identifier);
-
-		// This isn't the touch you're looking for.
-		if (!touch) { return; }
-
-		removeActiveTouch(data);
-		data.stream.stop();
-	}
-
-	function removeActiveTouch(data) {
-		off(document, touchevents.move, data.activeTouchmove);
-		off(document, touchevents.end, data.activeTouchend);
-	}
-
-	function TouchStream(node, events) {
-		var stream = Stream.from(events).map(function(e) {
-			return {
-				x:    e.pageX - events[0].pageX,
-				y:    e.pageY - events[0].pageY,
-				time: (e.timeStamp - events[0].timeStamp) / 1000
-			};
-		});
-
-		var data = {
-			stream:     stream,
-			target:     node,
-			touch:      undefined,
-			identifier: events[0].identifier
-		};
-
-		if (data.identifier === undefined) {
-			// We're dealing with a mouse event.
-			// Stop clicks from propagating during a move
-			on(node, 'click', preventDefault);
-			on(document, mouseevents.move, activeMousemove, data);
-			on(document, mouseevents.cancel, activeMouseend, data);
-		}
-		else {
-			// In order to unbind correct handlers they have to be unique
-			data.activeTouchmove = function(e, data) { activeTouchmove(e, data); };
-			data.activeTouchend  = function(e, data) { activeTouchend(e, data); };
-
-			// We're dealing with a touch.
-			on(document, touchevents.move, data.activeTouchmove, data);
-			on(document, touchevents.end, data.activeTouchend, data);
-		}
-
-		stream.then(function() {
-			// Unbind the click suppressor, waiting until after mouseup
-			// has been handled. I don't know why it has to be any longer than
-			// a tick, but it does, in Chrome at least.
-			setTimeout(function() {
-				off(node, 'click', preventDefault);
-			}, 200);
-		});
-
-		return stream;
-	}
-
-	on(document, 'mousedown', mousedown);
-	on(document, 'touchstart', touchstart);
-
-})(this);
-(function(window) {
-	"use strict";
-
-	var Fn      = window.Fn;
-	var dom     = window.dom;
-
-	var on      = dom.events.on;
-	var trigger = dom.events.trigger;
-	var closest = dom.closest;
+	var on      = events.on;
+	var trigger = events.trigger;
 
 //	var settings = {
 //		// Ratio of distance over target finger must travel to be
@@ -2067,7 +1766,7 @@ function getPositionParent(node) {
 		//var y = data.y;
 		//var w = node.offsetWidth;
 		//var h = node.offsetHeight;
-		var polar = Fn.toPolar([data.x, data.y]);
+		var polar = toPolar([data.x, data.y]);
 
 		// Todo: check if swipe has enough velocity and distance
 		//x/w > settings.threshold || e.velocityX * x/w * settings.sensitivity > 1
@@ -2092,16 +1791,18 @@ function getPositionParent(node) {
 			touchdone(node, data);
 		});
 	});
-})(this);
+})(window);
 // dom.popable
 //
 // Extends the default behaviour of events for the .tip class.
 
-(function(window) {
+import { noop } from '../../fn/fn.js';
+import { default as dom, events, matches } from '../dom.js';
+import './dom-activate.js';
 
-	var dom     = window.dom;
-	var trigger = dom.events.trigger;
-	var matches = dom.matches('.popable, [popable]');
+(function(window) {
+	var trigger = events.trigger;
+	var match   = matches('.popable, [popable]');
 
 	function activate(e) {
 		// Use method detection - e.defaultPrevented is not set in time for
@@ -2109,7 +1810,7 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var node    = e.target;
-		if (!matches(node)) { return; }
+		if (!match(node)) { return; }
 
 		// Make user actions outside node deactivat the node
 
@@ -2137,41 +1838,58 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 		e.default();
 	}
 
 	document.addEventListener('dom-activate', activate);
 	document.addEventListener('dom-deactivate', deactivate);
-	dom.activeMatchers.push(matches);
-})(this);
+	dom.activeMatchers.push(match);
+})(window);
 // dom.toggleable
+
+import { remove } from '../../fn/fn.js';
+import { default as dom, get, events, closest, matches, children, isPrimaryButton, isInternalLink, identify } from '../dom.js';
+import './dom-activate.js';
 
 (function(window) {
 	"use strict";
 
-	var dom     = window.dom;
-
 	// Define
 
-	var matches = dom.matches('.toggleable, [toggleable]');
+	var match = matches('.toggleable, [toggleable]');
 
 	// Functions
 
-	var on      = dom.events.on;
-	var off     = dom.events.off;
-	var trigger = dom.events.trigger;
+	var on      = events.on;
+	var off     = events.off;
+	var trigger = events.trigger;
 
-	function click(e, activeTarget) {
+	var actives = [];
+
+	function getHash(node) {
+		return (node.hash ?
+			node.hash :
+			node.getAttribute('href')
+		).substring(1);
+	}
+
+	function click(e) {
 		// A prevented default means this link has already been handled.
 		if (e.defaultPrevented) { return; }
-		if (!dom.isPrimaryButton(e)) { return; }
+		if (!isPrimaryButton(e)) { return; }
 
-		var node = e.currentTarget;
+		var node = closest('a[href]', e.target);
 		if (!node) { return; }
+		if (node.hostname && !isInternalLink(node)) { return; }
 
-		trigger(activeTarget, 'dom-deactivate', {
-			relatedTarget: e.target
+		// Does it point to an id?
+		var id = getHash(node);
+		if (!id) { return; }
+		if (actives.indexOf(id) === -1) { return; }
+
+		trigger(get(id), 'dom-deactivate', {
+			relatedTarget: node
 		});
 
 		e.preventDefault();
@@ -2183,15 +1901,9 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
-		var id = dom.identify(target);
-
-		dom('a[href$="#' + id + '"]')
-		.forEach(function(node) {
-			on(node, 'click', click, e.target);
-		});
-
+		actives.push(identify(target));
 		e.default();
 	}
 
@@ -2199,49 +1911,43 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
-		var id = e.target.id;
-
-		dom('a[href$="#' + id + '"]')
-		.forEach(function(node) {
-			off(node, 'click', click);
-		});
-
+		remove(actives, target.id);
 		e.default();
 	}
 
+	on(dom.root, 'click', click);
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
 
-	dom.activeMatchers.push(matches);
-})(this);
+	dom.activeMatchers.push(match);
+})(window);
 // dom.switchable
 //
 // Extends the default behaviour of the activate and deactivate
 // events with things to do when they are triggered on nodes.
 
+import { Functor as Fn } from '../../fn/fn.js';
+import { default as dom, events, trigger, matches, children } from '../dom.js';
+import './dom-activate.js';
+
 (function(window) {
 	"use strict";
 
-	// Import
-
-	var Fn      = window.Fn;
-	var dom     = window.dom;
-
 	// Define
 
-	var matches = dom.matches('.switchable, [switchable]');
-	var on      = dom.events.on;
-	var triggerDeactivate = dom.trigger('dom-deactivate');
+	var match   = matches('.switchable, [switchable]');
+	var on      = events.on;
+	var triggerDeactivate = trigger('dom-deactivate');
 
 	function activate(e) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
-		var nodes = dom.query('.switchable', target.parentNode);
+		var nodes = children(target.parentNode).filter(match);
 		var i     = nodes.indexOf(target);
 
 		nodes.splice(i, 1);
@@ -2259,25 +1965,27 @@ function getPositionParent(node) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
 		e.default();
 	}
 
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
-	dom.activeMatchers.push(matches);
-})(this);
+	dom.activeMatchers.push(match);
+})(window);
+
+import { last, wrap } from '../../fn/fn.js';
+import { default as dom, events, closest, matches } from '../dom.js';
+import './dom-swipe.js';
+import './dom-touch.js';
+import './dom.switchable.js';
+
 (function(window) {
 	"use strict";
 
-	var Fn       = window.Fn;
-	var last     = Fn.last;
-	var dom      = window.dom;
-	var children = dom.children;
-	var on       = dom.events.on;
-	var trigger  = dom.events.trigger;
-	var closest  = dom.closest;
+	var on       = events.on;
+	var trigger  = events.trigger;
 	var tau      = Math.PI * 2;
 
 	var elasticDistance = 800;
@@ -2289,7 +1997,7 @@ function getPositionParent(node) {
 	}
 
 	function xMinFromChildren(node) {
-		var child = last(children(node).filter(dom.matches('.switchable')));
+		var child = last(dom.children(node).filter(matches('.switchable, [switchable]')));
 
 		// Get the right-most x of the last switchable child's right-most edge
 		var w1 = child.offsetLeft + child.clientWidth;
@@ -2297,10 +2005,10 @@ function getPositionParent(node) {
 		return w2 - w1;
 	}
 
-	on(document, 'dom-touch', function(e) {
+	on(document, 'dom-touch', function touch(e) {
 		if (e.defaultPrevented) { return; }
 
-		var node = closest('.swipeable', e.target);
+		var node = closest('.swipeable, [swipeable]', e.target);
 		if (!node) { return; }
 
 		var classes = dom.classes(node);
@@ -2329,7 +2037,7 @@ function getPositionParent(node) {
 			xMax = parseFloat(xMax) || 0;
 		}
 
-		classes.add('notransition');
+		classes.add('no-transition');
 
 		var ax = x;
 
@@ -2351,7 +2059,7 @@ function getPositionParent(node) {
 			node.style.transform = transform;
 		})
 		.then(function() {
-			classes.remove('notransition');
+			classes.remove('no-transition');
 
 			// Todo: Watch out, this may interfere with slides
 			var xSnaps = dom.attribute('data-slide-snap', node);
@@ -2381,13 +2089,26 @@ function getPositionParent(node) {
 		node.style.transform = 'translate(' + l + 'px, 0px)';
 	}
 
-	on(document, 'dom-swipe', function(e) {
+	function update(swipeable, node) {
+		var box = dom.box(node);
+
+		// node may not be visible, in which case we can't update
+		if (!box) { return; }
+
+		var l1 = box.left;
+		var l2 = dom.box(swipeable).left;
+		var l  = l1 - l2 - dom.style('margin-left', node);
+
+		swipeable.style.transform = 'translate(' + (-l) + 'px, 0px)';
+	}
+
+	on(document, 'dom-swipe', function swipe(e) {
 		if (e.defaultPrevented) { return; }
 
-		var node = closest('.swipeable', e.target);
+		var node = closest('.swipeable, [swipeable]', e.target);
 		if (!node) { return; }
 
-		var angle = Fn.wrap(0, tau, e.angle || 0);
+		var angle = wrap(0, tau, e.angle || 0);
 
 			// If angle is rightwards
 		var prop = (angle > tau * 1/8 && angle < tau * 3/8) ?
@@ -2399,9 +2120,14 @@ function getPositionParent(node) {
 
 		if (!prop) { return; }
 
-		var active = children(node)
-		.filter(dom.matches('.active'))
-		.shift();
+		var children = dom.children(node);
+
+		// it is entirely possible there are no active children – the initial
+		// HTML may not specify an active child – in which case we assume the
+		// first child is displayed
+		var active = children
+		.filter(matches('.active'))
+		.shift() || children.shift();
 
 		if (active[prop]) {
 			trigger(active[prop], 'dom-activate');
@@ -2411,7 +2137,7 @@ function getPositionParent(node) {
 		}
 	});
 
-	on(document, 'dom-activate', function(e) {
+	on(document, 'dom-activate', function activate(e) {
 		// Use method detection - e.defaultPrevented is not set in time for
 		// subsequent listeners on the same node
 		if (!e.default) { return; }
@@ -2419,121 +2145,140 @@ function getPositionParent(node) {
 		var node   = e.target;
 		var parent = node.parentNode;
 
-		if (!dom.matches('.swipeable', parent)) { return; }
+		if (!matches('.swipeable, [swipeable]', parent)) { return; }
 
 		var classes = dom.classes(parent);
-		classes.remove('notransition');
-		document.documentElement.clientWidth;
-
-		var l1 = dom.box(node).left;
-		var l2 = dom.box(parent).left;
-		var l  = l1 - l2 - dom.style('margin-left', node);
-
-		parent.style.transform = 'translate(' + (-l) + 'px, 0px)';
+		classes.remove('no-transition');
+		// Force recalc
+		// TODO: check if this gets removed by JS minifier
+		dom.root.clientWidth;
 		e.preventDefault();
+		update(parent, node);
 	});
-})(this);
-(function(window) {
-	"use strict";
 
-	var Fn      = window.Fn;
-	var dom     = window.dom;
-
-	var noop          = Fn.noop;
-	var on            = dom.events.on;
-	var off           = dom.events.off;
-	var trigger       = dom.events.trigger;
-	var disableScroll = dom.disableScroll;
-	var enableScroll  = dom.enableScroll;
-	var trapFocus     = dom.trapFocus;
-	var untrapFocus   = noop;
-
-	var matches = dom.matches('.focusable, [focusable]');
-	var delay   = 600;
-
-	on(document, 'dom-activate', function(e) {
-		if (e.defaultPrevented) { return; }
-		if (!matches(e.target)) { return; }
-
-		// Trap focus
-
-		var node = e.target;
-		var trap = function trap(e) {
-			clearTimeout(timer);
-			off(e.target, 'transitionend', trap);
-			untrapFocus = trapFocus(e.target);
-		};
-
-		var timer = setTimeout(trap, delay, e);
-		on(e.target, 'transitionend', trap);
-
-		// Prevent scrolling of main document
-
-		disableScroll(dom.root);
-
-		// Make the escape key deactivate the focusable
-
-		requestAnimationFrame(function() {
-			function keydown(e) {
-				if (e.keyCode !== 27) { return; }
-				trigger(node, 'dom-deactivate');
-				e.preventDefault();
-			}
-
-			function deactivate(e) {
-				if (node !== e.target) { return; }
-				if (e.defaultPrevented) { return; }
-				document.removeEventListener('keydown', keydown);
-				document.removeEventListener('dom-deactivate', deactivate);
-			}
-
-			document.addEventListener('keydown', keydown);
-			document.addEventListener('dom-deactivate', deactivate);
+	on(window, 'resize', function resize() {
+		// Update swipeable positions
+		dom('.swipeable, [swipeable]').forEach(function(swipeable) {
+			var node = dom.children(swipeable).find(matches('.active'));
+			if (!node) { return; }
+			var classes = dom.classes(swipeable);
+			classes.add('no-transition');
+			update(swipeable, node);
+			// Force recalc
+			// TODO: check if this gets removed by JS minifier
+			dom.root.clientWidth;
+			classes.remove('no-transition');
 		});
 	});
+})(window);
+import { noop, requestTick, Stream } from '../../fn/fn.js';
+import { default as dom, disableScroll, enableScroll, trapFocus, events, matches } from '../dom.js';
+import './dom-activate.js';
 
-	on(document, 'dom-deactivate', function(e) {
-		if (e.defaultPrevented) { return; }
-		if (!matches(e.target)) { return; }
+var on            = events.on;
+var off           = events.off;
+var trigger       = events.trigger;
+var untrapFocus   = noop;
 
-		var untrap = function untrap(e) {
-			clearTimeout(timer);
-			off(e.target, 'transitionend', untrap);
-			untrapFocus();
-			untrapFocus = noop;
-		};
+var match = matches('.focusable, [focusable]');
+var delay = 600;
 
-		var timer = setTimeout(untrap, delay, e);
-		on(e.target, 'transitionend', untrap);
-		enableScroll(dom.root);
+
+on(document, 'dom-activate', function(e) {
+	if (e.defaultPrevented) { return; }
+	if (!match(e.target)) { return; }
+
+	// Trap focus
+
+	var node = e.target;
+	var trap = function trap(e) {
+		clearTimeout(timer);
+		off(e.target, 'transitionend', trap);
+		untrapFocus = trapFocus(e.target);
+	};
+
+	var timer = setTimeout(trap, delay, e);
+	on(e.target, 'transitionend', trap);
+
+	// Prevent scrolling of main document
+
+	disableScroll(dom.root);
+
+	// Make the escape key deactivate the focusable
+
+	requestAnimationFrame(function() {
+		function keydown(e) {
+			if (e.keyCode !== 27) { return; }
+			trigger(node, 'dom-deactivate');
+			e.preventDefault();
+		}
+
+		function deactivate(e) {
+			if (node !== e.target) { return; }
+			if (e.defaultPrevented) { return; }
+			document.removeEventListener('keydown', keydown);
+			document.removeEventListener('dom-deactivate', deactivate);
+		}
+
+		document.addEventListener('keydown', keydown);
+		document.addEventListener('dom-deactivate', deactivate);
 	});
+});
 
-	dom.activeMatchers.push(matches);
-})(this);
+on(document, 'dom-deactivate', function(e) {
+	if (e.defaultPrevented) { return; }
+	if (!match(e.target)) { return; }
+
+	var untrap = function untrap(e) {
+		clearTimeout(timer);
+		off(e.target, 'transitionend', untrap);
+		untrapFocus();
+		untrapFocus = noop;
+	};
+
+	var timer = setTimeout(untrap, delay, e);
+	on(e.target, 'transitionend', untrap);
+	enableScroll(dom.root);
+});
+
+
+dom.activeMatchers.push(match);
 // dom.toggleable
+
+import { noop } from '../../fn/fn.js';
+import { default as dom, remove, events, matches } from '../dom.js';
+import './dom-activate.js';
 
 (function(window) {
 	"use strict";
 
-	// Import
-	var dom         = window.dom;
-
 	// Define
-	var matches     = dom.matches('.removeable, [removeable]');
+	var match       = matches('.removeable, [removeable]');
 
 	// Max duration of deactivation transition in seconds
 	var maxDuration = 1;
 
 	// Functions
-	var on      = dom.events.on;
-	var off     = dom.events.off;
-	var remove  = dom.remove;
+	var on      = events.on;
+	var off     = events.off;
+
+    function activate(e) {
+        // Use method detection - e.defaultPrevented is not set in time for
+        // subsequent listeners on the same node
+        if (!e.default) { return; }
+
+        var target = e.target;
+        if (!match(target)) { return; }
+
+        //dom.identify(target);
+        e.default();
+    }
 
 	function deactivate(e, data, fn) {
 		if (!e.default) { return; }
 
 		var target = e.target;
-		if (!matches(target)) { return; }
+		if (!match(target)) { return; }
 
 		function update() {
 			clearTimeout(timer);
@@ -2547,32 +2292,28 @@ function getPositionParent(node) {
 		e.default();
 	}
 
+    on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
-})(this);
+})(window);
 // dom.locateable
 //
 // Extends the default behaviour of events for the .tip class.
 
+import { by, exponentialOut as expOut, noop } from '../../fn/fn.js';
+import { default as dom, box, offset, events, matches } from '../dom.js';
+import './dom-activate.js';
+
 (function(window) {
 
-    var Fn       = window.Fn;
-    var dom      = window.dom;
-
-    var by       = Fn.by;
-    var noop     = Fn.noop;
-    var powOut   = Fn.exponentialOut;
-    var animate  = dom.animate;
-    var box      = dom.box;
-    var offset   = dom.offset;
-    var on       = dom.events.on;
-    var matches  = dom.matches(".locateable, [locateable]");
+    var match = matches(".locateable, [locateable]");
+    var on    = events.on;
 
     // Time after scroll event to consider the document is scrolling
     var idleTime = 90;
 
     // Duration and easing of scroll animation
     var scrollDuration  = 0.8;
-    var scrollTransform = powOut(6);
+    var scrollTransform = expOut(6);
 
     // Time of latest scroll event
     var scrollTime = 0;
@@ -2584,7 +2325,7 @@ function getPositionParent(node) {
         if (!e.default) { return; }
 
         var target = e.target;
-        if (!matches(target)) { return; }
+        if (!match(target)) { return; }
 
         // If node is already active, ignore
         if (target === activeNode) { return; }
@@ -2622,7 +2363,7 @@ function getPositionParent(node) {
 
         var target = e.target;
 
-        if (!matches(target)) { return; }
+        if (!match(target)) { return; }
 
         e.default();
 
@@ -2632,21 +2373,10 @@ function getPositionParent(node) {
         }
 	}
 
-    function windowBox() {
-        return {
-            left:   0,
-            top:    0,
-            right:  window.innerWidth,
-            bottom: window.innerHeight,
-            width:  window.innerWidth,
-            height: window.innerHeight
-        };
-    }
-
     function update() {
         var locateables = dom('.locateable');
         var boxes       = locateables.map(box).sort(by('top'));
-        var winBox      = windowBox();
+        var winBox      = box(window);
 
         var n = -1;
         while (boxes[++n]) {
@@ -2685,185 +2415,173 @@ function getPositionParent(node) {
     on(document, 'dom-deactivate', deactivate);
     on(window, 'scroll', scroll);
     update();
-    dom.activeMatchers.push(matches);
-})(this);
-(function(window) {
-	"use strict";
+    dom.activeMatchers.push(match);
+})(window);
 
-    // Monitors forms and fields with .validateable for input, and generates
-    // and manages .error-labels following those that fail validation.
-    //
-    // Messages are read from:
-    //
-    // 1. A validation attribute on the input:
-    //    <input type="email" data-validation-type="That is not an email address" />
-    //    The attribute name can be modified globally by setting dom.validation.attributePrefix.
-    //
-    // 2. The messages in dom.validation.messages.
-    //
-    // 3. The browser's default validation message (which is available on the
-    //    input at the point that it fails validastion).
-    //
-    // Inputs inside or with .validateable are given .validated after they are
-    // first validated, enabling pre- as well as post- validation styles.
+// Monitors forms and fields with .validateable for input, and generates
+// and manages .error-labels following those that fail validation.
+//
+// Messages are read from:
+//
+// 1. A validation attribute on the input:
+//    <input type="email" data-validation-type="That is not an email address" />
+//    The attribute name can be modified globally by setting dom.validation.attributePrefix.
+//
+// 2. The messages in dom.validation.messages.
+//
+// 3. The browser's default validation message (which is available on the
+//    input at the point that it fails validastion).
+//
+// Inputs inside or with .validateable are given .validated after they are
+// first validated, enabling pre- as well as post- validation styles.
 
-	var Fn             = window.Fn;
-	var Stream         = window.Stream;
-	var dom            = window.dom;
+import { get, invoke, Stream } from '../../fn/fn.js';
+import { default as dom, create, remove, matches, next, validate, isValid, classes, after } from '../dom.js';
 
-	var get            = Fn.get;
-	var invoke         = Fn.invoke;
-	var nothing        = Fn.nothing;
-	var once           = Fn.once;
+var isValidateable = matches('.validateable, .validateable input, .validateable textarea, .validateable select, [validateable], [validateable] input, [validateable] textarea, [validateable] select');
 
-	var after          = dom.after;
-	var classes        = dom.classes;
-    var matches        = dom.matches;
-    var next           = dom.next;
-	var remove         = dom.remove;
+var types = {
+	patternMismatch: 'pattern',
+	rangeOverflow:   'max',
+	rangeUnderflow:  'min',
+	stepMismatch:    'step',
+	tooLong:         'maxlength',
+	typeMismatch:    'type',
+	valueMissing:    'required'
+};
 
-    var isValidateable = matches('.validateable, .validateable input, .validateable textarea, .validateable select');
 
-	var types = {
-		patternMismatch: 'pattern',
-		rangeOverflow:   'max',
-		rangeUnderflow:  'min',
-		stepMismatch:    'step',
-		tooLong:         'maxlength',
-		typeMismatch:    'type',
-		valueMissing:    'required'
+function negate(fn) {
+	return function() {
+		return !fn.apply(this, arguments);
 	};
+}
 
-	function negate(fn) {
-		return function() {
-			return !fn.apply(this, arguments);
-		};
-	}
+function isShowingMessage(node) {
+	return node.nextElementSibling
+		&& matches('.' + dom.validation.errorClass, node.nextElementSibling);
+}
 
-	function isValid(node) {
-		return node.validity ? node.validity.valid : true ;
-	}
+function toError(input) {
+	var node     = input;
+	var validity = node.validity;
+	var prefix   = dom.validation.attributePrefix;
+	var messages = dom.validation.messages;
+	var name;
 
-	function isShowingMessage(node) {
-		return node.nextElementSibling
-			&& matches('.' + dom.validation.errorClass, node.nextElementSibling);
-	}
-
-	function toError(input) {
-		var node     = input;
-		var validity = node.validity;
-        var prefix   = dom.validation.attributePrefix;
-        var messages = dom.validation.messages;
-        var name, text;
-
-		for (name in validity) {
-			if (name !== 'valid' && validity[name]) {
-				text = dom.validation[types[name]];
-
-				if (text) {
-					input.setCustomValidity(text);
-				}
-
-				return {
-					type: name,
-					attr: types[name],
-					name: input.name,
-					text: (prefix && input.getAttribute(prefix + types[name]))
-                        || (messages && messages[types[name]])
-                        || node.validationMessage,
-					node: input
-				};
-			}
+	for (name in validity) {
+		if (name !== 'valid' && validity[name]) {
+			return {
+				type: name,
+				attr: types[name],
+				name: input.name,
+				text: (prefix && input.getAttribute(prefix + types[name]))
+					|| (messages && messages[types[name]])
+					|| node.validationMessage,
+				node: input
+			};
 		}
 	}
+}
 
-	function renderError(error) {
-		var input  = error.node;
-		var node   = input;
+function renderError(error) {
+	var input = error.node;
+	var node  = input;
 
-		while (node.nextElementSibling && matches('.' + dom.validation.errorClass, node.nextElementSibling)) {
-			node = node.nextElementSibling;
-		}
+	// Find the last error
+	while (node.nextElementSibling && matches('.' + dom.validation.errorClass, node.nextElementSibling)) {
+		node = node.nextElementSibling;
+	}
 
-        var label = dom.create('label')
-        dom.assign(label, {
-            textContent: error.text,
-			for:         input.id,
-            class:       'error-label'
+	var label = create('label', {
+		textContent: error.text,
+		for:         input.id,
+		class:       'error-label'
+	});
+
+	after(node, label);
+
+	if (error.type === 'customError') {
+		node.setCustomValidity(error.text);
+
+		dom
+		.events('input', node)
+		.take(1)
+		.each(function() {
+			node.setCustomValidity('');
 		});
-
-		after(node, label);
 	}
+}
 
-	function addValidatedClass(input) {
-		classes(input).add(dom.validation.validatedClass);
+function addValidatedClass(input) {
+	classes(input).add(dom.validation.validatedClass);
+}
+
+function removeMessages(input) {
+	var node = input;
+
+	while ((node = next(node)) && matches('.' + dom.validation.errorClass, node)) {
+		remove(node);
 	}
+}
 
-	function removeMessages(input) {
-		var node = input;
+dom
+.events('input', document)
+.map(get('target'))
+.filter(isValidateable)
+// This came from somewhere - is it for nullifying custom messages? Review.
+.tap(invoke('setCustomValidity', ['']))
+.filter(isValid)
+.each(removeMessages);
 
-		while ((node = next(node)) && matches('.' + dom.validation.errorClass, node)) {
-			remove(node);
-		}
-	}
+dom
+.events('focusout', document)
+.map(get('target'))
+.filter(isValidateable)
+.each(validate);
 
-	dom
-	.event('input', document)
-	.map(get('target'))
-    .filter(isValidateable)
-	.tap(invoke('setCustomValidity', ['']))
-	.filter(isValid)
-	.each(removeMessages);
+dom
+.events('submit', document)
+.map(get('target'))
+.filter(isValidateable)
+.each(addValidatedClass);
 
-	dom
-	.event('focusout', document)
+// Add event in capture phase
+document.addEventListener(
+	'invalid',
+
+	// Push to stream
+	Stream.of()
 	.map(get('target'))
 	.filter(isValidateable)
-	.each(invoke('checkValidity', nothing));
+	.tap(addValidatedClass)
+	.filter(negate(isShowingMessage))
+	.map(toError)
+	.each(renderError)
+	.push,
 
-    dom
-	.event('submit', document)
-	.map(get('target'))
-	.filter(isValidateable)
-	.each(addValidatedClass);
+	// Capture phase
+	true
+);
 
-	// Add event in capture phase
-	document.addEventListener(
-		'invalid',
+dom.validation = {
+	errorClass: 'error-label',
 
-		// Push to stream
-		Stream.of()
-		.map(get('target'))
-        .filter(isValidateable)
-		.tap(addValidatedClass)
-		.filter(negate(isShowingMessage))
-		.map(toError)
-		.each(renderError)
-		.push,
+	// Class added to validated nodes (note: not valid nodes, necessarily,
+	// but nodes that have been validated).
+	validatedClass: 'validated',
 
-		// Capture phase
-		true
-	);
+	// Prefix for input attributes containing validation messages.
+	attributePrefix: 'data-validation-',
 
-    dom.validation = {
-		errorClass: 'error-label',
-
-		// Class added to validated nodes (note: not valid nodes, necessarily)
-		validatedClass: 'validated',
-
-        // Prefix for input attributes containing validation messages.
-        attributePrefix: 'data-validation-',
-
-        // Global object for validation messages.
-        messages: {
-            // pattern:
-            // max:
-            // min:
-            // step:
-            // maxlength:
-            // type:
-            // required:
-        }
-    };
-
-})(this);
+	// Global object for validation messages.
+	messages: {
+		// pattern:
+		// max:
+		// min:
+		// step:
+		// maxlength:
+		// type:
+		// required:
+	}
+};

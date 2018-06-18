@@ -226,7 +226,7 @@ var types = {
 	11: 'fragment'
 };
 
-var svgs = [
+var svgTags = [
 	'circle',
 	'ellipse',
 	'g',
@@ -240,16 +240,20 @@ var svgs = [
 	'svg'
 ];
 
+function isSVGTag(tag) {
+	return svgTags.includes(tag);
+}
+
 var constructors = {
-	text: function(text) {
+	text: function(type, text) {
 		return document.createTextNode(text || '');
 	},
 
-	comment: function(text) {
+	comment: function(type, text) {
 		return document.createComment(text || '');
 	},
 
-	fragment: function(html) {
+	fragment: function(type, html) {
 		var fragment = document.createDocumentFragment();
 
 		if (html) {
@@ -259,22 +263,46 @@ var constructors = {
 		}
 
 		return fragment;
-	}
-};
+	},
 
-svgs.forEach(function(tag) {
-	constructors[tag] = function(attributes) {
-		var node = document.createElementNS(svgNamespace, tag);
-		if (attributes) { setSVGAttributes(node, attributes); }
-		return node;
-	};
-});
+	default: overload(isSVGTag, {
+		true: function(tag, attributes) {
+			var elem = document.createElementNS(svgNamespace, tag);
+
+			setSVGAttributes(elem, attributes);
+
+			// Populate as collection of nodes, converting plain strings to
+			// text nodes where necessary
+			each(append(elem), content);
+			return elem;
+		},
+
+		false: function(tag, attributes, content) {
+			var elem = document.createElement(tag) ;
+
+			assignAttributes(elem, attributes);
+
+			if (typeof content === 'string') {
+				// Populate as HTML
+				elem.innerHTML = content;
+			}
+			else if (typeof content === 'object') {
+				// Populate as collection of nodes, converting plain strings to
+				// text nodes where necessary
+				each(append(elem), map(stringToText, content));
+			}
+
+			return elem;
+		}
+	})
+};
 
 function assignAttributes(node, attributes) {
 	var names = Object.keys(attributes);
 	var n = names.length;
 
 	while (n--) {
+		// Prefer assigning property over attribute
 		if (names[n] in node) {
 			node[names[n]] = attributes[names[n]];
 		}
@@ -293,33 +321,17 @@ function setSVGAttributes(node, attributes) {
 	}
 }
 
-function create(name) {
-	// create(type)
-	// create(type, text)
-	// create(tag, attributes)
-	// create(tag, text, attributes)
+const stringToText = overload(toType, {
+	string: function(string) {
+		return document.createTextNode(string);
+	},
 
-	if (constructors[name]) {
-		return constructors[name](arguments[1]);
-	}
+	// Pass through other types
+	default: id
+});
 
-	var node = document.createElement(name);
-	var attributes;
+var create = overload(id, constructors);
 
-	if (typeof arguments[1] === 'string') {
-		node.innerHTML = arguments[1];
-		attributes = arguments[2];
-	}
-	else {
-		attributes = arguments[1];
-	}
-
-	if (attributes) {
-		assignAttributes(node, attributes);
-	}
-
-	return node;
-}
 
 var clone = features.textareaPlaceholderSet ?
 
@@ -371,11 +383,13 @@ function isInternalLink(node) {
 	var location = window.location;
 
 		// IE does not give us a .hostname for links to
-		// xxx.xxx.xxx.xxx URLs
-	return node.hostname &&
+		// xxx.xxx.xxx.xxx URLs. file:// URLs don't have a hostname
+		// anywhere. This logic is not foolproof, it will let through
+		// links to different protocols for example
+	return (!node.hostname ||
 		// IE gives us the port on node.host, even where it is not
 		// specified. Use node.hostname
-		location.hostname === node.hostname &&
+		location.hostname === node.hostname) &&
 		// IE gives us node.pathname without a leading slash, so
 		// add one before comparing
 		location.pathname === prefixSlash(node.pathname);

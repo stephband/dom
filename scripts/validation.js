@@ -15,58 +15,55 @@
 // The HTML validation API can only set one custom validation message at a time,
 // so the last message per input will be displayed.
 
-(function(window) {
-	var Fn  = window.Fn;
-	var get = Fn.get;
+import { get } from '/static/fn/fn.js'
 
-    function toSelector(str) {
-		return '[name="' + str + '"]';
+function toSelector(str) {
+	return '[name="' + str + '"]';
+}
+
+function flattenErrors(object, form) {
+	var errors = [];
+
+	// Flatten errors into a list
+	for (name in object) {
+		errors.push.apply(errors,
+			object[name].map(function(text) {
+				return {
+					form: form,
+					name: name,
+					text: text
+				};
+			})
+		);
 	}
 
-	function flattenErrors(object, form) {
-		var errors = [];
+	return errors;
+}
 
-		// Flatten errors into a list
-		for (name in object) {
-			errors.push.apply(errors,
-				object[name].map(function(text) {
-					return {
-						form: form,
-						name: name,
-						text: text
-					};
-				})
-			);
-		}
+function setValidity(error) {
+	var selector = toSelector(error.name);
+	var input    = dom.find(selector, error.form);
 
-		return errors;
+	if (!input) {
+		console.warn('Error given for non-existent field name="' + error.name + '"', error);
+		return;
 	}
 
-	function setValidity(error) {
-		var selector = toSelector(error.name);
-		var input    = dom.find(selector, error.form);
+	input.setCustomValidity(error.text);
+}
 
-		if (!input) {
-			console.warn('Error given for non-existent field name="' + error.name + '"', error);
-			return;
-		}
+dom
+.events('dom-error', document)
+.each(function(e) {
+	var form   = e.target;
+	var errors = e.detail;
 
-		input.setCustomValidity(error.text);
+	if (typeof errors === 'object') {
+		// Format data and set custom validation messages on inputs
+		flattenErrors(errors, form).forEach(setValidity);
+
+		// Cause the validation handling found in dom.validation.js to
+		// pick up the custom validation messages and render them
+		form.checkValidity();
 	}
-
-	dom
-	.events('dom-error', document)
-	.each(function(e) {
-		var form   = e.target;
-		var errors = e.detail;
-
-		if (typeof errors === 'object') {
-			// Format data and set custom validation messages on inputs
-			flattenErrors(errors, form).forEach(setValidity);
-
-			// Cause the validation handling found in dom.validation.js to
-			// pick up the custom validation messages and render them
-			form.checkValidity();
-		}
-	});
-})(window);
+});

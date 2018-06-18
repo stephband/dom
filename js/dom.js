@@ -1,5 +1,8 @@
 
 import { cache, curry, denormalise, deprecate, id, noop, overload, pipe, pow, set, Stream, requestTick, toType } from '../../fn/fn.js';
+import create from '../modules/create.js';
+import prefix from '../modules/prefix.js';
+import style  from '../modules/style.js';
 
 var Node        = window.Node;
 var SVGElement  = window.SVGElement;
@@ -61,11 +64,11 @@ var features = define({
 			var testEvent = Event('featuretest');
 			var result    = false;
 
-			appendChild(document.body, input);
+			document.body.appendChild(input);
 			input.disabled = true;
 			input.addEventListener('featuretest', function(e) { result = true; });
 			input.dispatchEvent(testEvent);
-			removeNode(input);
+			input.remove();
 
 			return result;
 		}),
@@ -215,8 +218,6 @@ TokenList.prototype = {
 
 // DOM Nodes
 
-var testDiv = document.createElement('div');
-
 var types = {
 	1:  'element',
 	3:  'text',
@@ -225,113 +226,6 @@ var types = {
 	10: 'doctype',
 	11: 'fragment'
 };
-
-var svgTags = [
-	'circle',
-	'ellipse',
-	'g',
-	'line',
-	'rect',
-	//'text',
-	'use',
-	'path',
-	'polygon',
-	'polyline',
-	'svg'
-];
-
-function isSVGTag(tag) {
-	return svgTags.includes(tag);
-}
-
-var constructors = {
-	text: function(type, text) {
-		return document.createTextNode(text || '');
-	},
-
-	comment: function(type, text) {
-		return document.createComment(text || '');
-	},
-
-	fragment: function(type, html) {
-		var fragment = document.createDocumentFragment();
-
-		if (html) {
-			testDiv.innerHTML = html;
-			append(fragment, testDiv.childNodes);
-			testDiv.innerHTML = '';
-		}
-
-		return fragment;
-	},
-
-	default: overload(isSVGTag, {
-		true: function(tag, attributes) {
-			var elem = document.createElementNS(svgNamespace, tag);
-
-			setSVGAttributes(elem, attributes);
-
-			// Populate as collection of nodes, converting plain strings to
-			// text nodes where necessary
-			each(append(elem), content);
-			return elem;
-		},
-
-		false: function(tag, attributes, content) {
-			var elem = document.createElement(tag) ;
-
-			assignAttributes(elem, attributes);
-
-			if (typeof content === 'string') {
-				// Populate as HTML
-				elem.innerHTML = content;
-			}
-			else if (typeof content === 'object') {
-				// Populate as collection of nodes, converting plain strings to
-				// text nodes where necessary
-				each(append(elem), map(stringToText, content));
-			}
-
-			return elem;
-		}
-	})
-};
-
-function assignAttributes(node, attributes) {
-	var names = Object.keys(attributes);
-	var n = names.length;
-
-	while (n--) {
-		// Prefer assigning property over attribute
-		if (names[n] in node) {
-			node[names[n]] = attributes[names[n]];
-		}
-		else {
-			node.setAttribute(names[n], attributes[names[n]]);
-		}
-	}
-}
-
-function setSVGAttributes(node, attributes) {
-	var names = Object.keys(attributes);
-	var n = names.length;
-
-	while (n--) {
-		node.setAttributeNS(null, names[n], attributes[names[n]]);
-	}
-}
-
-const stringToText = overload(toType, {
-	string: function(string) {
-		return document.createTextNode(string);
-	},
-
-	// Pass through other types
-	default: id
-});
-
-var create = overload(id, constructors);
-
 
 var clone = features.textareaPlaceholderSet ?
 
@@ -448,11 +342,6 @@ function flashClass(string, node) {
 	});
 }
 
-function children(node) {
-	// In IE and Safari, document fragments do not have .children
-	return toArray(node.children || node.querySelectorAll('*'));
-}
-
 
 // DOM Traversal
 
@@ -515,20 +404,6 @@ function appendChild(target, node) {
 	return target;
 }
 
-function append(target, node) {
-	if (node instanceof Node || node instanceof SVGElement) {
-		appendChild(target, node);
-		return node;
-	}
-
-	if (!node.length) { return; }
-
-	var array = node.reduce ? node : A.slice.call(node) ;
-	array.reduce(appendChild, target);
-
-	return node;
-}
-
 function empty(node) {
 	while (node.lastChild) { node.removeChild(node.lastChild); }
 }
@@ -562,79 +437,6 @@ function replace(target, node) {
 
 
 // CSS
-
-var styleParsers = {
-	"transform:translateX": function(node) {
-		var matrix = style('transform', node);
-		if (!matrix || matrix === "none") { return 0; }
-		var values = valuesFromCssFn(matrix);
-		return parseFloat(values[4]);
-	},
-
-	"transform:translateY": function(node) {
-		var matrix = style('transform', node);
-		if (!matrix || matrix === "none") { return 0; }
-		var values = valuesFromCssFn(matrix);
-		return parseFloat(values[5]);
-	},
-
-	"transform:scale": function(node) {
-		var matrix = style('transform', node);
-		if (!matrix || matrix === "none") { return 0; }
-		var values = valuesFromCssFn(matrix);
-		var a = parseFloat(values[0]);
-		var b = parseFloat(values[1]);
-		return Math.sqrt(a * a + b * b);
-	},
-
-	"transform:rotate": function(node) {
-		var matrix = style('transform', node);
-		if (!matrix || matrix === "none") { return 0; }
-		var values = valuesFromCssFn(matrix);
-		var a = parseFloat(values[0]);
-		var b = parseFloat(values[1]);
-		return Math.atan2(b, a);
-	}
-};
-
-var prefix = (function(prefixes) {
-	var node = document.createElement('div');
-	var cache = {};
-
-	function testPrefix(prop) {
-		if (prop in node.style) { return prop; }
-
-		var upper = prop.charAt(0).toUpperCase() + prop.slice(1);
-		var l = prefixes.length;
-		var prefixProp;
-
-		while (l--) {
-			prefixProp = prefixes[l] + upper;
-
-			if (prefixProp in node.style) {
-				return prefixProp;
-			}
-		}
-
-		return false;
-	}
-
-	return function prefix(prop){
-		return cache[prop] || (cache[prop] = testPrefix(prop));
-	};
-})(['Khtml','O','Moz','Webkit','ms']);
-
-function valuesFromCssFn(string) {
-	return string.split('(')[1].split(')')[0].split(/\s*,\s*/);
-}
-
-function style(name, node) {
-	return window.getComputedStyle ?
-		window
-		.getComputedStyle(node, null)
-		.getPropertyValue(name) :
-		0 ;
-}
 
 function windowBox() {
 	return {
@@ -673,78 +475,6 @@ function offset(node1, node2) {
 
 // DOM Events
 
-var keyCodes = {
-	8:  'backspace',
-	9:  'tab',
-	13: 'enter',
-	16: 'shift',
-	17: 'ctrl',
-	18: 'alt',
-	27: 'escape',
-	32: 'space',
-	33: 'pageup',
-	34: 'pagedown',
-	35: 'pageright',
-	36: 'pageleft',
-	37: 'left',
-	38: 'up',
-	39: 'right',
-	40: 'down',
-	46: 'delete',
-	48: '0',
-	49: '1',
-	50: '2',
-	51: '3',
-	52: '4',
-	53: '5',
-	54: '6',
-	55: '7',
-	56: '8',
-	57: '9',
-	65: 'a',
-	66: 'b',
-	67: 'c',
-	68: 'd',
-	69: 'e',
-	70: 'f',
-	71: 'g',
-	72: 'h',
-	73: 'i',
-	74: 'j',
-	75: 'k',
-	76: 'l',
-	77: 'm',
-	78: 'n',
-	79: 'o',
-	80: 'p',
-	81: 'q',
-	82: 'r',
-	83: 's',
-	84: 't',
-	85: 'u',
-	86: 'v',
-	87: 'w',
-	88: 'x',
-	89: 'y',
-	90: 'z',
-	// Mac Chrome left CMD
-	91: 'cmd',
-	// Mac Chrome right CMD
-	93: 'cmd',
-	186: ';',
-	187: '=',
-	188: ',',
-	189: '-',
-	190: '.',
-	191: '/',
-	219: '[',
-	220: '\\',
-	221: ']',
-	222: '\'',
-	// Mac FF
-	224: 'cmd'
-};
-
 var eventOptions = { bubbles: true };
 
 var eventsSymbol = Symbol('events');
@@ -775,10 +505,6 @@ function isPrimaryButton(e) {
 	// Ignore mousedowns on any button other than the left (or primary)
 	// mouse button, or when a modifier key is pressed.
 	return (e.which === 1 && !e.ctrlKey && !e.altKey && !e.shiftKey);
-}
-
-function toKey(e) {
-	return keyCodes[e.keyCode];
 }
 
 function on(node, type, fn, data) {
@@ -968,12 +694,6 @@ function trapFocus(node) {
 
 // DOM Fragments and Templates
 
-var mimetypes = {
-	xml:  'application/xml',
-	html: 'text/html',
-	svg:  'image/svg+xml'
-};
-
 function fragmentFromChildren(node) {
 	if (node.domFragmentFromChildren) {
 		return node.domFragmentFromChildren;
@@ -1015,38 +735,6 @@ function fragmentFromId(id) {
 		t === 'script' ? fragmentFromHTML(node.innerHTML, attribute('data-parent-tag', node)) :
 		fragmentFromChildren(node) ;
 }
-
-function parse(type, string) {
-	if (!string) { return; }
-
-	var mimetype = mimetypes[type];
-	var xml;
-
-	// From jQuery source...
-	try {
-		xml = (new window.DOMParser()).parseFromString(string, mimetype);
-	} catch (e) {
-		xml = undefined;
-	}
-
-	if (!xml || xml.getElementsByTagName("parsererror").length) {
-		throw new Error("dom: Invalid XML: " + string);
-	}
-
-	return xml;
-}
-
-var escape = (function() {
-	var pre  = document.createElement('pre');
-	var text = document.createTextNode('');
-
-	pre.appendChild(text);
-
-	return function escape(value) {
-		text.textContent = value;
-		return pre.innerHTML;
-	};
-})();
 
 
 // Units
@@ -1249,17 +937,13 @@ assign(dom, {
 	closest:  curry(closest,  true),
 	contains: curry(contains, true),
 	matches:  curry(matches,  true),
-	children: children,
 	next:     next,
 	previous: previous,
 
 	// DOM mutation
 
-	assign:   curry(assignAttributes,  true),
-	create:   create,
 	clone:    clone,
 	identify: identify,
-	append:   curry(append,  true),
 	before:   curry(before,  true),
 	after:    curry(after,   true),
 	replace:  curry(replace, true),
@@ -1315,19 +999,6 @@ assign(dom, {
 	bounds:      bounds,
 	offset:      curry(offset, true),
 
-	prefix:      prefix,
-	style: curry(function(name, node) {
-		// If name corresponds to a custom property name in styleParsers...
-		if (styleParsers[name]) { return styleParsers[name](node); }
-
-		var value = style(name, node);
-
-		// Pixel values are converted to number type
-		return typeof value === 'string' && rpx.test(value) ?
-			parseFloat(value) :
-			value ;
-	}, true),
-
 	toPx:           toPx,
 	toRem:          toRem,
 	toVw:           toVw,
@@ -1339,8 +1010,6 @@ assign(dom, {
 	fragmentFromChildren: fragmentFromChildren,
 	fragmentFromHTML:     fragmentFromHTML,
 	fragmentFromId:       fragmentFromId,
-	escape:               escape,
-	parse:                curry(parse),
 
 	// DOM events
 
@@ -1349,7 +1018,6 @@ assign(dom, {
 	isPrimaryButton: isPrimaryButton,
 	isTargetEvent:   isTargetEvent,
 	preventDefault:  preventDefault,
-	toKey:           toKey,
 	trapFocus:       trapFocus,
 	trap:            deprecate(trapFocus, 'dom.trap() is now dom.trapFocus()'),
 
@@ -1436,7 +1104,7 @@ assign(dom, {
 		left: 0
 	}, {
 		right:  { get: function() { return window.innerWidth; }, enumerable: true, configurable: true },
-		top:    { get: function() { return dom.style('padding-top', document.body); }, enumerable: true, configurable: true },
+		top:    { get: function() { return style('padding-top', document.body); }, enumerable: true, configurable: true },
 		bottom: { get: function() { return window.innerHeight; }, enumerable: true, configurable: true }
 	})
 });

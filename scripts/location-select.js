@@ -1,15 +1,11 @@
-(function(window) {
-    "use strict";
 
-    var Fn  = window.Fn;
-    var get = Fn.get;
+import { get } from '../../fn/fn.js';
+import { events, matches } from '../dom.js';
 
-    dom
-    .events('change', document)
-    .map(fn.get('target'))
-    .filter(dom.matches('.location-select'))
-    .map(get('value'))
-    .each(function(value) {
-        window.location = value;
-    });
-})(this);
+events('change', document)
+.map(get('target'))
+.filter(matches('.location-select'))
+.map(get('value'))
+.each(function(value) {
+    window.location = value;
+});

@@ -1,5 +1,6 @@
 
-import { cache, curry, denormalise, deprecate, id, noop, overload, pipe, pow, set, Stream, requestTick, toType } from '../../fn/fn.js';
+import { cache, curry, denormalise, deprecate, Functor as Fn, id, noop, overload, pipe, pow, set, Stream, requestTick, toType } from '../../fn/fn.js';
+import append from '../modules/append.js';
 import create from '../modules/create.js';
 import prefix from '../modules/prefix.js';
 import style  from '../modules/style.js';
@@ -699,7 +700,12 @@ function fragmentFromChildren(node) {
 
 	var fragment = create('fragment');
 	node.domFragmentFromChildren = fragment;
-	append(fragment, node.childNodes);
+
+	var n = -1;
+	while (node.childNodes[++n] !== undefined) {
+		append(fragment, node.childNodes[n]);
+	}
+
 	return fragment;
 }
 
@@ -852,10 +858,6 @@ function animateScroll(coords) {
 			dom.view.scrollTop  = denormaliseY(progress);
 		})
 	);
-}
-
-function scrollRatio(node) {
-	return node.scrollTop / (node.scrollHeight - node.clientHeight);
 }
 
 function disableScroll(node) {
@@ -1061,12 +1063,6 @@ assign(dom, {
 
 	animateScroll: animateScroll,
 	scrollTo: deprecate(animateScroll, 'scrollTo(px, node) renamed to animateScroll(px)'),
-
-	// scrollRatio(node)
-	//
-	// Returns scrollTop as ratio of scrollHeight
-
-	scrollRatio: scrollRatio,
 
 	// disableScroll(node)
 	//

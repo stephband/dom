@@ -119,6 +119,6 @@ export const requestFrame           = dom.requestFrame;
 // Scroll
 
 export const animateScroll          = dom.animateScroll;
-export const scrollRatio            = dom.scrollRatio;
+export { default as scrollRatio } from './modules/scroll-ratio.js';
 export const disableScroll          = dom.disableScroll;
 export const enableScroll           = dom.enableScroll;

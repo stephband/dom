@@ -16,7 +16,7 @@
 // Inputs inside or with .validateable are given .validated after they are
 // first validated, enabling pre- as well as post- validation styles.
 
-import { get, Stream } from '../../fn/fn.js';
+import { get, invoke, Stream } from '../../fn/fn.js';
 import { default as dom, create, remove, matches, next, validate, isValid, classes, after } from '../dom.js';
 
 var isValidateable = matches('.validateable, .validateable input, .validateable textarea, .validateable select, [validateable], [validateable] input, [validateable] textarea, [validateable] select');
@@ -106,11 +106,12 @@ function removeMessages(input) {
 	}
 }
 
-
 dom
 .events('input', document)
 .map(get('target'))
 .filter(isValidateable)
+// This came from somewhere - is it for nullifying custom messages? Review.
+.tap(invoke('setCustomValidity', ['']))
 .filter(isValid)
 .each(removeMessages);
 

@@ -63,7 +63,7 @@ export default function create(tag, attributes) {
 	// create(type, text)
 	// create(type, attributes)
 
-	let object;
+	var object;
 
 	if (typeof tag === 'string') {
 		if (constructors[tag]) {

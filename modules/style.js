@@ -1,3 +1,4 @@
+var rpx          = /px$/;
 var styleParsers = {
 	"transform:translateX": function(node) {
 		var matrix = computedStyle('transform', node);

@@ -15,7 +15,7 @@ var define      = Object.defineProperties;
 var A            = Array.prototype;
 var svgNamespace = 'http://www.w3.org/2000/svg';
 var rspaces      = /\s+/;
-var rpx          = /px$/;
+
 
 
 // Features

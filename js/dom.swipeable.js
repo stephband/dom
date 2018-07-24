@@ -1,6 +1,6 @@
 
 import { last, wrap } from '../../fn/fn.js';
-import { default as dom, events, closest, matches } from '../dom.js';
+import { attribute, box, default as dom, events, children, classes, closest, matches, style } from '../dom.js';
 import './dom-swipe.js';
 import './dom-touch.js';
 import './dom.switchable.js';
@@ -21,7 +21,7 @@ import './dom.switchable.js';
 	}
 
 	function xMinFromChildren(node) {
-		var child = last(dom.children(node).filter(matches('.switchable, [switchable]')));
+		var child = last(children(node).filter(matches('.switchable, [switchable]')));
 
 		// Get the right-most x of the last switchable child's right-most edge
 		var w1 = child.offsetLeft + child.clientWidth;
@@ -35,18 +35,18 @@ import './dom.switchable.js';
 		var node = closest('.swipeable, [swipeable]', e.target);
 		if (!node) { return; }
 
-		var classes = dom.classes(node);
-		var transform = dom.style('transform', node);
+		var classy = classes(node);
+		var transform = style('transform', node);
 
 		transform = !transform || transform === 'none' ? '' : transform ;
 
-		var x = dom.style('transform:translateX', node);
+		var x = style('transform:translateX', node);
 
 		// Elastic flags and limits
 		var eMin = false;
 		var eMax = false;
-		var xMin = dom.attribute('data-slide-min', node);
-		var xMax = dom.attribute('data-slide-max', node);
+		var xMin = attribute('data-slide-min', node);
+		var xMax = attribute('data-slide-max', node);
 
 		if (!xMin && !xMax) {
 			eMin = true;
@@ -61,7 +61,7 @@ import './dom.switchable.js';
 			xMax = parseFloat(xMax) || 0;
 		}
 
-		classes.add('no-transition');
+		classy.add('no-transition');
 
 		var ax = x;
 
@@ -83,10 +83,10 @@ import './dom.switchable.js';
 			node.style.transform = transform;
 		})
 		.then(function() {
-			classes.remove('no-transition');
+			classy.remove('no-transition');
 
 			// Todo: Watch out, this may interfere with slides
-			var xSnaps = dom.attribute('data-slide-snap', node);
+			var xSnaps = attribute('data-slide-snap', node);
 
 			if (!xSnaps) { return; }
 			xSnaps = xSnaps.split(rspaces).map(parseFloat);
@@ -104,24 +104,24 @@ import './dom.switchable.js';
 	});
 
 	function transform(node, active) {
-		var l1 = dom.box(node).left;
-		var l2 = dom.box(active).left;
+		var l1 = box(node).left;
+		var l2 = box(active).left;
 
 		// Round the translation - without rounding images and text become
 		// slightly fuzzy as they are antialiased.
-		var l  = Math.round(l1 - l2 - dom.style('margin-left', active));
+		var l  = Math.round(l1 - l2 - style('margin-left', active));
 		node.style.transform = 'translate(' + l + 'px, 0px)';
 	}
 
 	function update(swipeable, node) {
-		var box = dom.box(node);
+		var pos = box(node);
 
 		// node may not be visible, in which case we can't update
-		if (!box) { return; }
+		if (!pos) { return; }
 
-		var l1 = box.left;
-		var l2 = dom.box(swipeable).left;
-		var l  = l1 - l2 - dom.style('margin-left', node);
+		var l1 = pos.left;
+		var l2 = box(swipeable).left;
+		var l  = l1 - l2 - style('margin-left', node);
 
 		swipeable.style.transform = 'translate(' + (-l) + 'px, 0px)';
 	}
@@ -144,14 +144,14 @@ import './dom.switchable.js';
 
 		if (!prop) { return; }
 
-		var children = dom.children(node);
+		var kids = children(node);
 
 		// it is entirely possible there are no active children – the initial
 		// HTML may not specify an active child – in which case we assume the
 		// first child is displayed
-		var active = children
+		var active = kids
 		.filter(matches('.active'))
-		.shift() || children.shift();
+		.shift() || kids.shift();
 
 		if (active[prop]) {
 			trigger(active[prop], 'dom-activate');
@@ -171,8 +171,8 @@ import './dom.switchable.js';
 
 		if (!matches('.swipeable, [swipeable]', parent)) { return; }
 
-		var classes = dom.classes(parent);
-		classes.remove('no-transition');
+		var classy = classes(parent);
+		classy.remove('no-transition');
 		// Force recalc
 		// TODO: check if this gets removed by JS minifier
 		dom.root.clientWidth;
@@ -183,15 +183,15 @@ import './dom.switchable.js';
 	on(window, 'resize', function resize() {
 		// Update swipeable positions
 		dom('.swipeable, [swipeable]').forEach(function(swipeable) {
-			var node = dom.children(swipeable).find(matches('.active'));
+			var node = children(swipeable).find(matches('.active'));
 			if (!node) { return; }
-			var classes = dom.classes(swipeable);
-			classes.add('no-transition');
+			var classy = classes(swipeable);
+			classy.add('no-transition');
 			update(swipeable, node);
 			// Force recalc
 			// TODO: check if this gets removed by JS minifier
 			dom.root.clientWidth;
-			classes.remove('no-transition');
+			classy.remove('no-transition');
 		});
 	});
 })(window);

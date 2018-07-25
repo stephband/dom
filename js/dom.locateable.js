@@ -2,11 +2,12 @@
 //
 // Extends the default behaviour of events for the .tip class.
 
-import { by, exponentialOut as expOut, noop } from '../../fn/fn.js';
-import { animate, default as dom, box, offset, events, matches } from '../dom.js';
+import { by, get, exponentialOut as expOut, noop } from '../../fn/fn.js';
+import { animate, default as dom, box, offset, events, matches, query } from '../dom.js';
 import './dom-activate.js';
 
-const match = matches(".locateable, [locateable]");
+const selector = ".locateable, [locateable]";
+const match = matches(selector);
 const on    = events.on;
 
 // Time after scroll event to consider the document is scrolling
@@ -74,8 +75,8 @@ function deactivate(e) {
 }
 
 function update() {
-    var locateables = dom('.locateable');
-    var boxes       = locateables.map(box).sort(by('top'));
+    var locateables = query(selector, document);
+    var boxes       = locateables.map(box).sort(by(get('top')));
     var winBox      = box(window);
 
     var n = -1;

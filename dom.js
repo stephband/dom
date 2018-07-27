@@ -3,11 +3,9 @@ if (window.console && window.console.log) {
 }
 
 import { curry } from '../fn/fn.js';
-import dom from './js/dom.js';
 
-// Support the old way
+import dom from './js/dom.js';
 export default dom;
-window.dom = dom;
 
 // Lifecycle
 
@@ -23,9 +21,16 @@ export const parse = curry(_parse, true);
 
 // Inspect
 
+export * from './modules/types.js';
 export { default as children } from './modules/children.js';
+export { default as tag } from './modules/tag.js';
 
-export const attribute              = dom.attribute;
+import _attribute from './modules/attribute.js';
+export const attribute = curry(_attribute, true);
+
+import _query from './modules/query.js';
+export const query = curry(_query, true);
+
 export const closest                = dom.closest;
 export const contains               = dom.contains;
 export const find                   = dom.find;
@@ -33,13 +38,6 @@ export const get                    = dom.get;
 export const matches                = dom.matches;
 export const next                   = dom.next;
 export const previous               = dom.previous;
-export const query                  = dom.query;
-export const tag                    = dom.tag;
-export const type                   = dom.type;
-export const isElementNode          = dom.isElementNode;
-export const isTextNode             = dom.isTextNode;
-export const isCommentNode          = dom.isCommentNode;
-export const isFragmentNode         = dom.isFragmentNode;
 export const isInternalLink         = dom.isInternalLink;
 export const isValid                = dom.isValid;
 
@@ -54,11 +52,11 @@ export const append  = curry(_append, true);
 import _prepend from './modules/prepend.js';
 export const prepend = curry(_prepend, true);
 
+export { default as clone } from './modules/clone.js';
 export { default as create } from './modules/create.js';
 export { default as define } from './modules/define.js';
+export { default as identify } from './modules/identify.js';
 
-export const clone                  = dom.clone;
-export const identify               = dom.identify;
 export const before                 = dom.before;
 export const after                  = dom.after;
 export const replace                = dom.replace;
@@ -87,10 +85,7 @@ export const style = curry(_style, true);
 
 // Fragments
 
-export const fragmentFromTemplate   = dom.fragmentFromTemplate;
-export const fragmentFromChildren   = dom.fragmentFromChildren;
-export const fragmentFromHTML       = dom.fragmentFromHTML;
-export const fragmentFromId         = dom.fragmentFromId;
+export * from './modules/fragments.js';
 
 // Events
 

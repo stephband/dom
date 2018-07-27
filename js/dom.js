@@ -1,8 +1,12 @@
 
 import { cache, curry, denormalise, deprecate, id, noop, overload, pipe, pow, set, Stream, requestTick, toType } from '../../fn/fn.js';
 import create from '../modules/create.js';
+import features from '../modules/features.js';
 import prefix from '../modules/prefix.js';
+import query from '../modules/query.js';
 import style  from '../modules/style.js';
+import tag    from '../modules/tag.js';
+import Event  from '../modules/event.js';
 
 var Node        = window.Node;
 var SVGElement  = window.SVGElement;
@@ -15,124 +19,6 @@ var A            = Array.prototype;
 var svgNamespace = 'http://www.w3.org/2000/svg';
 var rspaces      = /\s+/;
 var rpx          = /px$/;
-
-
-// Features
-
-var features = define({
-	events: define({}, {
-		fullscreenchange: {
-			get: cache(function() {
-				// TODO: untested event names
-				return ('fullscreenElement' in document) ? 'fullscreenchange' :
-				('webkitFullscreenElement' in document) ? 'webkitfullscreenchange' :
-				('mozFullScreenElement' in document) ? 'mozfullscreenchange' :
-				('msFullscreenElement' in document) ? 'MSFullscreenChange' :
-				'fullscreenchange' ;
-			}),
-
-			enumerable: true
-		},
-
-		transitionend: {
-			// Infer transitionend event from CSS transition prefix
-
-			get: cache(function() {
-				var end = {
-					KhtmlTransition: false,
-					OTransition: 'oTransitionEnd',
-					MozTransition: 'transitionend',
-					WebkitTransition: 'webkitTransitionEnd',
-					msTransition: 'MSTransitionEnd',
-					transition: 'transitionend'
-				};
-
-				var prefixed = prefix('transition');
-				return prefixed && end[prefixed];
-			}),
-
-			enumerable: true
-		}
-	})
-}, {
-	inputEventsWhileDisabled: {
-		// FireFox won't dispatch any events on disabled inputs:
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=329509
-
-		get: cache(function() {
-			var input     = document.createElement('input');
-			var testEvent = Event('featuretest');
-			var result    = false;
-
-			document.body.appendChild(input);
-			input.disabled = true;
-			input.addEventListener('featuretest', function(e) { result = true; });
-			input.dispatchEvent(testEvent);
-			input.remove();
-
-			return result;
-		}),
-
-		enumerable: true
-	},
-
-	template: {
-		get: cache(function() {
-			// Older browsers don't know about the content property of templates.
-			return 'content' in document.createElement('template');
-		}),
-
-		enumerable: true
-	},
-
-	textareaPlaceholderSet: {
-		// IE sets textarea innerHTML (but not value) to the placeholder
-		// when setting the attribute and cloning and so on. The twats have
-		// marked it "Won't fix":
-		//
-		// https://connect.microsoft.com/IE/feedback/details/781612/placeholder-text-becomes-actual-value-after-deep-clone-on-textarea
-
-		get: cache(function() {
-			var node = document.createElement('textarea');
-			node.setAttribute('placeholder', '---');
-			return node.innerHTML === '';
-		}),
-
-		enumerable: true
-	},
-
-	transition: {
-		get: cache(function testTransition() {
-			var prefixed = prefix('transition');
-			return prefixed || false;
-		}),
-
-		enumerable: true
-	},
-
-	fullscreen: {
-		get: cache(function testFullscreen() {
-			var node = document.createElement('div');
-			return !!(node.requestFullscreen ||
-				node.webkitRequestFullscreen ||
-				node.mozRequestFullScreen ||
-				node.msRequestFullscreen);
-		}),
-
-		enumerable: true
-	},
-
-	// Deprecated
-
-	transitionend: {
-		get: function() {
-			console.warn('dom.features.transitionend deprecated in favour of dom.features.events.transitionend.');
-			return features.events.transitionend;
-		},
-
-		enumerable: true
-	}
-});
 
 
 // Utilities
@@ -218,61 +104,6 @@ TokenList.prototype = {
 
 // DOM Nodes
 
-var types = {
-	1:  'element',
-	3:  'text',
-	8:  'comment',
-	9:  'document',
-	10: 'doctype',
-	11: 'fragment'
-};
-
-var clone = features.textareaPlaceholderSet ?
-
-	function clone(node) {
-		return node.cloneNode(true);
-	} :
-
-	function cloneWithHTML(node) {
-		// IE sets textarea innerHTML to the placeholder when cloning.
-		// Reset the resulting value.
-
-		var clone     = node.cloneNode(true);
-		var textareas = dom.query('textarea', node);
-		var n         = textareas.length;
-		var clones;
-
-		if (n) {
-			clones = dom.query('textarea', clone);
-
-			while (n--) {
-				clones[n].value = textareas[n].value;
-			}
-		}
-
-		return clone;
-	} ;
-
-function type(node) {
-	return types[node.nodeType];
-}
-
-function isElementNode(node) {
-	return node.nodeType === 1;
-}
-
-function isTextNode(node) {
-	return node.nodeType === 3;
-}
-
-function isCommentNode(node) {
-	return node.nodeType === 8;
-}
-
-function isFragmentNode(node) {
-	return node.nodeType === 11;
-}
-
 function isInternalLink(node) {
 	var location = window.location;
 
@@ -293,26 +124,6 @@ function isValid(node) {
 	return node.validity ? node.validity.valid : true ;
 }
 
-function identify(node) {
-	var id = node.id;
-
-	if (!id) {
-		do { id = Math.ceil(Math.random() * 100000); }
-		while (document.getElementById(id));
-		node.id = id;
-	}
-
-	return id;
-}
-
-function tag(node) {
-	return node.tagName && node.tagName.toLowerCase();
-}
-
-function attribute(name, node) {
-	return node.getAttribute && node.getAttribute(name) || undefined ;
-}
-
 function setClass(node, classes) {
 	if (node instanceof SVGElement) {
 		node.setAttribute('class', classes);
@@ -323,7 +134,9 @@ function setClass(node, classes) {
 }
 
 function classes(node) {
-	return node.classList || new TokenList(node, dom.attribute('class'), setClass);
+	return node.classList || new TokenList(node, function(node) {
+		return node.getAttribute('class');
+	}, setClass);
 }
 
 function addClass(string, node) {
@@ -347,10 +160,6 @@ function flashClass(string, node) {
 
 function find(selector, node) {
 	return node.querySelector(selector);
-}
-
-function query(selector, node) {
-	return toArray(node.querySelectorAll(selector));
 }
 
 function contains(child, node) {
@@ -480,18 +289,6 @@ var eventOptions = { bubbles: true };
 var eventsSymbol = Symbol('events');
 
 var untrapFocus = noop;
-
-function Event(type, properties) {
-	var options = assign({}, eventOptions, properties);
-	var event   = new CustomEvent(type, options);
-
-	if (properties) {
-		delete properties.detail;
-		assign(event, properties);
-	}
-
-	return event;
-}
 
 function preventDefault(e) {
 	e.preventDefault();
@@ -659,7 +456,7 @@ function trapFocus(node) {
 	var focusNode = document.activeElement || document.body;
 
 	function resetFocus() {
-		var focusable = dom.query('[tabindex], a, input, textarea, button', node)[0];
+		var focusable = query('[tabindex], a, input, textarea, button', node)[0];
 		if (focusable) { focusable.focus(); }
 	}
 
@@ -690,52 +487,6 @@ function trapFocus(node) {
 		});
 	};
 }
-
-
-// DOM Fragments and Templates
-
-function fragmentFromChildren(node) {
-	if (node.domFragmentFromChildren) {
-		return node.domFragmentFromChildren;
-	}
-
-	var fragment = create('fragment');
-	node.domFragmentFromChildren = fragment;
-	append(fragment, node.childNodes);
-	return fragment;
-}
-
-function fragmentFromHTML(html, tag) {
-	var node = document.createElement(tag || 'div');
-	node.innerHTML = html;
-	return fragmentFromChildren(node);
-}
-
-function fragmentFromTemplate(node) {
-	// A template tag has a content property that gives us a document
-	// fragment. If that doesn't exist we must make a document fragment.
-	return node.content || fragmentFromChildren(node);
-}
-
-function fragmentFromId(id) {
-	var node = document.getElementById(id);
-
-	if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }
-
-	var t = tag(node);
-
-	// In browsers where templates are not inert their content can clash
-	// with content in the DOM - ids, for example. Remove the template as
-	// a precaution.
-	if (t === 'template' && !features.template) {
-		remove(node);
-	}
-
-	return t === 'template' ? fragmentFromTemplate(node) :
-		t === 'script' ? fragmentFromHTML(node.innerHTML, attribute('data-parent-tag', node)) :
-		fragmentFromChildren(node) ;
-}
-
 
 // Units
 
@@ -933,7 +684,6 @@ assign(dom, {
 	},
 
 	find:     curry(find,     true),
-	query:    curry(query,    true),
 	closest:  curry(closest,  true),
 	contains: curry(contains, true),
 	matches:  curry(matches,  true),
@@ -942,8 +692,6 @@ assign(dom, {
 
 	// DOM mutation
 
-	clone:    clone,
-	identify: identify,
 	before:   curry(before,  true),
 	after:    curry(after,   true),
 	replace:  curry(replace, true),
@@ -980,16 +728,9 @@ assign(dom, {
 
 	// DOM inspection
 
-	isElementNode:  isElementNode,
-	isTextNode:     isTextNode,
-	isCommentNode:  isCommentNode,
-	isFragmentNode: isFragmentNode,
 	isInternalLink: isInternalLink,
 	isValid:        isValid,
 
-	type:        type,
-	tag:         tag,
-	attribute:   curry(attribute, true),
 	classes:     classes,
 	addClass:    curry(addClass,    true),
 	removeClass: curry(removeClass, true),
@@ -1003,13 +744,6 @@ assign(dom, {
 	toRem:          toRem,
 	toVw:           toVw,
 	toVh:           toVh,
-
-	// DOM fragments and templates
-
-	fragmentFromTemplate: fragmentFromTemplate,
-	fragmentFromChildren: fragmentFromChildren,
-	fragmentFromHTML:     fragmentFromHTML,
-	fragmentFromId:       fragmentFromId,
 
 	// DOM events
 

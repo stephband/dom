@@ -9,7 +9,7 @@ export default dom;
 
 // Lifecycle
 
-export const ready                  = dom.ready;
+export { default as ready } from './modules/ready.js';
 export const now                    = dom.now;
 
 // HTML
@@ -89,15 +89,14 @@ export * from './modules/fragments.js';
 
 // Events
 
-export const Event                  = dom.Event;
+export { default as Event } from './modules/event.js';
+export { isPrimaryButton, isTargetEvent, preventDefault } from './modules/events.js';
+
 export const events                 = dom.events;
 export const trigger                = dom.trigger;
 export const delegate               = dom.delegate;
-export const isPrimaryButton        = dom.isPrimaryButton;
-export const isTargetEvent          = dom.isTargetEvent;
 export const on                     = dom.on;
 export const off                    = dom.off;
-export const preventDefault         = dom.preventDefault;
 export const trapFocus              = dom.trapFocus;
 export const requestEvent           = dom.requestEvent;
 

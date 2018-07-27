@@ -4,7 +4,7 @@
 
 import { by, get, exponentialOut as expOut, noop } from '../../fn/fn.js';
 import { animate, default as dom, box, offset, events, matches, query } from '../dom.js';
-import './dom-activate.js';
+import { matchers } from './dom-activate.js';
 
 const selector = ".locateable, [locateable]";
 const match = matches(selector);
@@ -117,4 +117,4 @@ on(document, 'dom-deactivate', deactivate);
 on(window, 'scroll', scroll);
 update();
 
-dom.activeMatchers.push(match);
+matchers.push(match);

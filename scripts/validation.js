@@ -15,7 +15,8 @@
 // The HTML validation API can only set one custom validation message at a time,
 // so the last message per input will be displayed.
 
-import { get } from '/static/fn/fn.js'
+import { get } from '../../fn/fn.js'
+import { events } from '../dom.js'
 
 function toSelector(str) {
 	return '[name="' + str + '"]';
@@ -52,8 +53,7 @@ function setValidity(error) {
 	input.setCustomValidity(error.text);
 }
 
-dom
-.events('dom-error', document)
+events('dom-error', document)
 .each(function(e) {
 	var form   = e.target;
 	var errors = e.detail;

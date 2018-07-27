@@ -1,6 +1,6 @@
 
 import { default as dom, matches, events } from '../dom.js';
-import './dom-activate.js';
+import { matchers } from './dom-activate.js';
 
 // dom.toggleable
 
@@ -39,5 +39,5 @@ import './dom-activate.js';
 
 	on(document, 'dom-activate', activate);
 	on(document, 'dom-deactivate', deactivate);
-	dom.activeMatchers.push(match);
+	matchers.push(match);
 })(window);

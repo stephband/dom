@@ -285,25 +285,11 @@ function offset(node1, node2) {
 
 // DOM Events
 
-var eventOptions = { bubbles: true };
+
 
 var eventsSymbol = Symbol('events');
 
 var untrapFocus = noop;
-
-function preventDefault(e) {
-	e.preventDefault();
-}
-
-function isTargetEvent(e) {
-	return e.target === e.currentTarget;
-}
-
-function isPrimaryButton(e) {
-	// Ignore mousedowns on any button other than the left (or primary)
-	// mouse button, or when a modifier key is pressed.
-	return (e.which === 1 && !e.ctrlKey && !e.altKey && !e.shiftKey);
-}
 
 function on(node, type, fn, data) {
 	var options;
@@ -652,22 +638,9 @@ export default function dom(selector) {
 	return query(selector, document);
 };
 
-var ready = new Promise(function(accept, reject) {
-	function handle() {
-		document.removeEventListener('DOMContentLoaded', handle);
-		window.removeEventListener('load', handle);
-		accept();
-	}
-
-	document.addEventListener('DOMContentLoaded', handle);
-	window.addEventListener('load', handle);
-});
-
 assign(dom, {
 
 	// DOM lifecycle
-
-	ready:   ready.then.bind(ready),
 
 	now:     function() {
 		// Return DOM time in seconds
@@ -744,11 +717,7 @@ assign(dom, {
 
 	// DOM events
 
-	Event:           Event,
 	delegate:        delegate,
-	isPrimaryButton: isPrimaryButton,
-	isTargetEvent:   isTargetEvent,
-	preventDefault:  preventDefault,
 	trapFocus:       trapFocus,
 	trap:            deprecate(trapFocus, 'dom.trap() is now dom.trapFocus()'),
 
@@ -818,10 +787,6 @@ assign(dom, {
 			return requestAnimationFrame(--n ? frame : fn);
 		}());
 	}, 'requestFrameN() will be removed soon'), true),
-
-	// Features
-
-	features: features,
 
 	// Safe visible area
 

@@ -1,6 +1,6 @@
 import { noop, requestTick, Stream } from '../../fn/fn.js';
 import { default as dom, disableScroll, enableScroll, trapFocus, events, matches } from '../dom.js';
-import './dom-activate.js';
+import { matchers } from './dom-activate.js';
 
 var on            = events.on;
 var off           = events.off;
@@ -68,5 +68,4 @@ on(document, 'dom-deactivate', function(e) {
 	enableScroll(dom.root);
 });
 
-
-dom.activeMatchers.push(match);
+matchers.push(match);

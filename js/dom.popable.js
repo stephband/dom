@@ -4,7 +4,7 @@
 
 import { noop } from '../../fn/fn.js';
 import { default as dom, events, matches } from '../dom.js';
-import './dom-activate.js';
+import { matchers } from './dom-activate.js';
 
 (function(window) {
 	var trigger = events.trigger;
@@ -50,5 +50,5 @@ import './dom-activate.js';
 
 	document.addEventListener('dom-activate', activate);
 	document.addEventListener('dom-deactivate', deactivate);
-	dom.activeMatchers.push(match);
+	matchers.push(match);
 })(window);

@@ -2,7 +2,7 @@
 
 import { noop } from '../../fn/fn.js';
 import { default as dom, closest, fullscreen, isInternalLink, isPrimaryButton, events, matches } from '../dom.js';
-import './dom-activate.js';
+import { matchers } from './dom-activate.js';
 
 (function(window) {
     "use strict";
@@ -73,5 +73,5 @@ import './dom-activate.js';
 
     on(document, 'dom-activate', activate);
     on(document, 'dom-deactivate', deactivate);
-    dom.activeMatchers.push(match);
+    matchers.push(match);
 })(window);

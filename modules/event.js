@@ -1,4 +1,5 @@
 const assign = Object.assign;
+const eventOptions = { bubbles: true };
 
 export default function Event(type, properties) {
 	var options = assign({}, eventOptions, properties);

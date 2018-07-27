@@ -17,9 +17,11 @@ export function fragmentFromChildren(node) {
 
 	var fragment = create('fragment');
 	node.domFragmentFromChildren = fragment;
-	node.childNodes.forEach(function(node) {
-		fragment.append(node);
-	});
+
+    var n = -1;
+	while (node.childNodes[++n] !== undefined) {
+		append(fragment, node.childNodes[n]);
+	}
 
 	return fragment;
 }

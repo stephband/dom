@@ -1,5 +1,6 @@
 
-import { cache, curry, denormalise, deprecate, id, noop, overload, pipe, pow, set, Stream, requestTick, toType } from '../../fn/fn.js';
+import { cache, curry, denormalise, deprecate, Functor as Fn, id, noop, overload, pipe, pow, set, Stream, requestTick, toType } from '../../fn/fn.js';
+import append from '../modules/append.js';
 import create from '../modules/create.js';
 import features from '../modules/features.js';
 import prefix from '../modules/prefix.js';
@@ -18,7 +19,7 @@ var define      = Object.defineProperties;
 var A            = Array.prototype;
 var svgNamespace = 'http://www.w3.org/2000/svg';
 var rspaces      = /\s+/;
-var rpx          = /px$/;
+
 
 
 // Utilities
@@ -607,10 +608,6 @@ function animateScroll(coords) {
 	);
 }
 
-function scrollRatio(node) {
-	return node.scrollTop / (node.scrollHeight - node.clientHeight);
-}
-
 function disableScroll(node) {
 	node = node || document.documentElement;
 
@@ -797,12 +794,6 @@ assign(dom, {
 
 	animateScroll: animateScroll,
 	scrollTo: deprecate(animateScroll, 'scrollTo(px, node) renamed to animateScroll(px)'),
-
-	// scrollRatio(node)
-	//
-	// Returns scrollTop as ratio of scrollHeight
-
-	scrollRatio: scrollRatio,
 
 	// disableScroll(node)
 	//

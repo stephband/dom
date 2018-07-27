@@ -1,11 +1,22 @@
 
-import { get } from '../../fn/fn.js';
-import { events, matches } from '../dom.js';
+import { get, set, overload } from '../../fn/fn.js';
+import { get as getById, events, matches, trigger } from '../dom.js';
+
+const selector = '.location-select';
+
+function isHashRef(ref) {
+    return /^#\S+$/.test(ref);
+}
 
 events('change', document)
 .map(get('target'))
-.filter(matches('.location-select'))
+.filter(matches(selector))
 .map(get('value'))
-.each(function(value) {
-    window.location = value;
-});
+.each(overload(isHashRef, {
+    true: function(ref) {
+        const id = ref.slice(1);
+        trigger('dom-activate', getById(id));
+    },
+
+    false: set('locstion', window)
+}));

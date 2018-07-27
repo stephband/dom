@@ -112,6 +112,8 @@ export const requestFrame           = dom.requestFrame;
 
 // Scroll
 
+export { default as safe } from './modules/safe.js';
+
 export const animateScroll          = dom.animateScroll;
 export { default as scrollRatio } from './modules/scroll-ratio.js';
 export const disableScroll          = dom.disableScroll;

@@ -16,7 +16,7 @@
 // so the last message per input will be displayed.
 
 import { get } from '../../fn/fn.js'
-import { events } from '../dom.js'
+import { events, find } from '../dom.js'
 
 function toSelector(str) {
 	return '[name="' + str + '"]';
@@ -43,7 +43,7 @@ function flattenErrors(object, form) {
 
 function setValidity(error) {
 	var selector = toSelector(error.name);
-	var input    = dom.find(selector, error.form);
+	var input    = find(selector, error.form);
 
 	if (!input) {
 		console.warn('Error given for non-existent field name="' + error.name + '"', error);

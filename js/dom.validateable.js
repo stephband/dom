@@ -6,9 +6,9 @@
 //
 // 1. A validation attribute on the input:
 //    <input type="email" data-validation-type="That is not an email address" />
-//    The attribute name can be modified globally by setting dom.validation.attributePrefix.
+//    The attribute name can be modified globally by setting config.attributePrefix.
 //
-// 2. The messages in dom.validation.messages.
+// 2. The messages in config.messages.
 //
 // 3. The browser's default validation message (which is available on the
 //    input at the point that it fails validastion).
@@ -31,6 +31,28 @@ var types = {
 	valueMissing:    'required'
 };
 
+export const config = {
+	errorClass: 'error-label',
+
+	// Class added to validated nodes (note: not valid nodes, necessarily,
+	// but nodes that have been validated).
+	validatedClass: 'validated',
+
+	// Prefix for input attributes containing validation messages.
+	attributePrefix: 'data-validation-',
+
+	// Global object for validation messages.
+	messages: {
+		// pattern:
+		// max:
+		// min:
+		// step:
+		// maxlength:
+		// type:
+		// required:
+	}
+};
+
 
 function negate(fn) {
 	return function() {
@@ -40,14 +62,14 @@ function negate(fn) {
 
 function isShowingMessage(node) {
 	return node.nextElementSibling
-		&& matches('.' + dom.validation.errorClass, node.nextElementSibling);
+		&& matches('.' + config.errorClass, node.nextElementSibling);
 }
 
 function toError(input) {
 	var node     = input;
 	var validity = node.validity;
-	var prefix   = dom.validation.attributePrefix;
-	var messages = dom.validation.messages;
+	var prefix   = config.attributePrefix;
+	var messages = config.messages;
 	var name;
 
 	for (name in validity) {
@@ -70,7 +92,7 @@ function renderError(error) {
 	var node  = input;
 
 	// Find the last error
-	while (node.nextElementSibling && matches('.' + dom.validation.errorClass, node.nextElementSibling)) {
+	while (node.nextElementSibling && matches('.' + config.errorClass, node.nextElementSibling)) {
 		node = node.nextElementSibling;
 	}
 
@@ -95,13 +117,13 @@ function renderError(error) {
 }
 
 function addValidatedClass(input) {
-	classes(input).add(dom.validation.validatedClass);
+	classes(input).add(config.validatedClass);
 }
 
 function removeMessages(input) {
 	var node = input;
 
-	while ((node = next(node)) && matches('.' + dom.validation.errorClass, node)) {
+	while ((node = next(node)) && matches('.' + config.errorClass, node)) {
 		remove(node);
 	}
 }
@@ -144,25 +166,3 @@ document.addEventListener(
 	// Capture phase
 	true
 );
-
-dom.validation = {
-	errorClass: 'error-label',
-
-	// Class added to validated nodes (note: not valid nodes, necessarily,
-	// but nodes that have been validated).
-	validatedClass: 'validated',
-
-	// Prefix for input attributes containing validation messages.
-	attributePrefix: 'data-validation-',
-
-	// Global object for validation messages.
-	messages: {
-		// pattern:
-		// max:
-		// min:
-		// step:
-		// maxlength:
-		// type:
-		// required:
-	}
-};

@@ -3,7 +3,7 @@
 // Extends the default behaviour of events for the .tip class.
 
 import { by, get, exponentialOut as expOut, noop } from '../../fn/fn.js';
-import { animate, default as dom, box, offset, events, matches, query } from '../dom.js';
+import { animate, default as dom, box, offset, events, matches, safe, query, trigger } from '../dom.js';
 import { matchers } from './dom-activate.js';
 
 const selector = ".locateable, [locateable]";
@@ -38,7 +38,7 @@ function activate(e) {
 
         cancel();
         //scrollTime = e.timeStamp;
-        dom.trigger('dom-deactivate', activeNode);
+        trigger('dom-deactivate', activeNode);
     }
 
     var t = e.timeStamp;
@@ -49,10 +49,10 @@ function activate(e) {
     // was the last scroll event ages ago ?
     // TODO: test on iOS
     if (scrollTime > t || t > scrollTime + idleTime) {
-        coords     = offset(dom.view, target);
-        safeTop    = dom.safe.top;
+        coords     = offset(document.scrollingElement, target);
+        safeTop    = safe.top;
         scrollTime = t + scrollDuration * 1000;
-        cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', dom.view, coords[1] - safeTop);
+        cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', document.scrollingElement, coords[1] - safeTop);
     }
 
     e.default();
@@ -98,10 +98,10 @@ function update() {
             return;
         }
 
-        dom.trigger('dom-deactivate', activeNode);
+        trigger('dom-deactivate', activeNode);
     }
 
-    dom.trigger('dom-activate', node);
+    trigger('dom-activate', node);
 }
 
 function scroll(e) {

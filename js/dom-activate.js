@@ -1,9 +1,7 @@
 import { curry, isDefined, overload } from '../../fn/fn.js';
 import { append, classes, create, delegate, Event, events, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../dom.js';
 
-"use strict";
-
-var debug     = false;
+var DEBUG     = false;
 
 var on        = events.on;
 var off       = events.off;
@@ -69,7 +67,7 @@ function defaultActivate() {
 	data.active = true;
 	this.preventDefault();
 
-	if (debug) { console.log('[activate] default | target:', this.target.id, 'data:', data); }
+	if (DEBUG) { console.log('[activate] default | target:', this.target.id, 'data:', data); }
 
 	classes(data.node).add(config.activeClass);
 	buttons = getButtons(data);
@@ -90,7 +88,7 @@ function defaultDeactivate() {
 	data.active = false;
 	this.preventDefault();
 
-	if (debug) { console.log('[deactivate] default | target:', this.target.id, 'data:', data); }
+	if (DEBUG) { console.log('[deactivate] default | target:', this.target.id, 'data:', data); }
 
 	classes(data.node).remove(config.activeClass);
 	buttons = getButtons(data);

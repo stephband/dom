@@ -5,7 +5,7 @@ import { default as dom, remove, events, matches } from '../dom.js';
 import './dom-activate.js';
 
 // Define
-var match       = matches('.removeable, [removeable]');
+var match = matches('.removeable, [removeable]');
 
 // Max duration of deactivation transition in seconds
 var maxDuration = 1;

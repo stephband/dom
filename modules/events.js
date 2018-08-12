@@ -1,5 +1,6 @@
 
 import { Stream } from '../../fn/fn.js';
+import Event from './event.js';
 import features from './features.js';
 
 const assign  = Object.assign;

@@ -133,7 +133,6 @@ import _transition from './modules/transition.js';
 export const transition = curry(_transition, true);
 
 export { default as fullscreen } from './modules/fullscreen.js';
-export const requestFrame           = dom.requestFrame;
 
 // Validation
 

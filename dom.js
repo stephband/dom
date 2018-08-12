@@ -4,8 +4,6 @@ if (window.console && window.console.log) {
 
 import { curry, deprecate } from '../fn/fn.js';
 
-import dom from './js/dom.js';
-export default dom;
 
 // Lifecycle
 
@@ -122,8 +120,7 @@ export const trigger = curry(_trigger, true);
 import { default as _delegate } from './modules/delegate.js';
 export const delegate = curry(_delegate, true);
 
-export const trapFocus              = dom.trapFocus;
-export const requestEvent           = dom.requestEvent;
+export { default as trapFocus } from './modules/trap-focus.js';
 
 export { default as toKey } from './modules/to-key.js';
 

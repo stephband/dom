@@ -1,5 +1,5 @@
 
-import { default as dom, matches, events } from '../dom.js';
+import { matches, events } from '../dom.js';
 import { matchers } from './dom-activate.js';
 
 // dom.toggleable

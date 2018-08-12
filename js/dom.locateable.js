@@ -3,7 +3,7 @@
 // Extends the default behaviour of events for the .tip class.
 
 import { by, get, exponentialOut as expOut, noop } from '../../fn/fn.js';
-import { animate, default as dom, box, offset, events, matches, safe, query, trigger } from '../dom.js';
+import { animate, box, offset, events, matches, safe, query, trigger } from '../dom.js';
 import { matchers } from './dom-activate.js';
 
 const selector = ".locateable, [locateable]";

@@ -1,5 +1,5 @@
 import { noop, requestTick, Stream } from '../../fn/fn.js';
-import { default as dom, disableScroll, enableScroll, trapFocus, events, matches } from '../dom.js';
+import { disableScroll, enableScroll, trapFocus, events, matches } from '../dom.js';
 import { matchers } from './dom-activate.js';
 
 var on            = events.on;
@@ -29,7 +29,7 @@ on(document, 'dom-activate', function(e) {
 
 	// Prevent scrolling of main document
 
-	disableScroll(dom.root);
+	disableScroll(document.scrollingElement);
 
 	// Make the escape key deactivate the focusable
 
@@ -65,7 +65,7 @@ on(document, 'dom-deactivate', function(e) {
 
 	var timer = setTimeout(untrap, delay, e);
 	on(e.target, 'transitionend', untrap);
-	enableScroll(dom.root);
+	enableScroll(document.scrollingElement);
 });
 
 matchers.push(match);

@@ -16,7 +16,6 @@
         }
     ],
     "files": [
-        "js/dom.js",
         "js/dom-activate.js",
         "js/dom-touch.js",
         "js/dom-swipe.js",
@@ -29,7 +28,7 @@
         "js/dom.locateable.js",
         "js/dom.validateable.js"
     ],
-    "main": "js/dom.js",
+    "main": "./dom.js",
     "description": "A small library of functional functions, DOM events and Event Streams for HTML and SVG.",
     "keywords": [
         "DOM",

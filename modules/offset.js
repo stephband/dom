@@ -1,3 +1,5 @@
+import box from './box.js'; 
+
 export default function offset(node1, node2) {
 	var box1 = box(node1);
 	var box2 = box(node2);

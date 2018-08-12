@@ -7,6 +7,8 @@
 
 import Event from './event.js';
 
+const assign = Object.assign;
+
 export default function trigger(type, node) {
     let properties;
 

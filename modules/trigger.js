@@ -1,4 +1,11 @@
+// trigger(type, node)
+//
+// type - a string or an object with a 'type' property
+// node - a DOM node or an object with a 'target' property
+
 import Event from './event.js';
+
+const assign = Object.assign;
 
 export default function trigger(type, node) {
     let options;
@@ -8,7 +15,7 @@ export default function trigger(type, node) {
         options = type;
     }
 
-    if (typeof node) {
+    if (!'nodeType' in node) {
         node = node.target;
         options = assign({}, options, node);
     }

@@ -1,11 +1,11 @@
 
 import assignAttributes from './assign.js';
 
-const assign = Object.assign;
+const assign       = Object.assign;
+const svgNamespace = 'http://www.w3.org/2000/svg';
+const testDiv      = document.createElement('div');
 
-var testDiv = document.createElement('div');
-
-var constructors = {
+const constructors = {
 	text: function(text) {
 		return document.createTextNode(text || '');
 	},

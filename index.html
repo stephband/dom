@@ -885,8 +885,10 @@ stream.stop()</code></pre>
 	import { default as dom } from 'http://127.0.0.1/dom/dom.js';
 	import 'http://127.0.0.1/dom/dom-modules';
 
-	dom.validation.attributePrefix = 'data-val-';
-	dom.validation.messages = {
+	import { config as validationConfig } from './js/dom.validateable';
+
+	validationConfig.attributePrefix = 'data-val-';
+	validationConfig.messages = {
 		pattern:   'Doesnt match',
 		max:       'Higher than possible',
 		min:       'Lower than possible',

@@ -2,7 +2,7 @@ if (window.console && window.console.log) {
     console.log('dom         – https://github.com/stephband/dom');
 }
 
-import { curry } from '../fn/fn.js';
+import { curry, deprecate } from '../fn/fn.js';
 
 import dom from './js/dom.js';
 export default dom;
@@ -10,7 +10,7 @@ export default dom;
 // Lifecycle
 
 export { default as ready } from './modules/ready.js';
-export const now                    = dom.now;
+export { default as now } from './modules/now.js';
 
 // HTML
 
@@ -21,25 +21,30 @@ export const parse = curry(_parse, true);
 
 // Inspect
 
-export * from './modules/types.js';
-export { default as children } from './modules/children.js';
+export * from './modules/nodes.js';
 export { default as tag } from './modules/tag.js';
+
+import _contains from './modules/contains.js';
+export const contains = curry(_contains, true);
 
 import _attribute from './modules/attribute.js';
 export const attribute = curry(_attribute, true);
 
+export * from './modules/traversal.js';
+
+import _find from './modules/find.js';
+export const find = curry(_find, true);
+
+import _closest from './modules/closest.js';
+export const closest = curry(_closest, true);
+
+export { default as children } from './modules/children.js';
+
+import _matches from './modules/matches.js';
+export const matches = curry(_matches, true);
+
 import _query from './modules/query.js';
 export const query = curry(_query, true);
-
-export const closest                = dom.closest;
-export const contains               = dom.contains;
-export const find                   = dom.find;
-export const get                    = dom.get;
-export const matches                = dom.matches;
-export const next                   = dom.next;
-export const previous               = dom.previous;
-export const isInternalLink         = dom.isInternalLink;
-export const isValid                = dom.isValid;
 
 // Mutate
 
@@ -57,26 +62,33 @@ export { default as create } from './modules/create.js';
 export { default as define } from './modules/define.js';
 export { default as identify } from './modules/identify.js';
 
-export const before                 = dom.before;
-export const after                  = dom.after;
-export const replace                = dom.replace;
-export const empty                  = dom.empty;
-export const remove                 = dom.remove;
+export { empty, remove } from './modules/mutation.js';
+
+import { after as _after, before as _before, replace as _replace } from './modules/mutation.js';
+export const before  = curry(_before, true);
+export const after   = curry(_after, true);
+export const replace = curry(_replace, true);
+
+// Classes
+
+export { classes } from './modules/classes.js';
+
+import { addClass as _addClass, removeClass as _removeClass, frameClass as _frameClass } from './modules/classes.js';
+export const addClass    = curry(_addClass, true);
+export const removeClass = curry(_removeClass, true);
+export const frameClass  = curry(_frameClass, true);
+export const flashClass  = deprecate(frameClass, 'flashClass() is now frameClass()');
 
 // Style
 
-export const box                    = dom.box;
-export const bounds                 = dom.bounds;
-export const offset                 = dom.offset;
-export const classes                = dom.classes;
-export const addClass               = dom.addClass;
-export const removeClass            = dom.removeClass;
-export const flashClass             = dom.flashClass;
+export { default as box } from './modules/box.js';
+export { default as boundingBox } from './modules/bounding-box.js';
 
-export const toPx                   = dom.toPx;
-export const toRem                  = dom.toRem;
-export const toVw                   = dom.toVw;
-export const toVh                   = dom.toVh;
+import { default as _offset } from './modules/offset.js';
+export const offset = curry(_offset, true);
+
+
+export * from './modules/units.js';
 
 export { default as prefix } from './modules/prefix.js';
 
@@ -92,11 +104,24 @@ export * from './modules/fragments.js';
 export { default as Event } from './modules/event.js';
 export { isPrimaryButton, isTargetEvent, preventDefault } from './modules/events.js';
 
-export const events                 = dom.events;
-export const trigger                = dom.trigger;
-export const delegate               = dom.delegate;
-export const on                     = dom.on;
-export const off                    = dom.off;
+import { default as _events, on as __on, once as __once, off as __off, trigger as __trigger } from './modules/events.js';
+export const events = curry(_events, true);
+
+// Legacy uncurried functions
+
+Object.assign(events, {
+    on:      __on,
+    once:    __once,
+    off:     __off,
+    trigger: __trigger
+});
+
+import { default as _trigger } from './modules/trigger.js';
+export const trigger = curry(_trigger, true);
+
+import { default as _delegate } from './modules/delegate.js';
+export const delegate = curry(_delegate, true);
+
 export const trapFocus              = dom.trapFocus;
 export const requestEvent           = dom.requestEvent;
 
@@ -104,17 +129,22 @@ export { default as toKey } from './modules/to-key.js';
 
 // Animation
 
-export const animate                = dom.animate;
-export const fullscreen             = dom.fullscreen;
-export const transition             = dom.transition;
-export const validate               = dom.validate;
+import _animate from './modules/animate.js';
+export const animate = curry(_animate, true);
+
+import _transition from './modules/transition.js';
+export const transition = curry(_transition, true);
+
+export { default as fullscreen } from './modules/fullscreen.js';
 export const requestFrame           = dom.requestFrame;
+
+// Validation
+
+export * from './modules/validation.js';
 
 // Scroll
 
 export { default as safe } from './modules/safe.js';
-
-export const animateScroll          = dom.animateScroll;
+export { default as animateScroll } from './modules/animate-scroll.js';
 export { default as scrollRatio } from './modules/scroll-ratio.js';
-export const disableScroll          = dom.disableScroll;
-export const enableScroll           = dom.enableScroll;
+export * from './modules/scroll.js';

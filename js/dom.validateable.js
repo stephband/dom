@@ -17,7 +17,7 @@
 // first validated, enabling pre- as well as post- validation styles.
 
 import { get, invoke, Stream } from '../../fn/fn.js';
-import { default as dom, create, remove, matches, next, validate, isValid, classes, after } from '../dom.js';
+import { default as dom, create, events, matches, next, remove, validate, isValid, classes, after } from '../dom.js';
 
 var isValidateable = matches('.validateable, .validateable input, .validateable textarea, .validateable select, [validateable], [validateable] input, [validateable] textarea, [validateable] select');
 
@@ -107,8 +107,7 @@ function renderError(error) {
 	if (error.type === 'customError') {
 		node.setCustomValidity(error.text);
 
-		dom
-		.events('input', node)
+		events('input', node)
 		.take(1)
 		.each(function() {
 			node.setCustomValidity('');
@@ -128,8 +127,7 @@ function removeMessages(input) {
 	}
 }
 
-dom
-.events('input', document)
+events('input', document)
 .map(get('target'))
 .filter(isValidateable)
 // This came from somewhere - is it for nullifying custom messages? Review.
@@ -137,14 +135,12 @@ dom
 .filter(isValid)
 .each(removeMessages);
 
-dom
-.events('focusout', document)
+events('focusout', document)
 .map(get('target'))
 .filter(isValidateable)
 .each(validate);
 
-dom
-.events('submit', document)
+events('submit', document)
 .map(get('target'))
 .filter(isValidateable)
 .each(addValidatedClass);

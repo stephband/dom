@@ -85,6 +85,7 @@ export function isTargetEvent(e) {
 
 // -----------------
 
+const A = Array.prototype;
 const eventsSymbol = Symbol('events');
 
 function bindTail(fn) {

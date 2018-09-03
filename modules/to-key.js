@@ -1,4 +1,4 @@
-var keyCodes = {
+const keyStrings = {
 	8:  'backspace',
 	9:  'tab',
 	13: 'enter',
@@ -70,6 +70,19 @@ var keyCodes = {
 	224: 'cmd'
 };
 
+const keyCodes = Object.entries(keyStrings).reduce(function(object, entry) {
+	object[entry[1]] = parseInt(entry[0], 10);
+	return object;
+}, {});
+
 export default function toKey(e) {
-	return keyCodes[e.keyCode];
+	return keyStrings[e.keyCode];
+}
+
+export function toKeyCode(keyString) {
+	return keyCodes[keyString];
+}
+
+export function toKeyString(keyCode) {
+	return keyStrings[keyCode];
 }

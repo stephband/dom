@@ -21,7 +21,6 @@ function activate(e) {
 
 	requestAnimationFrame(function() {
 		function click(e) {
-			console.log('CLICK');
 			if (node.contains(e.target) || node === e.target) { return; }
 			trigger(node, 'dom-deactivate');
 		}

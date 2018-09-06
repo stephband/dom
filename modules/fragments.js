@@ -11,25 +11,25 @@ if (!NodeList.prototype.forEach) {
 // DOM Fragments and Templates
 
 export function fragmentFromChildren(node) {
-	if (node.domFragmentFromChildren) {
-		return node.domFragmentFromChildren;
-	}
-
 	var fragment = create('fragment');
-	node.domFragmentFromChildren = fragment;
 
-    var n = -1;
-	while (node.childNodes[++n] !== undefined) {
-		append(fragment, node.childNodes[n]);
+	while (node.firstChild) {
+		append(fragment, node.firstChild);
 	}
 
 	return fragment;
 }
 
-export function fragmentFromHTML(html, tag) {
-	var node = document.createElement(tag || 'div');
-	node.innerHTML = html;
-	return fragmentFromChildren(node);
+export function fragmentFromHTML(html, contextTag) {
+    if (contextTag) {
+        let node = document.createElement(contextTag);
+        node.innerHTML = html;
+    	return fragmentFromChildren(node);
+    }
+
+    return document
+    .createRange()
+    .createContextualFragment(html);
 }
 
 export function fragmentFromTemplate(node) {

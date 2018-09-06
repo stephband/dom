@@ -1,5 +1,5 @@
 if (window.console && window.console.log) {
-    console.log('dom         – https://github.com/stephband/dom');
+    window.console.log('%cdom%c         – https://github.com/stephband/dom', 'color: #0e83c7; font-weight: 600;', 'color: inherit; font-weight: 400;');
 }
 
 import { curry, deprecate } from '../fn/fn.js';
@@ -122,7 +122,7 @@ export const delegate = curry(_delegate, true);
 
 export { default as trapFocus } from './modules/trap-focus.js';
 
-export { default as toKey } from './modules/to-key.js';
+export { default as toKey, toKeyString, toKeyCode } from './modules/to-key.js';
 
 // Animation
 

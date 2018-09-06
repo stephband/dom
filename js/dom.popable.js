@@ -14,13 +14,14 @@ function activate(e) {
 	// subsequent listeners on the same node
 	if (!e.default) { return; }
 
-	var node    = e.target;
+	const node = e.target;
 	if (!match(node)) { return; }
 
-	// Make user actions outside node deactivat the node
+	// Make user actions outside node deactivate the node
 
 	requestAnimationFrame(function() {
 		function click(e) {
+			console.log('CLICK');
 			if (node.contains(e.target) || node === e.target) { return; }
 			trigger(node, 'dom-deactivate');
 		}
@@ -29,11 +30,11 @@ function activate(e) {
 			if (node !== e.target) { return; }
 			if (e.defaultPrevented) { return; }
 			document.removeEventListener('click', click);
-			document.removeEventListener('dom-deactivate', deactivate);
+			document.documentElement.removeEventListener('dom-deactivate', deactivate);
 		}
 
 		document.addEventListener('click', click);
-		document.addEventListener('dom-deactivate', deactivate);
+		document.documentElement.addEventListener('dom-deactivate', deactivate);
 	});
 
 	e.default();

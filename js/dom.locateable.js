@@ -3,7 +3,7 @@
 // Extends the default behaviour of events for the .tip class.
 
 import { by, get, exponentialOut as expOut, noop } from '../../fn/fn.js';
-import { animate, box, offset, events, matches, safe, query, trigger } from '../dom.js';
+import { animate, box, offset, events, matches, query, trigger } from '../dom.js';
 import { matchers } from './dom-activate.js';
 
 const selector = ".locateable, [locateable]";
@@ -16,6 +16,10 @@ const idleTime = 90;
 // Duration and easing of scroll animation
 const scrollDuration  = 0.8;
 const scrollTransform = expOut(6);
+
+export const config = {
+    top: 80
+};
 
 // Time of latest scroll event
 let scrollTime = 0;
@@ -42,7 +46,7 @@ function activate(e) {
     }
 
     var t = e.timeStamp;
-    var coords, safeTop;
+    var coords;
 
     // Heuristic for whether we are currently actively scrolling. Checks:
     // Is scroll currently being animated OR
@@ -50,9 +54,8 @@ function activate(e) {
     // TODO: test on iOS
     if (scrollTime > t || t > scrollTime + idleTime) {
         coords     = offset(document.scrollingElement, target);
-        safeTop    = safe.top;
         scrollTime = t + scrollDuration * 1000;
-        cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', document.scrollingElement, coords[1] - safeTop);
+        cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', document.scrollingElement, coords[1] - config.top);
     }
 
     e.default();

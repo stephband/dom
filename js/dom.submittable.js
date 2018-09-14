@@ -1,7 +1,7 @@
 
 // dom.submittable
 
-import { compose, get, noop } from '../../fn/fn.js';
+import { choose, compose, get, noop } from '../../fn/fn.js';
 import { events, matches, preventDefault } from '../dom.js';
 
 // Define
@@ -12,6 +12,73 @@ function isJSONContent(type) {
 	return type && type.indexOf("application/json") !== -1;
 }
 
+function serialize(formData) {
+	return new URLSearchParams(formData).toString();
+}
+
+function jsonify(formData) {
+	return JSON.stringify(
+		// formData.entries() is an iterator, not an array
+		Array
+		.from(formData.entries())
+		.reduce(function(output, entry) {
+			output[entry[0]] = entry[1];
+			return output;
+		}, {})
+	);
+}
+
+const createHeaders = choose({
+	'application/json': function(data) {
+		return {
+			"X-CSRFToken": data.get('csrfmiddlewaretoken'),
+			"Content-Type": "application/json; charset=utf-8"
+		};
+	},
+
+	'multipart/form-data': function(data) {
+		return {
+			"X-CSRFToken": data.get('csrfmiddlewaretoken'),
+			"Content-Type": 'multipart/form-data'
+		};
+	},
+
+	'default': function(data) {
+		return {
+			"Content-Type": 'application/x-www-form-urlencoded'
+		};
+	}
+});
+
+const createBody = choose({
+	'application/json': function(data) {
+		const csrf = data.get('csrfmiddlewaretoken');
+
+		if (csrf) {
+			data.delete('csrfmiddlewaretoken');
+		}
+
+		// data.entries() is an iterator, not an array
+		return jsonify(data);
+	},
+
+	'multipart/form-data': function(data) {
+		const csrf = data.get('csrfmiddlewaretoken');
+
+		if (csrf) {
+			data.delete('csrfmiddlewaretoken');
+		}
+
+		// FormData objects are already in multipart/form-data format
+		return data;
+	},
+
+	'default': function(data) {
+		// Default application/x-www-form-urlencoded serialization
+		return serialize(data);
+	},
+});
+
 // Functions
 events('submit', document)
 .filter(compose(match, get('target')))
@@ -21,41 +88,12 @@ events('submit', document)
 	const method   = form.getAttribute('method');
 	const url      = form.getAttribute('action');
 	const mimetype = form.getAttribute('enctype');
-	const data     = new FormData(form);
-
-	const body = mimetype === 'application/json' ?
-		// data.entries() is an iterator, not an array
-		JSON.stringify(
-			Array
-			.from(data.entries())
-			.reduce(function(output, entry) {
-				if (entry[0] !== 'csrfmiddlewaretoken') {
-					output[entry[0]] = entry[1];
-				}
-
-				return output;
-			}, {})
-		) :
-
-	mimetype === 'application/x-www-form-urlencoded' ?
-		// Todo: serialize form data
-		data :
-
-	data ;
+	const formData = new FormData(form);
 
 	fetch(url, {
-		method: method ? method.toUpperCase() : 'POST',
-		headers: {
-			"X-CSRFToken": data.get('csrfmiddlewaretoken'),
-            "Content-Type": mimetype === 'application/json' ?
-				// Other requests are sent as JSON
-				"application/json; charset=utf-8" :
-				// If type exists, use it
-				mimetype ||
-				// FormData, of type "multipart/form-data", is our default
-				"multipart/form-data"
-        },
-		body: body
+		method:  method ? method.toUpperCase() : 'POST',
+		headers: createHeaders(mimetype, formData),
+		body:    createBody(mimetype, formData)
 	})
 	.then(function(response) {
 		if (response.redirected) {
@@ -76,7 +114,7 @@ events('submit', document)
 			}
 			else {
 				events.trigger(form, 'dom-submit-error', {
-					detail: data.errors
+					detail: data
 				});
 			}
 		});

@@ -96,8 +96,9 @@ events('submit', document)
 		body:    createBody(mimetype, formData)
 	})
 	.then(function(response) {
+		// If redirected, navigate the browser away from here
 		if (response.redirected) {
-			console.log('REDIRECT', reponse);
+			window.location = response.url;
 		}
 
 		const contentType = response.headers.get("content-type");

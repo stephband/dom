@@ -45,7 +45,7 @@ events('submit', document)
 				// Get requests are encoded in the URL
 				"application/x-www-form-urlencoded"
         },
-		body: data
+		body: body
 	})
 	.then(function(response) {
 		const contentType = response.headers.get("content-type");

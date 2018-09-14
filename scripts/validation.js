@@ -1,9 +1,9 @@
 // validation.js
 //
-// The dom-error event is sent from forms that fail AJAX requests. It is a hook
-// for custom handling of responses where you want to use the dom library's
-// 'postable' but still want custom validation. Event.detail is the reponse
-// object.
+// The dom-submit-error event is sent from forms that fail AJAX requests. It is
+// a hook for custom handling of responses where you want to use the dom
+// library's 'submittable' but still want custom validation. Event.detail is the
+// reponse object.
 //
 // This script takes .data.errors from a response and sets input validity on
 // inputs that caused the error. It expects the errors object to be in the form:
@@ -55,9 +55,6 @@ function setValidity(error) {
 
 events('dom-submit-error', document)
 .each(function(e) {
-
-	console.log('HELLO', e);
-
 	var form   = e.target;
 	var errors = e.detail;
 

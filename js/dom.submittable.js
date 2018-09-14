@@ -1,12 +1,12 @@
 
-// dom.postable
+// dom.submittable
 
 import { compose, get, noop } from '../../fn/fn.js';
 import { events, matches, preventDefault } from '../dom.js';
 
 // Define
 
-var match = matches('.submittable, [submittable]');
+const match = matches('.submittable, [submittable]');
 
 function isJSONContent(type) {
 	return type && type.indexOf("application/json") !== -1;
@@ -18,18 +18,30 @@ events('submit', document)
 .tap(preventDefault)
 .map(get('target'))
 .each(function(form) {
-	var method = form.getAttribute('method');
-	var url    = form.getAttribute('action');
-	var data   = new FormData(form);
+	const method = form.getAttribute('method');
+	const url    = form.getAttribute('action');
+	const type   = form.getAttribute('enctype');
+	const data   = new FormData(form);
+
+	const body = type === 'application/json' ?
+		// data.entries() is an iterator, not an array
+		Array
+		.from(data.entries())
+		.reduce(function(output, entry) {
+			output[entry[0]] = entry[1];
+			return output;
+		}, {}) :
+
+		data ;
 
 	fetch(url, {
 		method: method ? method.toUpperCase() : 'POST',
 		headers: {
-            "Content-Type": method === 'GET' ?
-				// Get requests are encoded in the URL
-				"application/x-www-form-urlencoded" :
+            "Content-Type": type === 'application/json' ?
 				// Other requests are sent as JSON
-				"application/json; charset=utf-8"
+				"application/json; charset=utf-8" :
+				// Get requests are encoded in the URL
+				"application/x-www-form-urlencoded"
         },
 		body: data
 	})
@@ -54,8 +66,6 @@ events('submit', document)
 		});
 	})
 	.catch(function(error) {
-		events.trigger(form, 'dom-submit-error', {
-			detail: error.response.data.errors
-		});
+		events.trigger(form, 'dom-submit-error');
 	});
 });

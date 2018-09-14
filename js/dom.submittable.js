@@ -29,7 +29,10 @@ events('submit', document)
 			Array
 			.from(data.entries())
 			.reduce(function(output, entry) {
-				output[entry[0]] = entry[1];
+				if (entry[0] !== 'csrfmiddlewaretoken') {
+					output[entry[0]] = entry[1];
+				}
+
 				return output;
 			}, {})
 		) :
@@ -43,6 +46,7 @@ events('submit', document)
 	fetch(url, {
 		method: method ? method.toUpperCase() : 'POST',
 		headers: {
+			"X-CSRFToken": data.get('csrfmiddlewaretoken'),
             "Content-Type": mimetype === 'application/json' ?
 				// Other requests are sent as JSON
 				"application/json; charset=utf-8" :

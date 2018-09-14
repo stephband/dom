@@ -54,6 +54,7 @@ const createBody = choose({
 	'application/json': function(data) {
 		const csrf = data.get('csrfmiddlewaretoken');
 
+		// Remove CSRF from the data
 		if (csrf) {
 			data.delete('csrfmiddlewaretoken');
 		}
@@ -65,6 +66,7 @@ const createBody = choose({
 	'multipart/form-data': function(data) {
 		const csrf = data.get('csrfmiddlewaretoken');
 
+		// Remove CSRF from the data
 		if (csrf) {
 			data.delete('csrfmiddlewaretoken');
 		}
@@ -101,6 +103,7 @@ events('submit', document)
 			window.location = response.url;
 		}
 
+		// Otherwise send an event with data negociated by contentType
 		const contentType = response.headers.get("content-type");
 
 		(isJSONContent(contentType) ?

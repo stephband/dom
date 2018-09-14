@@ -53,17 +53,26 @@ function setValidity(error) {
 	input.setCustomValidity(error.text);
 }
 
-events('dom-error', document)
+events('dom-submit-error', document)
 .each(function(e) {
+
+	console.log('HELLO', e);
+
 	var form   = e.target;
 	var errors = e.detail;
 
-	if (typeof errors === 'object') {
+	if (errors && typeof errors === 'object') {
 		// Format data and set custom validation messages on inputs
 		flattenErrors(errors, form).forEach(setValidity);
 
 		// Cause the validation handling found in dom.validation.js to
 		// pick up the custom validation messages and render them
 		form.checkValidity();
+
+		// Signal that the event has been handled
+		e.preventDefault();
+	}
+	else {
+		console.warn('"dom-submit-error" received but no errors attached', form);
 	}
 });

@@ -18,12 +18,12 @@ events('submit', document)
 .tap(preventDefault)
 .map(get('target'))
 .each(function(form) {
-	const method = form.getAttribute('method');
-	const url    = form.getAttribute('action');
-	const type   = form.getAttribute('enctype');
-	const data   = new FormData(form);
+	const method   = form.getAttribute('method');
+	const url      = form.getAttribute('action');
+	const mimetype = form.getAttribute('enctype');
+	const data     = new FormData(form);
 
-	const body = type === 'application/json' ?
+	const body = mimetype === 'application/json' ?
 		// data.entries() is an iterator, not an array
 		JSON.stringify(
 			Array
@@ -34,20 +34,30 @@ events('submit', document)
 			}, {})
 		) :
 
-		data ;
+	mimetype === 'application/x-www-form-urlencoded' ?
+		// Todo: serialize form data
+		data :
+
+	data ;
 
 	fetch(url, {
 		method: method ? method.toUpperCase() : 'POST',
 		headers: {
-            "Content-Type": type === 'application/json' ?
+            "Content-Type": mimetype === 'application/json' ?
 				// Other requests are sent as JSON
 				"application/json; charset=utf-8" :
-				// Get requests are encoded in the URL
-				"application/x-www-form-urlencoded"
+				// If type exists, use it
+				mimetype ||
+				// FormData, of type "multipart/form-data", is our default
+				"multipart/form-data"
         },
 		body: body
 	})
 	.then(function(response) {
+		if (response.redirected) {
+			console.log('REDIRECT', reponse);
+		}
+
 		const contentType = response.headers.get("content-type");
 
 		(isJSONContent(contentType) ?

@@ -25,12 +25,14 @@ events('submit', document)
 
 	const body = type === 'application/json' ?
 		// data.entries() is an iterator, not an array
-		Array
-		.from(data.entries())
-		.reduce(function(output, entry) {
-			output[entry[0]] = entry[1];
-			return output;
-		}, {}) :
+		JSON.stringify(
+			Array
+			.from(data.entries())
+			.reduce(function(output, entry) {
+				output[entry[0]] = entry[1];
+				return output;
+			}, {})
+		) :
 
 		data ;
 

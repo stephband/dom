@@ -6,7 +6,7 @@ import { events, matches, preventDefault } from '../dom.js';
 
 // Define
 
-var match = matches('.submitable, [submitable]');
+var match = matches('.submittable, [submittable]');
 
 function isJSONContent(type) {
 	return type && type.indexOf("application/json") !== -1;

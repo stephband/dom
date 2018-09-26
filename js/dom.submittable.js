@@ -112,7 +112,7 @@ events('submit', document)
 		)
 		.then(function(data) {
 			if (response.ok) {
-				events.trigger(form, 'dom-submit-response', {
+				events.trigger(form, 'dom-submit-success', {
 					detail: data
 				});
 			}

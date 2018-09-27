@@ -24,6 +24,9 @@ export const config = {
 // Time of latest scroll event
 let scrollTime = 0;
 let activeNode;
+let animateScroll = function() {
+    return noop;
+};
 let cancel = noop;
 
 function activate(e) {
@@ -55,7 +58,7 @@ function activate(e) {
     if (scrollTime > t || t > scrollTime + idleTime) {
         coords     = offset(document.scrollingElement, target);
         scrollTime = t + scrollDuration * 1000;
-        cancel     = animate(scrollDuration, scrollTransform, 'scrollTop', document.scrollingElement, coords[1] - config.top);
+        cancel     = animateScroll(scrollDuration, scrollTransform, 'scrollTop', document.scrollingElement, coords[1] - config.top);
     }
 
     e.default();
@@ -119,5 +122,6 @@ on(document, 'dom-activate', activate);
 on(document, 'dom-deactivate', deactivate);
 on(window, 'scroll', scroll);
 update();
+animateScroll = animate;
 
 matchers.push(match);

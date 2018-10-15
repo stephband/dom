@@ -129,7 +129,7 @@ function removeMessages(input) {
 	}
 }
 
-events('input', document)
+events('input dom-update', document)
 .map(get('target'))
 .filter(isValidateable)
 // This came from somewhere - is it for nullifying custom messages? Review.

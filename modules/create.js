@@ -76,19 +76,19 @@ export default function create(tag, attributes) {
 		delete object.tagName;
 	}
 
-	const node = document.createElement(tag);
+	const node = document.createElement(tag) ;
 
-	if (!object) { return node; }
-
-	assignAttributes(node, object);
-
-	if (!attributes) { return node; }
-
-	if (typeof attributes === 'string') {
-		node.innerHTML = attributes;
+	if (object) {
+		assignAttributes(node, object);
 	}
-	else {
-		assignAttributes(node, attributes);
+
+	if (attributes) {
+		if (typeof attributes === 'string') {
+			node.innerHTML = attributes;
+		}
+		else {
+			assignAttributes(node, attributes);
+		}
 	}
 
 	return node;

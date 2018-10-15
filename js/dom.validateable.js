@@ -6,12 +6,14 @@
 //
 // 1. A validation attribute on the input:
 //    <input type="email" data-validation-type="That is not an email address" />
-//    The attribute name can be modified globally by setting config.attributePrefix.
+//    The attribute name can be modified globally by setting
+//    config.attributePrefix. The postfix word is always one of 'pattern',
+//    'max', 'min', 'step', 'maxlength', 'type' or 'required'.
 //
 // 2. The messages in config.messages.
 //
 // 3. The browser's default validation message (which is available on the
-//    input at the point that it fails validastion).
+//    input at the point that it fails validation).
 //
 // Inputs inside or with .validateable are given .validated after they are
 // first validated, enabling pre- as well as post- validation styles.
@@ -32,11 +34,11 @@ var types = {
 };
 
 export const config = {
-	errorClass: 'error-label',
+	errorLabelClass: 'error-label',
 
 	// Class added to validated nodes (note: not valid nodes, necessarily,
-	// but nodes that have been validated).
-	validatedClass: 'validated',
+	// but nodes that have been validated at least once).
+	validatedClass:  'validated',
 
 	// Prefix for input attributes containing validation messages.
 	attributePrefix: 'data-validation-',
@@ -62,7 +64,7 @@ function negate(fn) {
 
 function isShowingMessage(node) {
 	return node.nextElementSibling
-		&& matches('.' + config.errorClass, node.nextElementSibling);
+		&& matches('.' + config.errorLabelClass, node.nextElementSibling);
 }
 
 function toError(input) {
@@ -92,16 +94,16 @@ function renderError(error) {
 	var node  = input;
 
 	// Find the last error
-	while (node.nextElementSibling && matches('.' + config.errorClass, node.nextElementSibling)) {
+	while (node.nextElementSibling && matches('.' + config.errorLabelClass, node.nextElementSibling)) {
 		node = node.nextElementSibling;
 	}
 
 	var label = create('label', {
 		textContent: error.text,
 		for:         input.id,
-		class:       'error-label'
+		class:       config.errorLabelClass
 	});
-console.log(label, error)
+
 	after(node, label);
 
 	if (error.type === 'customError') {
@@ -122,7 +124,7 @@ function addValidatedClass(input) {
 function removeMessages(input) {
 	var node = input;
 
-	while ((node = next(node)) && matches('.' + config.errorClass, node)) {
+	while ((node = next(node)) && matches('.' + config.errorLabelClass, node)) {
 		remove(node);
 	}
 }

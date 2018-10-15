@@ -101,7 +101,7 @@ function renderError(error) {
 		for:         input.id,
 		class:       'error-label'
 	});
-
+console.log(label, error)
 	after(node, label);
 
 	if (error.type === 'customError') {

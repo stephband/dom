@@ -63,23 +63,19 @@ export default function create(tag, attributes) {
 	// create(type, text)
 	// create(type, attributes)
 
-	var object;
+	let node;
 
 	if (typeof tag === 'string') {
 		if (constructors[tag]) {
 			return constructors[tag](attributes);
 		}
+
+		node = document.createElement(tag);
 	}
 	else {
-		object = tag;
-		tag = object.tagName;
-		delete object.tagName;
-	}
-
-	const node = document.createElement(tag) ;
-
-	if (object) {
-		assignAttributes(node, object);
+		node = document.createElement(tag.tagName);
+		delete tag.tagName;
+		assignAttributes(node, tag);
 	}
 
 	if (attributes) {

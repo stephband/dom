@@ -337,10 +337,12 @@ ready(function() {
 
 	// Activate the node that corresponds to the hashref in
 	// location.hash, checking if it's an alphanumeric id selector
-	// (not a hash bang)
+	// (not a hash bang, which google abuses for paths in old apps)
 	if (!id || !(/^#\S+$/.test(id))) { return; }
 
 	// Catch errors, as id may nonetheless be an invalid selector
-	try { query(id, document).forEach(triggerActivate); }
+	try {
+		query(id, document).forEach(triggerActivate);
+	}
 	catch(e) {}
 });

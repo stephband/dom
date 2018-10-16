@@ -5,10 +5,11 @@ if (window.console && window.console.log) {
 import { curry, deprecate } from '../fn/fn.js';
 
 
-// Lifecycle
+// Document
 
 export { default as ready } from './modules/ready.js';
 export { default as now } from './modules/now.js';
+export { default as breakpoint } from './modules/breakpoint.js';
 
 // HTML
 

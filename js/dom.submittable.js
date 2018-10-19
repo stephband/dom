@@ -8,6 +8,15 @@ import { events, matches, preventDefault } from '../dom.js';
 
 const match = matches('.submittable, [submittable]');
 
+export const config = {
+	processResponse: function(response, form) {
+		// If redirected, navigate the browser away from here
+		if (response.redirected) {
+			window.location = response.url;
+		}
+	}
+};
+
 function isJSONContent(type) {
 	return type && type.indexOf("application/json") !== -1;
 }
@@ -98,9 +107,8 @@ events('submit', document)
 		body:    createBody(mimetype, formData)
 	})
 	.then(function(response) {
-		// If redirected, navigate the browser away from here
-		if (response.redirected) {
-			window.location = response.url;
+		if(config.processResponse && config.processResponse(response, form)){
+			return;
 		}
 
 		// Otherwise send an event with data negociated by contentType

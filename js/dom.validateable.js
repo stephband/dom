@@ -67,8 +67,7 @@ function isShowingMessage(node) {
 		&& matches('.' + config.errorLabelClass, node.nextElementSibling);
 }
 
-function toError(input) {
-	var node     = input;
+function toError(node) {
 	var validity = node.validity;
 	var prefix   = config.attributePrefix;
 	var messages = config.messages;
@@ -79,11 +78,11 @@ function toError(input) {
 			return {
 				type: name,
 				attr: types[name],
-				name: input.name,
-				text: (prefix && input.getAttribute(prefix + types[name]))
+				name: node.name,
+				text: (prefix && node.getAttribute(prefix + types[name]))
 					|| (messages && messages[types[name]])
 					|| node.validationMessage,
-				node: input
+				node: node
 			};
 		}
 	}
@@ -132,7 +131,7 @@ function removeMessages(input) {
 events('input dom-update', document)
 .map(get('target'))
 .filter(isValidateable)
-// This came from somewhere - is it for nullifying custom messages? Review.
+// This came from somewhere - is it for nullifying custom messages? Todo: review.
 .tap(invoke('setCustomValidity', ['']))
 .filter(isValid)
 .each(removeMessages);

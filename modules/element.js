@@ -17,9 +17,9 @@ function isPropertyDescriptor(object) {
     return object.get || object.set || 'value' in object ;
 }
 
-export default function defineElement(name, setup, attributes, dom) {
-    function CustomElement() {
-        var elem = Reflect.construct(HTMLElement, nothing, CustomElement);
+export default function element(name, setup, attributes, dom) {
+    function Element() {
+        var elem = Reflect.construct(HTMLElement, nothing, Element);
 
         // Create a shadow root if there is DOM content
         if (isDefined(dom)) {
@@ -38,7 +38,7 @@ export default function defineElement(name, setup, attributes, dom) {
         return elem;
     }
 
-    CustomElement.prototype = Object.create(HTMLElement.prototype);
+    Element.prototype = Object.create(HTMLElement.prototype);
 
     if (attributes) {
         // Extract attribute handlers and register them to listen to changes
@@ -46,8 +46,8 @@ export default function defineElement(name, setup, attributes, dom) {
         const changeHandlers = entries.reduce(intoObject, {});
         const changeCallback = choose(changeHandlers);
 
-        CustomElement.observedAttributes = Object.keys(changeHandlers);
-        CustomElement.prototype.attributeChangedCallback = function(attribute, old, value) {
+        Element.observedAttributes = Object.keys(changeHandlers);
+        Element.prototype.attributeChangedCallback = function(attribute, old, value) {
             if (value === old) { return; }
             changeCallback.apply(this, arguments);
         };
@@ -58,12 +58,12 @@ export default function defineElement(name, setup, attributes, dom) {
         entries.forEach(function(entry) {
             const name = entry[0];
 
-            if (name in CustomElement.prototype) {
+            if (name in Element.prototype) {
                 throw new Error('Trying to create a property "' + name + '", but HTMLElement already defines that property.');
             }
 
             if (typeof entry[1] === 'function') {
-                Object.defineProperty(CustomElement.prototype, name, {
+                Object.defineProperty(Element.prototype, name, {
                     get: function() {
                         return this.getAttribute(name) || '';
                     },
@@ -74,11 +74,11 @@ export default function defineElement(name, setup, attributes, dom) {
                 });
             }
             else if (isPropertyDescriptor(entry[1])) {
-                Object.defineProperty(CustomElement.prototype, name, entry[1]);
+                Object.defineProperty(Element.prototype, name, entry[1]);
             }
         });
     }
 
-    window.customElements.define(name, CustomElement);
-    return CustomElement;
+    window.customElements.define(name, Element);
+    return Element;
 }

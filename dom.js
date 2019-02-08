@@ -117,6 +117,16 @@ Object.assign(events, {
     trigger: __trigger
 });
 
+export const on = curry(function(type, fn, node) {
+    __on(node, type, fn);
+    return node;
+}, true);
+
+export const off = curry(function(type, fn, node) {
+    __off(node, type, fn);
+    return node;
+}, true);
+
 import { default as _trigger } from './modules/trigger.js';
 export const trigger = curry(_trigger, true);
 

@@ -58,7 +58,9 @@ export const prepend = curry(_prepend, true);
 
 export { default as clone } from './modules/clone.js';
 export { default as create } from './modules/create.js';
-export { default as define } from './modules/define.js';
+// Todo: remove define
+export { default as define } from './modules/element.js';
+export { default as element } from './modules/element.js';
 export { default as identify } from './modules/identify.js';
 
 export { empty, remove } from './modules/mutation.js';

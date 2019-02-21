@@ -1,82 +1,118 @@
+
+// Create a custom element
+//
+// element(name, template, attributes, properties, options)
+//
+// - name:       Custom element name
+// - template:   A template node, id of a template node or HTML string
+// - attributes: An object of attribute change handler functions
+// - properties: An object of property definitions
+// - options: {
+//       tag:        Name of tag to extend
+//       setup:      Lifecycle handler called during element construction
+//       connect:    Lifecycle handler called when element added to DOM
+//       disconnect: Lifecycle handler called when element removed from DOM
+//   }
+
 import { choose, isDefined, nothing } from '../../fn/fn.js';
 
 const shadowOptions = { mode: 'open' };
 
-function intoObject(object, entry) {
-    if (typeof entry[1] === 'function') {
-        object[entry[0]] = entry[1];
+const constructors = {
+    a:      HTMLAnchorElement,
+    p:      HTMLParagraphElement,
+    br:     HTMLBRElement,
+    img:    HTMLImageElement
+};
+
+const getElementConstructor = function(tag) {
+        // Return a constructor from the known list of tag names
+    return constructors[tag]
+        // Or assemble the tag name in the form "HTMLTagElement" and return
+        // that property of the window object
+        || window['HTML' + tag[0].toUpperCase() + tag.slice(1) + 'Element'];
+};
+
+export default function element(name, template, attributes, properties, options) {
+    // Get the element constructor from options.tag, or the
+    // base HTMLElement constructor
+    const Constructor = options.tag ?
+        getElementConstructor(options.tag) :
+        HTMLElement ;
+
+    if (!Constructor) {
+        throw new Error('Constructor not found for tagName "' + options.tag + '"');
     }
-    else if (entry[1].change) {
-        object[entry[0]] = entry[1].change;
+
+    // If template is an #id, search for the <template>
+    if (typeof template === 'string' && template[0] === '#') {
+        template = document.getElementById(template.slice(1));
+        if (!template || !template.content) { throw new Error('Template ' + template + ' not found in document'); }
     }
 
-    return object;
-}
-
-function isPropertyDescriptor(object) {
-    return object.get || object.set || 'value' in object ;
-}
-
-export default function element(name, setup, attributes, dom) {
     function Element() {
-        var elem = Reflect.construct(HTMLElement, nothing, Element);
+        // Construct on instance of Constructor using the Element prototype
+        const elem = Reflect.construct(Constructor, arguments, Element);
 
         // Create a shadow root if there is DOM content
-        if (isDefined(dom)) {
-            const shadow = elem.attachShadow(shadowOptions);
+        const shadow = elem.attachShadow(shadowOptions);
 
-            if (typeof dom === 'string') {
-                shadow.innerHTML = dom;
-            }
-            else {
-                shadow.appendChild(dom);
-            }
+        // If template is a <template>
+        if (typeof template === 'string') {
+            shadow.innerHTML = template;
+        }
+        else {
+            shadow.appendChild(template.content.cloneNode(true));
         }
 
-        // Run custom setup and return
-        setup(elem);
+        // At this point, if properties have already been set before the
+        // element is upgraded, they exist on the elem itself, where we have
+        // just upgraded it's protytype to define those properties those
+        // definitions will never be reached. Either:
+        //
+        // 1. Define properties on the instance instead of the prototype
+        //    Object.defineProperties(elem, properties);
+        //
+        // 2. Take a great deal of care not to set properties before an element is upgraded
+        //
+        // Let's go with 2.
+
+        options.setup && options.setup.call(elem, shadow);
+
         return elem;
     }
 
-    Element.prototype = Object.create(HTMLElement.prototype);
 
-    if (attributes) {
-        // Extract attribute handlers and register them to listen to changes
-        const entries        = Object.entries(attributes);
-        const changeHandlers = entries.reduce(intoObject, {});
-        const changeCallback = choose(changeHandlers);
+    // Properties
+    //
+    // {
+    //     name: { get: fn, set: fn }
+    // }
 
-        Element.observedAttributes = Object.keys(changeHandlers);
-        Element.prototype.attributeChangedCallback = function(attribute, old, value) {
-            if (value === old) { return; }
-            changeCallback.apply(this, arguments);
-        };
+    Element.prototype = Object.create(HTMLElement.prototype, properties);
 
-        // Define properties. Where the descriptor is a function, assume that
-        // we want a property to reflect the attribute. Where get, set or value
-        // are not in the descriptor, don't define a property.
-        entries.forEach(function(entry) {
-            const name = entry[0];
 
-            if (name in Element.prototype) {
-                throw new Error('Trying to create a property "' + name + '", but HTMLElement already defines that property.');
-            }
+    // Attributes - object of functions called when attributes change
+    //
+    // {
+    //     name: fn
+    // }
 
-            if (typeof entry[1] === 'function') {
-                Object.defineProperty(Element.prototype, name, {
-                    get: function() {
-                        return this.getAttribute(name) || '';
-                    },
+    Element.observedAttributes = Object.keys(attributes);
 
-                    set: function(value) {
-                        this.setAttribute(name, value);
-                    }
-                });
-            }
-            else if (isPropertyDescriptor(entry[1])) {
-                Object.defineProperty(Element.prototype, name, entry[1]);
-            }
-        });
+    Element.prototype.attributeChangedCallback = function(name, old, value) {
+        attributes[name].call(this, value, name);
+    };
+
+
+    // Lifecycle
+
+    if (options.connect) {
+        Element.prototype.connectedCallback = options.connect;
+    }
+
+    if (options.disconnect) {
+        Element.prototype.disconnectedCallback = options.disconnect;
     }
 
     window.customElements.define(name, Element);

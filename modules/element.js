@@ -25,13 +25,23 @@ const constructors = {
     img:    HTMLImageElement
 };
 
-const getElementConstructor = function(tag) {
+function getElementConstructor(tag) {
         // Return a constructor from the known list of tag names
     return constructors[tag]
         // Or assemble the tag name in the form "HTMLTagElement" and return
         // that property of the window object
         || window['HTML' + tag[0].toUpperCase() + tag.slice(1) + 'Element'];
 };
+
+function transferProperty(elem, key) {
+    if (elem.hasOwnProperty(key)) {
+        const value = elem[key];
+        delete elem[key];
+        elem[key] = value;
+    }
+
+    return elem;
+}
 
 export default function element(name, template, attributes, properties, options) {
     // Get the element constructor from options.tag, or the
@@ -65,19 +75,24 @@ export default function element(name, template, attributes, properties, options)
             shadow.appendChild(template.content.cloneNode(true));
         }
 
+        options.setup && options.setup.call(elem, shadow);
+
         // At this point, if properties have already been set before the
-        // element is upgraded, they exist on the elem itself, where we have
+        // element was upgraded, they exist on the elem itself, where we have
         // just upgraded it's protytype to define those properties those
         // definitions will never be reached. Either:
         //
         // 1. Define properties on the instance instead of the prototype
         //    Object.defineProperties(elem, properties);
         //
-        // 2. Take a great deal of care not to set properties before an element is upgraded
+        // 2. Take a great deal of care not to set properties before an element
+        //    is upgraded. I can't impose a restriction like that.
         //
-        // Let's go with 2.
-
-        options.setup && options.setup.call(elem, shadow);
+        // 3. Copy defined properties to their prototype handlers and delete
+        //    them on the instance.
+        //
+        // Let's go with 3. I'm not happy you have to do this, though.
+        Object.keys(properties).reduce(transferProperty, elem);
 
         return elem;
     }

@@ -24,15 +24,11 @@ export const eventOptions = {
 export const inputEvent = new CustomEvent('input', eventOptions);
 
 export function transform(curve, value, min, max) {
-    return curve === 'linear-logarithmic' ?
-        denormalise.linearLogarithmic(min, max, 1/9, value) :
-        denormalise[toCamelCase(curve)](min, max, value) ;
+    return denormalise[toCamelCase(curve)](min, max, value) ;
 }
 
 export function invert(curve, value, min, max) {
-    return curve === 'linear-logarithmic' ?
-        normalise.linearLogarithmic(min, max, 1/9, value) :
-        normalise[toCamelCase(curve)](min, max, value) ;
+    return normalise[toCamelCase(curve)](min, max, value) ;
 }
 
 

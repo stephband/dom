@@ -41,9 +41,9 @@ function outputMilliKilo(unit, value) {
 
 export const transformOutput = overload(id, {
     pan: function(unit, value) {
-        return value === -1 ? 'left' :
-            value === 0 ? 'centre' :
-            value === 1 ? 'right' :
+        return value === -1 ? '-1.00' :
+            value === 0 ? '0.00' :
+            value === 1 ? '1.00' :
             value.toFixed(2) ;
     },
 
@@ -63,7 +63,7 @@ export const transformOutput = overload(id, {
             value.toPrecision(3) ;
     },
 
-    step: function(unit, value) {
+    semitone: function(unit, value) {
         // detune value is in cents
         return value < 0 ?
             ('♭' + (-value / 100).toFixed(2)) :
@@ -106,7 +106,8 @@ export const transformTick = overload(id, {
             (value / 1000).toFixed(0) + 'k' ;
     },
 
-    step: function(unit, value) {
+    semitone: function(unit, value) {
+        //console.log(unit, value, value / 100, (value / 100).toFixed(0));
         // detune value is in cents
         return (value / 100).toFixed(0);
     },
@@ -129,16 +130,18 @@ function unitMilliKilo(unit, value) {
         unit ;
 }
 
+function unitEmptyString() {
+    return '';
+}
+
 export const transformUnit = overload(id, {
-    pan: function(unit, value) {
-        return '' ;
-    },
+    pan: unitEmptyString,
 
     dB: id,
 
     Hz: unitKilo,
 
-    step: id,
+    semitone: unitEmptyString,
 
     s: unitMilliKilo,
 

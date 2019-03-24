@@ -44,6 +44,10 @@ function createTicks(data, tokens) {
         })
         .map((value) => {
             const displayValue = transformTick(data.unit, value);
+if (data.unit === undefined) {
+
+    console.log(data.unit, value, displayValue);
+}
 
             // Freeze to tell mounter it's immutable, prevents
             // unnecessary observing

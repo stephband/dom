@@ -1,12 +1,95 @@
 
 :host {
 	--normal-color: hsl(192, 96%, 6%);
-	--active-color: hsl(198, 50%, 56%);
-	--active-color-muted: hsl(198, 56%, 44%);
-	--output-color: hsl(198, 20%, 52%);
+	--active-color: hsl(201, 40%, 58%);
+	--active-color-muted: hsl(201, 24%, 43%);
+	--output-color: hsl(201, 31%, 50%);
 	--hover-color: #969ea2;
+	--focus-text-color: hsl(201, 21%, 53%);
 	--focus-color: hsl(165, 31%, 53%);
+
+    position: relative;
+    display: grid;
+	grid-template-areas:
+		'label output plugs'
+		'ticks ticks ticks'
+		'input input input';
+	grid-template-columns: 1fr 1fr min-content;
+	grid-template-rows:
+		minmax(0.9375rem, min-content)
+		minmax(0.4375rem, min-content)
+		min-content;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    max-width: 25rem;
+	padding: 0;
+	/*overflow: hidden;*/
+	color: var(--normal-color);
 }
+
+:host > * {
+	margin: 0;
+}
+
+:host > .control-output {
+	grid-area: output;
+    order: 1;
+    margin-left: auto;
+    width: auto;
+    font-size: 0.8125rem;
+    text-align: right;
+	position: relative;
+	top: 2px;
+}
+
+:host > .control-input {
+	grid-area: input;
+
+	/* Make the range input slightly wider than the control
+	   to allow range thumb to line up with label text */
+	width: calc(100% + 0.375rem);
+	margin-left: -0.1875rem;
+	margin-right: -0.1875rem;
+    z-index: 1;
+}
+
+:host > .tick-input {
+	/* Hide tick input behind range control-input where it can do no harm. */
+	grid-area: input;
+	z-index: 0;
+	opacity: 0;
+}
+
+:host > .tick-label {
+	grid-area: ticks;
+	position: relative;
+
+	/* Use margin to centre labvels, not transform: translate, which has the
+	   side effect of blurring the text on pixel screens. */
+	margin-left: -0.6875rem;
+	width: 1.375rem;
+    z-index: 0;
+}
+
+:host > span {
+	grid-area: input;
+	background-color: yellow;
+}
+
+:host > ::slotted([slot="plugs"]) {
+    /* Style slotted content. This is overidden by external CSS. */
+	grid-area: plugs;
+	position: relative;
+	margin-left: 9px;
+	align-self: end;
+	line-height: 15px;
+	top: 1px;
+}
+
+
+
+/* Range inputs */
 
 [type="range"] {
 	-webkit-appearance: none !important;
@@ -161,87 +244,7 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-:host {
-    position: relative;
-    display: grid;
-	grid-template-areas:
-		'label output plugs'
-		'ticks ticks ticks'
-		'input input input';
-	grid-template-columns: 1fr 1fr min-content;
-	grid-template-rows:
-		minmax(0.9375rem, min-content)
-		minmax(0.4375rem, min-content)
-		min-content;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    max-width: 25rem;
-	padding: 0;
-	/*overflow: hidden;*/
-	color: var(--normal-color);
-}
-
-:host > * {
-	margin: 0;
-}
-
-.control-input:focus ~ .control-label {
-	color: var(--output-color);
-}
-
-.control-input:focus ~ .control-output {
-	color: var(--focus-color);
-}
-
-.control-label {
-	align-self: end;
-	font-size: 14px;
-	line-height: 15px;
-	color: var(--output-color);
-}
-
-.control-output {
-	align-self: end;
-	font-family: 'Fira Mono', 'Andale Mono', monospace;
-	font-size: 0.6875rem;
-	line-height: 0.9375rem;
-	/* Doesnt seem to want to respect 15px auto height. Force. */
-	height: 0.9375rem;
-	white-space: pre;
-	color: #969ea2;
-	color: #4C565C;
-	color: var(--output-color);
-}
-
-.control-output > abbr {
-	font-size: 0.8em;
-	margin-left: 0.125rem;
-	vertical-align: baseline;
-}
-/*
-.control-output.changing {
-	color: #72B8A9 !important;
-	transition: color 0ms linear;
-}
-*/
-
-
+/* Ticks */
 
 .tick-label {
 	cursor: pointer;
@@ -279,77 +282,77 @@
 }
 
 .tick-label:hover {
-    color: var(--output-color);
+    color: var(--focus-text-color);
 }
 
 .tick-label:focus {
     color: var(--focus-color);
 }
 
-.control-input:focus ~ .tick-label {
+.tick-input:checked + .tick-label {
+	color: var(--focus-color);
+}
+
+
+/* Label */
+
+.control-label {
+	align-self: end;
+	font-size: 14px;
+	line-height: 15px;
+	color: var(--output-color);
+}
+
+
+/* Value display */
+
+.control-output {
+	align-self: end;
+	font-family: 'Fira Mono', 'Andale Mono', monospace;
+	font-size: 0.6875rem;
+	line-height: 0.9375rem;
+	/* Doesnt seem to want to respect 15px auto height. Force. */
+	height: 0.9375rem;
+	white-space: pre;
+	color: #969ea2;
+	color: #4C565C;
+	color: var(--output-color);
+}
+
+.control-output > abbr {
+	font-size: 0.8em;
+	margin-left: 0.125rem;
+	vertical-align: baseline;
+}
+
+/*
+.control-output.changing {
+	color: #72B8A9 !important;
+	transition: color 0ms linear;
+}
+*/
+
+
+/* Range input */
+
+.control-input:focus ~ .control-label {
+	color: var(--output-color);
+}
+
+.control-input:focus ~ .control-output {
 	color: var(--active-color);
+}
+
+.control-input:focus ~ .tick-label {
+	color: var(--focus-text-color);
 }
 
 .control-input:focus ~ .tick-label::after {
 	color: var(--active-color-muted);
 }
 
-.tick-input:checked + .tick-label {
-	color: var(--focus-color);
-}
-
 .control-input:focus ~ .tick-input:checked + .tick-label {
 	color: var(--focus-color);
-}
-
-
-:host > .control-output {
-	grid-area: output;
-    order: 1;
-    margin-left: auto;
-    margin-right: 0;
-    width: auto;
-    font-size: 0.8125rem;
-    text-align: right;
-}
-
-:host > .control-input {
-	grid-area: input;
-
-	/* Make the range input slightly wider than the control
-	   to allow range thumb to line up with label text */
-	width: calc(100% + 0.375rem);
-	margin-left: -0.1875rem;
-	margin-right: -0.1875rem;
-    z-index: 1;
-}
-
-:host > .tick-input {
-	/* Hide tick input behind range control-input where it can do no harm. */
-	grid-area: input;
-	z-index: 0;
-	opacity: 0;
-}
-
-:host > .tick-label {
-	grid-area: ticks;
-	position: relative;
-
-	/* Use margin to centre labvels, not transform: translate, which has the
-	   side effect of blurring the text on pixel screens. */
-	margin-left: -0.6875rem;
-	width: 1.375rem;
-    z-index: 0;
-}
-
-:host > span {
-	grid-area: input;
-	background-color: yellow;
-}
-
-:host > ::slotted([slot="plugs"]) {
-    /* Style slotted content. This is overidden by external CSS. */
-	grid-area: plugs;
 }
 
 output > abbr {

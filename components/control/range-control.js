@@ -8,6 +8,13 @@ const DEBUG = false;//true;
 
 const assign = Object.assign;
 
+const defaults = {
+    path: './components/controls',
+    transform: 'linear',
+    min:    0,
+    max:    1
+};
+
 const mountSettings = {
     mount: function(node, options) {
         // Does the node have Sparkyfiable attributes?
@@ -43,25 +50,22 @@ function createTicks(data, tokens) {
                 && number <= data.max
         })
         .map((value) => {
-            const displayValue = transformTick(data.unit, value);
-if (data.unit === undefined) {
-
-    console.log(data.unit, value, displayValue);
-}
-
             // Freeze to tell mounter it's immutable, prevents
             // unnecessary observing
             return Object.freeze({
-                root:        data,
-                value:       value,
-                tickValue:   invert(data.transform, value, data.min, data.max),
-                displayValue: displayValue
+                root:         data,
+                value:        value,
+                tickValue:    invert(data.transform, value, data.min, data.max),
+                displayValue: transformTick(data.unit, value)
             });
         }) :
         nothing ;
 }
 
 element('range-control', '#range-control-template', {
+
+    // Attributes
+
     min:       function(value) { this.min = value; },
 
     max:       function(value) { this.max = value; },
@@ -80,6 +84,9 @@ element('range-control', '#range-control-template', {
         observer.ticks = createTicks(data, value);
     }
 }, {
+
+    // Properties
+
     type: {
         value: 'number',
         enumerable: true
@@ -159,22 +166,22 @@ element('range-control', '#range-control-template', {
             requestTick(() => {
                 observer.displayValue = transformOutput(data.unit, value);
                 observer.displayUnit  = transformUnit(data.unit, value);
-                observer.inputValue  = invert(data.transform, value, data.min, data.max);
+                observer.inputValue   = invert(data.transform, value, data.min, data.max);
             });
         },
 
         enumerable: true
     }
 }, {
+
+    // Lifecycle
+
     setup: function(shadow) {
-        const data = this.data = {
-            path: './components/controls',
-            transform: 'linear'
-        };
+        const data = this.data = assign({}, defaults);
     },
 
     connect: function() {
-        if (DEBUG) { console.log('Element added to document', this); }
+        if (DEBUG) { console.log('<range-control> added to document', this.value, this.data); }
 
         const data     = this.data;
         const observer = Observer(data);

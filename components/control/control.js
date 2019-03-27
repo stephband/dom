@@ -65,9 +65,10 @@ export const transformOutput = overload(id, {
 
     semitone: function(unit, value) {
         // detune value is in cents
-        return value < 0 ?
-            ('♭' + (-value / 100).toFixed(2)) :
-            ('♯' + (value / 100).toFixed(2)) ;
+        return value === 0 ? '0' :
+            value < 0 ?
+                '♭' + (-value / 100).toFixed(2) :
+                '♯' + (value / 100).toFixed(2) ;
     },
 
     s: outputMilliKilo,

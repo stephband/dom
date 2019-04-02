@@ -72,7 +72,6 @@ function dragendButton(e) {
 }
 
 Sparky.fn['data-on-drag'] = function(node, scopes, params) {
-	var name = params[0];
 	var dragstart = delegate('[draggable]', dragstartButton);
 	var dragend   = delegate('[draggable]', dragendButton);
 
@@ -81,7 +80,7 @@ Sparky.fn['data-on-drag'] = function(node, scopes, params) {
 	//.on('drag', '.node-button', cache, dragButton)
 	on(node, 'dragend', dragend);
 
-	this.then(function() {
+	scopes.done(function() {
 		off(node, 'dragstart', dragstart);
 		off(node, 'dragend', dragend);
 	});

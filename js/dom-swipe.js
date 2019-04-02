@@ -42,7 +42,7 @@ on(document, 'dom-touch', function(e) {
 	var touch = e.detail();
 	var data  = touch.clone().latest();
 
-	data.then(function() {
+	data.done(function() {
 		touchdone(node, data);
 	});
 });

@@ -253,7 +253,7 @@ function TouchStream(node, events) {
 		on(document, touchevents.end, data.activeTouchend, data);
 	}
 
-	stream.then(function() {
+	stream.done(function() {
 		// Unbind the click suppressor, waiting until after mouseup
 		// has been handled. I don't know why it has to be any longer than
 		// a tick, but it does, in Chrome at least.

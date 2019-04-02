@@ -79,7 +79,7 @@ on(document, 'dom-touch', function touch(e) {
 	.each(function(transform) {
 		node.style.transform = transform;
 	})
-	.then(function() {
+	.done(function() {
 		classy.remove('no-transition');
 
 		// Todo: Watch out, this may interfere with slides

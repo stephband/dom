@@ -4,7 +4,7 @@ Detects changes on file inputs, updates corresponding labels with a
 data-file attribute containing the name (not the path) of the file.
 */
 
-import { get } from '../../fn/fn.js';
+import { get } from '../../fn/module.js';
 import { events, matches, query } from '../dom.js';
 
 const selector = '[type="file"]';

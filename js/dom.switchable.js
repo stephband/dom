@@ -3,7 +3,7 @@
 // Extends the default behaviour of the activate and deactivate
 // events with things to do when they are triggered on nodes.
 
-import { Fn } from '../../fn/fn.js';
+import { Fn } from '../../fn/module.js';
 import { events, trigger, matches, children } from '../dom.js';
 import { matchers } from './dom-activate.js';
 

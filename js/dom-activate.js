@@ -1,4 +1,4 @@
-import { curry, isDefined, overload } from '../../fn/fn.js';
+import { curry, isDefined, overload } from '../../fn/module.js';
 import { append, classes, create, delegate, Event, events, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../dom.js';
 
 var DEBUG     = false;

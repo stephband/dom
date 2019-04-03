@@ -3,7 +3,7 @@
 //
 // Animate scrollTop of scrollingElement to coords [x, y]
 
-import { denormalise, normalise, pipe, pow } from '../../fn/fn.js';
+import { denormalise, normalise, pipe, pow } from '../../fn/module.js';
 import transition from './transition.js';
 
 var view = document.scrollingElement;
@@ -24,8 +24,8 @@ export default function animateScroll(coords) {
 		y = coords[1];
 	}
 
-	var denormaliseX = x !== false && denormalise(view.scrollLeft, x);
-	var denormaliseY = denormalise(view.scrollTop, y);
+	var denormaliseX = x !== false && denormalise('linear', view.scrollLeft, x);
+	var denormaliseY = denormalise('linear', view.scrollTop, y);
 
 	return transition(
 		duration,

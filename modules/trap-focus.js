@@ -1,4 +1,4 @@
-import { noop } from '../../fn/fn.js';
+import { noop } from '../../fn/module.js';
 
 let untrapFocus = noop;
 

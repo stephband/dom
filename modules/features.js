@@ -1,4 +1,4 @@
-import { cache } from '../../fn/fn.js';
+import { cache } from '../../fn/module.js';
 import prefix from './prefix.js';
 
 const assign = Object.assign;

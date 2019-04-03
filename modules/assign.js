@@ -1,4 +1,4 @@
-import { id, overload } from '../../fn/fn.js';
+import { id, overload } from '../../fn/module.js';
 import append from './append.js';
 
 const setAttribute = overload(id, {

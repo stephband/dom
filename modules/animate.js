@@ -7,12 +7,13 @@
 // object    - object to animate
 // value     - target value
 
-import { denormalise, pipe, set } from '../../fn/fn.js';
+import { pipe, set } from '../../fn/module.js';
+import { linear as denormaliseLinear } from '../../fn/modules/denormalisers.js';
 import transition from './transition.js';
 
 export default function animate(duration, transform, name, object, value) {
 	return transition(
 		duration,
-		pipe(transform, denormalise(object[name], value), set(name, object))
+		pipe(transform, denormaliseLinear(object[name], value), set(name, object))
 	);
 };

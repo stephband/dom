@@ -63,7 +63,7 @@
 //	}, setClass);
 //}
 
-import { get } from '../../fn/fn.js';
+import { get } from '../../fn/module.js';
 
 export const classes = get('classList');
 

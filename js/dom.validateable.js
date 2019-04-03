@@ -18,7 +18,7 @@
 // Inputs inside or with .validateable are given .validated after they are
 // first validated, enabling pre- as well as post- validation styles.
 
-import { get, invoke, Stream } from '../../fn/fn.js';
+import { get, invoke, Stream } from '../../fn/module.js';
 import { create, events, matches, next, remove, validate, isValid, classes, after } from '../dom.js';
 
 var isValidateable = matches('.validateable, .validateable input, .validateable textarea, .validateable select, [validateable], [validateable] input, [validateable] textarea, [validateable] select');

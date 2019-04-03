@@ -1,4 +1,4 @@
-import { toArray } from '../../fn/fn.js';
+import { toArray } from '../../fn/module.js';
 
 export default function children(node) {
 	// In IE and Safari, document fragments do not have .children, fall back to

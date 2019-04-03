@@ -1,7 +1,7 @@
 
 import '../js/dom.switchable.js';
 import '../js/dom.swipeable.js';
-import { get, weakCache } from '../../fn/fn.js';
+import { get, weakCache } from '../../fn/module.js';
 import { children, events, matches, trigger } from '../dom.js';
 
 const config    = { duration: 6 };

@@ -1,5 +1,5 @@
 
-import { get, set, overload } from '../../fn/fn.js';
+import { get, set, overload } from '../../fn/module.js';
 import { get as getById, events, matches, trigger } from '../dom.js';
 
 const selector = '.location-select';

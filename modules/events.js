@@ -1,5 +1,5 @@
 
-import { Stream } from '../../fn/fn.js';
+import { Stream } from '../../fn/module.js';
 import Event from './event.js';
 import features from './features.js';
 

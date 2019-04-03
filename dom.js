@@ -2,7 +2,7 @@ if (window.console && window.console.log) {
     window.console.log('%cdom%c         – https://github.com/stephband/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
 }
 
-import { curry, deprecate } from '../fn/fn.js';
+import { curry, deprecate } from '../fn/module.js';
 
 
 // Document

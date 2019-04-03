@@ -1,4 +1,4 @@
-import { toPolar } from '../../fn/fn.js';
+import { toPolar } from '../../fn/module.js';
 import { closest, events } from '../dom.js';
 import './dom-touch.js';
 

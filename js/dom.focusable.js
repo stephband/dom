@@ -1,4 +1,4 @@
-import { noop, requestTick, Stream } from '../../fn/fn.js';
+import { noop, requestTick, Stream } from '../../fn/module.js';
 import { disableScroll, enableScroll, trapFocus, events, matches } from '../dom.js';
 import { matchers } from './dom-activate.js';
 

@@ -1,6 +1,6 @@
 // Units
 
-import { id, overload, toType } from '../../fn/fn.js';
+import { id, overload, toType } from '../../fn/module.js';
 import style from './style.js';
 
 const runit = /(\d*\.?\d+)(r?em|vw|vh)/;

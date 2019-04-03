@@ -15,7 +15,7 @@
 // The HTML validation API can only set one custom validation message at a time,
 // so the last message per input will be displayed.
 
-import { get } from '../../fn/fn.js'
+import { get } from '../../fn/module.js'
 import { events, find } from '../dom.js'
 
 function toSelector(str) {

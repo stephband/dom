@@ -4,7 +4,7 @@
 //
 // Adds the class 'dragover' to droppables during the drag-n-drop action.
 
-import { Fn, choose, id, intersect, nothing, prepend, requestTick, Stream } from '../../fn/fn.js';
+import { Fn, choose, id, intersect, nothing, prepend, requestTick, Stream } from '../../fn/module.js';
 import { after, attribute, classes, closest, delegate, events, preventDefault, query, remove } from '../dom.js';
 
 const on      = events.on;

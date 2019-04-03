@@ -1,5 +1,5 @@
 
-import { last, wrap } from '../../fn/fn.js';
+import { last, wrap } from '../../fn/module.js';
 import { attribute, box, events, children, classes, closest, matches, query, style } from '../dom.js';
 import './dom-swipe.js';
 import './dom-touch.js';

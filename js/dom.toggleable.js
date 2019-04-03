@@ -1,6 +1,6 @@
 // dom.toggleable
 
-import { remove } from '../../fn/fn.js';
+import { remove } from '../../fn/module.js';
 import { get, events, closest, matches, children, isPrimaryButton, isInternalLink, identify } from '../dom.js';
 import { matchers } from './dom-activate.js';
 

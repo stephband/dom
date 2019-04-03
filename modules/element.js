@@ -14,7 +14,7 @@
 //       disconnect: Lifecycle handler called when element removed from DOM
 //   }
 
-import { choose, isDefined, nothing } from '../../fn/fn.js';
+import { choose, isDefined, nothing } from '../../fn/module.js';
 
 const shadowOptions = { mode: 'open' };
 

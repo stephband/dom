@@ -1,9 +1,9 @@
 
-import { id, overload, todB, toLevel, toCamelCase } from '../../../fn/fn.js';
+import { id, overload, todB, toLevel, toCamelCase } from '../../../fn/module.js';
 import { transforms } from '../../../soundstage/soundstage.js';
 
-import * as normalise   from '../../../fn/modules/normalise.js';
-import * as denormalise from '../../../fn/modules/denormalise.js';
+import * as normalise   from '../../../fn/modules/normalisers.js';
+import * as denormalise from '../../../fn/modules/denormalisers.js';
 
 export const attributes = ['min', 'max', 'value'];
 

@@ -1,4 +1,4 @@
-import { parse, requestTick, Stream } from '../../fn/fn.js';
+import { parse, requestTick, Stream } from '../../fn/module.js';
 import { attribute, classes, delegate, events, identify, query, remove, removeClass } from '../dom.js';
 import Sparky from '../../sparky/sparky.js';
 

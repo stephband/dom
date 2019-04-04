@@ -8,7 +8,8 @@
         "twitter": "stephband"
     },
     "dependencies": {
-        "fn": ">=1.0.0"
+        "fn": ">=1.0.0",
+        "rollup": "^1.8.0"
     },
     "licenses": [
         {
@@ -28,7 +29,6 @@
         "js/dom.locateable.js",
         "js/dom.validateable.js"
     ],
-    "main": "./module.js",
     "description": "A small library of functional functions, DOM events and Event Streams for HTML and SVG.",
     "keywords": [
         "DOM",
@@ -46,13 +46,15 @@
     "homepage": "http://stephen.band/dom",
     "docs": "http://github.com/stephband/dom",
     "devDependencies": {
-        "eslint": "^3.6.1",
+        "eslint": "^5.16.0",
         "minifier": "^0.8.1"
     },
+    "module": "module.js",
+    "main": "index.js",
     "scripts": {
-        "build-iife": "rollup dom.js --o dist/dom.js --f iife --n dom --banner '// dom 1.2.1\n//\n// by @stephband\n// http://stephen.band/dom\n'",
-        "build-min": "uglifyjs dist/dom.js --compress --output dist/dom.min.js",
-        "build": "npm run build-iife && npm run build-min",
-        "build-version": "npm run build && cp dist/dom.js dist/dom-1.2.1.js && cp dist/dom.min.js dist/dom-1.2.1.min.js && cp dist/dom.css dist/dom-1.2.1.css"
+        "lint": "eslint modules/*.js",
+        "build": "npm run build-cjs && npm run build-esm",
+        "build-cjs": "rollup module.js --o index.js --f cjs",
+        "build-esm": "rollup module.js --o dom.js --f esm"
     }
 }

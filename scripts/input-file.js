@@ -5,7 +5,7 @@ data-file attribute containing the name (not the path) of the file.
 */
 
 import { get } from '../../fn/module.js';
-import { events, matches, query } from '../dom.js';
+import { events, matches, query } from '../module.js';
 
 const selector = '[type="file"]';
 

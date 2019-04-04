@@ -2,7 +2,7 @@
 // dom.submittable
 
 import { choose, compose, get, noop } from '../../fn/module.js';
-import { events, matches, preventDefault } from '../dom.js';
+import { events, matches, preventDefault } from '../module.js';
 
 // Define
 

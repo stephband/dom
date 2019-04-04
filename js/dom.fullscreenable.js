@@ -1,7 +1,7 @@
 // dom.fullscreenable
 
 import { noop } from '../../fn/module.js';
-import { closest, fullscreen, isInternalLink, isPrimaryButton, events, matches } from '../dom.js';
+import { closest, fullscreen, isInternalLink, isPrimaryButton, events, matches } from '../module.js';
 import { matchers } from './dom-activate.js';
 
 var match           = matches('.fullscreenable, [fullscreenable]');

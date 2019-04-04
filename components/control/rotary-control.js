@@ -1,8 +1,8 @@
 
 import { Observer, requestTick, nothing } from '../../../fn/module.js';
 import { attributes, evaluate, eventOptions, inputEvent, transform, invert, transformOutput, transformTick, transformUnit  } from './control.js';
-import { element } from '../../dom.js';
-import Sparky, { mount } from '../../../sparky/sparky.js';
+import { element } from '../../module.js';
+import Sparky, { mount } from '../../../sparky/module.js';
 
 const DEBUG = false;//true;
 

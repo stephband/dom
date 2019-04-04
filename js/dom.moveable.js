@@ -1,5 +1,5 @@
 
-import { closest, events } from '../dom.js';
+import { closest, events } from '../module.js';
 import './dom-touch.js';
 
 var on      = events.on;

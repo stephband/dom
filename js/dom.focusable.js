@@ -1,5 +1,5 @@
 import { noop, requestTick, Stream } from '../../fn/module.js';
-import { disableScroll, enableScroll, trapFocus, events, matches } from '../dom.js';
+import { disableScroll, enableScroll, trapFocus, events, matches } from '../module.js';
 import { matchers } from './dom-activate.js';
 
 var on            = events.on;

@@ -2,7 +2,7 @@
 import '../js/dom.switchable.js';
 import '../js/dom.swipeable.js';
 import { get, weakCache } from '../../fn/module.js';
-import { children, events, matches, trigger } from '../dom.js';
+import { children, events, matches, trigger } from '../module.js';
 
 const config    = { duration: 6 };
 const getData   = weakCache(() => ({}));

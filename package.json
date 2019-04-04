@@ -28,7 +28,7 @@
         "js/dom.locateable.js",
         "js/dom.validateable.js"
     ],
-    "main": "./dom.js",
+    "main": "./module.js",
     "description": "A small library of functional functions, DOM events and Event Streams for HTML and SVG.",
     "keywords": [
         "DOM",

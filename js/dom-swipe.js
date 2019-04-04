@@ -1,5 +1,5 @@
 import { toPolar } from '../../fn/module.js';
-import { closest, events } from '../dom.js';
+import { closest, events } from '../module.js';
 import './dom-touch.js';
 
 const on      = events.on;

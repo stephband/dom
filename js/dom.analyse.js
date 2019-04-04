@@ -1,5 +1,5 @@
 import { get } from '../../fn/module.js';
-import { closest, attribute } from '../dom.js';
+import { closest, attribute } from '../module.js';
 
 const rspaces = /\s+/;
 

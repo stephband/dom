@@ -1,5 +1,5 @@
 
-import { matches, events } from '../dom.js';
+import { matches, events } from '../module.js';
 import { matchers } from './dom-activate.js';
 
 // dom.toggleable

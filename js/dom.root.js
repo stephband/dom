@@ -1,5 +1,5 @@
 
-import { classes, events } from '../dom.js';
+import { classes, events } from '../module.js';
 
 // Adds classes to the document root depending on the last input device
 // used, enabling you to set :focus styles depending on the type of input

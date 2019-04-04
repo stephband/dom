@@ -16,7 +16,7 @@
 // so the last message per input will be displayed.
 
 import { get } from '../../fn/module.js'
-import { events, find } from '../dom.js'
+import { events, find } from '../module.js'
 
 function toSelector(str) {
 	return '[name="' + str + '"]';

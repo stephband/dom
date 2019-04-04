@@ -4,7 +4,7 @@
 // events with things to do when they are triggered on nodes.
 
 import { Fn } from '../../fn/module.js';
-import { events, trigger, matches, children } from '../dom.js';
+import { events, trigger, matches, children } from '../module.js';
 import { matchers } from './dom-activate.js';
 
 // Define

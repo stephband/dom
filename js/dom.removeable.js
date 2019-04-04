@@ -1,7 +1,7 @@
 // dom.toggleable
 
 import { noop } from '../../fn/module.js';
-import { remove, events, matches } from '../dom.js';
+import { remove, events, matches } from '../module.js';
 import './dom-activate.js';
 
 // Define

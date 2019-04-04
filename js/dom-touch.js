@@ -1,5 +1,5 @@
 import { requestTick, Stream } from '../../fn/module.js';
-import { closest, events, isPrimaryButton, preventDefault } from '../dom.js';
+import { closest, events, isPrimaryButton, preventDefault } from '../module.js';
 
 // Number of pixels a pressed pointer travels before movestart
 // event is fired.

@@ -1,6 +1,8 @@
 
 import { id, overload, todB, toLevel, toCamelCase } from '../../../fn/module.js';
-import { transforms } from '../../../soundstage/soundstage.js';
+
+// Todo: get transfomrs from Fn library normalisers
+import { transforms } from '../../../soundstage/module.js';
 
 import * as normalise   from '../../../fn/modules/normalisers.js';
 import * as denormalise from '../../../fn/modules/denormalisers.js';

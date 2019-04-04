@@ -12,8 +12,9 @@ import { linear as denormaliseLinear } from '../../fn/modules/denormalisers.js';
 import transition from './transition.js';
 
 export default function animate(duration, transform, name, object, value) {
+	console.log('linear', 0, object[name], value);
 	return transition(
 		duration,
 		pipe(transform, denormaliseLinear(object[name], value), set(name, object))
 	);
-};
+}

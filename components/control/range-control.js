@@ -1,10 +1,10 @@
 
-import { Observer, requestTick, nothing } from '../../../fn/module.js';
-import { attributes, evaluate, eventOptions, inputEvent, transform, invert, transformOutput, transformTick, transformUnit  } from './control.js';
+import { Observer, nothing, requestTick } from '../../../fn/module.js';
+import { evaluate, inputEvent, invert, transform, transformOutput, transformTick, transformUnit  } from './control.js';
 import { element } from '../../module.js';
 import Sparky, { mount } from '../../../sparky/module.js';
 
-const DEBUG = false;//true;
+const DEBUG = window.DEBUG === undefined || window.DEBUG;
 
 const assign = Object.assign;
 
@@ -177,7 +177,7 @@ element('range-control', '#range-control-template', {
     // Lifecycle
 
     setup: function(shadow) {
-        const data = this.data = assign({}, defaults);
+        this.data = assign({}, defaults);
     },
 
     connect: function() {

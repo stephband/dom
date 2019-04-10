@@ -56,8 +56,9 @@ export default function element(name, template, attributes, properties, options)
 
     // If template is an #id, search for the <template>
     if (typeof template === 'string' && template[0] === '#') {
-        template = document.getElementById(template.slice(1));
-        if (!template || !template.content) { throw new Error('Template ' + template + ' not found in document'); }
+        const string = template;
+        template = document.getElementById(string.slice(1));
+        if (!template || !template.content) { throw new Error('Template "' + string + '" not found in document'); }
     }
 
     function Element() {

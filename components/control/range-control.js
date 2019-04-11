@@ -4,7 +4,7 @@ import { evaluate, inputEvent, invert, transform, transformOutput, transformTick
 import { element } from '../../module.js';
 import Sparky, { mount } from '../../../sparky/module.js';
 
-const DEBUG = window.DEBUG === undefined || window.DEBUG;
+const DEBUG = false;//window.DEBUG === undefined || window.DEBUG;
 
 const assign = Object.assign;
 
@@ -216,9 +216,10 @@ element('range-control', '#range-control-template', {
                 .focus();
             }
 
-            // Input events are suppsed to traverse the shadow boundary
-            // but they do not. At least not in Chrome 2019
+            // 'input' events are suppsed to traverse the shadow boundary
+            // but they do not. At least not in Chrome 2019 - a
             if (!e.composed) {
+                console.warn('Custom element not allowing input event to traverse shadow boundary');
                 this.dispatchEvent(inputEvent);
             }
         });

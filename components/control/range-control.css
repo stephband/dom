@@ -14,7 +14,7 @@
 		'label output plugs'
 		'ticks ticks ticks'
 		'input input input';
-	grid-template-columns: 1fr 1fr min-content;
+	grid-template-columns: 40% 60% min-content;
 	grid-template-rows:
 		minmax(0.9375rem, min-content)
 		minmax(0.4375rem, min-content)

@@ -73,7 +73,8 @@ export const transformOutput = overload(id, {
 
     default: function(unit, value) {
         return value < 0.1 ? value.toFixed(3) :
-            value.toPrecision(3) ;
+            value < 999.5 ? value.toPrecision(3) :
+            value.toFixed(0) ;
     }
 });
 
@@ -114,7 +115,14 @@ export const transformTick = overload(id, {
     s: tickMilliKilo,
 
     default: function(unit, value) {
-        return value.toPrecision(2) ;
+        // Format numbers to precision 3 then remove trailing zeroes from floats
+        return (value < 99.5 ?
+            value.toPrecision(3) :
+            value.toFixed(0)
+        )
+        .replace(/(\d+)(\.\d*?)0+$/, ($0, $1, $2) => {
+            return $1 + ($2.length > 1 ? $2 : '');
+        });
     }
 });
 

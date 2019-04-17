@@ -127,6 +127,8 @@ export const off = curry(function(type, fn, node) {
     return node;
 }, true);
 
+export { default as gestures } from './modules/gestures.js';
+
 import { default as _trigger } from './modules/trigger.js';
 export const trigger = curry(_trigger, true);
 

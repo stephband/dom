@@ -19,7 +19,6 @@ function dragstartButton(e) {
 	if (data) {
 		data = parse(rmimetype, {
 			1: function handleMime(data, results) {
-				const mimetype = results[1];
 				data[results[1]] = results[2];
 				if ((lastIndex(results) + 2) < results.input.length) {
 					parse(rmimetype, { 1: handleMime }, data, results);

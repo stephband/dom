@@ -71,6 +71,14 @@ export const transformOutput = overload(id, {
 
     s: outputMilliKilo,
 
+    bpm: function(unit, value) {
+        // Input value is a rate in beats per second
+        const bpm = value * 60;
+        return bpm < 100 ?
+            bpm.toFixed(1) :
+            bpm.toFixed(0) ;
+    },
+
     default: function(unit, value) {
         return value < 0.1 ? value.toFixed(3) :
             value < 999.5 ? value.toPrecision(3) :

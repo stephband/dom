@@ -45,6 +45,7 @@ export const matches = curry(_matches, true);
 import _query from './modules/query.js';
 export const query = curry(_query, true);
 
+
 // Mutate
 
 import _assign from './modules/assign.js';
@@ -104,7 +105,7 @@ export * from './modules/fragments.js';
 
 export { default as Event } from './modules/event.js';
 export { isPrimaryButton, isTargetEvent, preventDefault } from './modules/events.js';
-
+export { default as match } from './modules/match.js';
 import { default as _events, on as __on, once as __once, off as __off, trigger as __trigger } from './modules/events.js';
 export const events = curry(_events, true);
 

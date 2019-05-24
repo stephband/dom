@@ -2,16 +2,19 @@
 import { Stream } from '../../fn/module.js';
 import events, { isPrimaryButton } from './events.js';
 
+
+// https://stackoverflow.com/questions/8643739/cancel-click-event-in-the-mouseup-event-handler/8927598
+
 function createMouseGesture(e) {
     // Start gesture stream with mousedown event
-    var gesture = Stream.of(e);
+    const gesture = Stream.of(e);
 
-    var moves = events('mousemove', document).each((e) => {
+    const moves = events('mousemove', document).each((e) => {
         e.preventDefault();
         gesture.push(e);
     });
 
-    var ups = events('mouseup', document).each((e) => {
+    const ups = events('mouseup', document).each((e) => {
         e.preventDefault();
         gesture.push(e);
         gesture.stop();

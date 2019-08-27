@@ -18,7 +18,7 @@
 // Inputs inside or with .validateable are given .validated after they are
 // first validated, enabling pre- as well as post- validation styles.
 
-import { get, invoke, Stream } from '../../fn/module.js';
+import { get, id, invoke, Stream } from '../../fn/module.js';
 import { create, events, matches, next, remove, validate, isValid, classes, after } from '../module.js';
 
 var isValidateable = matches('.validateable, .validateable input, .validateable textarea, .validateable select, [validateable], [validateable] input, [validateable] textarea, [validateable] select');
@@ -34,14 +34,16 @@ var types = {
 };
 
 export const config = {
+    // Class added to labels displaying errors
 	errorLabelClass: 'error-label',
 
 	// Class added to validated nodes (note: not valid nodes, necessarily,
 	// but nodes that have been validated at least once).
-	validatedClass:  'validated',
+	validatedInputClass:  'validated',
 
-	// Prefix for input attributes containing validation messages.
-	attributePrefix: 'data-validation-',
+	// Prefix for input attributes containing node specific validation messages.
+    // Example: data-validation-max="You have gone too far"
+    messageAttributePrefix: 'data-validation-',
 
 	// Global object for validation messages.
 	messages: {
@@ -52,7 +54,12 @@ export const config = {
 		// maxlength:
 		// type:
 		// required:
-	}
+	},
+
+    // Given an input, select or textarea (that may have been augmented in some
+    // way such that it is not the node that an error should be attached to),
+    // selectNode() should return the node that the error should follow.
+    selectNode: id
 };
 
 
@@ -62,14 +69,15 @@ function negate(fn) {
 	};
 }
 
-function isShowingMessage(node) {
+function isShowingMessage(input) {
+    var node = config.selectNode(input);
 	return node.nextElementSibling
 		&& matches('.' + config.errorLabelClass, node.nextElementSibling);
 }
 
 function toError(node) {
 	var validity = node.validity;
-	var prefix   = config.attributePrefix;
+	var prefix   = config.messageAttributePrefix;
 	var messages = config.messages;
 	var name;
 
@@ -90,7 +98,7 @@ function toError(node) {
 
 function renderError(error) {
 	var input = error.node;
-	var node  = input;
+    var node  = config.selectNode(input);
 
 	// Find the last error
 	while (node.nextElementSibling && matches('.' + config.errorLabelClass, node.nextElementSibling)) {
@@ -106,22 +114,22 @@ function renderError(error) {
 	after(node, label);
 
 	if (error.type === 'customError') {
-		node.setCustomValidity(error.text);
+		input.setCustomValidity(error.text);
 
-		events('input', node)
+		events('input', input)
 		.take(1)
-		.each(function() {
-			node.setCustomValidity('');
+		.each(function(e) {
+			e.target.setCustomValidity('');
 		});
 	}
 }
 
 function addValidatedClass(input) {
-	classes(input).add(config.validatedClass);
+	classes(input).add(config.validatedInputClass);
 }
 
 function removeMessages(input) {
-	var node = input;
+	var node = config.selectNode(input);
 
 	while ((node = next(node)) && matches('.' + config.errorLabelClass, node)) {
 		remove(node);

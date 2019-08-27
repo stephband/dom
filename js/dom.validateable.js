@@ -45,7 +45,7 @@ export const config = {
     // Example: data-validation-max="You have gone too far"
     messageAttributePrefix: 'data-validation-',
 
-	// Global object for validation messages.
+	// Global object for validation messages, overiding the browser defaults.
 	messages: {
 		// pattern:
 		// max:

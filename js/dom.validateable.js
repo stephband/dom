@@ -55,7 +55,6 @@ export const config = {
 	}
 };
 
-
 function negate(fn) {
 	return function() {
 		return !fn.apply(this, arguments);
@@ -64,7 +63,7 @@ function negate(fn) {
 
 function isShowingMessage(node) {
 	return node.nextElementSibling
-		&& matches('.' + config.errorLabelClass, node.nextElementSibling);
+		&& matches('.' + config.errorLabelClass.trim().split(/\s+/).join('.'), node.nextElementSibling);
 }
 
 function toError(node) {
@@ -93,7 +92,7 @@ function renderError(error) {
 	var node  = input;
 
 	// Find the last error
-	while (node.nextElementSibling && matches('.' + config.errorLabelClass, node.nextElementSibling)) {
+	while (node.nextElementSibling && matches('.' + config.errorLabelClass.trim().split(/\s+/).join('.'), node.nextElementSibling)) {
 		node = node.nextElementSibling;
 	}
 
@@ -123,7 +122,7 @@ function addValidatedClass(input) {
 function removeMessages(input) {
 	var node = input;
 
-	while ((node = next(node)) && matches('.' + config.errorLabelClass, node)) {
+	while ((node = next(node)) && matches('.' + config.errorLabelClass.trim().split(/\s+/).join('.'), node)) {
 		remove(node);
 	}
 }

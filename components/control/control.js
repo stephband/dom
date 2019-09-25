@@ -71,6 +71,14 @@ export const transformOutput = overload(id, {
 
     s: outputMilliKilo,
 
+    bpm: function(unit, value) {
+        // Input value is a rate in beats per second
+        const bpm = value * 60;
+        return bpm < 100 ?
+            bpm.toFixed(1) :
+            bpm.toFixed(0) ;
+    },
+
     default: function(unit, value) {
         return value < 0.1 ? value.toFixed(3) :
             value < 999.5 ? value.toPrecision(3) :
@@ -166,13 +174,17 @@ export function evaluate(string) {
     const number = +string;
     if (number || number === 0) { return number; }
 
-    const tokens = /^(-?[\d.]+)(?:(dB)|(m|k)?(\w+))$/.exec(string);
+    const tokens = /^(-?[\d.]+)(?:(dB|bpm)|(m|k)?(\w+))$/.exec(string);
     if (!tokens) { return 0 };
 
     const value = parseFloat(tokens[1]) ;
 
     return tokens[2] === 'dB' ? toLevel(value) :
+        // BPM to rate in beats per second
+        tokens[2] === 'bpm' ? value / 60 :
+        // milli-
         tokens[3] === 'm' ? value / 1000 :
+        // kilo-
         tokens[3] === 'k' ? value * 1000 :
         value ;
 }

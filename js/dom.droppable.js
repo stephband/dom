@@ -59,9 +59,11 @@ function dragenter(e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = "copy";
         onOvernode(droppable, nothing);
+        return;
     }
 
     var types = intersect(dragtypes, droptypes);
+
     if (!types.length) {
         e.dataTransfer.dropEffect = "none";
         return;

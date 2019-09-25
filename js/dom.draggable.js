@@ -1,10 +1,12 @@
 import { parse, requestTick, Stream } from '../../fn/module.js';
 import { attribute, classes, delegate, events, identify, query, remove, removeClass } from '../module.js';
-import Sparky from '../../sparky/module.js';
+import { functions } from '../../sparky/module.js';
 
 var debug  = true;
 var on     = events.on;
 var off    = events.off;
+
+//                 xxxxx: wef;
 var rmimetype = /^([^:\s]+)\s*:\s*([^;\s]+);\s*/;
 
 function lastIndex(data) {
@@ -16,7 +18,7 @@ function dragstartButton(e) {
 
 	if (data) {
 		data = parse(rmimetype, {
-			1: function handleMime(data, mimetype, results) {
+			1: function handleMime(data, results) {
 				data[results[1]] = results[2];
 				if ((lastIndex(results) + 2) < results.input.length) {
 					parse(rmimetype, { 1: handleMime }, data, results);
@@ -28,8 +30,8 @@ function dragstartButton(e) {
 	else {
 		// Todo: needed for Neho - factor out
 		data = {
-			"Text":             identify(e.target),
-			"text/plain":       identify(e.target),
+			"Text":       identify(e.target),
+			"text/plain": identify(e.target)
 			//"application/json": JSON.stringify({})
 		};
 	}
@@ -71,7 +73,7 @@ function dragendButton(e) {
 	query('.dragover', document).forEach(removeClass('dragover'));
 }
 
-Sparky.fn['data-on-drag'] = function(node, scopes, params) {
+functions['data-on-drag'] = function(node, scopes, params) {
 	var dragstart = delegate('[draggable]', dragstartButton);
 	var dragend   = delegate('[draggable]', dragendButton);
 

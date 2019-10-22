@@ -11,11 +11,10 @@ const match = matches(selector);
 const on    = events.on;
 
 // Duration and easing of scroll animation
-const scrollDuration  = 0.8;
-const scrollTransform = expOut(6);
-
 export const config = {
-    top: 80
+    top: 80,
+    scrollDuration: 0.8,
+    scrollTransform: expOut(6)
 };
 
 let activeNode;
@@ -32,7 +31,7 @@ function scrollToNode(target) {
         scrollHeight - scrollBox.height :
         (coords[1] - config.top);
 
-    cancel = animateScroll(scrollDuration, scrollTransform, 'scrollTop', document.scrollingElement, top);
+    cancel = animateScroll(config.scrollDuration, config.scrollTransform, 'scrollTop', document.scrollingElement, top);
 }
 
 function activate(e) {

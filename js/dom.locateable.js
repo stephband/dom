@@ -2,8 +2,8 @@
 //
 // Extends the default behaviour of events for the .tip class.
 
-import { by, get, exponentialOut as expOut, noop } from '../../fn/module.js';
-import { animate, box, events, matches, offset, query, trigger } from '../module.js';
+import { by, get, exponentialOut as expOut, noop, requestTick } from '../../fn/module.js';
+import { animate, box, events, matches, offset, query, ready, trigger } from '../module.js';
 import { matchers } from './dom-activate.js';
 
 const selector = ".locateable, [locateable]";
@@ -14,12 +14,17 @@ const on    = events.on;
 export const config = {
     top: 80,
     scrollDuration: 0.8,
-    scrollTransform: expOut(6)
+    scrollTransform: expOut(6),
+    scrollIdleDuration: 0.1
 };
 
 let activeNode;
+let lastScrollTime = -Infinity;
 let cancel = noop;
-let animateScroll = function() {
+
+// No animation before document ready
+let animateScroll = function(duration, transform, property, node, top) {
+    node[property] = top;
     return noop;
 };
 
@@ -52,8 +57,10 @@ function activate(e) {
     }
 
     // If there is a related target, we know the command came from a
-    // link and we must animate.
-    if (e.relatedTarget) {
+    // link and we must animate. If last scroll time was in the distant past,
+    // we can be pretty sure we are not currently scrolling (even on iOS?) and
+    // so we probably want to animate.
+    if (e.relatedTarget || (lastScrollTime < e.timeStamp - config.scrollIdleDuration * 1000)) {
         scrollToNode(target);
     }
 
@@ -76,7 +83,9 @@ function deactivate(e) {
     }
 }
 
-function update() {
+function update(e) {
+    lastScrollTime = e.timeStamp;
+
     var locateables = query(selector, document);
     var boxes       = locateables.map(box).sort(by(get('top')));
     var winBox      = box(window);
@@ -117,9 +126,15 @@ function update() {
 
 on(document, 'dom-activate', activate);
 on(document, 'dom-deactivate', deactivate);
-on(window, 'scroll', update);
-update();
 
-animateScroll = animate;
+// Wait until after dom-activate has updated the page from the hashref – if
+// there is a hashref, dom-activate will be sent on ready. Then after ready,
+// make scroll animation smooth
+on(window, 'load', function(e) {
+    update(e);
+    on(window, 'scroll', update);
+    animateScroll = animate;
+});
+
 
 matchers.push(match);

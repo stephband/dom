@@ -1,4 +1,4 @@
-import { curry, isDefined, overload } from '../../fn/module.js';
+import { curry, isDefined, overload, requestTick } from '../../fn/module.js';
 import { append, classes, create, delegate, Event, events, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../module.js';
 
 var DEBUG     = false;
@@ -334,7 +334,9 @@ on(document, 'click', delegate('a[target]', activateTarget));
 ready(function() {
 	// Setup all things that should start out active
 	query('.' + config.activeClass, document).forEach(triggerActivate);
+});
 
+on(window, 'load', function() {
 	// Activate the node that corresponds to the hashref in
 	// location.hash, checking if it's an alphanumeric id selector
 	// (not a hash bang, which google abuses for paths in old apps)
@@ -344,5 +346,7 @@ ready(function() {
 	try {
 		query(id, document).forEach(triggerActivate);
 	}
-	catch(e) {}
+	catch(e) {
+		console.warn('dom: Cannot activate ' + id, e.message);
+	}
 });

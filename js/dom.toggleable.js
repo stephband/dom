@@ -1,7 +1,7 @@
 // dom.toggleable
 
 import { remove } from '../../fn/module.js';
-import { get, events, closest, matches, children, isPrimaryButton, isInternalLink, identify } from '../module.js';
+import { get, events, closest, matches, isPrimaryButton, isInternalLink, identify } from '../module.js';
 import { matchers } from './dom-activate.js';
 
 // Define

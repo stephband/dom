@@ -264,13 +264,7 @@ function activate(e, node) {
 		preventClick(e);
 	}
 
-	//if (data.active === undefined ?
-	//		data.bolt.elem.hasClass('active') :
-	//		data.active ) {
-	//	return;
-	//}
-
-	// TODO: This doesnt seemt o set relatedTarget
+	// TODO: This doesnt seem to set relatedTarget
 	// trigger(node, 'dom-activate', { relatedTarget: e.delegateTarget });
 	var a = Event('dom-activate', { relatedTarget: e.delegateTarget });
 	node.dispatchEvent(a);
@@ -289,22 +283,15 @@ function activateId(e, id) {
 	if (!node) { return; }
 
 	// Is the node popable, switchable or toggleable?
-	//var classes = dom.classes(node);
-
 	if (matchers.find(apply(node))) {
 		activate(e, node);
 	}
-	// A bit of a fudge, but smooth scrolling is so project-dependent it is
-	// hard to design a consistent way of doing it. The function
-	// dom.activateOther() is an optional hook that allows otherwise
-	// inactivateable things to get some action.
-	//else if (dom.activateOther) {
-	//	dom.activateOther(node);
-	//}
 }
 
 function activateHref(e) {
 	if (isIgnorable(e)) { return; }
+
+	// Check whether the link points to something on this page
 	if (e.delegateTarget.hostname && !isInternalLink(e.delegateTarget)) { return; }
 
 	// Does it point to an id?

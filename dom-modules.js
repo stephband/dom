@@ -11,4 +11,4 @@ import './js/dom.swipeable.js';
 import './js/dom.switchable.js';
 import './js/dom.toggleable.js';
 import './js/dom.validateable.js';
-import './js/dom.root.js';
+import './js/dom.device.js';

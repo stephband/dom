@@ -21,6 +21,6 @@ Styleguide: zutilities.transition
 
 /* Respond to device input classes. */
 
-.mouse *:focus {
+.mouse-device *:focus {
 	outline: none !important;
 }

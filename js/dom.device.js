@@ -6,10 +6,12 @@
 
 import { classes, events } from '../module.js';
 
-var simulatedEventDelay = 80;
-var keyClass   = 'key-device';
-var mouseClass = 'mouse-device';
-var touchClass = 'touch-device';
+export const config = {
+    simulatedEventDelay: 0.08,
+    keyClass:   'key-device',
+    mouseClass: 'mouse-device',
+    touchClass: 'touch-device'
+};
 
 var on         = events.on;
 var list       = classes(document.documentElement);
@@ -27,20 +29,20 @@ function mousedown(e) {
     // If we are within simulatedEventDelay of a touchend event, ignore
     // mousedown as it's likely a simulated event. Reset timeStamp to
     // gaurantee that we only block one mousedown at most.
-    if (e.timeStamp < timeStamp + simulatedEventDelay) { return; }
+    if (e.timeStamp < timeStamp + config.simulatedEventDelay * 1000) { return; }
     timeStamp = undefined;
-    updateClass(mouseClass);
+    updateClass(config.mouseClass);
 }
 
 function keydown(e) {
     // If key is not tab, enter or escape do nothing
     if ([9, 13, 27].indexOf(e.keyCode) === -1) { return; }
-    updateClass(keyClass);
+    updateClass(config.keyClass);
 }
 
 function touchend(e) {
     timeStamp = e.timeStamp;
-    updateClass(touchClass);
+    updateClass(config.touchClass);
 }
 
 on(document, 'mousedown', mousedown);

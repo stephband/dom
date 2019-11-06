@@ -107,14 +107,9 @@ export default define({
 		enumerable: true
 	},
 
-	// Deprecated
-
-	transitionend: {
-		get: function() {
-			console.warn('dom.features.transitionend deprecated in favour of dom.features.events.transitionend.');
-			return features.events.transitionend;
-		},
-
-		enumerable: true
+	scrollBehavior: {
+		get: cache(function() {
+			return 'scrollBehavior' in document.documentElement.style;
+		})
 	}
 });

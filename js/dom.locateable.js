@@ -2,8 +2,9 @@
 //
 // Extends the default behaviour of events for the .tip class.
 
-import { by, get, exponentialOut as expOut, noop, requestTick } from '../../fn/module.js';
-import { animate, box, events, matches, offset, query, ready, trigger } from '../module.js';
+import '../polyfills/element.scrollIntoView.js';
+import { by, get } from '../../fn/module.js';
+import { box, events, matches, query, trigger } from '../module.js';
 import { matchers } from './dom-activate.js';
 
 const selector = ".locateable, [locateable]";
@@ -12,37 +13,17 @@ const on    = events.on;
 
 // Duration and easing of scroll animation
 export const config = {
-    top: 80,
-    scrollDuration: 0.8,
-    scrollTransform: expOut(6),
     scrollIdleDuration: 0.1
+};
+
+const scrollOptions = {
+    // Overridden on window load
+    behavior: 'auto',
+    block: 'start'
 };
 
 let activeNode;
 let lastScrollTime = -Infinity;
-let cancel = noop;
-
-// No animation before document ready
-let animateScroll = function(duration, transform, property, node, top) {
-    node[property] = top;
-    return noop;
-};
-
-function scrollToNode(target) {
-    const coords = offset(document.scrollingElement, target);
-    const scrollHeight = document.scrollingElement.scrollHeight;
-    const scrollBoxHeight = document.scrollingElement === document.body ?
-        // We cannot gaurantee that body height is 100%. Use the window
-        // innerHeight instead.
-        window.innerHeight :
-        box(document.scrollingElement).height ;
-
-    const top = (coords[1] - config.top) > (scrollHeight - scrollBoxHeight) ?
-        scrollHeight - scrollBoxHeight :
-        (coords[1] - config.top);
-
-    cancel = animateScroll(config.scrollDuration, config.scrollTransform, 'scrollTop', document.scrollingElement, top);
-}
 
 function activate(e) {
     if (!e.default) { return; }
@@ -57,7 +38,6 @@ function activate(e) {
 
     // Deactivate current active node
     if (activeNode) {
-        cancel();
         trigger('dom-deactivate', activeNode);
     }
 
@@ -66,7 +46,7 @@ function activate(e) {
     // we can be pretty sure we are not currently scrolling (even on iOS?) and
     // so we probably want to animate.
     if (e.relatedTarget || (lastScrollTime < e.timeStamp - config.scrollIdleDuration * 1000)) {
-        scrollToNode(target);
+        target.scrollIntoView(scrollOptions);
     }
 
     e.default();
@@ -138,7 +118,9 @@ on(document, 'dom-deactivate', deactivate);
 on(window, 'load', function(e) {
     update(e);
     on(window, 'scroll', update);
-    animateScroll = animate;
+
+    // Scroll smoothly from now on
+    scrollOptions.behavior = 'smooth';
 });
 
 

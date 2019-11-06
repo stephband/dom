@@ -10,6 +10,7 @@ import { curry, deprecate } from '../fn/module.js';
 export { default as ready } from './modules/ready.js';
 export { default as now } from './modules/now.js';
 export { default as breakpoint } from './modules/breakpoint.js';
+export { default as features } from './modules/features.js';
 
 // HTML
 

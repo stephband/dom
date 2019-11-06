@@ -29,11 +29,16 @@ let animateScroll = function(duration, transform, property, node, top) {
 };
 
 function scrollToNode(target) {
-    const coords       = offset(document.scrollingElement, target);
+    const coords = offset(document.scrollingElement, target);
     const scrollHeight = document.scrollingElement.scrollHeight;
-    const scrollBox    = box(document.scrollingElement);
-    const top = (coords[1] - config.top) > (scrollHeight - scrollBox.height) ?
-        scrollHeight - scrollBox.height :
+    const scrollBoxHeight = document.scrollingElement === document.body ?
+        // We cannot gaurantee that body height is 100%. Use the window
+        // innerHeight instead.
+        window.innerHeight :
+        box(document.scrollingElement).height ;
+
+    const top = (coords[1] - config.top) > (scrollHeight - scrollBoxHeight) ?
+        scrollHeight - scrollBoxHeight :
         (coords[1] - config.top);
 
     cancel = animateScroll(config.scrollDuration, config.scrollTransform, 'scrollTop', document.scrollingElement, top);

@@ -36,7 +36,7 @@ function scrollToNode(target, behavior) {
         cancel = animate(config.scrollDuration, config.scrollTransform, 'scrollTop', document.scrollingElement, top);
     }
     else {
-        document.scrollingElement.scrollTop === top;
+        document.scrollingElement.scrollTop = top;
     }
 }
 
@@ -49,11 +49,11 @@ if (!features.scrollBehavior) {
     constructor.prototype.scrollIntoView = function(options) {
         if (typeof options === 'object') {
             if (options.block && options.block !== 'start') {
-                console.warn('Element.scrollIntoView polyfill only supports options.block: "start"');
+                console.warn('Element.scrollIntoView polyfill only supports options.block value "start"');
             }
 
             if (options.inline) {
-                console.warn('Element.scrollIntoView polyfill does not support options.inline');
+                console.warn('Element.scrollIntoView polyfill does not support options.inline... add support!');
             }
 
             scrollToNode(this, options.behavior);

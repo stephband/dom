@@ -4,7 +4,7 @@
 
 import '../polyfills/element.scrollintoview.js';
 import { by, get } from '../../fn/module.js';
-import { box, events, matches, query, trigger } from '../module.js';
+import { box, events, matches, query, trigger, features } from '../module.js';
 import { matchers } from './dom-activate.js';
 
 const selector = ".locateable, [locateable]";
@@ -25,7 +25,14 @@ const scrollOptions = {
 let activeNode;
 let lastScrollTime = -Infinity;
 
+// In browsers with scrollBehavior don't enable activate until load – these
+// browsers understand scroll-padding and will scroll to the correct hash
+// position without help when the hash is activated by dom-activate.js
+let activateable = !features.scrollBehavior;
+
 function activate(e) {
+    if (!activateable) { return; }
+
     if (!e.default) { return; }
 
     var target = e.target;
@@ -49,6 +56,7 @@ function activate(e) {
         target.scrollIntoView(scrollOptions);
     }
 
+    history.replaceState({}, '', '#' + target.id);
     e.default();
     activeNode = target;
 }
@@ -118,6 +126,9 @@ on(document, 'dom-deactivate', deactivate);
 on(window, 'load', function(e) {
     update(e);
     on(window, 'scroll', update);
+
+    // Make things activatable
+    activateable = true;
 
     // Scroll smoothly from now on
     scrollOptions.behavior = 'smooth';

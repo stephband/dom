@@ -56,9 +56,9 @@ function activate(e) {
         target.scrollIntoView(scrollOptions);
     }
 
-    history.replaceState({}, '', '#' + target.id);
     e.default();
     activeNode = target;
+    history.replaceState({}, '', '#' + target.id);
 }
 
 function deactivate(e) {

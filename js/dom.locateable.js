@@ -24,6 +24,7 @@ const scrollOptions = {
 
 let activeNode;
 let lastScrollTime = -Infinity;
+let lastActivateTime = -Infinity;
 
 // In browsers with scrollBehavior don't enable activate until load – these
 // browsers understand scroll-padding and will scroll to the correct hash
@@ -54,6 +55,7 @@ function activate(e) {
     // so we probably want to animate.
     if (e.relatedTarget || (lastScrollTime < e.timeStamp - config.scrollIdleDuration * 1000)) {
         target.scrollIntoView(scrollOptions);
+        lastActivateTime = e.timeStamp;
     }
 
     e.default();
@@ -78,6 +80,13 @@ function deactivate(e) {
 
 function update(e) {
     lastScrollTime = e.timeStamp;
+
+    // For a short duration after a target is activated don't update while
+    // the smooth scrolling settles to the right place.
+    if (lastActivateTime > e.timeStamp - config.scrollIdleDuration * 1000) {
+        lastActivateTime = e.timeStamp;
+        return;
+    }
 
     var locateables = query(selector, document);
     var boxes       = locateables.map(box).sort(by(get('top')));

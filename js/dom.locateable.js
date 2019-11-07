@@ -2,7 +2,7 @@
 //
 // Extends the default behaviour of events for the .tip class.
 
-import '../polyfills/element.scrollintoview.js';
+import '../polyfills/element.scrollIntoView.js';
 import { by, get } from '../../fn/module.js';
 import { box, events, matches, query, trigger } from '../module.js';
 import { matchers } from './dom-activate.js';

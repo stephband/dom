@@ -2,7 +2,7 @@ import '../polyfills/element.scrollintoview.js';
 import { by, curry, get, isDefined, overload, requestTick } from '../../fn/module.js';
 import { append, box, classes, create, delegate, Event, events, features, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../module.js';
 
-var DEBUG = true;
+var DEBUG = window.DEBUG;
 
 export const config = {
     scrollIdleDuration: 0.15

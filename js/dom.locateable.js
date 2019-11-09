@@ -1,20 +1,17 @@
-// dom.locateable
-//
-// Extends the default behaviour of events for the .tip class.
-
 import '../polyfills/element.scrollintoview.js';
-import { by, get } from '../../fn/module.js';
-import { box, events, matches, query, trigger, features } from '../module.js';
-import { matchers } from './dom-activate.js';
+import { by, curry, get, isDefined, overload, requestTick } from '../../fn/module.js';
+import { append, box, classes, create, delegate, Event, events, features, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../module.js';
+
+var DEBUG = true;
+
+export const config = {
+    scrollIdleDuration: 0.15
+};
 
 const selector = ".locateable, [locateable]";
-const match = matches(selector);
-const on    = events.on;
-
-// Duration and easing of scroll animation
-export const config = {
-    scrollIdleDuration: 0.1
-};
+const on       = events.on;
+const byTop    = by(get('top'));
+const nothing  = {};
 
 const scrollOptions = {
     // Overridden on window load
@@ -22,80 +19,71 @@ const scrollOptions = {
     block: 'start'
 };
 
-let activeNode;
-let lastScrollTime = -Infinity;
-let lastActivateTime = -Infinity;
+let hashTime     = -Infinity;
+let scrollTime   = -Infinity;
+let scrollTop0   = document.scrollingElement.scrollTop;
+let scrollTop1   = scrollTop0;
+let locateables, locatedNode, scrollPaddingTop;
 
-// In browsers with scrollBehavior don't enable activate until load – these
-// browsers understand scroll-padding and will scroll to the correct hash
-// position without help when the hash is activated by dom-activate.js
-let activateable = !features.scrollBehavior;
 
-function activate(e) {
-    if (!activateable) { return; }
-
-    if (!e.default) { return; }
-
-    var target = e.target;
-
-    // If node is already active, ignore
-    if (target === activeNode) { return; }
-
-    // If node is not a locateable
-    if (!match(target)) { return; }
-
-    // Deactivate current active node
-    if (activeNode) {
-        trigger('dom-deactivate', activeNode);
-    }
-
-    // If there is a related target, we know the command came from a
-    // link and we must animate. If last scroll time was in the distant past,
-    // we can be pretty sure we are not currently scrolling (even on iOS?) and
-    // so we probably want to animate.
-    if (e.relatedTarget || (lastScrollTime < e.timeStamp - config.scrollIdleDuration * 1000)) {
-        target.scrollIntoView(scrollOptions);
-        lastActivateTime = e.timeStamp;
-    }
-
-    e.default();
-    activeNode = target;
-    history.replaceState({}, '', '#' + target.id);
+function queryLinks(id) {
+	return query('a[href$="#' + id + '"]', document.body)
+	.filter(isInternalLink);
 }
 
-function deactivate(e) {
-    if (!e.default) { return; }
-
-    var target = e.target;
-
-    if (!match(target)) { return; }
-
-    e.default();
-
-    // If node is already active, ignore
-    if (target === activeNode) {
-        activeNode = undefined;
-    }
+function unlocate() {
+    if (!locatedNode) { return; }
+    locatedNode.classList.remove('located');
+    queryLinks(locatedNode.id).forEach((node) => node.classList.remove('on'));
+    locatedNode = undefined;
 }
 
-function update(e) {
-    lastScrollTime = e.timeStamp;
+function locate(node) {
+    node.classList.add('located');
+    queryLinks(node.id).forEach((node) => node.classList.add('on'));
+    locatedNode = node;
+}
 
-    // For a short duration after a target is activated don't update while
-    // the smooth scrolling settles to the right place.
-    if (lastActivateTime > e.timeStamp - config.scrollIdleDuration * 1000) {
-        lastActivateTime = e.timeStamp;
+function scrollIntoView(node, hashTime, scrollTime) {
+    // In Safari, hashchange is preceeded by a scroll event, elsewhere the
+    // hashchange comes first. Detect immediately preceeding scroll event,
+    // restore scroll...
+    if (hashTime - scrollTime < 12) {
+        document.scrollingElement.scrollTop = scrollTop1;
+    }
+
+    node.scrollIntoView(scrollOptions);
+}
+
+function scroll(e) {
+    const aMomentAgo = e.timeStamp - config.scrollIdleDuration * 1000;
+
+    // Keep a two-deep record of scrollTop in order to restore it in Safari,
+    // where hashchanges are preceeded by a scroll jump
+    scrollTop1 = scrollTop0;
+    scrollTop0 = document.scrollingElement.scrollTop;
+
+    // For a moment after the last hashchange dont update while
+    // smooth scrolling settles to the right place.
+    if (hashTime > aMomentAgo) {
+        hashTime = e.timeStamp;
         return;
     }
 
-    var locateables = query(selector, document);
-    var boxes       = locateables.map(box).sort(by(get('top')));
-    var winBox      = box(window);
-    var n = -1;
+    // Update things that rarely change only when we have not scrolled recently
+    if (scrollTime < aMomentAgo) {
+        locateables = query(selector, document);
+        scrollPaddingTop = parseInt(getComputedStyle(document.documentElement).scrollPaddingTop, 10);
+    }
+
+    scrollTime = e.timeStamp;
+
+    const boxes = locateables.map(box).sort(byTop);
+    let  n = -1;
 
     while (boxes[++n]) {
         // Stop on locateable lower than the break
-        if (boxes[n].top > winBox.height / 3) {
+        if (boxes[n].top >= scrollPaddingTop) {
             break;
         }
     }
@@ -105,8 +93,9 @@ function update(e) {
     // Before the first or after the last locateable. (The latter
     // should not be possible according to the above while loop)
     if (n < 0 || n >= boxes.length) {
-        if (activeNode) {
-            trigger('dom-deactivate', activeNode);
+        if (locatedNode) {
+            unlocate();
+            window.history.replaceState(nothing, '', '#');
         }
 
         return;
@@ -114,34 +103,61 @@ function update(e) {
 
     var node = locateables[n];
 
-    if (activeNode) {
-        // Node is already active
-        if (node === activeNode) {
-            return;
-        }
-
-        trigger('dom-deactivate', activeNode);
+    if (locatedNode && node === locatedNode) {
+        return;
     }
 
-    trigger('dom-activate', node);
+    unlocate();
+    locate(node);
+    window.history.replaceState(nothing, '', '#' + node.id);
 }
 
-on(document, 'dom-activate', activate);
-on(document, 'dom-deactivate', deactivate);
+function hashchange(e) {
+    if (DEBUG) {
+        console.log('hashchange', window.location.hash, document.scrollingElement.scrollTop);
+    }
 
-// Wait until after dom-activate has updated the page from the hashref – if
-// there is a hashref, dom-activate will be sent on ready. Then after ready,
-// make scroll animation smooth
-on(window, 'load', function(e) {
-    update(e);
-    on(window, 'scroll', update);
+    const hash = window.location.hash;
 
-    // Make things activatable
-    activateable = true;
+    // Record the timeStamp
+    hashTime = e.timeStamp;
+
+    // Remove current located
+    unlocate();
+
+    const id = hash.slice(1);
+    if (!id) {
+        if (!features.scrollBehavior) {
+            scrollIntoView(document.body, hashTime, scrollTime);
+        }
+
+        return;
+    }
+
+    // Is there a node with that id?
+    var node = document.getElementById(id);
+    if (!node) { return; }
+
+    // The page is on the move
+    locate(node);
+
+    // Implement smooth scroll for browsers that do not have it
+    if (!features.scrollBehavior) {
+        scrollIntoView(node, hashTime, scrollTime);
+    }
+}
+
+function load(e) {
+    hashchange(e);
+    scroll(e);
+
+    // Start listening to scroll
+    window.addEventListener('scroll', scroll);
 
     // Scroll smoothly from now on
     scrollOptions.behavior = 'smooth';
-});
+}
 
 
-matchers.push(match);
+window.addEventListener('hashchange', hashchange);
+window.addEventListener('load', load);

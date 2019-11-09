@@ -10,8 +10,8 @@ import { animate, box, features, offset } from '../module.js';
 
 // Duration and easing of scroll animation
 const config = {
-    scrollDuration: 1.2,
-    scrollTransform: expOut(4)
+    scrollDuration: 0.6,
+    scrollTransform: expOut(2)
 };
 
 let cancel = noop;

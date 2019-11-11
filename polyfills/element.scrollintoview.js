@@ -10,8 +10,8 @@ import { animate, box, features, offset } from '../module.js';
 
 // Duration and easing of scroll animation
 const config = {
-    scrollDuration: 0.6,
-    scrollTransform: expOut(2)
+    scrollDuration: 0.5,
+    scrollTransform: expOut(3)
 };
 
 let cancel = noop;
@@ -28,15 +28,21 @@ function scrollToNode(target, behavior) {
 
     const top = (coords[1] - scrollPaddingTop) > (scrollHeight - scrollBoxHeight) ?
         scrollHeight - scrollBoxHeight :
-        (coords[1] - scrollPaddingTop);
+        (coords[1] - scrollPaddingTop) ;
 
     cancel();
 
+    const scrollTop = top < 0 ?
+        0 :
+    top > scrollHeight - scrollBoxHeight ?
+        scrollHeight - scrollBoxHeight :
+    top ;
+
     if (behavior === 'smooth') {
-        cancel = animate(config.scrollDuration, config.scrollTransform, 'scrollTop', document.scrollingElement, top);
+        cancel = animate(config.scrollDuration, config.scrollTransform, 'scrollTop', document.scrollingElement, scrollTop);
     }
     else {
-        document.scrollingElement.scrollTop = top;
+        document.scrollingElement.scrollTop = scrollTop ;
     }
 }
 

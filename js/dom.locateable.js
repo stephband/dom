@@ -4,26 +4,24 @@ import { append, box, classes, create, delegate, Event, events, features, fragme
 
 var DEBUG = window.DEBUG;
 
-export const config = {
-    scrollIdleDuration: 0.15
-};
-
 const selector = ".locateable, [locateable]";
 const on       = events.on;
 const byTop    = by(get('top'));
 const nothing  = {};
-
 const scrollOptions = {
     // Overridden on window load
     behavior: 'auto',
     block: 'start'
 };
 
+export const config = {
+    scrollIdleDuration: 0.125
+};
+
 let hashTime     = -Infinity;
-let scrollTime   = -Infinity;
-let scrollTop0   = document.scrollingElement.scrollTop;
-let scrollTop1   = scrollTop0;
-let locateables, locatedNode, scrollPaddingTop;
+let frameTime    = -Infinity;
+let scrollTop    = document.scrollingElement.scrollTop;
+let locateables, locatedNode, scrollPaddingTop, frame;
 
 
 function queryLinks(id) {
@@ -44,39 +42,25 @@ function locate(node) {
     locatedNode = node;
 }
 
-function scrollIntoView(node, hashTime, scrollTime) {
-    // In Safari, hashchange is preceeded by a scroll event, elsewhere the
-    // hashchange comes first. Detect immediately preceeding scroll event,
-    // restore scroll...
-    if (hashTime - scrollTime < 12) {
-        document.scrollingElement.scrollTop = scrollTop1;
-    }
+function scrollIntoView(node) {
+    // In Safari, popstate and hashchange are preceeded by scroll jump -
+    // restore previous scrollTop.
+    document.scrollingElement.scrollTop = scrollTop;
 
+    // Then animate
     node.scrollIntoView(scrollOptions);
 }
 
-function scroll(e) {
-    const aMomentAgo = e.timeStamp - config.scrollIdleDuration * 1000;
+function update(time) {
+    frame = undefined;
 
-    // Keep a two-deep record of scrollTop in order to restore it in Safari,
-    // where hashchanges are preceeded by a scroll jump
-    scrollTop1 = scrollTop0;
-    scrollTop0 = document.scrollingElement.scrollTop;
-
-    // For a moment after the last hashchange dont update while
-    // smooth scrolling settles to the right place.
-    if (hashTime > aMomentAgo) {
-        hashTime = e.timeStamp;
-        return;
-    }
-
-    // Update things that rarely change only when we have not scrolled recently
-    if (scrollTime < aMomentAgo) {
+    // Update things that rarely change only when we have not updated recently
+    if (frameTime < time - config.scrollIdleDuration * 1000) {
         locateables = query(selector, document);
         scrollPaddingTop = parseInt(getComputedStyle(document.documentElement).scrollPaddingTop, 10);
     }
 
-    scrollTime = e.timeStamp;
+    frameTime = time;
 
     const boxes = locateables.map(box).sort(byTop);
     let  n = -1;
@@ -112,9 +96,35 @@ function scroll(e) {
     window.history.replaceState(nothing, '', '#' + node.id);
 }
 
-function hashchange(e) {
+function scroll(e) {
     if (DEBUG) {
-        console.log('hashchange', window.location.hash, document.scrollingElement.scrollTop);
+        console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollTop);
+    }
+
+    const aMomentAgo = e.timeStamp - config.scrollIdleDuration * 1000;
+
+    // Keep a record of scrollTop in order to restore it in Safari,
+    // where popstate and hashchange are preceeded by a scroll jump
+    scrollTop = document.scrollingElement.scrollTop;
+
+    // For a moment after the last hashchange dont update while
+    // smooth scrolling settles to the right place.
+    if (hashTime > aMomentAgo) {
+        hashTime = e.timeStamp;
+        return;
+    }
+
+    // Is frame already cued?
+    if (frame) {
+        return;
+    }
+
+    frame = requestAnimationFrame(update);
+}
+
+function popstate(e) {
+    if (DEBUG) {
+        console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollTop);
     }
 
     const hash = window.location.hash;
@@ -128,7 +138,7 @@ function hashchange(e) {
     const id = hash.slice(1);
     if (!id) {
         if (!features.scrollBehavior) {
-            scrollIntoView(document.body, hashTime, scrollTime);
+            scrollIntoView(document.body);
         }
 
         return;
@@ -143,12 +153,16 @@ function hashchange(e) {
 
     // Implement smooth scroll for browsers that do not have it
     if (!features.scrollBehavior) {
-        scrollIntoView(node, hashTime, scrollTime);
+        scrollIntoView(node);
     }
 }
 
 function load(e) {
-    hashchange(e);
+    if (DEBUG) {
+        console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollTop);
+    }
+
+    popstate(e);
     scroll(e);
 
     // Start listening to scroll
@@ -158,6 +172,5 @@ function load(e) {
     scrollOptions.behavior = 'smooth';
 }
 
-
-window.addEventListener('hashchange', hashchange);
 window.addEventListener('load', load);
+window.addEventListener('popstate', popstate);

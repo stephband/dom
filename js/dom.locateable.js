@@ -15,7 +15,7 @@ const scrollOptions = {
 };
 
 export const config = {
-    scrollIdleDuration: 0.2
+    scrollIdleDuration: 0.18
 };
 
 let hashTime     = -Infinity;
@@ -29,16 +29,24 @@ function queryLinks(id) {
 	.filter(isInternalLink);
 }
 
+function addOn(node) {
+    node.classList.add('on');
+}
+
+function removeOn(node) {
+    node.classList.remove('on');
+}
+
 function locate(node) {
     node.classList.add('located');
-    queryLinks(node.id).forEach((node) => node.classList.add('on'));
+    queryLinks(node.id).forEach(addOn);
     locatedNode = node;
 }
 
 function unlocate() {
     if (!locatedNode) { return; }
     locatedNode.classList.remove('located');
-    queryLinks(locatedNode.id).forEach((node) => node.classList.remove('on'));
+    queryLinks(locatedNode.id).forEach(removeOn);
     locatedNode = undefined;
 }
 

@@ -2,7 +2,7 @@ import '../polyfills/element.scrollintoview.js';
 import { by, curry, get, isDefined, overload, requestTick } from '../../fn/module.js';
 import { append, box, classes, create, delegate, Event, events, features, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../module.js';
 
-var DEBUG = window.DEBUG;
+var DEBUG = false;
 
 const selector = ".locateable, [locateable]";
 const on       = events.on;
@@ -15,7 +15,7 @@ const scrollOptions = {
 };
 
 export const config = {
-    scrollIdleDuration: 0.125
+    scrollIdleDuration: 0.2
 };
 
 let hashTime     = -Infinity;
@@ -29,26 +29,17 @@ function queryLinks(id) {
 	.filter(isInternalLink);
 }
 
-function unlocate() {
-    if (!locatedNode) { return; }
-    locatedNode.classList.remove('located');
-    queryLinks(locatedNode.id).forEach((node) => node.classList.remove('on'));
-    locatedNode = undefined;
-}
-
 function locate(node) {
     node.classList.add('located');
     queryLinks(node.id).forEach((node) => node.classList.add('on'));
     locatedNode = node;
 }
 
-function scrollIntoView(node) {
-    // In Safari, popstate and hashchange are preceeded by scroll jump -
-    // restore previous scrollTop.
-    document.scrollingElement.scrollTop = scrollTop;
-
-    // Then animate
-    node.scrollIntoView(scrollOptions);
+function unlocate() {
+    if (!locatedNode) { return; }
+    locatedNode.classList.remove('located');
+    queryLinks(locatedNode.id).forEach((node) => node.classList.remove('on'));
+    locatedNode = undefined;
 }
 
 function update(time) {
@@ -127,25 +118,29 @@ function popstate(e) {
         console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollTop);
     }
 
-    const hash = window.location.hash;
-
     // Record the timeStamp
     hashTime = e.timeStamp;
 
     // Remove current located
     unlocate();
 
-    const id = hash.slice(1);
+    const hash = window.location.hash;
+    const id   = hash.slice(1);
     if (!id) {
         if (!features.scrollBehavior) {
-            scrollIntoView(document.body);
+            // In Safari, popstate and hashchange are preceeded by scroll jump -
+            // restore previous scrollTop.
+            document.scrollingElement.scrollTop = scrollTop;
+
+            // Then animate
+            document.body.scrollIntoView(scrollOptions);
         }
 
         return;
     }
 
     // Is there a node with that id?
-    var node = document.getElementById(id);
+    const node = document.getElementById(id);
     if (!node) { return; }
 
     // The page is on the move
@@ -153,19 +148,21 @@ function popstate(e) {
 
     // Implement smooth scroll for browsers that do not have it
     if (!features.scrollBehavior) {
-        scrollIntoView(node);
+        // In Safari, popstate and hashchange are preceeded by scroll jump -
+        // restore previous scrollTop.
+        document.scrollingElement.scrollTop = scrollTop;
+
+        // Then animate
+        node.scrollIntoView(scrollOptions);
     }
 }
 
 function load(e) {
-    if (DEBUG) {
-        console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollTop);
-    }
-
     popstate(e);
     scroll(e);
 
-    // Start listening to scroll
+    // Start listening to popstate and scroll
+    window.addEventListener('popstate', popstate);
     window.addEventListener('scroll', scroll);
 
     // Scroll smoothly from now on
@@ -173,4 +170,3 @@ function load(e) {
 }
 
 window.addEventListener('load', load);
-window.addEventListener('popstate', popstate);

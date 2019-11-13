@@ -28,7 +28,7 @@ let fontSize;
 
 function getFontSize() {
 	return fontSize ||
-		(fontSize = parseFloat(style("font-size", document.documentElement), 10));
+		(fontSize = style("font-size", document.documentElement), 10);
 }
 
 

@@ -81,7 +81,7 @@ assign(Source.prototype, {
 
 	stop: function stopEvent() {
 console.log('STOP');
-		types.reduce(unlisten, this);
+		this.types.reduce(unlisten, this);
 		this._stop(buffer.length);
 	}
 });

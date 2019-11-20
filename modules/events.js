@@ -10,6 +10,47 @@ function prefixType(type) {
 	return features.events[type] || type ;
 }
 
+
+/* Handle event types */
+
+var clickTimeStamp = 0;
+
+function listen(source, type) {
+    // DOM click events may be simulated on inputs when their labels are
+    // clicked. The tell-tale is they have the same timeStamp. Ignore
+    // simulated clicks with the same timeStamp as previous clicks.
+    if (type === 'click') {
+        source.clickUpdate = function click(e) {
+            if (e.timeStamp <= clickTimeStamp) { return; }
+            clickTimeStamp = e.timeStamp;
+            source.update(e);
+        };
+
+        source.node.addEventListener(type, source.clickUpdate, source.options);
+        return source;
+    }
+
+    source.node.addEventListener(type, source.update, source.options);
+    return source;
+}
+
+function unlisten(source, type) {
+    source.node.removeEventListener(type, type === 'click' ?
+        source.clickUpdate :
+        source.update
+    );
+
+    return source;
+}
+
+window.addEventListener('click', function(e) {
+    clickTimeStamp = e.timeStamp;
+});
+
+
+
+/* Stream of events */
+
 function Source(notify, stop, type, options, node) {
 	const types  = type.split(rspaces).map(prefixType);
 	const buffer = [];
@@ -19,36 +60,28 @@ function Source(notify, stop, type, options, node) {
 		notify('push');
 	}
 
-	this.stop   = stop;
-	this.types  = types;
-	this.node   = node;
-	this.buffer = buffer;
-	this.update = update;
+	this.stop    = stop;
+	this.types   = types;
+	this.node    = node;
+	this.buffer  = buffer;
+	this.update  = update;
+	this.options = options;
 
-	types.forEach(function(type) {
-		node.addEventListener(type, update, options);
-	});
+	// Potential hard-to-find error here if type has repeats, ie 'click click'.
+	// Lets assume nobody is dumb enough to do this, I dont want to have to
+	// check for that every time.
+	types.reduce(listen, this);
 }
 
 assign(Source.prototype, {
 	shift: function shiftEvent() {
 		const buffer = this.buffer;
-
 		return buffer.shift();
 	},
 
 	stop: function stopEvent() {
-		const stop   = this.stop;
-		const types  = this.types;
-		const node   = this.node;
-		const buffer = this.buffer;
-		const update = this.update;
-
-		types.forEach(function(type) {
-			node.removeEventListener(type, update);
-		});
-
-		stop(buffer.length);
+		types.reduce(unlisten, this);
+		this.stop(buffer.length);
 	}
 });
 

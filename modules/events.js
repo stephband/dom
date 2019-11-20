@@ -98,6 +98,7 @@ export default function events(type, node) {
     );
 }
 
+
 // -----------------
 
 export function isPrimaryButton(e) {
@@ -113,7 +114,6 @@ export function preventDefault(e) {
 export function isTargetEvent(e) {
 	return e.target === e.currentTarget;
 }
-
 
 
 // -----------------

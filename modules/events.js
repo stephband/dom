@@ -60,7 +60,7 @@ function Source(notify, stop, type, options, node) {
 		notify('push');
 	}
 
-	this.stop    = stop;
+	this._stop    = stop;
 	this.types   = types;
 	this.node    = node;
 	this.buffer  = buffer;
@@ -80,8 +80,9 @@ assign(Source.prototype, {
 	},
 
 	stop: function stopEvent() {
+console.log('STOP');
 		types.reduce(unlisten, this);
-		this.stop(buffer.length);
+		this._stop(buffer.length);
 	}
 });
 

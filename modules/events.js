@@ -142,14 +142,22 @@ export function on(node, type, fn, data) {
 	var types   = type.split(rspaces);
 	var events  = node[eventsSymbol] || (node[eventsSymbol] = {});
 	var handler = data ? bindTail(fn, data) : fn ;
-	var handlers;
-
+	var handlers, listener;
 	var n = -1;
+
 	while (++n < types.length) {
 		type = types[n];
 		handlers = events[type] || (events[type] = []);
-		handlers.push([fn, handler]);
-		node.addEventListener(type, handler, options);
+		listener = type === 'click' ?
+			function(e) {
+				// Ignore clicks with the same timeStamp as previous clicks –
+				// they are likely simulated by the browser.
+				if (e.timeStamp <= clickTimeStamp) { return; }
+				handler(e);
+			} :
+			handler ;
+		handlers.push([fn, listener]);
+		node.addEventListener(type, listener, options);
 	}
 
 	return node;

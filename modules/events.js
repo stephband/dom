@@ -11,18 +11,23 @@ function prefixType(type) {
 }
 
 
-/* Handle event types */
+// Handle event types
 
+// DOM click events may be simulated on inputs when their labels are
+// clicked. The tell-tale is they have the same timeStamp. Track click
+// timeStamps.
 var clickTimeStamp = 0;
 
+window.addEventListener('click', function(e) {
+    clickTimeStamp = e.timeStamp;
+});
+
 function listen(source, type) {
-    // DOM click events may be simulated on inputs when their labels are
-    // clicked. The tell-tale is they have the same timeStamp. Ignore
-    // simulated clicks with the same timeStamp as previous clicks.
     if (type === 'click') {
         source.clickUpdate = function click(e) {
+            // Ignore clicks with the same timeStamp as previous clicks –
+            // they are likely simulated by the browser.
             if (e.timeStamp <= clickTimeStamp) { return; }
-            clickTimeStamp = e.timeStamp;
             source.update(e);
         };
 
@@ -43,13 +48,8 @@ function unlisten(source, type) {
     return source;
 }
 
-window.addEventListener('click', function(e) {
-    clickTimeStamp = e.timeStamp;
-});
 
-
-
-/* Stream of events */
+// Stream of events
 
 function Source(notify, stop, type, options, node) {
 	const types  = type.split(rspaces).map(prefixType);
@@ -80,7 +80,6 @@ assign(Source.prototype, {
 	},
 
 	stop: function stopEvent() {
-console.log('STOP');
 		this.types.reduce(unlisten, this);
 		this._stop(this.buffer.length);
 	}

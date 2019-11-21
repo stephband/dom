@@ -41,20 +41,23 @@ const createHeaders = choose({
 	'application/json': function(data) {
 		return {
 			"X-CSRFToken": data.get('csrfmiddlewaretoken'),
-			"Content-Type": "application/json; charset=utf-8"
+			"Content-Type": "application/json; charset=utf-8",
+			"X-Requested-With": "XMLHttpRequest"
 		};
 	},
 
 	'multipart/form-data': function(data) {
 		return {
 			"X-CSRFToken": data.get('csrfmiddlewaretoken'),
-			"Content-Type": 'multipart/form-data'
+			"Content-Type": 'multipart/form-data',
+			"X-Requested-With": "XMLHttpRequest"
 		};
 	},
 
 	'default': function(data) {
 		return {
-			"Content-Type": 'application/x-www-form-urlencoded'
+			"Content-Type": 'application/x-www-form-urlencoded',
+			"X-Requested-With": "XMLHttpRequest"
 		};
 	}
 });

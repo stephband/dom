@@ -93,10 +93,11 @@ export default function events(type, node) {
 		type    = options.type;
 	}
 
-	return new Stream((notify, stop) =>
-        new Source(notify, stop, type, options, node)
-    );
+	return new Stream(function(notify, stop) {
+        return new Source(notify, stop, type, options, node)
+    });
 }
+
 
 // -----------------
 
@@ -113,7 +114,6 @@ export function preventDefault(e) {
 export function isTargetEvent(e) {
 	return e.target === e.currentTarget;
 }
-
 
 
 // -----------------

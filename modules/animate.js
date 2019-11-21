@@ -13,8 +13,9 @@ import transition from './transition.js';
 
 export default function animate(duration, transform, name, object, value) {
 	// denormaliseLinear is not curried! Wrap it.
+    const startValue = object[name];
 	return transition(
 		duration,
-		pipe(transform, (v) => denormaliseLinear(object[name], value, v), set(name, object))
+		pipe(transform, (v) => denormaliseLinear(startValue, value, v), set(name, object))
 	);
 }

@@ -3,7 +3,9 @@ import { last, wrap } from '../../fn/module.js';
 import { attribute, box, events, children, classes, closest, matches, query, style } from '../module.js';
 import './dom-swipe.js';
 import './dom-touch.js';
-import './dom.switchable.js';
+import './switchable.js';
+
+const selector = '.swipeable, [swipeable]';
 
 var on       = events.on;
 var trigger  = events.trigger;
@@ -29,7 +31,7 @@ function xMinFromChildren(node) {
 on(document, 'dom-touch', function touch(e) {
 	if (e.defaultPrevented) { return; }
 
-	var node = closest('.swipeable, [swipeable]', e.target);
+	var node = closest(selector, e.target);
 	if (!node) { return; }
 
 	var classy = classes(node);
@@ -74,7 +76,7 @@ on(document, 'dom-touch', function touch(e) {
 				xMin :
 			data.x ;
 
-		return transform + ' translate(' + tx + 'px, 0px)';
+		return transform + ' translate3d(' + tx + 'px, 0px, 0px)';
 	})
 	.each(function(transform) {
 		node.style.transform = transform;
@@ -95,7 +97,7 @@ on(document, 'dom-touch', function touch(e) {
 		});
 
 		//requestAnimationFrame(function() {
-			node.style.transform = transform + ' translate(' + tx + 'px, 0px)';
+			node.style.transform = transform + ' translate3d(' + tx + 'px, 0px, 0px)';
 		//});
 	});
 });
@@ -107,7 +109,7 @@ function transform(node, active) {
 	// Round the translation - without rounding images and text become
 	// slightly fuzzy as they are antialiased.
 	var l  = Math.round(l1 - l2 - style('margin-left', active));
-	node.style.transform = 'translate(' + l + 'px, 0px)';
+	node.style.transform = 'translate3d(' + l + 'px, 0px, 0px)';
 }
 
 function update(swipeable, node) {
@@ -120,13 +122,13 @@ function update(swipeable, node) {
 	var l2 = box(swipeable).left;
 	var l  = l1 - l2 - style('margin-left', node);
 
-	swipeable.style.transform = 'translate(' + (-l) + 'px, 0px)';
+	swipeable.style.transform = 'translate3d(' + (-l) + 'px, 0px, 0px)';
 }
 
 on(document, 'dom-swipe', function swipe(e) {
 	if (e.defaultPrevented) { return; }
 
-	var node = closest('.swipeable, [swipeable]', e.target);
+	var node = closest(selector, e.target);
 	if (!node) { return; }
 
 	var angle = wrap(0, tau, e.angle || 0);
@@ -166,7 +168,7 @@ on(document, 'dom-activate', function activate(e) {
 	var node   = e.target;
 	var parent = node.parentNode;
 
-	if (!matches('.swipeable, [swipeable]', parent)) { return; }
+	if (!matches(selector, parent)) { return; }
 
 	var classy = classes(parent);
 	classy.remove('no-transition');
@@ -179,7 +181,7 @@ on(document, 'dom-activate', function activate(e) {
 
 on(window, 'resize', function resize() {
 	// Update swipeable positions
-	query('.swipeable, [swipeable]', document).forEach(function(swipeable) {
+	query(selector, document).forEach(function(swipeable) {
 		var node = children(swipeable).find(matches('.active'));
 		if (!node) { return; }
 		var classy = classes(swipeable);

@@ -1,5 +1,6 @@
 
 import ready from './ready.js';
+import { toPx } from './units.js';
 
 const rules = [];
 const rem = /(\d*\.?\d+)r?em/;
@@ -10,23 +11,7 @@ const types = {
 
     function: function(fn) { return fn(); },
 
-    string: function(string) {
-        var data, n;
-
-        data = rem.exec(string);
-        if (data) {
-            n = parseFloat(data[1]);
-            return getFontSize() * n;
-        }
-
-        data = rpercent.exec(string);
-        if (data) {
-            n = parseFloat(data[1]) / 100;
-            return width * n;
-        }
-
-        throw new Error('[window.breakpoint] \'' + string + '\' cannot be parsed as rem, em or %.');
-    }
+    string: toPx
 };
 
 const tests = {
@@ -40,20 +25,10 @@ const tests = {
     maxScrollBottom: function(value) { return (scrollHeight - height - scrollTop) <  types[typeof value](value); }
 };
 
-let width, height, scrollTop, scrollHeight, fontSize;
-
-function getStyle(node, name) {
-    return window.getComputedStyle ?
-        window
-        .getComputedStyle(node, null)
-        .getPropertyValue(name) :
-        0 ;
-}
-
-function getFontSize() {
-    return fontSize ||
-        (fontSize = parseFloat(getStyle(document.documentElement, "font-size"), 10));
-}
+let width = window.innerWidth;
+let height = window.innerHeight;
+let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+let scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
 
 function test(query) {
     var keys = Object.keys(query);
@@ -70,7 +45,7 @@ function test(query) {
     return true;
 }
 
-function update() {
+function update(e) {
     var l = rules.length;
     var rule;
 
@@ -80,7 +55,7 @@ function update() {
 
         if (rule.state && !test(rule.query)) {
             rule.state = false;
-            rule.exit && rule.exit();
+            rule.exit && rule.exit(e);
         }
     }
 
@@ -92,7 +67,7 @@ function update() {
 
         if (!rule.state && test(rule.query)) {
             rule.state = true;
-            rule.enter && rule.enter();
+            rule.enter && rule.enter(e);
         }
     }
 }
@@ -110,14 +85,14 @@ export default function breakpoint(query, fn1, fn2) {
 
 function scroll(e) {
     scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    update();
+    update(e);
 }
 
 function resize(e) {
     width = window.innerWidth;
     height = window.innerHeight;
     scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-    update();
+    update(e);
 }
 
 window.addEventListener('scroll', scroll)
@@ -125,8 +100,3 @@ window.addEventListener('resize', resize);
 
 ready(update)
 document.addEventListener('DOMContentLoaded', update);
-
-width = window.innerWidth;
-height = window.innerHeight;
-scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;

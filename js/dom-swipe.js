@@ -36,7 +36,7 @@ function touchdone(node, data) {
 on(document, 'dom-touch', function(e) {
 	if (e.defaultPrevented) { return; }
 
-	var node = closest('.swipeable', e.target);
+	var node = closest('.swipeable, [swipeable]', e.target);
 	if (!node) { return; }
 
 	var touch = e.detail();

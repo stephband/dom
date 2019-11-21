@@ -20,14 +20,14 @@
         "js/dom-activate.js",
         "js/dom-touch.js",
         "js/dom-swipe.js",
-        "js/dom.popable.js",
-        "js/dom.toggleable.js",
-        "js/dom.switchable.js",
-        "js/dom.swipeable.js",
-        "js/dom.focusable.js",
-        "js/dom.removeable.js",
-        "js/dom.locateable.js",
-        "js/dom.validateable.js"
+        "js/popable.js",
+        "js/toggleable.js",
+        "js/switchable.js",
+        "js/swipeable.js",
+        "js/focusable.js",
+        "js/removeable.js",
+        "js/locateable.js",
+        "js/validateable.js"
     ],
     "description": "A small library of functional functions, DOM events and Event Streams for HTML and SVG.",
     "keywords": [

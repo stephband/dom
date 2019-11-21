@@ -257,35 +257,11 @@ function isIgnorable(e) {
 	if ((e.type === 'keydown' || e.type === 'keyup') && e.keyCode !== 13) { return true; }
 }
 
-function activate(e, node) {
-	e.preventDefault();
-
-	if (e.type === 'mousedown') {
-		preventClick(e);
-	}
-
-	// TODO: This doesnt seem to set relatedTarget
-	// trigger(node, 'dom-activate', { relatedTarget: e.delegateTarget });
-	var a = Event('dom-activate', { relatedTarget: e.delegateTarget });
-	node.dispatchEvent(a);
-}
-
 function getHash(node) {
 	return (isDefined(node.hash) ?
 		node.hash :
 		node.getAttribute('href')
 	).substring(1);
-}
-
-function activateId(e, id) {
-	// Does it point to a node?
-	var node = document.getElementById(id);
-	if (!node) { return; }
-
-	// Is the node popable, switchable or toggleable?
-	if (matchers.find(apply(node))) {
-		activate(e, node);
-	}
 }
 
 function activateHref(e) {
@@ -298,7 +274,23 @@ function activateHref(e) {
 	var id = getHash(e.delegateTarget);
 	if (!id) { return; }
 
-	activateId(e, id);
+	// Does it point to a node?
+	var node = document.getElementById(id);
+	if (!node) { return; }
+
+	// Is the node activateable?
+	if (!matchers.find(apply(node))) { return; }
+
+	e.preventDefault();
+
+	if (e.type === 'mousedown') {
+		preventClick(e);
+	}
+
+	// TODO: This doesnt seem to set relatedTarget
+	// trigger(node, 'dom-activate', { relatedTarget: e.delegateTarget });
+	var a = Event('dom-activate', { relatedTarget: e.delegateTarget });
+	node.dispatchEvent(a);
 }
 
 function activateTarget(e) {

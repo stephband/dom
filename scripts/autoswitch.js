@@ -1,6 +1,6 @@
 
-import '../js/dom.switchable.js';
-import '../js/dom.swipeable.js';
+import '../js/switchable.js';
+import '../js/swipeable.js';
 import { get, weakCache } from '../../fn/module.js';
 import { children, events, matches, trigger } from '../module.js';
 

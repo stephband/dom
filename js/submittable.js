@@ -104,7 +104,8 @@ events('submit', document)
 	fetch(url, {
 		method:  method ? method.toUpperCase() : 'POST',
 		headers: createHeaders(mimetype, formData),
-		body:    createBody(mimetype, formData)
+		body:    createBody(mimetype, formData),
+		credentials: 'same-origin'
 	})
 	.then(function(response) {
 		if(config.processResponse && config.processResponse(response, form)){

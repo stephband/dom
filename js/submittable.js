@@ -1,8 +1,8 @@
 
 // dom.submittable
 
-import { choose, compose, get, noop, request } from '../../fn/module.js';
-import { events, matches, preventDefault } from '../module.js';
+import { choose, compose, get, noop } from '../../fn/module.js';
+import { events, matches, preventDefault, request } from '../module.js';
 
 // Define
 

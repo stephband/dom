@@ -66,7 +66,7 @@ function update(time) {
 
     while (boxes[++n]) {
         // Stop on locateable lower than the break
-        if (boxes[n].top >= scrollPaddingTop) {
+        if (boxes[n].top > scrollPaddingTop + 1) {
             break;
         }
     }

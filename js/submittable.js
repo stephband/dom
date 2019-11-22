@@ -1,16 +1,12 @@
 
 // dom.submittable
 
-import { choose, compose, get, noop } from '../../fn/module.js';
-import { events, matches, preventDefault, request } from '../module.js';
+import { choose, compose, get, noop, request } from '../../fn/module.js';
+import { events, matches, preventDefault } from '../module.js';
 
 // Define
 
 const match = matches('.submittable, [submittable]');
-
-function isJSONContent(type) {
-	return type && type.indexOf("application/json") !== -1;
-}
 
 // Functions
 events('submit', document)
@@ -23,20 +19,15 @@ events('submit', document)
 	const mimetype = form.getAttribute('enctype');
 	const formData = new FormData(form);
 
-	request(url, method ? method.toUpperCase() : 'POST', mimetype, formData)
+	request(method || 'POST', mimetype, url, formData)
 	.then(function(data) {
-		if (response.ok) {
-			events.trigger(form, 'dom-submitted', {
-				detail: data
-			});
-		}
-		else {
-			events.trigger(form, 'dom-submit-error', {
-				detail: data
-			});
-		}
+		events.trigger(form, 'dom-submitted', {
+			detail: data
+		});
 	})
 	.catch(function(error) {
-		events.trigger(form, 'dom-submit-error');
+		events.trigger(form, 'dom-submit-error', {
+			detail: error
+		});
 	});
 });

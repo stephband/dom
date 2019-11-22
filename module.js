@@ -2,7 +2,7 @@ if (window.console && window.console.log) {
     window.console.log('%cdom%c         – https://github.com/stephband/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
 }
 
-import { curry, deprecate } from '../fn/module.js';
+import { curry } from '../fn/module.js';
 
 
 // Document
@@ -80,7 +80,6 @@ import { addClass as _addClass, removeClass as _removeClass, frameClass as _fram
 export const addClass    = curry(_addClass, true);
 export const removeClass = curry(_removeClass, true);
 export const frameClass  = curry(_frameClass, true);
-export const flashClass  = deprecate(frameClass, 'flashClass() is now frameClass()');
 
 // Style
 
@@ -161,3 +160,10 @@ export { default as safe } from './modules/safe.js';
 export { default as animateScroll } from './modules/animate-scroll.js';
 export { default as scrollRatio } from './modules/scroll-ratio.js';
 export * from './modules/scroll.js';
+
+// Requests
+
+export { getCookie } from './modules/cookies.js';
+import { default as _request } from './modules/request.js';
+export const request = curry(_request);
+export { requestGet, requestPatch, requestPost, requestDelete } from './modules/request.js';

@@ -1,35 +1,29 @@
-import { cache, get, update } from '../fn/module.js';
+import { choose, compose, id } from '../../fn/module.js';
+import { getCookie } from './cookies.js';
 
 export const config = {
 	headers: {
 		"X-CSRFToken": function(data) {
 			// If data is FormData, get CSRFToken from hidden form field
 			// otherwise read it from a coookie.
-			return data && data.get && data.get('csrfmiddlewaretoken')
-				|| readCookie();
+			return data
+				&& data.get
+				&& data.get('csrfmiddlewaretoken')
+				|| getCookie("csrftoken") ;
 		}
 	},
 
 	onresponse: function(response) {
-		// If redirected, navigate the browser away from here
+		// If redirected, navigate the browser away from here. Can get
+		// annoying when receiving 404s, maybe not a good default...
 		if (response.redirected) {
 			window.location = response.url;
 			return;
 		}
+
+		return response;
 	}
 };
-
-function assignConfig(target, object, data) {
-	// Assigns value unless value is a function, in which case assigns
-	// the result of running value(data)
-	for (name in object) {
-		target[name] = typeof object[name] === 'function' ?
-			object[name](data) :
-			object[name] ;
-	}
-
-	return target;
-}
 
 const createHeaders = choose({
 	'application/json': function(data) {
@@ -42,6 +36,13 @@ const createHeaders = choose({
 	'multipart/form-data': function(data) {
 		return assignConfig({
 			"Content-Type": 'multipart/form-data',
+			"X-Requested-With": "XMLHttpRequest"
+		}, config.headers, data);
+	},
+
+	'audio/wav': function(data) {
+		return assignConfig({
+			"Content-Type": 'audio/wav',
 			"X-Requested-With": "XMLHttpRequest"
 		}, config.headers, data);
 	},
@@ -59,11 +60,11 @@ const createBody = choose({
 		// If data is FormData don't send CSRF in body of data
 		if (data && data.get) {
 			data.delete('csrfmiddlewaretoken');
-			data = jsonify(data);
+			data = formDataToJSON(data);
 			return data;
 		}
 
-		return data;
+		return JSON.stringify(data);
 	},
 
 	'multipart/form-data': function(data) {
@@ -73,7 +74,7 @@ const createBody = choose({
 			return data;
 		}
 
-		// Todo: convert other formats to multipart formdata...
+		// Todo: convert other formats to multipart formdata...?
 		return;
 	},
 
@@ -83,7 +84,28 @@ const createBody = choose({
 	}
 });
 
-function jsonify(formData) {
+const responders = {
+	'text/html':           respondText,
+	'application/json':    respondJSON,
+	'multipart/form-data': respondForm,
+	'audio':               respondBlob,
+	'audio/wav':           respondBlob,
+	'audio/m4a':           respondBlob
+};
+
+function assignConfig(target, object, data) {
+	// Assigns value unless value is a function, in which case assigns
+	// the result of running value(data)
+	for (name in object) {
+		target[name] = typeof object[name] === 'function' ?
+			object[name](data) :
+			object[name] ;
+	}
+
+	return target;
+}
+
+function formDataToJSON(formData) {
 	return JSON.stringify(
 		// formData.entries() is an iterator, not an array
 		Array
@@ -100,47 +122,81 @@ function serialize(formData) {
 }
 
 function createOptions(method, mimetype, data) {
-	return {
+	return method === 'GET' ? {
+		method:  method,
+		headers: createHeaders(mimetype, data),
+		credentials: 'same-origin'
+	} : {
 		method:  method,
 		headers: createHeaders(mimetype, data),
 		body:    createBody(mimetype, data),
 		credentials: 'same-origin'
-	};
+	} ;
 }
 
-function processResponse(response) {
-	if (config.onresponse && !config.onresponse(response)) {}
+function throwError(object) {
+	throw object;
+}
 
-	// Otherwise return data negociated by contentType
-	return isJSONContent(response.headers.get("content-type")) ?
+function respondBlob(response) {
+	if (!response.ok) {
+		throw new Error(response.statusText + '');
+	}
+
+	return response.blob();
+}
+
+function respondJSON(response) {
+	return response.ok ?
 		response.json() :
-		response.text() ;
+		response.json().then(throwError) ;
 }
 
-export function request(url, method = 'GET', mimetype = 'application/json', data) {
+function respondForm(response) {
+	return response.ok ?
+		response.formData() :
+		response.formData().then(throwError) ;
+}
+
+function respondText(response) {
+	return response.ok ?
+		response.text() :
+		response.text().then(throwError) ;
+}
+
+function respond(response) {
+	if (!response.ok) {
+		throw new Error(response.statusText + '');
+	}
+
+	return response;
+}
+
+export default function request(type = 'GET', mimetype = 'application/json', url, data) {
+	const method = type.toUpperCase();
 	return fetch(url, createOptions(method, mimetype, data))
-	.then(processResponse);
+	.then(compose(
+		method === 'DELETE' ? respond : responders[mimetype],
+		config.onresponse || id
+	));
 }
 
-export function requestGet(url, data) {
-	const mimetype = 'application/json';
-	return request(url, 'GET', mimetype, data)
-	.then(get('data'));
+export function requestGet(url) {
+	return fetch(url, createOptions('GET', 'application/json'))
+	.then(compose(respondJSON, config.onresponse || id));
 }
 
 export function requestPatch(url, data) {
-	const mimetype = 'application/json';
-	return request(url, 'PATCH', mimetype, data)
-	.then(get('data'));
+	return fetch(url, createOptions('PATCH', 'application/json', data))
+	.then(compose(respondJSON, config.response || id));
 }
 
 export function requestPost(url, data) {
-	const mimetype = 'application/json';
-	return request(url, 'POST', mimetype, data)
-	.then(get('data'));
+	return fetch(url, createOptions('POST', 'application/json', data))
+	.then(compose(respondJSON, config.onresponse || id));
 }
 
 export function requestDelete(url, data) {
-	const mimetype = 'application/json';
-	return request(url, 'DELETE', mimetype, data);
+	return fetch(url, createOptions('DELETE', 'application/json', data))
+	.then(compose(respond, config.onresponse || id));
 }

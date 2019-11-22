@@ -1,17 +1,7 @@
 import { choose, compose, id } from '../../fn/module.js';
-import { getCookie } from './cookies.js';
 
 export const config = {
-	headers: {
-		"X-CSRFToken": function(data) {
-			// If data is FormData, get CSRFToken from hidden form field
-			// otherwise read it from a coookie.
-			return data
-				&& data.get
-				&& data.get('csrfmiddlewaretoken')
-				|| getCookie("csrftoken") ;
-		}
-	},
+	headers: {},
 
 	onresponse: function(response) {
 		// If redirected, navigate the browser away from here. Can get
@@ -26,6 +16,13 @@ export const config = {
 };
 
 const createHeaders = choose({
+    'application/x-www-form-urlencoded': function(data) {
+        return assignConfig({
+			"Content-Type": 'application/x-www-form-urlencoded',
+			"X-Requested-With": "XMLHttpRequest"
+		}, config.headers, data);
+    },
+
 	'application/json': function(data) {
 		return assignConfig({
 			"Content-Type": "application/json; charset=utf-8",
@@ -67,6 +64,17 @@ const createBody = choose({
 		return JSON.stringify(data);
 	},
 
+    'application/x-www-form-urlencoded': function(data) {
+		// If data is FormData don't send CSRF in body of data
+		if (data && data.get) {
+			data.delete('csrfmiddlewaretoken');
+			return data;
+		}
+
+		// Todo: convert other formats to multipart formdata...?
+		return;
+	},
+
 	'multipart/form-data': function(data) {
 		// If data is FormData don't send CSRF in body of data
 		if (data && data.get) {
@@ -88,6 +96,7 @@ const responders = {
 	'text/html':           respondText,
 	'application/json':    respondJSON,
 	'multipart/form-data': respondForm,
+    'application/x-www-form-urlencoded': respondForm,
 	'audio':               respondBlob,
 	'audio/wav':           respondBlob,
 	'audio/m4a':           respondBlob
@@ -139,64 +148,56 @@ function throwError(object) {
 }
 
 function respondBlob(response) {
-	if (!response.ok) {
-		throw new Error(response.statusText + '');
-	}
-
 	return response.blob();
 }
 
 function respondJSON(response) {
-	return response.ok ?
-		response.json() :
-		response.json().then(throwError) ;
+	return response.json();
 }
 
 function respondForm(response) {
-	return response.ok ?
-		response.formData() :
-		response.formData().then(throwError) ;
+	return response.formData();
 }
 
 function respondText(response) {
-	return response.ok ?
-		response.text() :
-		response.text().then(throwError) ;
+	return response.text();
 }
 
 function respond(response) {
+    if (config.onresponse) {
+        response = config.onresponse(response);
+    }
+
 	if (!response.ok) {
 		throw new Error(response.statusText + '');
 	}
 
-	return response;
+    const mimetype = response.headers.get('Content-Type');
+    return responders[mimetype](response);
 }
 
 export default function request(type = 'GET', mimetype = 'application/json', url, data) {
 	const method = type.toUpperCase();
 	return fetch(url, createOptions(method, mimetype, data))
-	.then(compose(
-		method === 'DELETE' ? respond : responders[mimetype],
-		config.onresponse || id
-	));
+	.then(respond);
 }
 
 export function requestGet(url) {
 	return fetch(url, createOptions('GET', 'application/json'))
-	.then(compose(respondJSON, config.onresponse || id));
+	.then(respond);
 }
 
 export function requestPatch(url, data) {
 	return fetch(url, createOptions('PATCH', 'application/json', data))
-	.then(compose(respondJSON, config.response || id));
+	.then(respond);
 }
 
 export function requestPost(url, data) {
 	return fetch(url, createOptions('POST', 'application/json', data))
-	.then(compose(respondJSON, config.onresponse || id));
+	.then(respond);
 }
 
 export function requestDelete(url, data) {
 	return fetch(url, createOptions('DELETE', 'application/json', data))
-	.then(compose(respond, config.onresponse || id));
+	.then(respond);
 }

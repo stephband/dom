@@ -14,12 +14,13 @@ events('submit', document)
 .tap(preventDefault)
 .map(get('target'))
 .each(function(form) {
-	const method   = form.getAttribute('method');
-	const url      = form.getAttribute('action');
-	const mimetype = form.getAttribute('enctype');
+	const method   = form.method;
+	const url      = form.action || '';
+    // Allow other values for enctype by reading the attribute first
+	const mimetype = form.getAttribute('enctype') || form.enctype;
 	const formData = new FormData(form);
 
-	request(method || 'POST', mimetype, url, formData)
+	request(method, mimetype, url, formData)
 	.then(function(data) {
 		events.trigger(form, 'dom-submitted', {
 			detail: data

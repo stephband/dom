@@ -2,7 +2,7 @@
 import { last, wrap } from '../../fn/module.js';
 import { attribute, box, events, children, classes, closest, matches, query, style } from '../module.js';
 import './dom-swipe.js';
-import './dom-touch.js';
+import './dom-gesture.js';
 import './switchable.js';
 
 const selector = '.swipeable, [swipeable]';
@@ -28,7 +28,7 @@ function xMinFromChildren(node) {
 	return w2 - w1;
 }
 
-on(document, 'dom-touch', function touch(e) {
+on(document, 'dom-gesture', function touch(e) {
 	if (e.defaultPrevented) { return; }
 
 	var node = closest(selector, e.target);
@@ -65,16 +65,19 @@ on(document, 'dom-touch', function touch(e) {
 	var ax = x;
 
 	// e.detail() is a stream of touch coordinates
-	e.detail()
-	.map(function(data) {
-		ax = x + data.x;
+	var stream = e.detail();
+    var x0 = stream.shift().pageX;
+
+	stream.map(function(e) {
+        var diffX = e.pageX - pageX;
+        ax = x + diffX;
 		var tx = ax > 0 ?
 				eMax ? elasticEase(ax / elasticDistance) * elasticDistance - x :
 				xMax :
 			ax < xMin ?
 				eMin ? elasticEase((ax - xMin) / elasticDistance) * elasticDistance + xMin - x :
 				xMin :
-			data.x ;
+			diffX ;
 
 		return transform + ' translate3d(' + tx + 'px, 0px, 0px)';
 	})

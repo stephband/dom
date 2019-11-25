@@ -1,6 +1,6 @@
 import { toPolar } from '../../fn/module.js';
 import { closest, events } from '../module.js';
-import './dom-touch.js';
+import './dom-gesture.js';
 
 const on      = events.on;
 const trigger = events.trigger;
@@ -14,14 +14,14 @@ const trigger = events.trigger;
 //		sensitivity: 6
 //	};
 
-function touchdone(node, data) {
+function touchdone(node, data, x0, y0, t0) {
 	data = data.shift();
 
 	//var x = data.x;
 	//var y = data.y;
 	//var w = node.offsetWidth;
 	//var h = node.offsetHeight;
-	var polar = toPolar([data.x, data.y]);
+	var polar = toPolar([data.pageX - x0, data.pageY - y0]);
 
 	// Todo: check if swipe has enough velocity and distance
 	//x/w > settings.threshold || e.velocityX * x/w * settings.sensitivity > 1
@@ -29,11 +29,11 @@ function touchdone(node, data) {
 	trigger(node, 'dom-swipe', {
 		detail:   data,
 		angle:    polar[1],
-		velocity: polar[0] / data.time
+		velocity: polar[0] / (data.timeStamp - t0)
 	});
 }
 
-on(document, 'dom-touch', function(e) {
+on(document, 'dom-gesture', function(e) {
 	if (e.defaultPrevented) { return; }
 
 	var node = closest('.swipeable, [swipeable]', e.target);
@@ -43,6 +43,6 @@ on(document, 'dom-touch', function(e) {
 	var data  = touch.clone().latest();
 
 	data.done(function() {
-		touchdone(node, data);
+		touchdone(node, data, e.pageX, e.pageY, e.timeStamp);
 	});
 });

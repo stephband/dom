@@ -9,16 +9,16 @@ Requires `js/dom-activate.js`.
 
 Requires `js/dom-activate.js`.
 
-##### `dom-touch`
+##### `dom-gesture`
 
-Requires `js/dom-touch.js`.
+Requires `js/dom-gesture.js`.
 
 A `touch` event fires following a `mousedown` or `touchstart` and as soon as the
 pointer has moved more than a threshold 6px from it's start position. It carries
 a stream of coordinates for the finger as `e.detail()`.
 
     dom
-    .event("dom-touch", document)
+    .event("dom-gesture", document)
     .each(function(e) {
         // Position at start of touch
     	var x = e.pageX;
@@ -37,7 +37,7 @@ a stream of coordinates for the finger as `e.detail()`.
 
 ##### `dom-swipe`
 
-Requires `js/dom-touch.js` and `js/dom-swipe.js`.
+Requires `js/dom-gesture.js` and `js/dom-swipe.js`.
 
 A swipe event fires after a single touch has performed a swipe gesture in a
 node with the class `swipeable`.

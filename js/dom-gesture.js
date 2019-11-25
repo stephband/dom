@@ -1,8 +1,7 @@
 import { requestTick, Stream } from '../../fn/module.js';
 import { closest, events, isPrimaryButton, preventDefault } from '../module.js';
 
-// Number of pixels a pressed pointer travels before movestart
-// event is fired.
+// Number of pixels a pressed pointer travels before gesture is started.
 var threshold = 8;
 
 var ignoreTags = {
@@ -19,6 +18,9 @@ var mouseevents = {
 };
 
 var touchevents = {
+    // Todo: why do we need passive: false? On iOS scrolling can be blocked with
+    // touch-action: none... do we want to block on any arbitrary thing that we
+    // gesture on or leave it to be explicitly set in CSS?
 	move:   { type: 'touchmove', passive: false },
 	cancel: 'touchend',
 	end:    'touchend'
@@ -156,8 +158,8 @@ function checkThreshold(e, events, touch, fn) {
 	// Unbind handlers that tracked the touch or mouse up till now.
 	fn(events);
 
-	// Trigger the touch event
-	trigger(events[0].target, 'dom-touch', {
+	// Trigger the gesture event
+	trigger(events[0].target, 'dom-gesture', {
 		pageX:  e0.pageX,
 		pageY:  e0.pageY,
 		detail: function() {
@@ -165,7 +167,6 @@ function checkThreshold(e, events, touch, fn) {
 				stream = TouchStream(node, events);
 			}
 
-			//return stream.clone();
 			return stream;
 		}
 	});
@@ -221,13 +222,7 @@ function removeActiveTouch(data) {
 }
 
 function TouchStream(node, events) {
-	var stream = Stream.from(events).map(function(e) {
-		return {
-			x:    e.pageX - events[0].pageX,
-			y:    e.pageY - events[0].pageY,
-			time: (e.timeStamp - events[0].timeStamp) / 1000
-		};
-	});
+	var stream = Stream.from(events);
 
 	var data = {
 		stream:     stream,
@@ -245,12 +240,12 @@ function TouchStream(node, events) {
 	}
 	else {
 		// In order to unbind correct handlers they have to be unique
-		data.activeTouchmove = function(e, data) { activeTouchmove(e, data); };
-		data.activeTouchend  = function(e, data) { activeTouchend(e, data); };
+		data.activeTouchmove = function(e) { activeTouchmove(e, data); };
+		data.activeTouchend  = function(e) { activeTouchend(e, data); };
 
 		// We're dealing with a touch.
-		on(document, touchevents.move, data.activeTouchmove, data);
-		on(document, touchevents.end, data.activeTouchend, data);
+        on(document, touchevents.move, data.activeTouchmove);
+		on(document, touchevents.end, data.activeTouchend);
 	}
 
 	stream.done(function() {

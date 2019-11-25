@@ -18,7 +18,7 @@
 	assign(jQuery.event.special, {
 		'dom-activate': definition,
 		'dom-deactivate': definition,
-		'dom-touch': definition,
+		'dom-gesture': definition,
 		'dom-swipe': definition
 	});
 

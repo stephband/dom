@@ -2,93 +2,11 @@
 // dom.submittable
 
 import { choose, compose, get, noop } from '../../fn/module.js';
-import { events, matches, preventDefault } from '../module.js';
+import { events, matches, preventDefault, request } from '../module.js';
 
 // Define
 
 const match = matches('.submittable, [submittable]');
-
-export const config = {
-	processResponse: function(response, form) {
-		// If redirected, navigate the browser away from here
-		if (response.redirected) {
-			window.location = response.url;
-		}
-	}
-};
-
-function isJSONContent(type) {
-	return type && type.indexOf("application/json") !== -1;
-}
-
-function serialize(formData) {
-	return new URLSearchParams(formData).toString();
-}
-
-function jsonify(formData) {
-	return JSON.stringify(
-		// formData.entries() is an iterator, not an array
-		Array
-		.from(formData.entries())
-		.reduce(function(output, entry) {
-			output[entry[0]] = entry[1];
-			return output;
-		}, {})
-	);
-}
-
-const createHeaders = choose({
-	'application/json': function(data) {
-		return {
-			"X-CSRFToken": data.get('csrfmiddlewaretoken'),
-			"Content-Type": "application/json; charset=utf-8"
-		};
-	},
-
-	'multipart/form-data': function(data) {
-		return {
-			"X-CSRFToken": data.get('csrfmiddlewaretoken'),
-			"Content-Type": 'multipart/form-data'
-		};
-	},
-
-	'default': function(data) {
-		return {
-			"Content-Type": 'application/x-www-form-urlencoded'
-		};
-	}
-});
-
-const createBody = choose({
-	'application/json': function(data) {
-		const csrf = data.get('csrfmiddlewaretoken');
-
-		// Remove CSRF from the data
-		if (csrf) {
-			data.delete('csrfmiddlewaretoken');
-		}
-
-		// data.entries() is an iterator, not an array
-		return jsonify(data);
-	},
-
-	'multipart/form-data': function(data) {
-		const csrf = data.get('csrfmiddlewaretoken');
-
-		// Remove CSRF from the data
-		if (csrf) {
-			data.delete('csrfmiddlewaretoken');
-		}
-
-		// FormData objects are already in multipart/form-data format
-		return data;
-	},
-
-	'default': function(data) {
-		// Default application/x-www-form-urlencoded serialization
-		return serialize(data);
-	},
-});
 
 // Functions
 events('submit', document)
@@ -96,43 +14,21 @@ events('submit', document)
 .tap(preventDefault)
 .map(get('target'))
 .each(function(form) {
-	const method   = form.getAttribute('method');
-	const url      = form.getAttribute('action');
-	const mimetype = form.getAttribute('enctype');
+	const method   = form.method;
+	const url      = form.action || '';
+    // Allow other values for enctype by reading the attribute first
+	const mimetype = form.getAttribute('enctype') || form.enctype;
 	const formData = new FormData(form);
 
-	fetch(url, {
-		method:  method ? method.toUpperCase() : 'POST',
-		headers: createHeaders(mimetype, formData),
-		body:    createBody(mimetype, formData),
-		credentials: 'same-origin'
-	})
-	.then(function(response) {
-		if(config.processResponse && config.processResponse(response, form)){
-			return;
-		}
-
-		// Otherwise send an event with data negociated by contentType
-		const contentType = response.headers.get("content-type");
-
-		(isJSONContent(contentType) ?
-			response.json() :
-			response.text()
-		)
-		.then(function(data) {
-			if (response.ok) {
-				events.trigger(form, 'dom-submitted', {
-					detail: data
-				});
-			}
-			else {
-				events.trigger(form, 'dom-submit-error', {
-					detail: data
-				});
-			}
+	request(method, mimetype, url, formData)
+	.then(function(data) {
+		events.trigger(form, 'dom-submitted', {
+			detail: data
 		});
 	})
 	.catch(function(error) {
-		events.trigger(form, 'dom-submit-error');
+		events.trigger(form, 'dom-submit-error', {
+			detail: error
+		});
 	});
 });

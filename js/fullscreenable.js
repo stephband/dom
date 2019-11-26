@@ -1,73 +1,52 @@
 // dom.fullscreenable
 
 import { noop } from '../../fn/module.js';
-import { closest, fullscreen, isInternalLink, isPrimaryButton, events, matches } from '../module.js';
-import { matchers } from './dom-activate.js';
+import { matches } from '../module.js';
+import { handlers } from './dom-activate.js';
 
-var match           = matches('.fullscreenable, [fullscreenable]');
-var on              = events.on;
-var off             = events.off;
-var trigger         = events.trigger;
+var match = matches('.fullscreenable, [fullscreenable]');
 
-function getHash(node) {
-    return (node.hash ?
-        node.hash :
-        node.getAttribute('href')
-    ).substring(1);
+function fullscreenElement() {
+    return document.fullscreenElement
+        || document.webkitFullscreenElement
+        || document.mozFullScreenElement
+        || document.msFullscreenElement ;
 }
 
-function click(e) {
-    // A prevented default means this link has already been handled.
-    if (e.defaultPrevented) { return; }
-    if (!isPrimaryButton(e)) { return; }
-
-    var node = closest('a[href]', e.target);
-    if (!node) { return; }
-    if (node.hostname && !isInternalLink(node)) { return; }
-
-    // Does it point to an id?
-    var id = getHash(node);
-    if (!id) { return; }
-
-    // Does the id match the fullscreen element?
-    if (id !== e.currentTarget.id) { return; }
-
-    trigger(e.currentTarget, 'dom-deactivate', { relatedTarget: node });
-    e.preventDefault();
+function enterFullscreen(node) {
+    return node.requestFullscreen ? node.requestFullscreen() :
+        node.webkitRequestFullscreen ? node.webkitRequestFullscreen() :
+        node.mozRequestFullScreen ? node.mozRequestFullScreen() :
+        node.msRequestFullscreen ? node.msRequestFullscreen() :
+        undefined ;
 }
 
-function activate(e) {
-    if (!e.default) { return; }
-
-    var target = e.target;
-    if (!match(target)) { return; }
-
-    fullscreen(e.target);
-    on(e.target, 'click', click);
-
-    // Don't call the default activate actions, we are hijacking the
-    // activate and making it do fullscreen stuff. There is a
-    // fullscreenchange event to listen to for changes, and you can check
-    // the current fullscreened element with document.fullscreenElement.
-    e.default();
-}
-
-function deactivate(e, data, fn) {
-    if (!e.default) { return; }
-
-    var target = e.target;
-    if (!match(target)) { return; }
-
+function exitFullscreen() {
     document.exitFullscreen ? document.exitFullscreen() :
     document.webkitExitFullscreen ? document.webkitExitFullscreen() :
     document.mozCancelFullScreen ? document.mozCancelFullScreen() :
     document.msExitFullscreen ? document.msExitFullscreen() :
     noop() ;
-
-    off(e.target, 'click', click);
-    e.default();
 }
 
-on(document, 'dom-activate', activate);
-on(document, 'dom-deactivate', deactivate);
-matchers.push(match);
+handlers.push(function(node, e) {
+    if (!match(node)) {
+        // Return flag as not handled
+        return false;
+    }
+
+    var fullscreenNode = fullscreenElement();
+    if (fullscreenNode) {
+        exitFullscreen();
+
+        if (node === fullscreenNode) {
+            // Flag as handled
+            return true;
+        }
+    }
+
+    enterFullscreen(node);
+
+    // Flag as handled
+    return true;
+});

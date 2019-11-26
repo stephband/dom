@@ -22,6 +22,7 @@ export const config = {
 };
 
 export const matchers = [];
+export const handlers = [];
 
 
 function findButtons(id) {
@@ -264,6 +265,10 @@ function getHash(node) {
 	).substring(1);
 }
 
+function sum(total, n) {
+    return total + !!n;
+}
+
 function activateHref(e) {
 	if (isIgnorable(e)) { return; }
 
@@ -277,6 +282,13 @@ function activateHref(e) {
 	// Does it point to a node?
 	var node = document.getElementById(id);
 	if (!node) { return; }
+
+    // Is the node handleable
+    var handleCount = handlers.map(apply(node)).reduce(sum, 0);
+	if (handleCount) {
+        e.preventDefault();
+        return;
+    }
 
 	// Is the node activateable?
 	if (!matchers.find(apply(node))) { return; }

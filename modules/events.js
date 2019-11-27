@@ -151,7 +151,8 @@ export function on(node, type, fn, data) {
 		listener = type === 'click' ?
 			function(e) {
 				// Ignore clicks with the same timeStamp as previous clicks –
-				// they are likely simulated by the browser.
+				// they are likely simulated by the browser on inputs when
+				// their labels are clicked
 				if (e.timeStamp <= clickTimeStamp) { return; }
 				handler(e);
 			} :

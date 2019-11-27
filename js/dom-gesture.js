@@ -18,9 +18,9 @@ var mouseevents = {
 };
 
 var touchevents = {
-    // Todo: why do we need passive: false? On iOS scrolling can be blocked with
-    // touch-action: none... do we want to block on any arbitrary thing that we
-    // gesture on or leave it to be explicitly set in CSS?
+	// Todo: why do we need passive: false? On iOS scrolling can be blocked with
+	// touch-action: none... do we want to block on any arbitrary thing that we
+	// gesture on or leave it to be explicitly set in CSS?
 	move:   { type: 'touchmove', passive: false },
 	cancel: 'touchend',
 	end:    'touchend'
@@ -198,7 +198,7 @@ function activeTouchmove(e, data) {
 
 	if (!touch) { return; }
 
-	// Stop the interface from gesturing
+	// Stop the interface from scrolling
 	e.preventDefault();
 
 	data.touch = touch;
@@ -244,7 +244,7 @@ function TouchStream(node, events) {
 		data.activeTouchend  = function(e) { activeTouchend(e, data); };
 
 		// We're dealing with a touch.
-        on(document, touchevents.move, data.activeTouchmove);
+		on(document, touchevents.move, data.activeTouchmove);
 		on(document, touchevents.end, data.activeTouchend);
 	}
 

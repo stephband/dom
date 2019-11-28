@@ -21,6 +21,11 @@ Styleguide: zutilities.transition
 
 /* Respond to device input classes. */
 
-.mouse-device *:focus {
-	outline: none !important;
+.mouse-device a:focus,
+.mouse-device button:focus,
+.mouse-device input:focus,
+.touch-device a:focus,
+.touch-device button:focus,
+.touch-device input:focus {
+     outline-width: 0;
 }

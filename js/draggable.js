@@ -1,6 +1,6 @@
 import { parse, requestTick, Stream } from '../../fn/module.js';
 import { attribute, classes, delegate, events, identify, query, remove, removeClass } from '../module.js';
-import { functions } from '../../sparky/module.js';
+import { register } from '../../sparky/module.js';
 
 var debug  = true;
 var on     = events.on;
@@ -73,7 +73,7 @@ function dragendButton(e) {
 	query('.dragover', document).forEach(removeClass('dragover'));
 }
 
-functions['data-on-drag'] = function(node, scopes, params) {
+register('data-on-drag', function(node, params) {
 	var dragstart = delegate('[draggable]', dragstartButton);
 	var dragend   = delegate('[draggable]', dragendButton);
 
@@ -82,8 +82,8 @@ functions['data-on-drag'] = function(node, scopes, params) {
 	//.on('drag', '.node-button', cache, dragButton)
 	on(node, 'dragend', dragend);
 
-	scopes.done(function() {
+	this.done(function() {
 		off(node, 'dragstart', dragstart);
 		off(node, 'dragend', dragend);
 	});
-};
+});

@@ -8,7 +8,8 @@
 // - attributes: An object of attribute change handler functions
 // - properties: An object of property definitions
 // - options: {
-//       tag:        Name of tag to extend
+//       extends:    Name of tag to extend
+//       shadow:     Template string, node or id used to create a shadow DOM
 //       setup:      Lifecycle handler called during element construction
 //       connect:    Lifecycle handler called when element added to DOM
 //       disconnect: Lifecycle handler called when element removed from DOM
@@ -19,14 +20,16 @@ import { choose, isDefined, nothing } from '../../fn/module.js';
 const shadowOptions = { mode: 'open' };
 
 const constructors = {
-    a:      HTMLAnchorElement,
-    p:      HTMLParagraphElement,
-    br:     HTMLBRElement,
-    img:    HTMLImageElement
+    'a':        HTMLAnchorElement,
+    'p':        HTMLParagraphElement,
+    'br':       HTMLBRElement,
+    'img':      HTMLImageElement,
+    'template': HTMLTemplateElement
 };
 
 function getElementConstructor(tag) {
-        // Return a constructor from the known list of tag names
+        // Return a constructor from the known list of tag names – not all tags
+        // have constructor names that match their tags
     return constructors[tag]
         // Or assemble the tag name in the form "HTMLTagElement" and return
         // that property of the window object
@@ -43,30 +46,57 @@ function transferProperty(elem, key) {
     return elem;
 }
 
-export default function element(name, template, attributes, properties, options) {
+function getTemplateById(id) {
+    const template = document.getElementById(options.shadow.slice(1));
+
+    if (!template || !template.content) {
+        throw new Error('Template "' + options.shadow + '" not found in document');
+    }
+
+    return template;
+}
+
+export default function element(name, attributes, properties, options) {
+    // Legacy...
+    // element() has changed signature from (name, template, attributes, properties, options) –
+    // support the old signature with a warning.
+    if (typeof attributes === 'string' || 'innerHTML' in attributes) {
+        console.warn('dom element(): template parameter is now passed in as option.shadow');
+        options.shadow = attributes;
+        return element(name, arguments[2], arguments[3], arguments[4]);
+    }
+
     // Get the element constructor from options.tag, or the
     // base HTMLElement constructor
-    const Constructor = options.tag ?
-        getElementConstructor(options.tag) :
+    const Constructor = options.extends ?
+        getElementConstructor(options.extends) :
         HTMLElement ;
 
     if (!Constructor) {
-        throw new Error('Constructor not found for tagName "' + options.tag + '"');
+        throw new Error('Constructor not found for tag "' + options.extends + '"');
     }
 
-    // If template is an #id, search for the <template>
-    if (typeof template === 'string' && template[0] === '#') {
-        const string = template;
-        template = document.getElementById(string.slice(1));
-        if (!template || !template.content) { throw new Error('Template "' + string + '" not found in document'); }
-    }
+    const template = options && options.shadow && (
+        typeof options.shadow === 'string' ?
+            // If options.shadow is an #id, search for <template id="id">
+            options.shadow[0] === '#' ? getTemplateById(options.shadow.slice(1)) :
+            // It must be a string of HTML
+            options.shadow :
+        options.shadow.content ?
+            // It must be a template node
+            options.shadow :
+        // Whatever it is, we don't support it
+        function(){
+            throw new Error('element() options.shadow not recognised as template node, id or string');
+        }()
+    );
 
-    function Element() {
+    const Element = template ? function Element() {
         // Construct on instance of Constructor using the Element prototype
         const elem = Reflect.construct(Constructor, arguments, Element);
 
         // Create a shadow root if there is DOM content
-        const shadow = elem.attachShadow(shadowOptions);
+        const shadow = template && elem.attachShadow(shadowOptions) ;
 
         // If template is a <template>
         if (typeof template === 'string') {
@@ -96,7 +126,13 @@ export default function element(name, template, attributes, properties, options)
         Object.keys(properties).reduce(transferProperty, elem);
 
         return elem;
-    }
+    } : function Element() {
+        // Construct on instance of Constructor using the Element prototype
+        const elem = Reflect.construct(Constructor, arguments, Element);
+        options.setup && options.setup.call(elem);
+        Object.keys(properties).reduce(transferProperty, elem);
+        return elem;
+    } ;
 
 
     // Properties
@@ -105,7 +141,7 @@ export default function element(name, template, attributes, properties, options)
     //     name: { get: fn, set: fn }
     // }
 
-    Element.prototype = Object.create(HTMLElement.prototype, properties);
+    Element.prototype = Object.create(Constructor.prototype, properties || {}) ;
 
 
     // Attributes - object of functions called when attributes change
@@ -131,6 +167,6 @@ export default function element(name, template, attributes, properties, options)
         Element.prototype.disconnectedCallback = options.disconnect;
     }
 
-    window.customElements.define(name, Element);
+    window.customElements.define(name, Element, options);
     return Element;
 }

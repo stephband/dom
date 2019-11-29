@@ -1,7 +1,7 @@
 
-import { id, overload, todB, toLevel, toCamelCase } from '../../../fn/module.js';
-import * as normalise   from '../../../fn/modules/normalisers.js';
-import * as denormalise from '../../../fn/modules/denormalisers.js';
+import { id, overload, todB, toLevel, toCamelCase } from '../../fn/module.js';
+import * as normalise   from '../../fn/modules/normalisers.js';
+import * as denormalise from '../../fn/modules/denormalisers.js';
 
 export const attributes = ['min', 'max', 'value'];
 

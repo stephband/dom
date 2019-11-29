@@ -1,21 +1,14 @@
 
-import { Observer, nothing, requestTick } from '../../../fn/module.js';
-import { evaluate, inputEvent, invert, transform, transformOutput, transformTick, transformUnit  } from './control.js';
-import { element } from '../../module.js';
-import Sparky, { mount } from '../../../sparky/module.js';
+import { Observer, requestTick, nothing } from '../../../fn/module.js';
+import { attributes, evaluate, eventOptions, inputEvent, transform, invert, transformOutput, transformTick, transformUnit  } from './control.js';
+import { element } from '../module.js';
+import Sparky, { mount } from '../../sparky/module.js';
 
-const DEBUG = false;//window.DEBUG === undefined || window.DEBUG;
+const DEBUG = false;//true;
 
 const assign = Object.assign;
 
-const defaults = {
-    path: './components/controls',
-    transform: 'linear',
-    min:    0,
-    max:    1
-};
-
-const mountSettings = {
+const settings = {
     mount: function(node, options) {
         // Does the node have Sparkyfiable attributes?
         const attrFn = node.getAttribute(options.attributeFn);
@@ -28,7 +21,7 @@ const mountSettings = {
         var sparky = Sparky(node, options);
 
         // This is just some help for logging
-        sparky.label = 'Sparky (<range-control> tick)';
+        sparky.label = 'Sparky (<rotary-control> tick)';
 
         // Return sparky
         return sparky;
@@ -45,27 +38,26 @@ function createTicks(data, tokens) {
         .map(evaluate)
         .filter((number) => {
             // Filter ticks to min-max range, special-casing logarithmic-0
-            // which travels to 0 whatever it's min value
-            return number >= (data.transform === 'linear-logarithmic' ? 0 : data.min)
+            // which has a min greater than 0
+            return number >= (data.transform === 'logarithmic-zero' ? 0 : data.min)
                 && number <= data.max
         })
         .map((value) => {
+            const displayValue = transformTick(data.unit, value);
+
             // Freeze to tell mounter it's immutable, prevents
             // unnecessary observing
             return Object.freeze({
-                root:         data,
-                value:        value,
-                tickValue:    invert(data.transform, value, data.min, data.max),
-                displayValue: transformTick(data.unit, value)
+                root:        data,
+                value:       value,
+                tickValue:   invert(data.transform || 'linear', value, data.min, data.max),
+                displayValue: displayValue
             });
         }) :
         nothing ;
 }
 
-element('range-control', '#range-control-template', {
-
-    // Attributes
-
+element('rotary-control', {
     min:       function(value) { this.min = value; },
 
     max:       function(value) { this.max = value; },
@@ -84,9 +76,6 @@ element('range-control', '#range-control-template', {
         observer.ticks = createTicks(data, value);
     }
 }, {
-
-    // Properties
-
     type: {
         value: 'number',
         enumerable: true
@@ -110,7 +99,7 @@ element('range-control', '#range-control-template', {
             if (data.max === undefined || data.value === undefined) { return; }
 
             observer.ticks = createTicks(data, this.getAttribute('ticks') || '');
-            observer.inputValue = invert(data.transform, data.value, data.min, data.max);
+            observer.inputValue = invert(data.transform || 'linear', data.value, data.min, data.max);
         },
 
         enumerable: true
@@ -134,7 +123,7 @@ element('range-control', '#range-control-template', {
             if (data.min === undefined || data.value === undefined) { return; }
 
             observer.ticks = createTicks(data, this.getAttribute('ticks') || '');
-            observer.inputValue = invert(data.transform, data.value, data.min, data.max);
+            observer.inputValue = invert(data.transform || 'linear', data.value, data.min, data.max);
         },
 
         enumerable: true
@@ -166,28 +155,29 @@ element('range-control', '#range-control-template', {
             requestTick(() => {
                 observer.displayValue = transformOutput(data.unit, value);
                 observer.displayUnit  = transformUnit(data.unit, value);
-                observer.inputValue   = invert(data.transform, value, data.min, data.max);
+                observer.inputValue  = invert(data.transform || 'linear', value, data.min, data.max);
             });
         },
 
         enumerable: true
     }
 }, {
-
-    // Lifecycle
+    shadow: '#rotary-control-template',
 
     setup: function(shadow) {
-        this.data = assign({}, defaults);
+        const data = this.data = {
+            path: './components/controls'
+        };
     },
 
     connect: function() {
-        if (DEBUG) { console.log('<range-control> added to document', this.value, this.data); }
+        if (DEBUG) { console.log('Element added to document', this); }
 
         const data     = this.data;
         const observer = Observer(data);
 
         // Mount template
-        mount(this.shadowRoot, mountSettings).push(data);
+        mount(this.shadowRoot, settings).push(data);
 
         // Pick up input events and update scope - Sparky wont do this
         // currently as events are delegated to document, and these are in
@@ -198,7 +188,7 @@ element('range-control', '#range-control-template', {
 
             observer.inputValue = inputValue;
 
-            const value = transform(data.transform, inputValue, data.min, data.max) ;
+            const value = transform(data.transform || 'linear', inputValue, data.min, data.max) ;
             data.value = value;
 
             observer.displayValue = transformOutput(data.unit, value);
@@ -216,10 +206,9 @@ element('range-control', '#range-control-template', {
                 .focus();
             }
 
-            // 'input' events are suppsed to traverse the shadow boundary
-            // but they do not. At least not in Chrome 2019 - a
+            // Input events are suppsed to traverse the shadow boundary
+            // but they do not. At least not in Chrome 2019
             if (!e.composed) {
-                console.warn('Custom element not allowing input event to traverse shadow boundary');
                 this.dispatchEvent(inputEvent);
             }
         });

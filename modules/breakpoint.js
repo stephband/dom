@@ -1,6 +1,6 @@
 
 import ready from './ready.js';
-import { toPx } from './units.js';
+import { toPx } from './values.js';
 
 const rules = [];
 const rem = /(\d*\.?\d+)r?em/;

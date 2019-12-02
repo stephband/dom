@@ -62,7 +62,7 @@ function createTicks(data, tokens) {
         nothing ;
 }
 
-element('range-control', , {
+element('range-control', {
 
     shadow: '#range-control-template',
 

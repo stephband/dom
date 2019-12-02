@@ -57,10 +57,10 @@ function Source(notify, stop, type, options, node) {
 
 	function update(value) {
 		buffer.push(value);
-		notify('push');
+		notify();
 	}
 
-	this._stop    = stop;
+	this._stop   = stop;
 	this.types   = types;
 	this.node    = node;
 	this.buffer  = buffer;

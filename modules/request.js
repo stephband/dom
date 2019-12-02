@@ -1,5 +1,7 @@
 import { choose, compose, id } from '../../fn/module.js';
 
+const assign = Object.assign;
+
 export const config = {
 	headers: {},
 
@@ -130,16 +132,18 @@ function serialize(formData) {
 	return new URLSearchParams(formData).toString();
 }
 
-function createOptions(method, mimetype, data) {
+function createOptions(method, mimetype, data, signal) {
 	return method === 'GET' ? {
 		method:  method,
 		headers: createHeaders(mimetype, data),
-		credentials: 'same-origin'
+		credentials: 'same-origin',
+        signal: signal
 	} : {
 		method:  method,
 		headers: createHeaders(mimetype, data),
 		body:    createBody(mimetype, data),
-		credentials: 'same-origin'
+		credentials: 'same-origin',
+        signal: signal
 	} ;
 }
 
@@ -181,27 +185,29 @@ request(type, mimetype, url, data)
 */
 
 export default function request(type = 'GET', mimetype = 'application/json', url, data) {
-	const method = type.toUpperCase();
-	return fetch(url, createOptions(method, mimetype, data))
-	.then(respond);
+	const method     = type.toUpperCase();
+    const controller = new AbortController();
+
+	return assign(fetch(url, createOptions(method, mimetype, data, controller.signal))
+    .then(respond), {
+        cancel: function() {
+            controller.abort();
+        }
+    });
 }
 
 export function requestGet(url) {
-	return fetch(url, createOptions('GET', 'application/json'))
-	.then(respond);
+	return request('GET', 'application/json', url);
 }
 
 export function requestPatch(url, data) {
-	return fetch(url, createOptions('PATCH', 'application/json', data))
-	.then(respond);
+	return request('PATCH', 'application/json', url, data);
 }
 
 export function requestPost(url, data) {
-	return fetch(url, createOptions('POST', 'application/json', data))
-	.then(respond);
+	return request('POST', 'application/json', url, data);
 }
 
 export function requestDelete(url, data) {
-	return fetch(url, createOptions('DELETE', 'application/json', data))
-	.then(respond);
+	return request('DELETE', 'application/json', url, data);
 }

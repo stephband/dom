@@ -19,33 +19,33 @@ function prefixType(type) {
 var clickTimeStamp = 0;
 
 window.addEventListener('click', function(e) {
-    clickTimeStamp = e.timeStamp;
+	clickTimeStamp = e.timeStamp;
 });
 
 function listen(source, type) {
-    if (type === 'click') {
-        source.clickUpdate = function click(e) {
-            // Ignore clicks with the same timeStamp as previous clicks –
-            // they are likely simulated by the browser.
-            if (e.timeStamp <= clickTimeStamp) { return; }
-            source.update(e);
-        };
+	if (type === 'click') {
+		source.clickUpdate = function click(e) {
+			// Ignore clicks with the same timeStamp as previous clicks –
+			// they are likely simulated by the browser.
+			if (e.timeStamp <= clickTimeStamp) { return; }
+			source.update(e);
+		};
 
-        source.node.addEventListener(type, source.clickUpdate, source.options);
-        return source;
-    }
+		source.node.addEventListener(type, source.clickUpdate, source.options);
+		return source;
+	}
 
-    source.node.addEventListener(type, source.update, source.options);
-    return source;
+	source.node.addEventListener(type, source.update, source.options);
+	return source;
 }
 
 function unlisten(source, type) {
-    source.node.removeEventListener(type, type === 'click' ?
-        source.clickUpdate :
-        source.update
-    );
+	source.node.removeEventListener(type, type === 'click' ?
+		source.clickUpdate :
+		source.update
+	);
 
-    return source;
+	return source;
 }
 
 
@@ -94,8 +94,8 @@ export default function events(type, node) {
 	}
 
 	return new Stream(function(notify, stop) {
-        return new Source(notify, stop, type, options, node)
-    });
+		return new Source(notify, stop, type, options, node)
+	});
 }
 
 

@@ -176,6 +176,10 @@ function respond(response) {
     return responders[mimetype](response);
 }
 
+/*
+request(type, mimetype, url, data)
+*/
+
 export default function request(type = 'GET', mimetype = 'application/json', url, data) {
 	const method = type.toUpperCase();
 	return fetch(url, createOptions(method, mimetype, data))

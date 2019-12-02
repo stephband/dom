@@ -1,19 +1,18 @@
 
-// Create a custom element
-//
-// element(name, template, attributes, properties, options)
-//
-// - name:       Custom element name
-// - template:   A template node, id of a template node or HTML string
-// - attributes: An object of attribute change handler functions
-// - properties: An object of property definitions
-// - options: {
-//       extends:    Name of tag to extend
-//       shadow:     Template string, node or id used to create a shadow DOM
-//       setup:      Lifecycle handler called during element construction
-//       connect:    Lifecycle handler called when element added to DOM
-//       disconnect: Lifecycle handler called when element removed from DOM
-//   }
+/*
+element(name, options)
+
+- name: 'name'     Custom element tag name
+- options: {
+       extends:    Name of tag to extend, makes the element a custom built-in
+       shadow:     String or template node or id used to create a shadow DOM
+       attributes: A `{name: fn}` map called when named attributes change
+       properties: A `{name: {get, set}}` map called on named property access
+       construct:  Lifecycle handler called during element construction
+       connect:    Lifecycle handler called when element added to DOM
+       disconnect: Lifecycle handler called when element removed from DOM
+   }
+*/
 
 import { choose, isDefined, nothing } from '../../fn/module.js';
 
@@ -33,8 +32,11 @@ function getElementConstructor(tag) {
     return constructors[tag]
         // Or assemble the tag name in the form "HTMLTagElement" and return
         // that property of the window object
-        || window['HTML' + tag[0].toUpperCase() + tag.slice(1) + 'Element'];
-};
+        || window['HTML' + tag[0].toUpperCase() + tag.slice(1) + 'Element']
+        || (() => {
+            throw new Error('Constructor not found for tag "' + tag + '"');
+        })();
+}
 
 function transferProperty(elem, key) {
     if (elem.hasOwnProperty(key)) {
@@ -56,25 +58,36 @@ function getTemplateById(id) {
     return template;
 }
 
-export default function element(name, attributes, properties, options) {
+function createShadow(template, elem) {
+    if (!template) { return; }
+
+    // Create a shadow root if there is DOM content
+    const shadow = elem.attachShadow(shadowOptions) ;
+
+    // If template is a <template>
+    if (typeof template === 'string') {
+        shadow.innerHTML = template;
+    }
+    else {
+        shadow.appendChild(template.content.cloneNode(true));
+    }
+
+    return shadow;
+}
+
+export default function element(name, options) {
     // Legacy...
     // element() has changed signature from (name, template, attributes, properties, options) –
     // support the old signature with a warning.
-    if (typeof attributes === 'string' || 'innerHTML' in attributes) {
-        console.warn('dom element(): template parameter is now passed in as option.shadow');
-        options.shadow = attributes;
-        return element(name, arguments[2], arguments[3], arguments[4]);
+    if (typeof options === 'string') {
+        throw new Error('dom element(): new signature element(name, options). Everything is an option.');
     }
 
     // Get the element constructor from options.tag, or the
     // base HTMLElement constructor
-    const Constructor = options.extends ?
+    const constructor = options.extends ?
         getElementConstructor(options.extends) :
         HTMLElement ;
-
-    if (!Constructor) {
-        throw new Error('Constructor not found for tag "' + options.extends + '"');
-    }
 
     const template = options && options.shadow && (
         typeof options.shadow === 'string' ?
@@ -91,22 +104,13 @@ export default function element(name, attributes, properties, options) {
         }()
     );
 
-    const Element = template ? function Element() {
+    function Element() {
         // Construct on instance of Constructor using the Element prototype
-        const elem = Reflect.construct(Constructor, arguments, Element);
+        const elem   = Reflect.construct(constructor, arguments, Element);
+        const shadow = createShadow(template, elem);
 
-        // Create a shadow root if there is DOM content
-        const shadow = template && elem.attachShadow(shadowOptions) ;
-
-        // If template is a <template>
-        if (typeof template === 'string') {
-            shadow.innerHTML = template;
-        }
-        else {
-            shadow.appendChild(template.content.cloneNode(true));
-        }
-
-        options.setup && options.setup.call(elem, shadow);
+        options.construct
+        && options.construct.call(elem, shadow);
 
         // At this point, if properties have already been set before the
         // element was upgraded, they exist on the elem itself, where we have
@@ -123,50 +127,53 @@ export default function element(name, attributes, properties, options) {
         //    them on the instance.
         //
         // Let's go with 3. I'm not happy you have to do this, though.
-        Object.keys(properties).reduce(transferProperty, elem);
+        options.properties
+        && Object.keys(options.properties).reduce(transferProperty, elem);
 
         return elem;
-    } : function Element() {
-        // Construct on instance of Constructor using the Element prototype
-        const elem = Reflect.construct(Constructor, arguments, Element);
-        options.setup && options.setup.call(elem);
-        Object.keys(properties).reduce(transferProperty, elem);
-        return elem;
-    } ;
+    }
 
-
-    // Properties
+    // options.properties
+    //
+    // Map of getter/setters called when properties mutate.
     //
     // {
     //     name: { get: fn, set: fn }
     // }
 
-    Element.prototype = Object.create(Constructor.prototype, properties || {}) ;
+    Element.prototype = Object.create(constructor.prototype, options.properties || {}) ;
 
-
-    // Attributes - object of functions called when attributes change
+    // options.attributes
+    //
+    // Map of functions called when named attributes change.
     //
     // {
     //     name: fn
     // }
 
-    Element.observedAttributes = Object.keys(attributes);
+    if (options.attributes) {
+        Element.observedAttributes = Object.keys(options.attributes);
 
-    Element.prototype.attributeChangedCallback = function(name, old, value) {
-        attributes[name].call(this, value, name);
-    };
+        Element.prototype.attributeChangedCallback = function(name, old, value) {
+            options.attributes[name].call(this, value, name);
+        };
+    }
 
-
-    // Lifecycle
+    // options.connect
 
     if (options.connect) {
         Element.prototype.connectedCallback = options.connect;
     }
 
+    // options.disconnect
+
     if (options.disconnect) {
         Element.prototype.disconnectedCallback = options.disconnect;
     }
 
+    // options.extends
+
     window.customElements.define(name, Element, options);
+
     return Element;
 }

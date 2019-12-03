@@ -69,7 +69,7 @@ on(document, 'dom-gesture', function touch(e) {
     var x0 = stream.shift().pageX;
 
 	stream.map(function(e) {
-        var diffX = e.pageX - pageX;
+        var diffX = e.pageX - x0;
         ax = x + diffX;
 		var tx = ax > 0 ?
 				eMax ? elasticEase(ax / elasticDistance) * elasticDistance - x :

@@ -1,4 +1,4 @@
-import { toPolar } from '../../fn/module.js';
+import { argument, toPolar } from '../../fn/module.js';
 import { closest, events } from '../module.js';
 import './dom-gesture.js';
 
@@ -15,8 +15,6 @@ const trigger = events.trigger;
 //	};
 
 function touchdone(node, data, x0, y0, t0) {
-	data = data.shift();
-
 	//var x = data.x;
 	//var y = data.y;
 	//var w = node.offsetWidth;
@@ -40,9 +38,9 @@ on(document, 'dom-gesture', function(e) {
 	if (!node) { return; }
 
 	var touch = e.detail();
-	var data  = touch.clone().latest();
 
-	data.done(function() {
-		touchdone(node, data, e.pageX, e.pageY, e.timeStamp);
-	});
+    touch
+    .clone()
+    .reduce(argument(1))
+    .then((data) => touchdone(node, data, e.pageX, e.pageY, e.timeStamp));
 });

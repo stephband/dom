@@ -218,7 +218,7 @@ function ignoreAbortError(error) {
     // Swallow AbortErrors, since we generate one every time we use
     // the AbortController.
     if (error.name === 'AbortError') {
-        console.log('Request aborted deliberately, swollowing error');
+        console.log('Request aborted by throttle. Nothing to worry about.');
 
         // JS promises have no machanism to conditionally catch different
         // types of error – throw undefined to fall through to the next

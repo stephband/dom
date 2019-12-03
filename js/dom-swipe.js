@@ -14,33 +14,33 @@ const trigger = events.trigger;
 //        sensitivity: 6
 //    };
 
-function touchdone(node, data, x0, y0, t0) {
+function touchdone(node, first, last) {
 	//var x = data.x;
 	//var y = data.y;
 	//var w = node.offsetWidth;
 	//var h = node.offsetHeight;
-	var polar = toPolar([data.pageX - x0, data.pageY - y0]);
+	var polar = toPolar([last.pageX - first.pageX, last.pageY - first.pageY]);
 
 	// Todo: check if swipe has enough velocity and distance
 	//x/w > settings.threshold || e.velocityX * x/w * settings.sensitivity > 1
 
 	trigger(node, 'dom-swipe', {
-		detail:   data,
+		detail:   last,
 		angle:    polar[1],
-		velocity: polar[0] / (data.timeStamp - t0)
+		velocity: polar[0] / (last.timeStamp - first.timeStamp)
 	});
 }
 
 on(document, 'dom-gesture', function(e) {
+	// Event is already handled
 	if (e.defaultPrevented) { return; }
 
 	var node = closest('.swipeable, [swipeable]', e.target);
 	if (!node) { return; }
 
-	var touch = e.detail();
-
-	touch
+	// e.detail is a stream of touch or mouse events
+	e.detail()
 	.clone()
 	.reduce(argument(1))
-	.then((data) => touchdone(node, data, e.pageX, e.pageY, e.timeStamp));
+	.then((last) => touchdone(node, last, e));
 });

@@ -153,7 +153,6 @@ function checkThreshold(e, events, touch, fn) {
 
 	var e0   = events[0];
 	var node = events[0].target;
-	var stream;
 
 	// Unbind handlers that tracked the touch or mouse up till now.
 	fn(events);
@@ -163,11 +162,7 @@ function checkThreshold(e, events, touch, fn) {
 		pageX:  e0.pageX,
 		pageY:  e0.pageY,
 		detail: function() {
-			if (!stream) {
-				stream = TouchStream(node, events);
-			}
-
-			return stream;
+            return TouchStream(node, events);
 		}
 	});
 }

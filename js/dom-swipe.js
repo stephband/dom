@@ -39,8 +39,7 @@ on(document, 'dom-gesture', function(e) {
 	if (!node) { return; }
 
 	// e.detail is a stream of touch or mouse events
-	e.detail()
-	.clone()
-	.reduce(argument(1))
-	.then((last) => touchdone(node, last, e));
+	e
+    .detail()
+	.last((last) => touchdone(node, e, last));
 });

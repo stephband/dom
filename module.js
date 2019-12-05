@@ -14,6 +14,7 @@ export { default as features } from './modules/features.js';
 
 // HTML
 
+export { default as element } from './modules/element.js';
 export { default as escape } from './modules/escape.js';
 
 import _parse from './modules/parse.js';
@@ -46,7 +47,6 @@ export const matches = curry(_matches, true);
 import _query from './modules/query.js';
 export const query = curry(_query, true);
 
-
 // Mutate
 
 import _assign from './modules/assign.js';
@@ -60,9 +60,6 @@ export const prepend = curry(_prepend, true);
 
 export { default as clone } from './modules/clone.js';
 export { default as create } from './modules/create.js';
-// Todo: remove define
-export { default as define } from './modules/element.js';
-export { default as element } from './modules/element.js';
 export { default as identify } from './modules/identify.js';
 
 export { empty, remove } from './modules/mutation.js';

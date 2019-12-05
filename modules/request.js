@@ -67,6 +67,8 @@ const createBody = choose({
 	},
 
     'application/x-www-form-urlencoded': function(data) {
+console.log('x-www-form-urlencoded', data);
+
 		// If data is FormData don't send CSRF in body of data
 		if (data && data.get) {
 			data.delete('csrfmiddlewaretoken');

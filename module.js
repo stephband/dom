@@ -164,6 +164,7 @@ export * from './modules/scroll.js';
 // Requests
 
 export { getCookie } from './modules/cookies.js';
+export { config as requestConfig } from './modules/request.js';
 import { default as _request } from './modules/request.js';
 export const request = curry(_request, true, 4);
 export { requestGet, requestPatch, requestPost, requestDelete, throttledRequest } from './modules/request.js';

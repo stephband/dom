@@ -8,8 +8,12 @@ import { events, matches, preventDefault, request } from '../module.js';
 
 const match = matches('.submittable, [submittable]');
 
+
 // Functions
 events('submit', document)
+.tap(function(value) {
+    console.log(value);
+})
 .filter(compose(match, get('target')))
 .tap(preventDefault)
 .map(get('target'))

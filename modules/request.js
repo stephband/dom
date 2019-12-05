@@ -2,9 +2,23 @@ import { choose, compose, id } from '../../fn/module.js';
 
 const assign = Object.assign;
 
+/*
+config
+
+```{
+	headers:    {},
+	ondata:     fn(data),
+	onresponse: function(response)
+}```
+*/
+
 export const config = {
 	headers: {},
 
+	// Takes data (can be FormData object or plain object), returns data
+	ondata: id,
+
+	// Takes response, returns response
 	onresponse: function(response) {
 		// If redirected, navigate the browser away from here. Can get
 		// annoying when receiving 404s, maybe not a good default...
@@ -18,12 +32,12 @@ export const config = {
 };
 
 const createHeaders = choose({
-    'application/x-www-form-urlencoded': function(data) {
-        return assignConfig({
+	'application/x-www-form-urlencoded': function(data) {
+		return assignConfig({
 			"Content-Type": 'application/x-www-form-urlencoded',
 			"X-Requested-With": "XMLHttpRequest"
 		}, config.headers, data);
-    },
+	},
 
 	'application/json': function(data) {
 		return assignConfig({
@@ -47,50 +61,29 @@ const createHeaders = choose({
 	},
 
 	'default': function(data) {
-		return {
+		return assignConfig({
 			"Content-Type": 'application/x-www-form-urlencoded',
 			"X-Requested-With": "XMLHttpRequest"
-		};
+		}, config.header, data);
 	}
 });
 
 const createBody = choose({
 	'application/json': function(data) {
-		// If data is FormData don't send CSRF in body of data
-		if (data && data.get) {
-			data.delete('csrfmiddlewaretoken');
-			data = formDataToJSON(data);
-			return data;
-		}
-
-		return JSON.stringify(data);
+		return data.get ?
+			formDataToJSON(data) :
+			JSON.stringify(data);
 	},
 
-    'application/x-www-form-urlencoded': function(data) {
-		// If data is FormData don't send CSRF in body of data
-		if (data && data.get) {
-			data.delete('csrfmiddlewaretoken');
-			return data;
-		}
-
-		// Todo: convert other formats to multipart formdata...?
-		return;
+	'application/x-www-form-urlencoded': function(data) {
+		return data.get ?
+			formDataToQuery(data) :
+			dataToQuery(data) ;
 	},
 
 	'multipart/form-data': function(data) {
-		// If data is FormData don't send CSRF in body of data
-		if (data && data.get) {
-			data.delete('csrfmiddlewaretoken');
-			return data;
-		}
-
-		// Todo: convert other formats to multipart formdata...?
-		return;
-	},
-
-	'default': function(data) {
-		// Default application/x-www-form-urlencoded serialization
-		return serialize(data);
+		// Mmmmmhmmm?
+		return data;
 	}
 });
 
@@ -98,11 +91,12 @@ const responders = {
 	'text/html':           respondText,
 	'application/json':    respondJSON,
 	'multipart/form-data': respondForm,
-    'application/x-www-form-urlencoded': respondForm,
+	'application/x-www-form-urlencoded': respondForm,
 	'audio':               respondBlob,
 	'audio/wav':           respondBlob,
 	'audio/m4a':           respondBlob
 };
+
 
 function assignConfig(target, object, data) {
 	// Assigns value unless value is a function, in which case assigns
@@ -128,8 +122,22 @@ function formDataToJSON(formData) {
 	);
 }
 
-function serialize(formData) {
-	return new URLSearchParams(formData).toString();
+function dataToQuery(data) {
+	return Object.keys(data).reduce((params, key) => {
+		params.append(key, data[key]);
+		return params;
+	}, new URLSearchParams());
+}
+
+function formDataToQuery(data) {
+	return new URLSearchParams(data).toString();
+}
+
+function urlFromData(url, data) {
+	// Form data
+	return data instanceof FormData ?
+		url + '?' + formDataToQuery(data) :
+		url + '?' + dataToQuery(data) ;
 }
 
 function createOptions(method, mimetype, data, controller) {
@@ -137,13 +145,16 @@ function createOptions(method, mimetype, data, controller) {
 		method:  method,
 		headers: createHeaders(mimetype, data),
 		credentials: 'same-origin',
-        signal: controller && controller.signal
+		signal: controller && controller.signal
 	} : {
 		method:  method,
+		// Process headers before body, allowing us to read for example,
+		// a CSRFToken, in createHeaders before removing it from data in
+		// ondata.
 		headers: createHeaders(mimetype, data),
-		body:    createBody(mimetype, data),
+		body:    createBody(mimetype, config.ondata ? ondata(data) : data),
 		credentials: 'same-origin',
-        signal: controller && controller.signal
+		signal: controller && controller.signal
 	} ;
 }
 
@@ -168,16 +179,21 @@ function respondText(response) {
 }
 
 function respond(response) {
-    if (config.onresponse) {
-        response = config.onresponse(response);
-    }
+	if (config.onresponse) {
+		response = config.onresponse(response);
+	}
 
 	if (!response.ok) {
 		throw new Error(response.statusText + '');
 	}
 
-    const mimetype = response.headers.get('Content-Type');
-    return responders[mimetype](response);
+	// Get mimetype from Content-Type, remembering to hoik off any
+	// parameters first
+	const mimetype = response.headers
+		.get('Content-Type')
+		.replace(/\;.*$/, '');
+
+	return responders[mimetype](response);
 }
 
 
@@ -188,68 +204,92 @@ request(type, mimetype, url, data)
 export default function request(type = 'GET', mimetype = 'application/json', url, data) {
 	const method = type.toUpperCase();
 
-    // param[4] is an optional abort controller
+	// If this is a GET and there is data, append data to the URL query string
+	if (method === 'GET' && data) {
+		url = urlFromData(url, data);
+	}
+
+	// param[4] is an optional abort controller
 	return fetch(url, createOptions(method, mimetype, data, arguments[4]))
-    .then(respond);
+	.then(respond);
 }
+
+/*
+requestGet(url)
+A shortcut for `request('get', 'application/json', url)`
+*/
 
 export function requestGet(url) {
 	return request('GET', 'application/json', url, {});
 }
 
+/*
+requestPatch(url, data)
+A shortcut for `request('patch', 'application/json', url, data)`
+*/
+
 export function requestPatch(url, data) {
 	return request('PATCH', 'application/json', url, data);
 }
+
+/*
+requestPost(url, data)
+A shortcut for `request('post', 'application/json', url, data)`
+*/
 
 export function requestPost(url, data) {
 	return request('POST', 'application/json', url, data);
 }
 
+/*
+requestDelete(url, data)
+A shortcut for `request('delete', 'application/json', url, data)`
+*/
+
 export function requestDelete(url, data) {
 	return request('DELETE', 'application/json', url, data);
 }
-
 
 /*
 throttledRequest(type, mimetype, url)
 */
 
 function ignoreAbortError(error) {
-    // Swallow AbortErrors, since we generate one every time we use
-    // the AbortController.
-    if (error.name === 'AbortError') {
-        console.log('Request aborted by throttle. Nothing to worry about.');
+	// Swallow AbortErrors, since we generate one every time we use
+	// the AbortController.
+	if (error.name === 'AbortError') {
+		console.log('Request aborted by throttle. Nothing to worry about.');
 
-        // JS promises have no machanism to conditionally catch different
-        // types of error – throw undefined to fall through to the next
-        // catch without a value.
-        throw undefined;
-    }
+		// JS promises have no machanism to conditionally catch different
+		// types of error – throw undefined to fall through to the next
+		// catch without a value.
+		throw undefined;
+	}
 
-    // Rethrow all other errors
-    throw error;
+	// Rethrow all other errors
+	throw error;
 }
 
 export function throttledRequest(type, mimetype, url) {
-    var promise, controller;
+	var promise, controller;
 
-    return function throttle(data) {
-        var p;
+	return function throttle(data) {
+		var p;
 
-        if (promise) {
-            // Cancel previous request
-            controller.abort();
-        }
+		if (promise) {
+			// Cancel previous request
+			controller.abort();
+		}
 
-        controller = new AbortController();
+		controller = new AbortController();
 
-        return promise = p = request(type, mimetype, url, data, controller)
-        .finally(() => {
-            // Promise may not be the same promise by the time we get here
-            if (promise !== p) { return; }
-            promise    = undefined ;
-            controller = undefined ;
-        })
-        .catch(ignoreAbortError);
-    };
+		return promise = p = request(type, mimetype, url, data, controller)
+		.finally(() => {
+			// Promise may not be the same promise by the time we get here
+			if (promise !== p) { return; }
+			promise    = undefined ;
+			controller = undefined ;
+		})
+		.catch(ignoreAbortError);
+	};
 };

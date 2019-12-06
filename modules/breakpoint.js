@@ -1,28 +1,27 @@
 
 import ready from './ready.js';
+import { call, id, overload, toType } from '../../fn/module.js';
 import { toPx } from './values.js';
 
 const rules = [];
 const rem = /(\d*\.?\d+)r?em/;
 const rpercent = /(\d*\.?\d+)%/;
 
-const types = {
-    number: function(n) { return n; },
-
-    function: function(fn) { return fn(); },
-
-    string: toPx
-};
+const types = overload(toType, {
+    'number':   id,
+    'string':   toPx,
+    'function': function(fn) { return fn(); }
+});
 
 const tests = {
-    minWidth: function(value)  { return width >= types[typeof value](value); },
-    maxWidth: function(value)  { return width <  types[typeof value](value); },
-    minHeight: function(value) { return height >= types[typeof value](value); },
-    maxHeight: function(value) { return height <  types[typeof value](value); },
-    minScrollTop: function(value) { return scrollTop >= types[typeof value](value); },
-    maxScrollTop: function(value) { return scrollTop <  types[typeof value](value); },
-    minScrollBottom: function(value) { return (scrollHeight - height - scrollTop) >= types[typeof value](value); },
-    maxScrollBottom: function(value) { return (scrollHeight - height - scrollTop) <  types[typeof value](value); }
+    minWidth: function(value)  { return width >= types(value); },
+    maxWidth: function(value)  { return width <  types(value); },
+    minHeight: function(value) { return height >= types(value); },
+    maxHeight: function(value) { return height <  types(value); },
+    minScrollTop: function(value) { return scrollTop >= types(value); },
+    maxScrollTop: function(value) { return scrollTop <  types(value); },
+    minScrollBottom: function(value) { return (scrollHeight - height - scrollTop) >= types(value); },
+    maxScrollBottom: function(value) { return (scrollHeight - height - scrollTop) <  types(value); }
 };
 
 let width = window.innerWidth;

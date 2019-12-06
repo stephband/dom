@@ -6,17 +6,18 @@ const assign = Object.assign;
 config
 
 ```{
-	headers:    {},
-	ondata:     fn(data),
+	headers:    fn(data),    // Must return an object with properties to add to the header
+	body:       fn(data),    // Must return an object to send as data
 	onresponse: function(response)
 }```
 */
 
 export const config = {
-	headers: {},
+    // Takes data, returns headers
+	headers: function(data) { return {}; },
 
 	// Takes data (can be FormData object or plain object), returns data
-	ondata: id,
+	body: id,
 
 	// Takes response, returns response
 	onresponse: function(response) {
@@ -32,39 +33,39 @@ export const config = {
 };
 
 const createHeaders = choose({
-	'application/x-www-form-urlencoded': function(data) {
-		return assignConfig({
+	'application/x-www-form-urlencoded': function(headers) {
+		return assign(headers, {
 			"Content-Type": 'application/x-www-form-urlencoded',
 			"X-Requested-With": "XMLHttpRequest"
-		}, config.headers, data);
+		});
 	},
 
-	'application/json': function(data) {
-		return assignConfig({
+	'application/json': function(headers) {
+		return assign(headers, {
 			"Content-Type": "application/json; charset=utf-8",
 			"X-Requested-With": "XMLHttpRequest"
-		}, config.headers, data);
+		});
 	},
 
-	'multipart/form-data': function(data) {
-		return assignConfig({
+	'multipart/form-data': function(headers) {
+		return assign(headers, {
 			"Content-Type": 'multipart/form-data',
 			"X-Requested-With": "XMLHttpRequest"
-		}, config.headers, data);
+		});
 	},
 
-	'audio/wav': function(data) {
-		return assignConfig({
+	'audio/wav': function(headers) {
+		return assign(headers, {
 			"Content-Type": 'audio/wav',
 			"X-Requested-With": "XMLHttpRequest"
-		}, config.headers, data);
+		});
 	},
 
-	'default': function(data) {
-		return assignConfig({
+	'default': function(headers) {
+		return assign(headers, {
 			"Content-Type": 'application/x-www-form-urlencoded',
 			"X-Requested-With": "XMLHttpRequest"
-		}, config.header, data);
+		});
 	}
 });
 
@@ -83,7 +84,9 @@ const createBody = choose({
 
 	'multipart/form-data': function(data) {
 		// Mmmmmhmmm?
-		return data;
+		return data.get ?
+            data :
+            dataToFormData(data) ;
 	}
 });
 
@@ -122,6 +125,10 @@ function formDataToJSON(formData) {
 	);
 }
 
+function formDataToQuery(data) {
+	return new URLSearchParams(data).toString();
+}
+
 function dataToQuery(data) {
 	return Object.keys(data).reduce((params, key) => {
 		params.append(key, data[key]);
@@ -129,8 +136,8 @@ function dataToQuery(data) {
 	}, new URLSearchParams());
 }
 
-function formDataToQuery(data) {
-	return new URLSearchParams(data).toString();
+function dataToFormData(data) {
+    throw new Error('TODO: dataToFormData(data)');
 }
 
 function urlFromData(url, data) {
@@ -143,16 +150,16 @@ function urlFromData(url, data) {
 function createOptions(method, mimetype, data, controller) {
 	return method === 'GET' ? {
 		method:  method,
-		headers: createHeaders(mimetype, data),
+		headers: createHeaders(mimetype, config.headers ? config.headers(data) : {}),
 		credentials: 'same-origin',
 		signal: controller && controller.signal
 	} : {
 		method:  method,
-		// Process headers before body, allowing us to read for example,
-		// a CSRFToken, in createHeaders before removing it from data in
-		// ondata.
-		headers: createHeaders(mimetype, data),
-		body:    createBody(mimetype, config.ondata ? ondata(data) : data),
+		// Process headers before body, allowing us to read a CSRFToken,
+        // which may be in data, in createHeaders() before removing it
+        // from data in body().
+		headers: createHeaders(mimetype, config.headers ? config.headers(data) : {}),
+		body:    createBody(mimetype, config.body ? config.body(data) : data),
 		credentials: 'same-origin',
 		signal: controller && controller.signal
 	} ;

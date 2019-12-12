@@ -58,6 +58,18 @@ function setSVGAttributes(node, attributes) {
 	}
 }
 
+/*
+create(tag, text)`
+
+Returns a new DOM node.
+
+- If `tag` is `"text"` returns a text node with the content `text`.
+- If `tag` is `"fragment"` returns a document fragment.
+- If `tag` is `"comment"` returns a comment `<!-- text -->`.
+- Anything else returns an element `<tag>text</tag>`, where `text` is inserted
+  as inner html.
+*/
+
 export default function create(tag, attributes) {
 	// create(type)
 	// create(type, text)

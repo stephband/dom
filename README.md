@@ -42,10 +42,10 @@ Returns an array of elements matching `selector` in `document` (alias of
 
 ## DOM Nodes
 
-##### `.root`
-##### `.head`
-##### `.body`
-##### `.view`
+root
+head
+body
+view
 
 The main scrolling 'view' element, either the `<head>` or the `<body>`
 (alias of `document.scrollingElement`).
@@ -53,202 +53,73 @@ The main scrolling 'view' element, either the `<head>` or the `<body>`
 
 ## DOM lifecycle
 
-##### `.ready(fn)`
+/*
+ready(fn)`
 
 Calls `fn` on DOM content load.
 
-
+*/
 ## DOM traversal
 
-##### `.closest(selector, node)`
 
-Returns the node itself or the closest ancestor that matches `selector`.
-If no match is found, returns `undefined`.
-
-##### `.children(node)`
-
-Returns an array of child elements of `node`.
-
-##### `.matches(selector, node)`
-
-Returns `true` if `node` matches `selector`, otherwise `false`.
-
-##### `.next(node)`
+/*
+next(node)`
 
 Returns the next sibling element node, or `undefined`.
-
-##### `.previous(node)`
+*/
+/*
+previous(node)`
 
 Returns the previous sibling element node, or `undefined`.
-
-##### `.query(selector, node)`
+*/
+/*
+query(selector, node)`
 
 Returns an array of all descendants of `node` that match `selector`.
 
 
 ## DOM inspection
 
-##### `.attribute(name, node)`
 
-Returns the string contents of attribute `name`, or if the attribute is known
-boolean, returns `true` or `false`. If the attribute is not set, returns
-`undefined`.
 
-##### `.classes(node)`
 
-Returns the classList of `node`.
 
-##### `.isCommentNode(node)`
 
-Returns `true` if `node` is a comment.
-
-##### `.isElementNode(node)`
-
-Returns `true` if `node` is an element node.
-
-##### `.isFragmentNode(node)`
-
-Returns `true` if `node` is a fragment.
-
-##### `.isTextNode(node)`
-
-Returns `true` if `node` is a text node.
-
-##### `.isInternalLink(node)`
-
-Returns `true` if the `href` of `node` points to a resource on the same domain
-as the current document.
-
-##### `.tag(node)`
-
-Returns the tag name of `node`.
-
-##### `.type(node)`
-
-Returns `node` type as one of the strings `element`, `comment`, `text`,
-`fragment`, `document` or `doctype`.
 
 
 ## DOM mutation
 
-##### `.addClass(class, node)`
 
-Adds `class` to the classList of `node`.
 
-##### `.after(target, node)`
 
-Inserts `node` after `target`.
 
-##### `.append(target, node)`
 
-Appends node to `target`.
 
-If `node` is a collection of nodes, appends each node to `target`.
-
-##### `.assign(node, attributes)`
-
-Sets the key-value pairs of the object `attributes` as attributes on `node`.
-
-##### `.before(target, node)`
-
-Inserts `node` before target.
-
-##### `.create(tag, text)`
-
-Returns a new DOM node.
-
-- If `tag` is `"text"` returns a text node with the content `text`.
-- If `tag` is `"fragment"` returns a document fragment.
-- If `tag` is `"comment"` returns a comment `<!-- text -->`.
-- Anything else returns an element `<tag>text</tag>`, where `text` is inserted
-  as inner html.
-
-##### `.clone(node)`
-
-Returns a deep copy of `node`.
-
-##### `.empty(node)`
-
-Removes content of `node`.
-
-##### `.identify(node)`
-
-Returns the id of `node`, or where `node` has no id, a random id is generated,
-set on `node` and returned:
-
-    dom('button').map(dom.identify)...
-
-If you just want to get an existing id rather than generate a new one, use the
-Fn library's `get` function:
-
-    dom('button').map(Fn.get('id'))...
-
-##### `.remove(node)`
-
-Removes `node` from the DOM.
-
-##### `.removeClass(class, node)`
-
-Removes `class` from the classList of `node`.
-
-##### `.replace(target, node)`
-
-Swaps `target` for `node`.
 
 
 ## DOM Events
 
-##### `.event(type, node)`
 
-Returns a mappable stream of events heard on `node`:
 
-    var stream = dom
-    .event('click', dom.body);
-    .map(Fn.get('timeStamp'))
-    .each(function(time) {
-        // Do something with times
-    });
-
-Stopping the stream removes the event listeners:
-
-    stream.stop();
-
-##### `.requestEvent(type, fn, node)`
+/*
+requestEvent(type, fn, node)`
 
 Calls fn once on the next event of `type`.
-
-##### `.trapFocus(node)`
+*/
+/*
+trapFocus(node)`
 
 Constrains focus to focusable elements inside `node`.
 Returns a function that removes the trap.
 Creating a new trap also removes the existing trap.
+*/
 
-##### `.trigger(type, node)`
 
-Triggers event of `type` on `node`.
 
-    dom.trigger('dom-activate', dom.get('toggle-id'));
-
-##### `.isPrimaryButton(e)`
-
-Returns `true` if user event is from the primary (normally the left or only)
-button of an input device. Use this to avoid listening to right-clicks.
-
-##### `.preventDefault(e)`
-
-Calls `e.preventDefault()`.
-
-##### `.toKey(e)`
-
-Returns key string corresponding to `e.keyCode`, or `undefined`.
-
-##### `.Event(type, properties)`
-
-Creates a CustomEvent of type `type`.
-Additionally, `properties` are assigned to the event object.
 
 <!--
-##### `.events`
+/*
+events`
 
 An object containing some lower-level, uncurried event methods.
 
@@ -269,25 +140,30 @@ Triggers event of `type`, with optional `properties`, on `node`.
 
 ## Style
 
-##### `.box(node)`
+/*
+box(node)`
 
 Returns a `DOMRect` object describing the draw box of `node`.
 (If `node` is `window` a plain object is returned).
-
-##### `.bounds(node)`
+*/
+/*
+bounds(node)`
 
 Returns a `DOMRect` object describing the bounding box of `node` and its
 descendants.
-
-##### `.offset(node1, node2)`
+*/
+/*
+offset(node1, node2)`
 
 Returns array `[x, y]` representing the vector from `node1` to `node2`.
-
-##### `.position(node)`
+*/
+/*
+position(node)`
 
 Returns array `[x, y]` representing the screen coordinates of `node`.
-
-##### `.style(property, node)`
+*/
+/*
+style(property, node)`
 
 Returns the computed style `property` of `node`.
 If `property` is of the form `"property:name"`, a named aspect of the property
@@ -298,28 +174,33 @@ is returned.
     dom.style('transform:translateX', node); // returns translation, as a number, in px
     dom.style('transform:translateY', node); // returns translation, as a number, in px
 
-##### `.toPx(value)`
+/*
+toPx(value)`
 
 Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in pixels.
-
-##### `.toRem(value)`
+*/
+/*
+toRem(value)`
 
 Takes number in pixels and returns a string of the form '10rem'.
 
 
 ## Animation
 
-##### `.animate(duration, transform, name, object, value)`
+/*
+animate(duration, transform, name, object, value)`
 
 Animates property `name` of `object` to `value` over `duration` seconds, using
 the `transform` function as an easing function. Updates the object on animation
 frames.
-
-##### `.requestFrame(fn)`
+*/
+/*
+requestFrame(fn)`
 
 Alias of window.requestAnimationFrame.
-
-##### `.transition(duration, fn)`
+*/
+/*
+transition(duration, fn)`
 
 Calls `fn` on each frame until `duration` seconds has elapsed. `fn` is passed a
 single argument `progress`, a number that ramps from 0-1 over the duration of
@@ -334,25 +215,30 @@ The `.animate()` function uses `.transition()` behind the scenes.
 
 ## Scrolling
 
-##### `.animateScroll(value)`
+/*
+animateScroll(value)`
 
 Shortcut helper for animating scrollTop of main view.
-
-##### `.disableScroll(node)`
+*/
+/*
+disableScroll(node)`
 
 Disables scrolling by setting `overflow: hidden` on `node` while maintaining the
 current scrollTop, effectively causing the node to 'freeze'.
-
-##### `.enableScroll(node)`
+*/
+/*
+enableScroll(node)`
 
 Enables scrolling by removing `overflow: hidden` on `node`.
-
-##### `.scrollRatio(node)`
+*/
+/*
+scrollRatio(node)`
 
 Return the ratio of scrollTop to scrollHeight.
 
 <!--
-##### `.safe`
+/*
+safe`
 
 A box object describing a safe viewing area. This property is to be updated or
 replaced by your project. Used by locateable.
@@ -361,24 +247,29 @@ replaced by your project. Used by locateable.
 
 ## HTML
 
-##### `.escape(string)`
+/*
+escape(string)`
 
 Escapes `string` for setting safely as HTML.
-
-##### `.fragmentFromHTML(string)`
+*/
+/*
+fragmentFromHTML(string)`
 
 Returns a DOM fragment of the parsed html `string`.
-
-##### `.fragmentFromTemplate(node)`
+*/
+/*
+fragmentFromTemplate(node)`
 
 Returns a DOM fragment containing the content of the template `node`.
-
-##### `.parse(type, string)`
+*/
+/*
+parse(type, string)`
 
 Returns a document parsed from `string`, where `type` is one of `'xml'`,
 `'html'` or `'svg'`.
-
-##### `.prefix(string)`
+*/
+/*
+prefix(string)`
 
 Returns a prefixed CSS property name where a prefix is required in the current
 browser.
@@ -386,7 +277,8 @@ browser.
 
 ## Feature detection
 
-##### `.features`
+/*
+features`
 
 An object of feature detection results.
 

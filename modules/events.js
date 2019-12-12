@@ -51,6 +51,23 @@ function unlisten(source, type) {
 
 // Stream of events
 
+/*
+events(type, node)
+
+Returns a mappable stream of events heard on `node`:
+
+    var stream = dom
+    .event('click', dom.body);
+    .map(get('target'))
+    .each(function(node) {
+        // Do something with nodes
+    });
+
+Stopping the stream removes the event listeners:
+
+    stream.stop();
+*/
+
 function Source(notify, stop, type, options, node) {
 	const types  = type.split(rspaces).map(prefixType);
 	const buffer = [];
@@ -99,13 +116,24 @@ export default function events(type, node) {
 }
 
 
-// -----------------
+/*
+isPrimaryButton(e)
+
+Returns `true` if user event is from the primary (normally the left or only)
+button of an input device. Use this to avoid listening to right-clicks.
+*/
 
 export function isPrimaryButton(e) {
 	// Ignore mousedowns on any button other than the left (or primary)
 	// mouse button, or when a modifier key is pressed.
 	return (e.which === 1 && !e.ctrlKey && !e.altKey && !e.shiftKey);
 }
+
+/*
+preventDefault(e)
+
+Calls `e.preventDefault()`.
+*/
 
 export function preventDefault(e) {
 	e.preventDefault();
@@ -201,6 +229,16 @@ export function off(node, type, fn) {
 
 	return node;
 }
+
+/*
+trigger(type, node)
+
+Triggers event of `type` on `node`.
+
+```
+trigger('dom-activate', node);
+```
+*/
 
 export function trigger(node, type, properties) {
 	// Don't cache events. It prevents you from triggering an event of a

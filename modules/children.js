@@ -1,3 +1,9 @@
+/*
+children(node)
+
+Returns an array of child elements of `node`.
+*/
+
 import { toArray } from '../../fn/module.js';
 
 export default function children(node) {

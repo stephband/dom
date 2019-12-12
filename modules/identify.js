@@ -1,4 +1,13 @@
-// Returns a node's id, generating one if the node does not alreay have one
+/*
+identify(node)`
+
+Returns the id of `node`, or where `node` has no id, a random id is generated,
+checked against the DOM for uniqueness, set on `node` and returned:
+
+```
+dom.query('button', document).map(identify)
+```
+*/
 
 export default function identify(node) {
 	var id = node.id;

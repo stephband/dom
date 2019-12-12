@@ -1,4 +1,11 @@
 
+/*
+closest(selector, node)
+
+Returns the node itself or the closest ancestor that matches `selector`.
+If no match is found, returns `undefined`.
+*/
+
 import matches from './matches.js';
 
 export default function closest(selector, node) {

@@ -1,4 +1,10 @@
 
+/*
+matches(selector, node)
+
+Returns `true` if `node` matches `selector`, otherwise `false`.
+*/
+
 import tag from './tag.js';
 
 export default function matches(selector, node) {

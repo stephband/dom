@@ -1,8 +1,7 @@
-// Event(type)
-// Event(settings, properties)
 
 const assign      = Object.assign;
 const CustomEvent = window.CustomEvent;
+
 const defaults    = {
 	// The event bubbles (false by default)
 	// https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
@@ -16,6 +15,13 @@ const defaults    = {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
 	//composed: false
 };
+
+/*
+Event(type, properties)
+
+Creates a CustomEvent of type `type`.
+Additionally, `properties` are assigned to the event object.
+*/
 
 export default function Event(type, options) {
 	let settings;

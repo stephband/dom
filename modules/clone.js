@@ -1,6 +1,12 @@
 import features from './features.js';
 import query from './query.js';
 
+/*
+clone(node)`
+
+Returns a deep copy of `node`.
+*/
+
 export default features.textareaPlaceholderSet ?
 
 	function clone(node) {

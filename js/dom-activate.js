@@ -1,8 +1,4 @@
 
-/*
-dom-activate
-*/
-
 import { curry, isDefined, overload, requestTick } from '../../fn/module.js';
 import { append, classes, create, delegate, Event, events, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../module.js';
 
@@ -106,6 +102,25 @@ function defaultDeactivate() {
 	}
 }
 
+/*
+dom-activate
+
+<p>When a <code>dom-activate</code> event is triggered on an element
+with a behaviour attribute, and if that event bubbles to
+<code>document</code> without being prevented&hellip;</p>
+
+<ol>
+    <li>the class <code>active</code> is added to the target</li>
+    <li>the class <code>on</code> is added to all links that
+    reference the element by hash ref</li>
+</ol>
+
+<p>To programmatically activate a `popable`, `toggleable` or
+`switchable`:</p>
+
+```trigger('dom-activate', element);```
+*/
+
 on(document, 'dom-activate', function(e) {
 	if (e.defaultPrevented) { return; }
 
@@ -120,6 +135,25 @@ on(document, 'dom-activate', function(e) {
 	e.data    = data;
 	e.default = defaultActivate;
 });
+
+/*
+dom-deactivate
+
+<p>When a <code>dom-deactivate</code> event is triggered on an
+element with a behaviour attribute, and if that event bubbles to
+<code>document</code> without being prevented&hellip;</p>
+
+<ol>
+    <li>the class <code>active</code> is removed from the target</li>
+    <li>the class <code>on</code> is removed from all links that
+    reference the element by hash ref</li>
+</ol>
+
+<p>To programmatically deactivate a `popable`, `toggleable` or
+`switchable`:</p>
+
+```trigger('dom-deactivate', element);```
+*/
 
 on(document, 'dom-deactivate', function(e) {
 	if (e.defaultPrevented) { return; }

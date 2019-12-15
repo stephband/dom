@@ -1,3 +1,8 @@
+
+/*
+dom-activate
+*/
+
 import { curry, isDefined, overload, requestTick } from '../../fn/module.js';
 import { append, classes, create, delegate, Event, events, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../module.js';
 

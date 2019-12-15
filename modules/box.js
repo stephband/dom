@@ -1,3 +1,11 @@
+
+/*
+box(node)
+
+Returns a `DOMRect` object describing the draw box of `node`.
+(If `node` is `window` a plain object is returned).
+*/
+
 function windowBox() {
 	return {
 		left:   0,

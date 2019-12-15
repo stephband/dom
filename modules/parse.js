@@ -4,6 +4,13 @@ var mimetypes = {
 	svg:  'image/svg+xml'
 };
 
+/*
+parse(type, string)
+
+Returns a document parsed from `string`, where `type` is one of `'xml'`,
+`'html'` or `'svg'`.
+*/
+
 export default function parse(type, string) {
 	if (!string) { return; }
 

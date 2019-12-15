@@ -1,3 +1,7 @@
+/*
+dom-swipe
+*/
+
 import { argument, toPolar } from '../../fn/module.js';
 import { closest, events } from '../module.js';
 import './dom-gesture.js';

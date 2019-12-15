@@ -1,3 +1,19 @@
+/*
+draggable
+
+The native behaviour of the `draggable="true"`*
+attribute is extended with the `draggable-mimetypes`
+attribute, which defines data to be carried by a drag action:
+
+```
+<div draggable="true" draggable-mimetypes="application/json: [0,1,2,3]">
+    Drag me
+</div>
+```
+
+<small>* Note that `draggable` must be `"true"`. It is not a boolean attribute.</small>
+*/
+
 import { parse, requestTick, Stream } from '../../fn/module.js';
 import { attribute, classes, delegate, events, identify, query, remove, removeClass } from '../module.js';
 import { register } from '../../sparky/module.js';

@@ -4,6 +4,27 @@ import prefix from './prefix.js';
 const assign = Object.assign;
 const define = Object.defineProperties;
 
+/*
+features
+
+An object of feature detection results.
+
+```
+{
+    inputEventsWhileDisabled: true, // false in FF, where disabled inputs don't trigger events
+    template: true,                 // false in old browsers where template.content not found
+    textareaPlaceholderSet: true,   // false in IE, where placeholder is also set on innerHTML
+    transition: true,               // false in older browsers where transitions not supported
+    fullscreen: true,               // false where fullscreen API not supported
+    scrollBehavior: true,           // Whether scroll behavior CSS is supported
+    events: {
+        fullscreenchange: 'fullscreenchange',
+        transitionend:    'transitionend'
+    }
+}
+```
+*/
+
 export default define({
 	events: define({}, {
 		fullscreenchange: {

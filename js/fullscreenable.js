@@ -1,8 +1,10 @@
-// dom.fullscreenable
-//
-// Links refering to [fullscreenable] elements put those elements into
-// fullscreen. Style things that depend on fullscreen support with the
-// .fullscreen-support class found on the document root.
+/*
+fullscreenable
+
+Links refering to [fullscreenable] elements put those elements into
+fullscreen. Style things that depend on fullscreen support with the
+.fullscreen-support class found on the document root.
+*/
 
 import { noop } from '../../fn/module.js';
 import { matches } from '../module.js';
@@ -38,8 +40,8 @@ function exitFullscreen() {
 }
 
 if (fullscreenEnabled) {
-    /* This should really be accessible to CSS via an @supports query or some
-       such, but it is not, or not in a way that works. Add a supports class. */
+    // This should really be accessible to CSS via an @supports query or some
+    // such, but it is not, or not in a way that works. Add a supports class.
     document.documentElement.classList.add('fullscreen-support');
 
     handlers.push(function(node, e) {

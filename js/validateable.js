@@ -1,4 +1,65 @@
 
+/*
+validateable
+
+<p>The <strong>validateable</strong> attribute can be set on an
+individual input, or on a form to make all descendant inputs
+validateable.</p>
+
+<p>A validateable input is validated on <code>focusout</code>, and
+if an <code>invalid</code> event is emitted an error label is
+appended to the DOM directly after it. The label's text is read
+from&hellip;</p>
+
+<ol>
+    <li>a <code>data-validation-xxx</code> attribute on the input,
+    (where <code>xxxx</code> is the name of the failed constraint), OR</li>
+    <li>the object <code>dom.validation.messages</code>, OR</li>
+    <li>the browser's default message</li>
+</ol>
+
+<p>In addition, the first time a validation is performed on an
+element the class <code>validated</code> is added, providing a
+hook for pre- and post- validation <code>:invalid</code> styles.</p>
+
+<p>Constraints are named after the validation attributes that impose
+them.</p>
+
+<pre><code>dom.validation.messages = {
+    pattern:   'Pattern does not match',
+    max:       'Number too small',
+    min:       'Number too big',
+    step:      'Number not in step',
+    maxlength: 'Input too long',
+    type:      'Input not of type',
+    required:  ''
+};
+</code></pre>
+<p>This messages object is unpopulated by default.</p>
+
+<form class="block @2-grid-4/15 @2-grid-left-1/15 @3-grid-left-1/9 validateable" style="height: 0; overflow: visible; margin-top: -440px;">
+<label for="text">text</label>
+<input type="text" id="text" name="text" required maxlength="20" />
+
+<label for="password">password</label>
+<input type="password" id="password" name="password" required />
+
+<label for="number">number</label>
+<input type="number" id="number" name="number" min="0" max="1" step="0.1" />
+
+<label for="url">url</label>
+<input type="url" id="url" name="url" />
+
+<label for="email">email</label>
+<input type="email" id="email" name="email" data-val-type="Wrong type, knucklehead" />
+</form>
+*/
+
+
+
+
+
+
 // Monitors forms and fields with .validateable for input, and generates
 // and manages .error-labels following those that fail validation.
 //

@@ -1,8 +1,25 @@
 
-// Listen for drops on droppables, compare their droppable-mimetypes against
-// the drag data and send a dom-drop event with available data.
-//
-// Adds the class 'dragover' to droppables during the drag-n-drop action.
+/*
+droppable
+
+Listen for drops on droppables, compare their droppable-mimetypes against
+the drag data and send a dom-drop event with available data.
+
+Adds the class 'dragover' to droppables during the drag-n-drop action.
+
+<p>The <code>droppable</code> attribute turns an element into
+a drop target for drag-and-drop actions, and is given the class
+<code>dragover</code> while data of an accepted mimetype is being
+dragged over it.</p>
+<p>Define the mimetypes of data to accept in the <code>droppable-mimetypes</code>
+attribute:</p>
+
+```
+<div droppable droppable-mimetypes="application/json">
+    Drop JSON on me.
+</div>
+```
+*/
 
 import { Fn, choose, id, intersect, nothing, prepend, requestTick, Stream } from '../../fn/module.js';
 import { after, attribute, classes, closest, delegate, events, preventDefault, query, remove } from '../module.js';

@@ -1,3 +1,9 @@
+/*
+ready(fn)
+Calls `fn` on DOM content load, or if later than content load, immediately
+(on the next tick).
+*/
+
 const ready = new Promise(function(accept, reject) {
 	function handle(e) {
 		document.removeEventListener('DOMContentLoaded', handle);

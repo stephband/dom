@@ -1,0 +1,36 @@
+
+:root {
+    background-color: #f5f3f3;
+    --name-color: #332256;
+}
+
+html,
+body {
+    background-color: #f9f6ff;
+    background-color: #fbf7ff;
+    background-color: #fdf6fa;
+    background-color: #f5f3f3;
+}
+
+body {
+    color: #004e58;
+	color: #005d5a;
+	color: #305000;
+}
+
+code,
+code > .params {
+    color: #e2006f;
+}
+
+.js.block,
+code.block {
+    background-color: #383244;
+    background-color: #303740;
+    background-color: #fdfcff;
+    background-color: #312b3e;
+}
+
+ol {
+    padding-left: 0;
+}

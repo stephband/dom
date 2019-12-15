@@ -1,3 +1,19 @@
+/*
+style(property, node)`
+
+Returns the computed style `property` of `node`.
+
+    style('transform', node);            // returns transform
+
+If `property` is of the form `"property:name"`, a named aspect of the property
+is returned.
+
+    style('transform:rotate', node);     // returns rotation, as a number, in radians
+    style('transform:scale', node);      // returns scale, as a number
+    style('transform:translateX', node); // returns translation, as a number, in px
+    style('transform:translateY', node); // returns translation, as a number, in px
+*/
+
 var rpx          = /px$/;
 var styleParsers = {
 	"transform:translateX": function(node) {

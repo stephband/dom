@@ -2,6 +2,13 @@ import { noop } from '../../fn/module.js';
 
 let untrapFocus = noop;
 
+/*
+trapFocus(node)
+Constrains focus to focusable elements inside `node`.
+Returns a function that removes the trap.
+Calling `trapFocus(node)` again also removes the existing trap.
+*/
+
 export default function trapFocus(node) {
 	// Trap focus as described by Nikolas Zachas:
 	// http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/

@@ -154,7 +154,7 @@ export * from './modules/validation.js';
 // Scroll
 
 export { default as safe } from './modules/safe.js';
-export { default as animateScroll } from './modules/animate-scroll.js';
+//export { default as animateScroll } from './modules/animate-scroll.js';
 export { default as scrollRatio } from './modules/scroll-ratio.js';
 export * from './modules/scroll.js';
 

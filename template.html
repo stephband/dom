@@ -32,36 +32,22 @@
     <link rel="stylesheet" href="../dom/css/dom.css" />
     <link rel="stylesheet" href="../fn/css/prism.cruncher.css" />
     <link rel="stylesheet" href="../fn/css/tests.css" />
-    <link rel="stylesheet" href="css/docs.css" />
-    <link rel="stylesheet" href="css/theme.css" />
-    <link rel="stylesheet" href="css/respond.css" />
+    <link rel="stylesheet" href="../fn/css/docs.css" />
+    <link rel="stylesheet" href="../dom/css/theme.css" />
+    <link rel="stylesheet" href="../fn/css/respond.css" />
 </head>
 
 <body class="grid">
     <header class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 @3-x-span-11" id="header">
         <template build-fn="fetch:package.json" build-include="/fn/templates.html#header-template"></template>
+        <p>Import functions from the dom module:</p>
+        <pre><code class="language-js">import { query, events } from '/dom/module.js';</code></pre>
     </header>
 
     <section class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 grid" locateable id="functions">
         <header class="x-1 x-span-3 @1-x-span-4">
             <h2 class="text-2">Functions</h2>
-            <p>Import functions from the Fn module:</p>
-            <pre><code class="language-js">import { get, matches } from '/fn/module.js';</code></pre>
         </header>
-
-        <div class="x-1 x-span-3">
-            <h4 class="text-4">Functions</h4>
-            <template build-fn="docs:
-            modules/cache.js,
-            modules/compose.js,
-            modules/curry.js,
-            modules/choose.js,
-            modules/once.js,
-            modules/overload.js,
-            modules/pipe.js,
-            modules/weak-cache.js
-            filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
-        </div>
 
         <div class="x-1 x-span-3 @2-x-span-4">
             <p>
@@ -72,74 +58,80 @@
 
         <div class="x-1 x-span-3 column-grid grid">
             <div class="x-1">
-                <h4 class="text-4">Objects</h4>
+                <h4 class="text-4">select.</h4>
                 <template build-fn="docs:
-                modules/argument.js,
-                modules/call.js,
-                modules/equals.js,
-                modules/get.js,
-                modules/has.js,
-                modules/id.js,
-                modules/invoke.js,
-                modules/is.js,
-                modules/is-defined.js,
+                modules/closest.js,
+                modules/children.js,
+                modules/find.js,
                 modules/matches.js,
-                modules/noop.js,
-                modules/not.js,
-                modules/request-tick.js,
-                modules/self.js,
-                modules/set.js,
-                modules/to-array.js,
-                modules/to-class.js,
-                modules/to-fixed.js,
-                modules/to-string.js,
-                modules/to-type.js
+                modules/query.js
                 filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
             </div>
         </div>
 
         <div class="x-1 x-span-3 @1-x-4 column-grid grid">
             <div class="x-1">
-                <h4 class="text-4">Strings</h4>
+                <h4 class="text-4">inspect.</h4>
                 <template build-fn="docs:
-                modules/capture.js,
-                modules/exec.js,
-                'modules/time.js?parseDate,parseTime',
-                modules/parse-int.js,
-                modules/parse-value.js
+                modules/attribute.js,
+                modules/classes.js,
+                modules/tag.js
                 filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
             </div>
 
             <div class="x-1">
-                <h4 class="text-4">Numbers</h4>
+                <h4 class="text-4">mutate.</h4>
                 <template build-fn="docs:
-                modules/maths/core.js,
-                modules/maths/cubic-bezier.js,
-                modules/maths/to-cartesian.js,
-                modules/maths/to-polar.js
+                modules/classes.js,
+                modules/append.js,
+                modules/assign.js,
+                modules/create.js,
+                modules/clone.js,
+                modules/identify.js
                 filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
             </div>
         </div>
 
         <div class="x-1 x-span-3 @2-x-7 column-grid grid">
             <div class="x-1">
-                <h4 class="text-4">Arrays</h4>
+                <h4 class="text-4">events.</h4>
                 <template build-fn="docs:
-                modules/lists/core.js,
-                modules/lists/insert.js,
-                modules/lists/last.js,
-                modules/lists/remove.js,
-                modules/lists/rest.js,
-                modules/lists/take.js,
-                modules/lists/unique.js,
-                modules/lists/update.js
+                modules/events.js,
+                modules/trap-focus.js,
+                modules/trigger.js,
+                modules/to-key.js,
+                modules/event.js
                 filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
             </div>
 
             <div class="x-1">
-                <h4 class="text-4">Time</h4>
+                <h4 class="text-4">style.</h4>
                 <template build-fn="docs:
-                modules/time.js
+                modules/box.js,
+                modules/offset.js,
+                modules/prefix.js,
+                modules/style.js
+                filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
+            </div>
+        </div>
+
+        <div class="x-1 x-span-3 @2-x-7 column-grid grid">
+            <div class="x-1">
+                <h4 class="text-4">animate.</h4>
+                <template build-fn="docs:
+                modules/animate.js,
+                modules/transition.js,
+                modules/scroll.js,
+                modules/scroll-ratio.js
+                filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
+            </div>
+
+            <div class="x-1">
+                <h4 class="text-4">HTML.</h4>
+                <template build-fn="docs:
+                modules/escape.js,
+                modules/fragments.js,
+                modules/parse.js
                 filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
             </div>
         </div>
@@ -147,57 +139,46 @@
 
     <section class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 columns-grid grid" locateable id="observer">
         <header class="x-1 x-span-3 @1-x-span-4">
-            <h2 class="text-2" style="font-size: 1.875rem;">Observer</h2>
-            <p>Import and create an observer:</p>
-            <pre><code class="language-js">import { Observer, observe } from '/fn/module.js';
-const data = Observer({ a: true });</code></pre>
-            <p>
-            An observer is an ES6 Proxy of an object that intercepts and reports
-            mutations. There is only ever one observer per object, ie, calling
-            <code>Observer(object)</code> multiple times with the same object
-            always returns the same observer. Observers can be observed for
-            mutations with the observe function:
-            </p>
+            <h2 class="text-2" style="font-size: 1.875rem;">Behaviour attributes</h2>
+            <p><strong>dom</strong> comes with a number of extensions
+			for enhancing the behaviours of elements, declared by simply
+			adding a behavioural attribute.</p>
 
-            <pre><code class="language-js">observe('a', (value) => {...}, data);</code></pre>
+			<p>These are not 'plugins' in a traditional sense: there are no
+			setups to call and no JS objects exposed. Instead the DOM is enhanced
+			by binding reactions to delegated events. Behaviours can be set up
+			and used even before <code>DOMContentLoad</code>, and elements added
+			asynchrounously can use them automatically.</p>
+
+			<p>Many behaviours are powered by two simple custom events. Here's
+			what they do.</p>
+
+			<!--p>The <strong>dom</strong> library provides no style to make these
+			behaviours do anything visual.</p><!-- Linking style to behaviour gets in
+			the way of composeability.</p>
+			<p>The CSS library <strong>Bolt</strong> has a number of classes
+			that work out-of-the-box with <strong>dom</strong> behaviours.</p-->
         </header>
 
         <div class="x-1 x-span-3 list-grid grid">
             <template build-fn="docs:
-            modules/observer/observer.js,
-            modules/observer/observe.js
-            filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
+            js/draggable.js,
+            js/droppable.js,
+            js/fullscreenable.js,
+            js/locateable.js,
+            js/popable.js,
+            js/submittable.js,
+            js/switchable.js,
+            js/toggleable.js,
+            js/validateable.js
+            each" build-include="/fn/templates.html#{[type]}-template"></template>
         </div>
     </section>
-
-    <!--div class="x-1 x-span-3 @2-x-2 @3-x-span-6 @4-x-span-5 @5-x-span-3">
-        <p>Text things</p>
-    </div-->
-
-    <!--div class="x-1 x-span-3 @2-x-2 @3-x-span-6 @4-x-span-5 @5-x-span-3" build-fn="docs:'./modules/stream.js'"></div-->
-
-    <section class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 columns-grid grid" locateable id="stream">
-        <header class="x-1 x-span-3 @1-x-span-4">
-            <h2 class="text-2" style="font-size: 1.875rem;">Stream</h2>
-            <p>Import and create a stream:</p>
-            <pre><code class="language-js">import { Stream } from '/fn/module.js';
-const stream = Stream.of(1,2,3,4);</code></pre>
-        </header>
-
-        <div class="x-1 x-span-3 list-grid grid">
-            <template build-fn="docs:modules/stream.js filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
-            <template build-fn="docs:modules/fn.js filter-property each" build-include="/fn/templates.html#{[type]}-template"></template>
-        </div>
-
-        <div class="x-1 x-span-3 @1-x-4 list-grid grid">
-            <template build-fn="docs:modules/stream.js filter-method take:16 each" build-include="/fn/templates.html#{[type]}-template"></template>
-        </div>
-
-        <div class="x-1 x-span-3 @2-x-7 list-grid grid">
-            <template build-fn="docs:modules/stream.js filter-method rest:16 each" build-include="/fn/templates.html#{[type]}-template"></template>
-        </div>
-    </section>
-
+    <!--js/removeable.js,
+    js/submittable.js,
+    js/switchable.js,
+    js/toggleable.js,
+    js/validateable.js-->
     <!-- Build document -->
     <script type="module" build-remove>
         import '../fn/docs-build.js';
@@ -208,8 +189,7 @@ const stream = Stream.of(1,2,3,4);</code></pre>
         import '../dom/js/device.js';
         import '../dom/js/toggleable.js';
         import '../dom/js/locateable.js';
-        import * as Fn from './module.js';
-
-        Object.assign(window, Fn);
+        import * as dom from './module.js';
+        window.$ = dom;
     </script>
 </body>

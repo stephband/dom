@@ -1,5 +1,12 @@
 
-// dom.submittable
+/*
+submittable
+
+Makes a form submit via `fetch()`. Reads the form's standard `enctype`
+attribute to set the mimetype of the request, but extends it by permitting
+the value `"application/json"` as well as the standard
+`"application/x-www-form-urlencoded"` and `"multipart/form-data"`.
+*/
 
 import { choose, compose, get, noop } from '../../fn/module.js';
 import { events, matches, preventDefault, request } from '../module.js';

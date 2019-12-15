@@ -31,6 +31,11 @@ function getFontSize() {
 		(fontSize = style("font-size", document.documentElement), 10);
 }
 
+/*
+toPx(value)`
+
+Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in pixels.
+*/
 
 export const toPx = overload(toType, {
 	'number': id,
@@ -46,13 +51,32 @@ export const toPx = overload(toType, {
 	}
 });
 
+
+/*
+toRem(value)
+
+Takes number in pixels and returns a string of the form '10rem'.
+*/
+
 export function toRem(n) {
 	return (toPx(n) / getFontSize()) + 'rem';
 }
 
+/*
+toVw(value)
+
+Takes number in pixels and returns a string of the form '10vw'.
+*/
+
 export function toVw(n) {
 	return (100 * toPx(n) / window.innerWidth) + 'vw';
 }
+
+/*
+toVh(value)
+
+Takes number in pixels and returns a string of the form '10vh'.
+*/
 
 export function toVh(n) {
 	return (100 * toPx(n) / window.innerHeight) + 'vh';

@@ -1,4 +1,11 @@
 
+
+/*
+prefix(string)
+Returns a prefixed CSS property name where a prefix is required in the current
+browser.
+*/
+
 const prefixes = ['Khtml','O','Moz','Webkit','ms'];
 
 var node = document.createElement('div');

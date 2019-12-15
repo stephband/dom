@@ -20,6 +20,12 @@ export function fragmentFromChildren(node) {
 	return fragment;
 }
 
+
+/*
+fragmentFromHTML(string)
+Returns a DOM fragment of the parsed html `string`.
+*/
+
 export function fragmentFromHTML(html, contextTag) {
     if (contextTag) {
         let node = document.createElement(contextTag);
@@ -31,6 +37,11 @@ export function fragmentFromHTML(html, contextTag) {
     .createRange()
     .createContextualFragment(html);
 }
+
+/*
+fragmentFromTemplate(node)
+Returns a DOM fragment containing the content of the template `node`.
+*/
 
 export function fragmentFromTemplate(node) {
 	// A template tag has a content property that gives us a document

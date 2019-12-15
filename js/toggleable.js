@@ -1,4 +1,13 @@
-// dom.toggleable
+/*
+toggleable
+
+<p>A <strong>toggleable</strong> is very similar to a popable. it
+is also activated when a link that references it is clicked – but
+then deactivated by a second click an any link that references it.</p>
+
+<p>Toggleables can be used for making
+<a class="button" href="#content-toggle">expandable drawers</a>.</p>
+*/
 
 import { remove } from '../../fn/module.js';
 import { get, events, closest, matches, isPrimaryButton, isInternalLink, identify } from '../module.js';

@@ -1,5 +1,5 @@
 /*
-assign(node, attributes)`
+assign(node, attributes)
 
 Sets the key-value pairs of the object `attributes` as attributes on `node`.
 */

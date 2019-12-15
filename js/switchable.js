@@ -1,7 +1,37 @@
-// dom.switchable
-//
-// Extends the default behaviour of the activate and deactivate
-// events with things to do when they are triggered on nodes.
+/*
+switchable
+
+Extends the default behaviour of the activate and deactivate
+events with things to do when they are triggered on nodes.
+
+<p>In any group of <strong>switchable</strong> siblings, one is
+always active. A switchable is activated when a link that references
+it is clicked, while the currently active switchable is
+deactivated.</p>
+<p>Groups of switchables can be styled to make tabs or
+slideshows.</p
+
+<p>For any group of siblings with the class <code>switchable</code>,
+only one can be <code>active</code> at any one time.</p>
+
+<ul class="inline-index index">
+    <li><a class="tab-button button" href="#tab-1">1</a></li>
+    <li><a class="tab-button button" href="#tab-2">2</a></li>
+    <li><a class="tab-button button" href="#tab-3">3</a></li>
+</ul>
+
+<div class="tab-block block switchable" id="tab-1">
+    Tab 1
+</div
+
+><div class="tab-block block switchable" id="tab-2">
+    Tab 2
+</div
+
+><div class="tab-block block switchable" id="tab-3">
+    Tab 3
+</div>
+*/
 
 import { Fn } from '../../fn/module.js';
 import { events, trigger, matches, children } from '../module.js';

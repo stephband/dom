@@ -1,4 +1,10 @@
-// dom.toggleable
+/*
+`removeable`
+
+<p>A <strong>removeable</strong> is removed from the DOM after
+<code>dom-deactivate</code>.</p>
+<p>Can be used to make one-off messages, like <a href="#one-off-dialog">this dialog</a>.</p>
+*/
 
 import { noop } from '../../fn/module.js';
 import { remove, events, matches } from '../module.js';

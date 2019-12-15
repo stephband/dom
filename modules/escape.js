@@ -1,4 +1,10 @@
 
+
+/*
+escape(string)
+Escapes `string` for setting safely as HTML.
+*/
+
 var pre  = document.createElement('pre');
 var text = document.createTextNode('');
 

@@ -1,3 +1,8 @@
+
+/*
+dom-gesture
+*/
+
 import { requestTick, Stream } from '../../fn/module.js';
 import { closest, events, isPrimaryButton, preventDefault } from '../module.js';
 

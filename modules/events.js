@@ -48,16 +48,12 @@ function unlisten(source, type) {
 	return source;
 }
 
-
-// Stream of events
-
 /*
 events(type, node)
 
 Returns a mappable stream of events heard on `node`:
 
-    var stream = dom
-    .event('click', dom.body);
+    var stream = events('click', document.body);
     .map(get('target'))
     .each(function(node) {
         // Do something with nodes

@@ -1,3 +1,16 @@
+
+/*
+locateable
+
+<p>A <strong>locateable</strong> is activated when a link that
+references is clicked. Upon activation the document view is scrolled
+to it's location.</p>
+<p>It is deactivated when the dom view is either
+scrolled above that location, or another locateable is brought into
+view from below.</p>
+<p>locateables are useful for making scrolling navigations.</p>
+*/
+
 import '../polyfills/element.scrollintoview.js';
 import { by, curry, get, isDefined, overload, requestTick } from '../../fn/module.js';
 import { append, box, classes, create, delegate, Event, events, features, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../module.js';

@@ -1,11 +1,18 @@
 
-// transition(duration, fn)
-//
-// duration  - duration seconds
-// fn        - callback that is called on animation frames with a float
-//             representing progress in the range 0-1
-//
-// Returns a function that cancels the transition.
+
+/*
+transition(duration, fn)
+
+Calls `fn` on each animation frame until `duration` seconds has elapsed. `fn`
+is passed a single argument `progress`, a number that ramps from `0` to `1` over
+the duration of the transition. Returns a function that cancels the transition.
+
+```
+transition(3, function(progress) {
+    // Called every frame for 3 seconds
+});
+```
+*/
 
 const performance           = window.performance;
 const requestAnimationFrame = window.requestAnimationFrame;

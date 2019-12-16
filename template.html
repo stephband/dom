@@ -37,11 +37,9 @@
     <link rel="stylesheet" href="../fn/css/respond.css" />
 </head>
 
-<body class="grid">
-    <header class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 @3-x-span-11" id="header">
+<body class="@3-grid-12 grid">
+    <header class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 @3-x-span-9" id="header">
         <template build-fn="fetch:package.json" build-include="/fn/templates.html#header-template"></template>
-        <p>Import functions from the dom module:</p>
-        <pre><code class="language-js">import { query, events } from '/dom/module.js';</code></pre>
     </header>
 
     <section class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 grid" locateable id="functions">
@@ -51,7 +49,13 @@
 
         <div class="x-1 x-span-3 @2-x-span-4">
             <p>
-            The functions below are curried (where they take more than one
+                Import functions:
+            </p>
+
+            <pre><code class="language-js">import { closest, matches } from '/dom/module.js';</code></pre>
+
+            <p>
+            All functions are curried (where they take more than one
             parameter), allowing them to be partially applied.
             </p>
         </div>
@@ -67,14 +71,12 @@
                 modules/query.js
                 filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
             </div>
-        </div>
 
-        <div class="x-1 x-span-3 @1-x-4 column-grid grid">
             <div class="x-1">
                 <h4 class="text-4">inspect.</h4>
                 <template build-fn="docs:
                 modules/attribute.js,
-                modules/classes.js,
+                modules/identify.js,
                 modules/tag.js
                 filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
             </div>
@@ -82,21 +84,20 @@
             <div class="x-1">
                 <h4 class="text-4">mutate.</h4>
                 <template build-fn="docs:
-                modules/classes.js,
                 modules/append.js,
                 modules/assign.js,
                 modules/create.js,
-                modules/clone.js,
-                modules/identify.js
+                modules/clone.js
                 filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
             </div>
         </div>
 
-        <div class="x-1 x-span-3 @2-x-7 column-grid grid">
+        <div class="x-1 x-span-3 @1-x-4 column-grid grid">
             <div class="x-1">
                 <h4 class="text-4">events.</h4>
                 <template build-fn="docs:
                 modules/events.js,
+                modules/gestures.js,
                 modules/trap-focus.js,
                 modules/trigger.js,
                 modules/to-key.js,
@@ -107,9 +108,12 @@
             <div class="x-1">
                 <h4 class="text-4">style.</h4>
                 <template build-fn="docs:
+                modules/classes.js,
                 modules/box.js,
                 modules/offset.js,
                 modules/prefix.js,
+                modules/scroll-ratio.js,
+                modules/scroll.js,
                 modules/style.js
                 filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
             </div>
@@ -120,9 +124,7 @@
                 <h4 class="text-4">animate.</h4>
                 <template build-fn="docs:
                 modules/animate.js,
-                modules/transition.js,
-                modules/scroll.js,
-                modules/scroll-ratio.js
+                modules/transition.js
                 filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
             </div>
 
@@ -137,45 +139,57 @@
         </div>
     </section>
 
-    <section class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 columns-grid grid" locateable id="observer">
+    <section class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 columns-grid grid" locateable id="attributes">
         <header class="x-1 x-span-3 @1-x-span-4">
-            <h2 class="text-2" style="font-size: 1.875rem;">Behaviour attributes</h2>
-            <p><strong>dom</strong> comes with a number of extensions
-			for enhancing the behaviours of elements, declared by simply
-			adding a behavioural attribute.</p>
+            <h2 class="text-2">Attributes</h2>
 
-			<p>These are not 'plugins' in a traditional sense: there are no
-			setups to call and no JS objects exposed. Instead the DOM is enhanced
-			by binding reactions to delegated events. Behaviours can be set up
-			and used even before <code>DOMContentLoad</code>, and elements added
-			asynchrounously can use them automatically.</p>
+            <p>The library has a number of scripts for cheekily extending the
+            default behaviour of DOM elements, accessed by adding
+            'behaviour'&nbsp;attributes.</p>
 
-			<p>Many behaviours are powered by two simple custom events. Here's
-			what they do.</p>
+			<p>Behaviours may be imported and used before
+            <code class="language-js">'DOMContentLoad'</code>, there are no
+            'setup' functions to run, and elements that are added
+            to the DOM later get to use them&nbsp;automatically.</p>
 
-			<!--p>The <strong>dom</strong> library provides no style to make these
-			behaviours do anything visual.</p><!-- Linking style to behaviour gets in
-			the way of composeability.</p>
-			<p>The CSS library <strong>Bolt</strong> has a number of classes
-			that work out-of-the-box with <strong>dom</strong> behaviours.</p-->
+            <p>This library provides no style to make these behaviours do
+            anything <i>visual</i>, however; the behaviours largely add and remove
+            classes: the rest is up to your&nbsp;CSS. This is deliberate.
+            By seperating style from behaviour many different styles of
+            interactive – a menu, a dialog, a tooltip – can share <code class="language-js">popable</code>
+            behaviour, for example.</p>
         </header>
 
-        <div class="x-1 x-span-3 list-grid grid">
+        <div class="x-1 y-2 x-span-3 @2-x-span-4">
+            <h3 class="text-4">Navigate</h3>
             <template build-fn="docs:
-            js/draggable.js,
-            js/droppable.js,
-            js/fullscreenable.js,
-            js/locateable.js,
-            js/popable.js,
-            js/submittable.js,
-            js/switchable.js,
-            js/toggleable.js,
-            js/validateable.js
-            each" build-include="/fn/templates.html#{[type]}-template"></template>
+                js/locateable.js
+                each" build-include="/fn/templates.html#attribute-template"></template>
+
+            <h3 class="text-4">Hijack</h3>
+            <template build-fn="docs:
+                js/fullscreenable.js,
+                js/popable.js,
+                js/switchable.js,
+                js/toggleable.js
+                each" build-include="/fn/templates.html#attribute-template"></template>
+        </div>
+
+        <div class="x-1 y-2 x-span-3 @2-x-6 @2-x-span-4">
+            <h3 class="text-4">Data</h3>
+            <template build-fn="docs:
+                js/draggable.js,
+                js/droppable.js
+                each" build-include="/fn/templates.html#attribute-template"></template>
+            <h3 class="text-4">Forms</h3>
+            <template build-fn="docs:
+                js/submittable.js,
+                js/validateable.js
+                each" build-include="/fn/templates.html#attribute-template"></template>
         </div>
     </section>
 
-    <section class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 columns-grid grid" locateable id="observer">
+    <!--section class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 columns-grid grid" locateable id="observer">
         <header class="x-1 x-span-3 @1-x-span-4">
             <h2 class="text-2" style="font-size: 1.875rem;">Events</h2>
         </header>
@@ -186,7 +200,7 @@
             js/dom-gesture.js
             each" build-include="/fn/templates.html#{[type]}-template"></template>
         </div>
-    </section>
+    </section-->
 
     <!--js/removeable.js,
     js/submittable.js,

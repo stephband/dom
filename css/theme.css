@@ -1,21 +1,18 @@
 
 :root {
-    background-color: #f5f3f3;
-    --name-color: #332256;
+    background-color: #f1f0ef;
+    --name-color: #223d56;
 }
 
 html,
 body {
-    background-color: #f9f6ff;
-    background-color: #fbf7ff;
-    background-color: #fdf6fa;
-    background-color: #f5f3f3;
+    background-color: #f1f0ef;
 }
 
 body {
     color: #004e58;
 	color: #005d5a;
-	color: #305000;
+	color: #223d56;
 }
 
 code,

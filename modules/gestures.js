@@ -1,4 +1,10 @@
 
+/*
+gestures(node)
+
+Returns a stream of streams of dom events
+*/
+
 import { Stream } from '../../fn/module.js';
 import events, { isPrimaryButton } from './events.js';
 

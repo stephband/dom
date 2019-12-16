@@ -2,13 +2,29 @@
 /*
 locateable
 
-<p>A <strong>locateable</strong> is activated when a link that
-references is clicked. Upon activation the document view is scrolled
-to it's location.</p>
-<p>It is deactivated when the dom view is either
-scrolled above that location, or another locateable is brought into
-view from below.</p>
-<p>locateables are useful for making scrolling navigations.</p>
+An element with a `locateable` attribute updates the browser location hash
+with its `id` when scrolled into view.
+
+When the location hash changes to be equal to a `locateable`'s id
+the locateable gets the class `"located"`, and links that reference that
+locateable via their `href` attribute get the class `"on"`.
+
+Build a list of links that reference locateables and with a little style
+you have a scrolling navigation:
+
+```html
+<style>
+    a               { color: #888888; }
+    a.on            { color: black; }
+    article.located { ... }
+</style>
+
+<a href="#fish">...</a>
+<a href="#chips">...</a>
+
+<article locateable id="fish">...</article>
+<article locateable id="chips">...</article>
+```
 */
 
 import '../polyfills/element.scrollintoview.js';

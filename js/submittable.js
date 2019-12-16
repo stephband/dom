@@ -2,9 +2,9 @@
 /*
 submittable
 
-Makes a form submit via `fetch()`. Reads the form's standard `enctype`
-attribute to set the mimetype of the request, but extends it by permitting
-the value `"application/json"` as well as the standard
+Hijacks the submit event and submits the form via `fetch()`. Reads the form's
+standard `enctype` attribute to set the mimetype of the request, but extends
+it by permitting the value `"application/json"` as well as the standard
 `"application/x-www-form-urlencoded"` and `"multipart/form-data"`.
 */
 

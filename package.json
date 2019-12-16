@@ -1,15 +1,19 @@
 {
     "name": "dom",
     "title": "dom",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "author": {
         "name": "Stephen Band",
         "url": "http://stephen.band",
         "twitter": "stephband"
     },
-    "dependencies": {
-        "fn": ">=1.0.0",
-        "rollup": "^1.8.0"
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/stephband/dom.git"
+    },
+
+    "bugs": {
+        "url": "https://github.com/stephband/dom/issues"
     },
     "licenses": [
         {
@@ -29,7 +33,7 @@
         "js/locateable.js",
         "js/validateable.js"
     ],
-    "description": "A small library of functional functions, DOM events and Event Streams for HTML and SVG.",
+    "description": "A small library of functions, event streams and behaviour attributes for HTML and SVG.",
     "keywords": [
         "DOM",
         "html",
@@ -47,7 +51,9 @@
     "docs": "http://github.com/stephband/dom",
     "devDependencies": {
         "eslint": "^5.16.0",
-        "minifier": "^0.8.1"
+        "node-sass": "^4.13.0",
+        "puppeteer": "^1.20.0",
+        "rollup": "^1.27.9"
     },
     "module": "module.js",
     "main": "index.js",
@@ -55,6 +61,8 @@
         "lint": "eslint modules/*.js",
         "build": "npm run build-cjs && npm run build-esm",
         "build-cjs": "rollup module.js --o index.js --f cjs",
-        "build-esm": "rollup module.js --o dom.js --f esm"
+        "build-esm": "rollup module.js --o fn.js --f esm",
+        "build-docs": "node ../fn/render-html.js http://localhost/dom/template.html ./index.html 8 && git add index.html",
+        "sass": "node-sass --output-style compact --indent-type tab --indent-width 1 -o css css/respond.scss"
     }
 }

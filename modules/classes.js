@@ -65,7 +65,6 @@
 
 /*
 classes(node)
-
 Returns the classList of `node`.
 */
 
@@ -74,8 +73,7 @@ import { get } from '../../fn/module.js';
 export const classes = get('classList');
 
 /*
-addClass(class, node)`
-
+addClass(class, node)
 Adds `'class'` to the classList of `node`.
 */
 
@@ -84,8 +82,7 @@ export function addClass(string, node) {
 }
 
 /*
-removeClass(class, node)`
-
+removeClass(class, node)
 Removes `'class'` from the classList of `node`.
 */
 

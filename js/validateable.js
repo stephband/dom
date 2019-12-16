@@ -37,7 +37,7 @@ them.</p>
 </code></pre>
 <p>This messages object is unpopulated by default.</p>
 
-<form class="block @2-grid-4/15 @2-grid-left-1/15 @3-grid-left-1/9 validateable" style="height: 0; overflow: visible; margin-top: -440px;">
+<form class="block" validateable>
 <label for="text">text</label>
 <input type="text" id="text" name="text" required maxlength="20" />
 

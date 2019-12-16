@@ -1,11 +1,13 @@
 /*
-identify(node)`
+identify(node)
 
 Returns the id of `node`, or where `node` has no id, a random id is generated,
 checked against the DOM for uniqueness, set on `node` and returned:
 
 ```
-dom.query('button', document).map(identify)
+query('button', document)
+.map(identify)
+.forEach((id) => ...)
 ```
 */
 

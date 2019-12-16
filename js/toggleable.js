@@ -1,12 +1,14 @@
 /*
 toggleable
 
-<p>A <strong>toggleable</strong> is very similar to a popable. it
-is also activated when a link that references it is clicked – but
-then deactivated by a second click an any link that references it.</p>
+An element with the `toggleable` attribute is activated and deactivated when
+a link that references it is clicked.
 
-<p>Toggleables can be used for making
-<a class="button" href="#content-toggle">expandable drawers</a>.</p>
+An active `toggleable` has the class `"active"`, and links to it have the
+class `"on"`.
+
+With a little hide/show style, a toggleable can be used to make menus, drawers,
+accordions and so on.
 */
 
 import { remove } from '../../fn/module.js';

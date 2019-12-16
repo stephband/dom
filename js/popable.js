@@ -2,19 +2,14 @@
 /*
 popable
 
-<p>A <strong>popable</strong> is activated when a link that
-references it is clicked, and deactivated by user events heard
-outside of it.</p>
+An element with the `popable` attribute is activated when a link that
+references it is hijacked, and deactivated by user interaction outside of it.
 
-<p>Popables can be useful for making pop-down menus and
-<a class="button" href="#popable-dialog">dialogs</a>.</p>
+An active `popable` gets the class `"active"`, and all links to it get the
+class `"on"`.
 
-<div class="dialog-layer layer fixed" href="#popable-dialog">
-    <div class="dialog popable focusable" id="popable-dialog" style="max-width: 30rem;">
-        <p>A popable goes away when clicked outside of, so you can click
-        on the background layer to close this dialog.</p>
-    </div>
-</div>
+With a little hide/show style, a popable can be used to make menus, tooltips,
+accordions and so on.
 */
 
 import { noop } from '../../fn/module.js';

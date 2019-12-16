@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en" is="sparky" class="js"><head>
+<!DOCTYPE html><html lang="en" is="sparky" class="js fullscreen-support"><head>
     <meta charset="utf-8">
 
     <meta name="author" content="@stephband">
@@ -734,12 +734,10 @@ from…</p>
 </ol>
 
 <p>In addition, the first time a validation is performed on an
-element the class <code>validated</code> is added, providing a
+element the class <code>"validated"</code> is added, providing a
 hook for pre- and post- validation <code>:invalid</code> styles.</p>
-
 <p>Constraints are named after the validation attributes that impose
 them.</p>
-
 <pre><code>dom.validation.messages = {
     pattern:   'Pattern does not match',
     max:       'Number too small',
@@ -750,7 +748,9 @@ them.</p>
     required:  ''
 };
 </code></pre>
-<p>This messages object is unpopulated by default.</p>
+
+<p>This messages object is unpopulated by default, so the browser's default
+validation messages are shown.</p>
 
 <form class="block" validateable="">
 <label for="text">text</label>
@@ -794,8 +794,13 @@ them.</p>
     <!-- Document interactivity -->
     <script type="module">
         import '../dom/js/device.js';
+        import '../dom/js/popable.js';
         import '../dom/js/toggleable.js';
         import '../dom/js/locateable.js';
+        import '../dom/js/submittable.js';
+        import '../dom/js/switchable.js';
+        import '../dom/js/fullscreenable.js';
+        import '../dom/js/validateable.js';
         import * as dom from './module.js';
         window.$ = dom;
     </script>

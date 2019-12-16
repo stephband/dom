@@ -18,12 +18,12 @@ from&hellip;</p>
     <li>the browser's default message</li>
 </ol>
 
-<p>In addition, the first time a validation is performed on an
-element the class <code>validated</code> is added, providing a
-hook for pre- and post- validation <code>:invalid</code> styles.</p>
+In addition, the first time a validation is performed on an
+element the class `"validated"` is added, providing a
+hook for pre- and post- validation `:invalid` styles.
 
-<p>Constraints are named after the validation attributes that impose
-them.</p>
+Constraints are named after the validation attributes that impose
+them.
 
 <pre><code>dom.validation.messages = {
     pattern:   'Pattern does not match',
@@ -35,7 +35,9 @@ them.</p>
     required:  ''
 };
 </code></pre>
-<p>This messages object is unpopulated by default.</p>
+
+<p>This messages object is unpopulated by default, so the browser's default
+validation messages are shown.</p>
 
 <form class="block" validateable>
 <label for="text">text</label>

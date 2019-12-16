@@ -25,6 +25,10 @@
     <link rel="stylesheet" href="../bolt/css/root.css" />
     <link rel="stylesheet" href="../bolt/css/body.css" />
     <link rel="stylesheet" href="../bolt/css/block.css" />
+    <link rel="stylesheet" href="../bolt/css/bubble.css" />
+    <link rel="stylesheet" href="../bolt/css/button.css" />
+    <link rel="stylesheet" href="../bolt/css/dialog.css" />
+    <link rel="stylesheet" href="../bolt/css/layer.css" />
     <link rel="stylesheet" href="../bolt/css/type.css" />
     <link rel="stylesheet" href="../bolt/css/text.css" />
     <link rel="stylesheet" href="../bolt/css/color.css" />
@@ -140,25 +144,39 @@
     </section>
 
     <section class="x-1 x-span-3 @1-x-span-6 @2-x-span-9 @3-x-2 columns-grid grid" locateable id="attributes">
-        <header class="x-1 x-span-3 @1-x-span-4">
+        <header class="x-1 x-span-3 @1-x-span-4 block">
             <h2 class="text-2">Attributes</h2>
 
             <p>The library has a number of scripts for cheekily extending the
-            default behaviour of DOM elements, accessed by adding
-            'behaviour'&nbsp;attributes.</p>
+            default behaviour of DOM elements, declared via 'behaviour'&nbsp;attributes.</p>
 
 			<!--p>Behaviours may be imported and used before
             <code class="language-js">'DOMContentLoad'</code>, there are no
             'setup' functions to run, and elements that are added
             to the DOM later get to use them&nbsp;automatically.</p-->
 
-            <p>This library provides no style to make these behaviours do
-            anything <i>visual</i>; the behaviours largely add and remove
-            classes: the rest is up to your&nbsp;CSS. This is deliberate.
-            By seperating style from behaviour many different styles of
-            interactive – a menu, a dialog, a tooltip – can share
-            <code class="language-js">popable</code> behaviour, for
-            example.</p>
+            <p>No style is given to make these behaviours do anything <i>visual</i>
+            however. Behaviours, largely, add and remove classes, how that <i>looks</i>
+            is up to your CSS. This is deliberate: by seperating style
+            and behaviour many different styles of interactive –
+            <a href="#example-menu">a menu</a>, <a href="#example-dialog">a dialog</a>,
+            <a href="#example-tooltip">a tooltip</a> – may share, for example,
+            <code class="language-js">popable</code>&nbsp;behaviour.</p>
+
+            <nav class="menu-toggle-block toggle-block block" popable id="example-menu">
+                <a class="menu-button button" href="#">One</a>
+                <a class="menu-button button" href="#">Two</a>
+                <a class="menu-button button" href="#">Three</a>
+                <a class="menu-button button" href="#">Boo</a>
+            </nav>
+
+            <section class="dialog" popable id="example-dialog">
+                Boo
+            </section>
+
+            <aside class="top-bubble bubble" popable id="example-tooltip">
+                Boo
+            </aside>
         </header>
 
         <div class="x-1 y-2 x-span-3 @2-x-span-4">

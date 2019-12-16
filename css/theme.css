@@ -28,6 +28,17 @@ code.block {
     background-color: #312b3e;
 }
 
+p > a {
+    border-bottom: 2px solid currentcolor;
+}
+
+p > a:hover,
+p > a:focus,
+p > a.on {
+    color: #4b94d7;
+    border-bottom: 2px solid currentcolor;
+}
+
 ol {
     padding-left: 0;
 }

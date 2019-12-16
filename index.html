@@ -527,17 +527,18 @@ the duration of the transition. Returns a function that cancels the transition.<
             default behaviour of DOM elements, accessed by adding
             'behaviour'&nbsp;attributes.</p>
 
-			<p>Behaviours may be imported and used before
-            <code class=" language-js"><span class="token string">'DOMContentLoad'</span></code>, there are no
+			<!--p>Behaviours may be imported and used before
+            <code class="language-js">'DOMContentLoad'</code>, there are no
             'setup' functions to run, and elements that are added
-            to the DOM later get to use them&nbsp;automatically.</p>
+            to the DOM later get to use them&nbsp;automatically.</p-->
 
             <p>This library provides no style to make these behaviours do
-            anything <i>visual</i>, however; the behaviours largely add and remove
+            anything <i>visual</i>; the behaviours largely add and remove
             classes: the rest is up to your&nbsp;CSS. This is deliberate.
             By seperating style from behaviour many different styles of
-            interactive – a menu, a dialog, a tooltip – can share <code class=" language-js">popable</code>
-            behaviour, for example.</p>
+            interactive – a menu, a dialog, a tooltip – can share
+            <code class=" language-js">popable</code> behaviour, for
+            example.</p>
         </header>
 
         <div class="x-1 y-2 x-span-3 @2-x-span-4">

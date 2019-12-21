@@ -278,25 +278,38 @@ function ignoreAbortError(error) {
 }
 
 export function throttledRequest(type, mimetype, url) {
-	var promise, controller;
+	var controller, data, promise;
 
-	return function throttle(data) {
-		var p;
+    function then() {
+        controller = undefined;
+    }
 
-		if (promise) {
-			// Cancel previous request
+	function send() {
+        controller = new AbortController();
+        var req = request(type, mimetype, url, data, controller);
+        req.then(then);
+        promise = undefined;
+        data    = undefined;
+        return req;
+	}
+
+    return function(object) {
+        data = object;
+
+        if (promise) {
+            return promise;
+        }
+
+        // Cancel previous request
+        if (controller) {
 			controller.abort();
+            controller = undefined;
 		}
 
-		controller = new AbortController();
-
-		return promise = p = request(type, mimetype, url, data, controller)
-		.finally(() => {
-			// Promise may not be the same promise by the time we get here
-			if (promise !== p) { return; }
-			promise    = undefined ;
-			controller = undefined ;
-		})
-		.catch(ignoreAbortError);
-	};
+        // Batch requests to ticks
+        return promise = Promise
+        .resolve()
+        .then(send)
+        .catch(ignoreAbortError);
+    };
 };

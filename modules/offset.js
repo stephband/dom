@@ -1,6 +1,6 @@
 
 /*
-offset(node1, node2)`
+offset(node1, node2)
 
 Returns array `[x, y]` representing the vector from `node1` to `node2`.
 */

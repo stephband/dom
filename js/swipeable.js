@@ -13,8 +13,6 @@ var elasticDistance = 800;
 
 var rspaces = /\s+/;
 
-console.log('FERRKRKRKR');
-
 function elasticEase(n) {
 	return Math.atan(n) / Math.PI ;
 }

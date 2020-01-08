@@ -1,21 +1,27 @@
 
 /*
-gestures
+gestures(node)
+
+Returns a stream of streams of events. Each stream of events represents the
+motion of a finger. The types of events the stream contains is either
+`'mousedown'` followed by any number of `'mousemove'`s and a `'mouseup'`,
+or `'touchstart'`, any number of `'touchmove'`s and a `'touchend'`.
 */
 
-import { requestTick, Stream } from '../../fn/module.js';
-import closest from './closest.js';
-import events, { isPrimaryButton, preventDefault, on, off, trigger } from './events.js';
+import { Stream } from '../../fn/module.js';
+import { isPrimaryButton, preventDefault, on, off } from './events.js';
 
-// Number of pixels a pressed pointer travels before gesture is started.
-var threshold = 8;
+export const config = {
+	// Number of pixels a pressed pointer travels before gesture is started.
+	threshold: 4,
 
-var ignoreTags = {
+	ignoreTags: {
 		textarea: true,
 		input: true,
 		select: true,
 		button: true
-	};
+	}
+};
 
 var mouseevents = {
 	move:   'mousemove',
@@ -35,7 +41,7 @@ var touchevents = {
 
 function isIgnoreTag(e) {
 	var tag = e.target.tagName;
-	return tag && !!ignoreTags[tag.toLowerCase()];
+	return tag && !!config.ignoreTags[tag.toLowerCase()];
 }
 
 function identifiedTouch(touchList, id) {
@@ -109,7 +115,7 @@ function removeMouse() {
 
 function touchstart(e, push) {
 	// Don't get in the way of interaction with form elements
-	if (ignoreTags[e.target.tagName.toLowerCase()]) { return; }
+	if (config.ignoreTags[e.target.tagName.toLowerCase()]) { return; }
 
 	var touch = e.changedTouches[0];
 
@@ -156,39 +162,30 @@ function checkThreshold(e, events, touch, removeHandlers, push) {
 	var distY = touch.pageY - events[0].pageY;
 
 	// Do nothing if the threshold has not been crossed.
-	if ((distX * distX) + (distY * distY) < (threshold * threshold)) { return; }
+	if ((distX * distX) + (distY * distY) < (config.threshold * config.threshold)) {
+		return;
+	}
 
 	var e0   = events[0];
 	var node = events[0].target;
 
 	// Unbind handlers that tracked the touch or mouse up till now.
 	removeHandlers(events);
-	push(TouchStream(node, events));
-
-	// Trigger the gesture event
-	//trigger(events[0].target, 'dom-gesture', {
-	//	pageX:  e0.pageX,
-	//	pageY:  e0.pageY,
-	//	detail: function() {
-    //        return TouchStream(node, events);
-	//	}
-	//});
+	push(touches(node, events));
 }
 
 
 // Handlers that control what happens following a movestart
 
-function activeMousemove(e, data) {
+function activeMousemove(e, data, push) {
 	data.touch = e;
 	data.timeStamp = e.timeStamp;
-	data.stream.push(e);
+	push(e);
 }
 
-function activeMouseend(e, data) {
-	var target = data.target;
-
+function activeMouseend(e, data, stop) {
 	removeActiveMouse();
-	data.stream.stop();
+	stop();
 }
 
 function removeActiveMouse() {
@@ -196,7 +193,7 @@ function removeActiveMouse() {
 	off(document, mouseevents.end, activeMouseend);
 }
 
-function activeTouchmove(e, data) {
+function activeTouchmove(e, data, push) {
 	var touch = changedTouch(e, data);
 
 	if (!touch) { return; }
@@ -206,17 +203,16 @@ function activeTouchmove(e, data) {
 
 	data.touch = touch;
 	data.timeStamp = e.timeStamp;
-	data.stream.push(touch);
+	push(touch);
 }
 
-function activeTouchend(e, data) {
+function activeTouchend(e, data, stop) {
 	var touch  = identifiedTouch(e.changedTouches, data.identifier);
 
 	// This isn't the touch you're looking for.
 	if (!touch) { return; }
-
 	removeActiveTouch(data);
-	data.stream.stop();
+	stop();
 }
 
 function removeActiveTouch(data) {
@@ -224,43 +220,67 @@ function removeActiveTouch(data) {
 	off(document, touchevents.end, data.activeTouchend);
 }
 
-function TouchStream(node, events) {
-	var stream = Stream.from(events);
+function touches(node, events) {
+	return events[0].identifier === undefined ?
+		Stream(function MouseSource(push, stop) {
+			var data = {
+				target: node,
+				touch: undefined
+			};
 
-	var data = {
-		stream:     stream,
-		target:     node,
-		touch:      undefined,
-		identifier: events[0].identifier
-	};
+			// Todo: Should Stream, perhaps, take { buffer } as a source
+			// property, allowing us to return any old buffer (as long as
+			// it has .shift())? Or are we happy pushing in, which causes
+			// a bit of internal complexity in Stream?
+			events.forEach(push);
 
-	if (data.identifier === undefined) {
-		// We're dealing with a mouse event.
-		// Stop clicks from propagating during a move
-		on(node, 'click', preventDefault);
-		on(document, mouseevents.move, activeMousemove, data);
-		on(document, mouseevents.cancel, activeMouseend, data);
-	}
-	else {
-		// In order to unbind correct handlers they have to be unique
-		data.activeTouchmove = function(e) { activeTouchmove(e, data); };
-		data.activeTouchend  = function(e) { activeTouchend(e, data); };
+			// We're dealing with a mouse event.
+			// Stop clicks from propagating during a move
+			on(node, 'click', preventDefault);
+			on(document, mouseevents.move, activeMousemove, data, push);
+			on(document, mouseevents.cancel, activeMouseend, data, stop);
 
-		// We're dealing with a touch.
-		on(document, touchevents.move, data.activeTouchmove);
-		on(document, touchevents.end, data.activeTouchend);
-	}
+			return {
+				stop: function() {
+					removeActiveMouse();
+					stop();
+				}
+			};
+		})
+		.done(function () {
+			// Unbind the click suppressor, waiting until after mouseup
+			// has been handled. I don't know why it has to be any longer than
+			// a tick, but it does, in Chrome at least.
+			setTimeout(function () {
+				off(node, 'click', preventDefault);
+			}, 120);
+		}) :
 
-	stream.done(function() {
-		// Unbind the click suppressor, waiting until after mouseup
-		// has been handled. I don't know why it has to be any longer than
-		// a tick, but it does, in Chrome at least.
-		setTimeout(function() {
-			off(node, 'click', preventDefault);
-		}, 200);
-	});
+		Stream(function TouchSource(push, stop) {
+			var data = {
+				target: node,
+				touch: undefined,
+				identifier: events[0].identifier
+			};
 
-	return stream;
+			events.forEach(push);
+
+			// Track a touch
+			// In order to unbind correct handlers they have to be unique
+			data.activeTouchmove = function (e) { activeTouchmove(e, data, push); };
+			data.activeTouchend = function (e) { activeTouchend(e, data, stop); };
+
+			// We're dealing with a touch.
+			on(document, touchevents.move, data.activeTouchmove);
+			on(document, touchevents.end, data.activeTouchend);
+
+			return {
+				stop: function () {
+					removeActiveTouch(data);
+					stop();
+				}
+			};
+		});
 }
 
 export default function gestures(node) {

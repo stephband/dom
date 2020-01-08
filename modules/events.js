@@ -145,17 +145,14 @@ export function isTargetEvent(e) {
 const A = Array.prototype;
 const eventsSymbol = Symbol('events');
 
-function bindTail(fn) {
-	// Takes arguments 1 and up and appends them to arguments
-	// passed to fn.
-	var args = A.slice.call(arguments, 1);
+function applyTail(fn, args) {
 	return function() {
 		A.push.apply(arguments, args);
 		fn.apply(null, arguments);
 	};
 }
 
-export function on(node, type, fn, data) {
+export function on(node, type, fn) {
 	var options;
 
 	if (typeof type === 'object') {
@@ -165,7 +162,7 @@ export function on(node, type, fn, data) {
 
 	var types   = type.split(rspaces);
 	var events  = node[eventsSymbol] || (node[eventsSymbol] = {});
-	var handler = data ? bindTail(fn, data) : fn ;
+	var handler = arguments.length > 3 ? applyTail(fn, A.slice.call(arguments, 3)) : fn ;
 	var handlers, listener;
 	var n = -1;
 

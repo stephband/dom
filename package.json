@@ -22,7 +22,6 @@
     ],
     "files": [
         "js/dom-activate.js",
-        "js/dom-gesture.js",
         "js/dom-swipe.js",
         "js/popable.js",
         "js/toggleable.js",

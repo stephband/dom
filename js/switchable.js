@@ -16,7 +16,7 @@ Switchables can be used to make tabs, slideshows, accordions and so on.
     <a class="tab-button button" href="#tab-3">3</a>
 </nav>
 
-<section class="tab-block block" switchable id="tab-1">
+<section class="tab-block block active" switchable id="tab-1">
     Tab 1
 </section
 
@@ -30,7 +30,6 @@ Switchables can be used to make tabs, slideshows, accordions and so on.
 ```
 */
 
-import { Fn } from '../../fn/module.js';
 import { events, trigger, matches, children } from '../module.js';
 import { matchers } from './dom-activate.js';
 
@@ -57,7 +56,7 @@ function activate(e) {
 	// Deactivate the previous active pane AFTER this pane has been
 	// activated. It's important for panes who's style depends on the
 	// current active pane, eg: .slide.active ~ .slide
-	Fn.from(active).each(triggerDeactivate);
+	active.forEach(triggerDeactivate);
 }
 
 function deactivate(e) {

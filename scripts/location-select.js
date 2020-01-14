@@ -18,5 +18,5 @@ events('change', document)
         trigger('dom-activate', getById(id));
     },
 
-    false: set('locstion', window)
+    false: set('location', window)
 }));

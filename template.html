@@ -43,7 +43,7 @@
 
 <body class="@3-grid-12 grid">
     <header class="x-1 xspan-3 @1-xspan-6 @2-xspan-9 @3-x-2 @3-xspan-9" id="header">
-        <template build-fn="fetch:package.json" build-include="/fn/templates.html#header-template"></template>
+        <template build-fn="fetch:package.json" build-src="/fn/templates.html#header-template"></template>
     </header>
 
     <section class="x-1 xspan-3 @1-xspan-6 @2-xspan-9 @3-x-2 grid" locateable id="functions">
@@ -73,7 +73,7 @@
                 modules/find.js,
                 modules/matches.js,
                 modules/query.js
-                filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
+                filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
 
             <div class="x-1">
@@ -82,7 +82,7 @@
                 modules/attribute.js,
                 modules/identify.js,
                 modules/tag.js
-                filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
+                filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
 
             <div class="x-1">
@@ -92,7 +92,7 @@
                 modules/assign.js,
                 modules/create.js,
                 modules/clone.js
-                filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
+                filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
         </div>
 
@@ -106,7 +106,7 @@
                 modules/trigger.js,
                 modules/to-key.js,
                 modules/event.js
-                filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
+                filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
 
             <div class="x-1">
@@ -119,7 +119,7 @@
                 modules/scroll-ratio.js,
                 modules/scroll.js,
                 modules/style.js
-                filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
+                filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
         </div>
 
@@ -129,7 +129,7 @@
                 <template build-fn="docs:
                 modules/animate.js,
                 modules/transition.js
-                filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
+                filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
 
             <div class="x-1">
@@ -138,7 +138,7 @@
                 modules/escape.js,
                 modules/fragments.js,
                 modules/parse.js
-                filter-function each" build-include="/fn/templates.html#{[type]}-template"></template>
+                filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
         </div>
     </section>
@@ -183,7 +183,7 @@
             <h3 class="text-4">Navigate</h3>
             <template build-fn="docs:
                 js/locateable.js
-                each" build-include="/fn/templates.html#attribute-template"></template>
+                each" build-src="/fn/templates.html#attribute-template"></template>
 
             <h3 class="text-4">Hijack</h3>
             <template build-fn="docs:
@@ -191,7 +191,7 @@
                 js/popable.js,
                 js/switchable.js,
                 js/toggleable.js
-                each" build-include="/fn/templates.html#attribute-template"></template>
+                each" build-src="/fn/templates.html#attribute-template"></template>
         </div>
 
         <div class="x-1 y-2 xspan-3 @2-x-6 @2-xspan-4">
@@ -199,12 +199,12 @@
             <template build-fn="docs:
                 js/draggable.js,
                 js/droppable.js
-                each" build-include="/fn/templates.html#attribute-template"></template>
+                each" build-src="/fn/templates.html#attribute-template"></template>
             <h3 class="text-4">Forms</h3>
             <template build-fn="docs:
                 js/submittable.js,
                 js/validateable.js
-                each" build-include="/fn/templates.html#attribute-template"></template>
+                each" build-src="/fn/templates.html#attribute-template"></template>
         </div>
     </section>
 
@@ -217,7 +217,7 @@
             <template build-fn="docs:
             js/dom-activate.js,
             js/dom-gesture.js
-            each" build-include="/fn/templates.html#{[type]}-template"></template>
+            each" build-src="/fn/templates.html#{[type]}-template"></template>
         </div>
     </section-->
 

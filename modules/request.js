@@ -90,17 +90,6 @@ const createBody = choose({
 	}
 });
 
-const responders = {
-	'text/html':           respondText,
-	'application/json':    respondJSON,
-	'multipart/form-data': respondForm,
-	'application/x-www-form-urlencoded': respondForm,
-	'audio':               respondBlob,
-	'audio/wav':           respondBlob,
-	'audio/m4a':           respondBlob
-};
-
-
 function assignConfig(target, object, data) {
 	// Assigns value unless value is a function, in which case assigns
 	// the result of running value(data)
@@ -169,6 +158,16 @@ function throwError(object) {
 	throw object;
 }
 
+const responders = {
+	'text/html': respondText,
+	'application/json': respondJSON,
+	'multipart/form-data': respondForm,
+	'application/x-www-form-urlencoded': respondForm,
+	'audio': respondBlob,
+	'audio/wav': respondBlob,
+	'audio/m4a': respondBlob
+};
+
 function respondBlob(response) {
 	return response.blob();
 }
@@ -197,8 +196,8 @@ function respond(response) {
 	// Get mimetype from Content-Type, remembering to hoik off any
 	// parameters first
 	const mimetype = response.headers
-		.get('Content-Type')
-		.replace(/\;.*$/, '');
+	.get('Content-Type')
+	.replace(/\;.*$/, '');
 
 	return responders[mimetype](response);
 }

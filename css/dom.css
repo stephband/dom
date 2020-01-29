@@ -13,10 +13,10 @@ Styleguide: zutilities.transition
 .no-transition .switchable,
 .no-transition .popable,
 .no-transition .toggleable {
-	-webkit-transition: none !important;
-	   -moz-transition: none !important;
-	     -o-transition: all 0 linear 0 !important;
-	        transition: none !important;
+    -webkit-transition: none !important;
+       -moz-transition: none !important;
+         -o-transition: all 0 linear 0 !important;
+            transition: none !important;
 }
 
 /* Respond to device input classes. */
@@ -28,4 +28,8 @@ Styleguide: zutilities.transition
 .touch-device button:focus,
 .touch-device input:focus {
      outline-width: 0;
+}
+
+.mouse-device button:focus {
+    box-shadow: none;
 }

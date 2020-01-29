@@ -232,7 +232,7 @@ function touches(node, events) {
 			// property, allowing us to return any old buffer (as long as
 			// it has .shift())? Or are we happy pushing in, which causes
 			// a bit of internal complexity in Stream?
-			events.forEach(push);
+			push.apply(null, events);
 
 			// We're dealing with a mouse event.
 			// Stop clicks from propagating during a move
@@ -263,7 +263,7 @@ function touches(node, events) {
 				identifier: events[0].identifier
 			};
 
-			events.forEach(push);
+			push.apply(null, events);
 
 			// Track a touch
 			// In order to unbind correct handlers they have to be unique

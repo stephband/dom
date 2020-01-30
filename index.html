@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="../bolt/css/color.css">
 
     <link rel="stylesheet" href="../dom/css/dom.css">
-    <link rel="stylesheet" href="../fn/css/prism.cruncher.css">
+    <link rel="stylesheet" href="../fn/css/prism-cruncher.css">
     <link rel="stylesheet" href="../fn/css/tests.css">
     <link rel="stylesheet" href="../fn/css/docs.css">
     <link rel="stylesheet" href="../dom/css/theme.css">
@@ -49,7 +49,7 @@
             <li><strong>bugs:</strong> <a href="{[bugs.url]}">{[bugs.url]}</a></li>
         </ul>
 </template><template id="title-template" title="/fn/">
-    <h3 class="text-4">{[name]}</h3>
+    <h3 class="text-4" build-fn="after:body">{[name]}</h3>
 </template><template id="attribute-template" title="/fn/">
     <article build-fn="append:body" class="attribute-toggle-block toggle-block block" toggleable="" id="{[id]}">
         <h3 class="text-5">
@@ -84,11 +84,27 @@
             </a>
         </h3>
     </article>
+</template><template id="fn-template" title="/fn/">
+    <article build-fn="append:body" class="toggle-block block" toggleable="" id="{[id]}">
+        <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
+            <a href="#{[id]}">
+                <code build-fn="append:title" class="language-js"></code>
+            </a>
+        </h3>
+    </article>
+</template><template id="section-template" title="/fn/">
+    <article build-fn="append:body" class="toggle-block block active" id="{[id]}">
+        <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
+            <code build-fn="append:title" class="function language-js"></code>
+        </h3>
+    </article>
+</template><template id="body-template" title="/fn/">
+    <article build-fn="append:body" class="toggle-block block active" id="{[id]}"></article>
 </template></head>
 
 <body class="@3-grid-12 grid">
     <header class="x-1 xspan-3 @1-xspan-6 @2-xspan-9 @3-x-2 @3-xspan-9" id="header">
-
+        
         <h1>dom <span class="text-6">1.3.0</span></h1>
 
         <p class="text-8">
@@ -123,7 +139,7 @@
         <div class="x-1 xspan-3 column-grid grid">
             <div class="x-1">
                 <h4 class="text-4">select.</h4>
-
+                
     <article class="toggle-block block" toggleable="" id="closest-selector-node">
         <h3 class="text-5 ">
             <a href="#closest-selector-node">
@@ -165,7 +181,7 @@ If no match is found, returns <code>undefined</code>.</p>
 
             <div class="x-1">
                 <h4 class="text-4">inspect.</h4>
-
+                
     <article class="toggle-block block" toggleable="" id="attribute-name-node">
         <h3 class="text-5 ">
             <a href="#attribute-name-node">
@@ -202,7 +218,7 @@ checked against the DOM for uniqueness, set on <code>node</code> and returned:</
 
             <div class="x-1">
                 <h4 class="text-4">mutate.</h4>
-
+                
     <article class="toggle-block block" toggleable="" id="append-target-node">
         <h3 class="text-5 ">
             <a href="#append-target-node">
@@ -256,7 +272,7 @@ as inner html.</li>
         <div class="x-1 xspan-3 @1-x-4 column-grid grid">
             <div class="x-1">
                 <h4 class="text-4">events.</h4>
-
+                
     <article class="toggle-block block" toggleable="" id="events-type-node">
         <h3 class="text-5 ">
             <a href="#events-type-node">
@@ -305,7 +321,22 @@ button of an input device. Use this to avoid listening to right-clicks.</p>
                 <code class="function language-js"><span class="token function">gestures</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
             </a>
         </h3>
-    <p>Returns a stream of streams of dom events</p>
+    <p>Returns a stream of streams of events. Each stream of events represents the
+motion of a single finger. The types of events the stream contains is either
+<code>'mousedown'</code> followed by any number of <code>'mousemove'</code>s and a <code>'mouseup'</code>,
+or the touch objects that go with <code>'touchstart'</code>, any number of <code>'touchmove'</code>s
+and a <code>'touchend'</code>.</p>
+<pre><code class="language-js"><span class="token function">gestures</span><span class="token punctuation">(</span>document<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">each</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>events<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// First event is a mousedown or touchstart event</span>
+    <span class="token keyword">const</span> e0 <span class="token operator">=</span> events<span class="token punctuation">.</span><span class="token function">shift</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    events<span class="token punctuation">.</span><span class="token function">each</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>e1<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Mousemove or touchmove events</span>
+        <span class="token keyword">const</span> polar <span class="token operator">=</span> Math<span class="token punctuation">.</span>se1<span class="token punctuation">.</span>pageX <span class="token operator">-</span> e0<span class="token punctuation">.</span>pageX<span class="token punctuation">,</span> e1<span class="token punctuation">.</span>pageY <span class="token operator">-</span> e0<span class="token punctuation">.</span>pageY<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">const</span> distance <span class="token operator">=</span> polar<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token operator">...</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
 </article>
 
     <article class="toggle-block block" toggleable="" id="trapfocus-node">
@@ -342,7 +373,7 @@ Additionally, <code>properties</code> are assigned to the event object.</p>
 
             <div class="x-1">
                 <h4 class="text-4">style.</h4>
-
+                
     <article class="toggle-block block" toggleable="" id="classes-node">
         <h3 class="text-5 ">
             <a href="#classes-node">
@@ -386,8 +417,7 @@ Additionally, <code>properties</code> are assigned to the event object.</p>
                 <code class="function language-js"><span class="token function">offset</span><span class="token punctuation">(</span>node1<span class="token punctuation">,</span> node2<span class="token punctuation">)</span></code>
             </a>
         </h3>
-    <p>`</p>
-<p>Returns array <code>[x, y]</code> representing the vector from <code>node1</code> to <code>node2</code>.</p>
+    <p>Returns array <code>[x, y]</code> representing the vector from <code>node1</code> to <code>node2</code>.</p>
 </article>
 
     <article class="toggle-block block" toggleable="" id="prefix-string">
@@ -448,7 +478,7 @@ is returned.</p>
         <div class="x-1 xspan-3 @2-x-7 column-grid grid">
             <div class="x-1">
                 <h4 class="text-4">animate.</h4>
-
+                
     <article class="toggle-block block" toggleable="" id="animate-duration-transform-name-object-value">
         <h3 class="text-5 ">
             <a href="#animate-duration-transform-name-object-value">
@@ -481,7 +511,7 @@ the duration of the transition. Returns a function that cancels the transition.<
 
             <div class="x-1">
                 <h4 class="text-4">HTML.</h4>
-
+                
     <article class="toggle-block block" toggleable="" id="escape-string">
         <h3 class="text-5 ">
             <a href="#escape-string">
@@ -561,10 +591,10 @@ the duration of the transition. Returns a function that cancels the transition.<
 
         <div class="x-1 y-2 xspan-3 @2-xspan-4">
             <h3 class="text-4">Navigate</h3>
-
-    <article class="attribute-toggle-block toggle-block block" toggleable="" id="locateableundefined">
+            
+    <article class="attribute-toggle-block toggle-block block" toggleable="" id="locateable">
         <h3 class="text-5">
-            <a href="#locateableundefined">
+            <a href="#locateable">
                 <code class="token language-js"><span>[</span><span>locateable</span><span>]</span></code>
             </a>
         </h3>
@@ -592,10 +622,10 @@ you have a scrolling navigation:</p>
 
 
             <h3 class="text-4">Hijack</h3>
-
-    <article class="attribute-toggle-block toggle-block block" toggleable="" id="fullscreenableundefined">
+            
+    <article class="attribute-toggle-block toggle-block block" toggleable="" id="fullscreenable">
         <h3 class="text-5">
-            <a href="#fullscreenableundefined">
+            <a href="#fullscreenable">
                 <code class="token language-js"><span>[</span><span>fullscreenable</span><span>]</span></code>
             </a>
         </h3>
@@ -606,9 +636,9 @@ fullscreen. Style things that depend on fullscreen support with the
 .fullscreen-support class found on the document root.</p>
 </article>
 
-    <article class="attribute-toggle-block toggle-block block" toggleable="" id="popableundefined">
+    <article class="attribute-toggle-block toggle-block block" toggleable="" id="popable">
         <h3 class="text-5">
-            <a href="#popableundefined">
+            <a href="#popable">
                 <code class="token language-js"><span>[</span><span>popable</span><span>]</span></code>
             </a>
         </h3>
@@ -622,9 +652,9 @@ class <code>"on"</code>.</p>
 accordions and so on.</p>
 </article>
 
-    <article class="attribute-toggle-block toggle-block block" toggleable="" id="switchableundefined">
+    <article class="attribute-toggle-block toggle-block block" toggleable="" id="switchable">
         <h3 class="text-5">
-            <a href="#switchableundefined">
+            <a href="#switchable">
                 <code class="token language-js"><span>[</span><span>switchable</span><span>]</span></code>
             </a>
         </h3>
@@ -641,7 +671,7 @@ it is clicked, and all links to it are given the class <code>"on"</code>.</p><p>
     <span class="token operator">&lt;</span>a <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tab-button button"</span> href<span class="token operator">=</span><span class="token string">"#tab-3"</span><span class="token operator">&gt;</span><span class="token number">3</span><span class="token operator">&lt;</span><span class="token operator">/</span>a<span class="token operator">&gt;</span>
 <span class="token operator">&lt;</span><span class="token operator">/</span>nav<span class="token operator">&gt;</span>
 
-<span class="token operator">&lt;</span>section <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tab-block block"</span> switchable id<span class="token operator">=</span><span class="token string">"tab-1"</span><span class="token operator">&gt;</span>
+<span class="token operator">&lt;</span>section <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tab-block block active"</span> switchable id<span class="token operator">=</span><span class="token string">"tab-1"</span><span class="token operator">&gt;</span>
     Tab <span class="token number">1</span>
 <span class="token operator">&lt;</span><span class="token operator">/</span>section
 
@@ -653,9 +683,9 @@ it is clicked, and all links to it are given the class <code>"on"</code>.</p><p>
     Tab <span class="token number">3</span>
 <span class="token operator">&lt;</span><span class="token operator">/</span>section<span class="token operator">&gt;</span></code></pre></article>
 
-    <article class="attribute-toggle-block toggle-block block" toggleable="" id="toggleableundefined">
+    <article class="attribute-toggle-block toggle-block block" toggleable="" id="toggleable">
         <h3 class="text-5">
-            <a href="#toggleableundefined">
+            <a href="#toggleable">
                 <code class="token language-js"><span>[</span><span>toggleable</span><span>]</span></code>
             </a>
         </h3>
@@ -673,10 +703,10 @@ accordions and so on.</p>
 
         <div class="x-1 y-2 xspan-3 @2-x-6 @2-xspan-4">
             <h3 class="text-4">Data</h3>
-
-    <article class="attribute-toggle-block toggle-block block" toggleable="" id="draggableundefined">
+            
+    <article class="attribute-toggle-block toggle-block block" toggleable="" id="draggable">
         <h3 class="text-5">
-            <a href="#draggableundefined">
+            <a href="#draggable">
                 <code class="token language-js"><span>[</span><span>draggable</span><span>]</span></code>
             </a>
         </h3>
@@ -690,9 +720,9 @@ attribute, which defines data to be carried by a drag action:</p>
 <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">&gt;</span></code></pre><p><small>* Note that <code>draggable</code> must be <code>"true"</code>. It is not a boolean attribute.</small></p>
 </article>
 
-    <article class="attribute-toggle-block toggle-block block" toggleable="" id="droppableundefined">
+    <article class="attribute-toggle-block toggle-block block" toggleable="" id="droppable">
         <h3 class="text-5">
-            <a href="#droppableundefined">
+            <a href="#droppable">
                 <code class="token language-js"><span>[</span><span>droppable</span><span>]</span></code>
             </a>
         </h3>
@@ -713,10 +743,10 @@ attribute:</p>
 <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">&gt;</span></code></pre></article>
 
             <h3 class="text-4">Forms</h3>
-
-    <article class="attribute-toggle-block toggle-block block" toggleable="" id="submittableundefined">
+            
+    <article class="attribute-toggle-block toggle-block block" toggleable="" id="submittable">
         <h3 class="text-5">
-            <a href="#submittableundefined">
+            <a href="#submittable">
                 <code class="token language-js"><span>[</span><span>submittable</span><span>]</span></code>
             </a>
         </h3>
@@ -728,9 +758,9 @@ it by permitting the value <code>"application/json"</code> as well as the standa
 <code>"application/x-www-form-urlencoded"</code> and <code>"multipart/form-data"</code>.</p>
 </article>
 
-    <article class="attribute-toggle-block toggle-block block" toggleable="" id="validateableundefined">
+    <article class="attribute-toggle-block toggle-block block" toggleable="" id="validateable">
         <h3 class="text-5">
-            <a href="#validateableundefined">
+            <a href="#validateable">
                 <code class="token language-js"><span>[</span><span>validateable</span><span>]</span></code>
             </a>
         </h3>
@@ -808,7 +838,7 @@ validation messages are shown.</p>
     js/toggleable.js,
     js/validateable.js-->
     <!-- Build document -->
-
+    
 
     <!-- Document interactivity -->
     <script type="module">

@@ -3,9 +3,24 @@
 gestures(node)
 
 Returns a stream of streams of events. Each stream of events represents the
-motion of a finger. The types of events the stream contains is either
+motion of a single finger. The types of events the stream contains is either
 `'mousedown'` followed by any number of `'mousemove'`s and a `'mouseup'`,
-or `'touchstart'`, any number of `'touchmove'`s and a `'touchend'`.
+or the touch objects that go with `'touchstart'`, any number of `'touchmove'`s
+and a `'touchend'`.
+
+```js
+gestures(document).each(function(events) {
+	// First event is a mousedown or touchstart event
+	const e0 = events.shift();
+
+	events.each(function(e1) {
+		// Mousemove or touchmove events
+		const polar = Math.se1.pageX - e0.pageX, e1.pageY - e0.pageY]);
+		const distance = polar[1];
+		...
+	});
+});
+```
 */
 
 import { Stream } from '../../fn/module.js';

@@ -15,8 +15,10 @@ gestures(document).each(function(events) {
 
 	events.each(function(e1) {
 		// Mousemove or touchmove events
-		const polar = Math.se1.pageX - e0.pageX, e1.pageY - e0.pageY]);
-		const distance = polar[1];
+		const distance = Math.pow(
+			Math.pow(e1.pageX - e0.pageX, 2),
+			Math.pow(e1.pageY - e0.pageY, 2),
+		0.5);
 		...
 	});
 });

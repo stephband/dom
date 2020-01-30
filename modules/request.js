@@ -197,8 +197,8 @@ function respond(response) {
 	// Get mimetype from Content-Type, remembering to hoik off any
 	// parameters first
 	const mimetype = response.headers
-		.get('Content-Type')
-		.replace(/\;.*$/, '');
+	.get('Content-Type')
+	.replace(/\;.*$/, '');
 
 	return responders[mimetype](response);
 }

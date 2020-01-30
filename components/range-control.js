@@ -19,7 +19,7 @@ const mountSettings = {
     mount: function(node, options) {
         // Does the node have Sparkyfiable attributes?
         const attrFn = node.getAttribute(options.attributeFn);
-        //const attrInclude = node.getAttribute(options.attributeInclude);
+        //const attrInclude = node.getAttribute(options.attributeSrc);
 
         if (!attrFn/* && !attrInclude*/) { return; }
 

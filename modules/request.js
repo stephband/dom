@@ -90,17 +90,6 @@ const createBody = choose({
 	}
 });
 
-const responders = {
-	'text/html':           respondText,
-	'application/json':    respondJSON,
-	'multipart/form-data': respondForm,
-	'application/x-www-form-urlencoded': respondForm,
-	'audio':               respondBlob,
-	'audio/wav':           respondBlob,
-	'audio/m4a':           respondBlob
-};
-
-
 function assignConfig(target, object, data) {
 	// Assigns value unless value is a function, in which case assigns
 	// the result of running value(data)
@@ -168,6 +157,16 @@ function createOptions(method, mimetype, data, controller) {
 function throwError(object) {
 	throw object;
 }
+
+const responders = {
+	'text/html': respondText,
+	'application/json': respondJSON,
+	'multipart/form-data': respondForm,
+	'application/x-www-form-urlencoded': respondForm,
+	'audio': respondBlob,
+	'audio/wav': respondBlob,
+	'audio/m4a': respondBlob
+};
 
 function respondBlob(response) {
 	return response.blob();

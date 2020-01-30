@@ -3,9 +3,24 @@
 gestures(node)
 
 Returns a stream of streams of events. Each stream of events represents the
-motion of a finger. The types of events the stream contains is either
+motion of a single finger. The types of events the stream contains is either
 `'mousedown'` followed by any number of `'mousemove'`s and a `'mouseup'`,
-or `'touchstart'`, any number of `'touchmove'`s and a `'touchend'`.
+or the touch objects that go with `'touchstart'`, any number of `'touchmove'`s
+and a `'touchend'`.
+
+```js
+gestures(document).each(function(events) {
+	// First event is a mousedown or touchstart event
+	const e0 = events.shift();
+
+	events.each(function(e1) {
+		// Mousemove or touchmove events
+		const polar = Math.se1.pageX - e0.pageX, e1.pageY - e0.pageY]);
+		const distance = polar[1];
+		...
+	});
+});
+```
 */
 
 import { Stream } from '../../fn/module.js';
@@ -232,7 +247,7 @@ function touches(node, events) {
 			// property, allowing us to return any old buffer (as long as
 			// it has .shift())? Or are we happy pushing in, which causes
 			// a bit of internal complexity in Stream?
-			events.forEach(push);
+			push.apply(null, events);
 
 			// We're dealing with a mouse event.
 			// Stop clicks from propagating during a move
@@ -263,7 +278,7 @@ function touches(node, events) {
 				identifier: events[0].identifier
 			};
 
-			events.forEach(push);
+			push.apply(null, events);
 
 			// Track a touch
 			// In order to unbind correct handlers they have to be unique

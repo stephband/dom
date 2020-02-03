@@ -1,30 +1,28 @@
 /*
 switchable
 
-In any group of siblings with the `switchable` attribute, exactly one is
-always active.
-
 A `switchable` is given the class `"active"` when a link that references
-it is clicked, and all links to it are given the class `"on"`.</p>
+it is clicked, and all links to it are given the class `"on"`. In any group of
+siblings with the `switchable` attribute, exactly one is always active.
 
 Switchables can be used to make tabs, slideshows, accordions and so on.
 
-```
+```html
 <nav>
-    <a class="tab-button button" href="#tab-1">1</a>
+    <a class="tab-button button on" href="#tab-1">1</a>
     <a class="tab-button button" href="#tab-2">2</a>
     <a class="tab-button button" href="#tab-3">3</a>
 </nav>
 
 <section class="tab-block block active" switchable id="tab-1">
     Tab 1
-</section
+</section>
 
-><section class="tab-block block" switchable id="tab-2">
+<section class="tab-block block" switchable id="tab-2">
     Tab 2
-</section
+</section>
 
-><section class="tab-block block" switchable id="tab-3">
+<section class="tab-block block" switchable id="tab-3">
     Tab 3
 </section>
 ```

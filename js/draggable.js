@@ -5,7 +5,7 @@ The native behaviour of the `draggable="true"`*
 attribute is extended with the `draggable-mimetypes`
 attribute, which defines data to be carried by a drag action:
 
-```
+```html
 <div draggable="true" draggable-mimetypes="application/json: [0,1,2,3]">
     Drag me
 </div>

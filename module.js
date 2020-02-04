@@ -23,6 +23,8 @@ export const parse = curry(_parse, true);
 // Inspect
 
 export * from './modules/nodes.js';
+export { default as query } from './modules/query.js';
+export { default as select } from './modules/query.js';
 export { default as tag } from './modules/tag.js';
 
 import _contains from './modules/contains.js';
@@ -44,8 +46,6 @@ export { default as children } from './modules/children.js';
 import _matches from './modules/matches.js';
 export const matches = curry(_matches, true);
 
-import _query from './modules/query.js';
-export const query = curry(_query, true);
 
 // Mutate
 

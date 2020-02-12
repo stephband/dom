@@ -1,4 +1,32 @@
 
+/*
+media(query, enterFn, exitFn)
+
+Evaluates `query` object, which is an object describing a media and scroll
+query, against the document, and calls `enterFn` when all conditions in
+the selector object become true, and `exitFn` when at least one of them becomes
+false.
+
+A query object may contain any combination of the properties:
+
+```js
+{
+    minWidth: number | string | fn,
+    maxWidth: number | string | fn,
+    minHeight: number | string | fn,
+    maxHeight: number | string | fn,
+    minScrollTop: number | string | fn,
+    maxScrollTop: number | string | fn,
+    minScrollBottom: number | string | fn,
+    maxScrollBottom: number | string | fn
+}
+```
+
+For each property, a number represents a value in pixels, a string must be
+a value with CSS units (eg. '3rem'), and a function must return a number
+representing a value in pixels.
+*/
+
 import ready from './ready.js';
 import { call, id, overload, toType } from '../../fn/module.js';
 import { toPx } from './values.js';
@@ -71,7 +99,7 @@ function update(e) {
     }
 }
 
-export default function breakpoint(query, fn1, fn2) {
+export default function media(query, fn1, fn2) {
     var rule = {};
 
     rule.query = query;

@@ -6,9 +6,10 @@ Returns the node itself or the closest ancestor that matches `selector`.
 If no match is found, returns `undefined`.
 */
 
+import { curry } from '../../fn/module.js';
 import matches from './matches.js';
 
-export default function closest(selector, node) {
+export function closest(selector, node) {
 	var root = arguments[2];
 
 	if (!node || node === document || node === root || node.nodeType === 11) { return; }
@@ -21,3 +22,5 @@ export default function closest(selector, node) {
 		 node :
 		 closest(selector, node.parentNode, root) ;
 }
+
+export default curry(closest, true);

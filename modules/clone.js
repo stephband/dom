@@ -1,5 +1,5 @@
 import features from './features.js';
-import query from './query.js';
+import { select } from './select.js';
 
 /*
 clone(node)`
@@ -18,12 +18,12 @@ export default features.textareaPlaceholderSet ?
 		// Reset the resulting value.
 
 		var clone     = node.cloneNode(true);
-		var textareas = query('textarea', node);
+		var textareas = select('textarea', node);
 		var n         = textareas.length;
 		var clones;
 
 		if (n) {
-			clones = query('textarea', clone);
+			clones = select('textarea', clone);
 
 			while (n--) {
 				clones[n].value = textareas[n].value;

@@ -1,8 +1,3 @@
-var mimetypes = {
-	xml:  'application/xml',
-	html: 'text/html',
-	svg:  'image/svg+xml'
-};
 
 /*
 parse(type, string)
@@ -11,7 +6,15 @@ Returns a document parsed from `string`, where `type` is one of `'xml'`,
 `'html'` or `'svg'`.
 */
 
-export default function parse(type, string) {
+import { curry } from '../../fn/module.js';
+
+var mimetypes = {
+	xml: 'application/xml',
+	html: 'text/html',
+	svg: 'image/svg+xml'
+};
+
+export function parse(type, string) {
 	if (!string) { return; }
 
 	var mimetype = mimetypes[type];
@@ -30,3 +33,5 @@ export default function parse(type, string) {
 
 	return xml;
 }
+
+export default curry(parse, true);

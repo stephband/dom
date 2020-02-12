@@ -1,3 +1,4 @@
+
 if (window.console && window.console.log) {
     window.console.log('%cdom%c         – https://github.com/stephband/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
 }
@@ -7,44 +8,34 @@ import curry from '../fn/modules/curry.js';
 
 // Document
 
-export { default as ready } from './modules/ready.js';
-export { default as now } from './modules/now.js';
-export { default as breakpoint } from './modules/breakpoint.js';
-export { default as features } from './modules/features.js';
+export { default as ready }      from './modules/ready.js';
+export { default as now }        from './modules/now.js';
+export { default as media }      from './modules/media.js';
+export { default as breakpoint } from './modules/media.js';
+export { default as features }   from './modules/features.js';
 
 // HTML
 
-export { default as element } from './modules/element.js';
-export { default as escape } from './modules/escape.js';
-
-import _parse from './modules/parse.js';
-export const parse = curry(_parse, true);
+export { default as element }    from './modules/element.js';
+export { default as escape }     from './modules/escape.js';
+export { default as parse }      from './modules/parse.js';
 
 // Inspect
 
 export * from './modules/nodes.js';
-export { default as query } from './modules/query.js';
-export { default as select } from './modules/query.js';
-export { default as tag } from './modules/tag.js';
 
-import _contains from './modules/contains.js';
-export const contains = curry(_contains, true);
-
-import _attribute from './modules/attribute.js';
-export const attribute = curry(_attribute, true);
+export { default as attribute }  from './modules/attribute.js';
+export { default as contains }   from './modules/contains.js';
+export { default as closest }    from './modules/closest.js';
+export { default as find }       from './modules/find.js';
+export { default as matches }    from './modules/matches.js';
+export { default as query }      from './modules/select.js';
+export { default as select }     from './modules/select.js';
+export { default as tag }        from './modules/tag.js';
 
 export * from './modules/traversal.js';
 
-import _find from './modules/find.js';
-export const find = curry(_find, true);
-
-import _closest from './modules/closest.js';
-export const closest = curry(_closest, true);
-
 export { default as children } from './modules/children.js';
-
-import _matches from './modules/matches.js';
-export const matches = curry(_matches, true);
 
 
 // Mutate

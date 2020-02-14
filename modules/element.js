@@ -49,7 +49,7 @@ function transferProperty(elem, key) {
 }
 
 function getTemplateById(id) {
-    const template = document.getElementById(options.shadow.slice(1));
+    const template = document.getElementById(id);
 
     if (!template || !template.content) {
         throw new Error('Template "' + options.shadow + '" not found in document');

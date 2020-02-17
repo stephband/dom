@@ -105,7 +105,7 @@
 <body class="@3-grid-12 grid">
     <header class="x-1 xspan-3 @1-xspan-6 @2-xspan-9 @3-x-2 @3-xspan-9" id="header">
         
-        <h1>dom <span class="text-6">1.3.0</span></h1>
+        <h1>dom <span class="text-6">1.3.1</span></h1>
 
         <p class="text-8">
             A small library of functions, event streams and behaviour attributes for HTML and SVG.
@@ -124,16 +124,9 @@
         </header>
 
         <div class="x-1 xspan-3 @2-xspan-4">
-            <p>
-                Import functions:
-            </p>
-
+            <p>Import functions:</p>
             <pre class=" language-js"><code class=" language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> closest<span class="token punctuation">,</span> matches <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'/dom/module.js'</span><span class="token punctuation">;</span></code></pre>
-
-            <p>
-            All functions are curried (where they take more than one
-            parameter), allowing them to be partially applied.
-            </p>
+            <p>All functions that take more than one parameter are partially applicable.</p>
         </div>
 
         <div class="x-1 xspan-3 column-grid grid">
@@ -168,10 +161,10 @@ If no match is found, returns <code>undefined</code>.</p>
     <p>Returns <code>true</code> if <code>node</code> matches <code>selector</code>, otherwise <code>false</code>.</p>
 </article>
 
-    <article class="toggle-block block" toggleable="" id="query-selector-node">
+    <article class="toggle-block block" toggleable="" id="select-selector-node">
         <h3 class="text-5 ">
-            <a href="#query-selector-node">
-                <code class="function language-js"><span class="token function">query</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            <a href="#select-selector-node">
+                <code class="function language-js"><span class="token function">select</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
             </a>
         </h3>
     <p>Returns an array of all descendants of <code>node</code> that match <code>selector</code>.</p>
@@ -200,9 +193,36 @@ returns <code>undefined</code>.</p>
         </h3>
     <p>Returns the id of <code>node</code>, or where <code>node</code> has no id, a random id is generated,
 checked against the DOM for uniqueness, set on <code>node</code> and returned:</p>
-<pre><code><span class="token function">query</span><span class="token punctuation">(</span><span class="token string">'button'</span><span class="token punctuation">,</span> document<span class="token punctuation">)</span>
+<pre><code><span class="token comment">// Get ids of all buttons in document</span>
+<span class="token function">select</span><span class="token punctuation">(</span><span class="token string">'button'</span><span class="token punctuation">,</span> document<span class="token punctuation">)</span>
 <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>identify<span class="token punctuation">)</span>
 <span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token operator">...</span><span class="token punctuation">)</span></code></pre></article>
+
+    <article class="toggle-block block" toggleable="" id="media-query-enterfn-exitfn">
+        <h3 class="text-5 ">
+            <a href="#media-query-enterfn-exitfn">
+                <code class="function language-js"><span class="token function">media</span><span class="token punctuation">(</span>query<span class="token punctuation">,</span> enterFn<span class="token punctuation">,</span> exitFn<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Evaluates <code>query</code> object, which is an object describing a media and scroll
+query, against the document, and calls <code>enterFn</code> when all conditions in
+the selector object become true, and <code>exitFn</code> when at least one of them becomes
+false.</p>
+<p>A query object may contain any combination of the properties:</p>
+<pre><code class="language-js"><span class="token punctuation">{</span>
+    minWidth<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    maxWidth<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    minHeight<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    maxHeight<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    minScrollTop<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    maxScrollTop<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    minScrollBottom<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    maxScrollBottom<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn
+<span class="token punctuation">}</span></code></pre>
+<p>For each property a number represents a value in pixels, a string must be
+a value with CSS units (eg. <code>'3rem'</code>), or a function must return a number
+representing a value in pixels.</p>
+</article>
 
     <article class="toggle-block block" toggleable="" id="tag-node">
         <h3 class="text-5 ">
@@ -225,35 +245,43 @@ checked against the DOM for uniqueness, set on <code>node</code> and returned:</
                 <code class="function language-js"><span class="token function">append</span><span class="token punctuation">(</span>target<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
             </a>
         </h3>
-    <p>`</p>
-<p>Appends node to <code>target</code>.</p>
-<p>If <code>node</code> is a collection of nodes, appends each node to <code>target</code>.</p>
+    <p>Appends <code>node</code>, which may be a string or DOM node, to <code>target</code>. Returns <code>node</code>.</p>
 </article>
 
-    <article class="toggle-block block" toggleable="" id="assign-node-attributes">
+    <article class="toggle-block block" toggleable="" id="assign-node-properties">
         <h3 class="text-5 ">
-            <a href="#assign-node-attributes">
-                <code class="function language-js"><span class="token function">assign</span><span class="token punctuation">(</span>node<span class="token punctuation">,</span> attributes<span class="token punctuation">)</span></code>
+            <a href="#assign-node-properties">
+                <code class="function language-js"><span class="token function">assign</span><span class="token punctuation">(</span>node<span class="token punctuation">,</span> properties<span class="token punctuation">)</span></code>
             </a>
         </h3>
-    <p>Sets the key-value pairs of the object <code>attributes</code> as attributes on <code>node</code>.</p>
+    <p>Assigns each property of <code>properties</code> to <code>node</code>, as a property where that
+property exists in <code>node</code>, otherwise as an attribute.</p>
+<p>If <code>properties</code> has a property <code>'children'</code> it must be an array of nodes;
+they are appended to ‘node’.</p>
+<p>The property <code>'html'</code> is treated as an alias of <code>'innerHTML'</code>. The property
+<code>'tag'</code> is treated as an alias of <code>'tagName'</code> (which is ignored, as
+<code>node.tagName</code> is read-only). The property <code>'is'</code> is also ignored.</p>
 </article>
 
-    <article class="toggle-block block" toggleable="" id="create-tag-text">
+    <article class="toggle-block block" toggleable="" id="create-tag-content">
         <h3 class="text-5 ">
-            <a href="#create-tag-text">
-                <code class="function language-js"><span class="token function">create</span><span class="token punctuation">(</span>tag<span class="token punctuation">,</span> text<span class="token punctuation">)</span></code>
+            <a href="#create-tag-content">
+                <code class="function language-js"><span class="token function">create</span><span class="token punctuation">(</span>tag<span class="token punctuation">,</span> content<span class="token punctuation">)</span></code>
             </a>
         </h3>
-    <p>`</p>
-<p>Returns a new DOM node.</p>
+    <p>Constructs and returns a new DOM node.</p>
 <ul>
-<li>If <code>tag</code> is <code>"text"</code> returns a text node with the content <code>text</code>.</li>
-<li>If <code>tag</code> is <code>"fragment"</code> returns a document fragment.</li>
-<li>If <code>tag</code> is <code>"comment"</code> returns a comment <code>&lt;!-- text --&gt;</code>.</li>
-<li>Anything else returns an element <code>&lt;tag&gt;text&lt;/tag&gt;</code>, where <code>text</code> is inserted
-as inner html.</li>
+<li>If <code>tag</code> is <code>"text"</code> a text node is created.</li>
+<li>If <code>tag</code> is <code>"fragment"</code> a fragment is created.</li>
+<li>If <code>tag</code> is <code>"comment"</code> a comment is created.</li>
+<li>If <code>tag</code> is any other string the element <code>&lt;tag&gt;&lt;/tag&gt;</code> is created.</li>
+<li>Where <code>tag</code> is an object, it must have a <code>"tag"</code> or <code>"tagName"</code> property.
+A node is created according to the above rules for tag strings, and other
+properties of the object are assigned with dom’s <code>assign(node, object)</code> function.</li>
 </ul>
+<p>If <code>content</code> is a string it is set as text content on a text or comment node,
+or as inner HTML on an element or fragment. It may also be an object of
+properties which are assigned with dom’s <code>assign(node, properties)</code> function.</p>
 </article>
 
     <article class="toggle-block block" toggleable="" id="clone-node">
@@ -264,6 +292,15 @@ as inner html.</li>
         </h3>
     <p>`</p>
 <p>Returns a deep copy of <code>node</code>.</p>
+</article>
+
+    <article class="toggle-block block" toggleable="" id="prepend-target-node">
+        <h3 class="text-5 ">
+            <a href="#prepend-target-node">
+                <code class="function language-js"><span class="token function">prepend</span><span class="token punctuation">(</span>target<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Prepends <code>node</code>, which may be a string or DOM node, to <code>target</code>. Returns <code>node</code>.</p>
 </article>
 
             </div>
@@ -634,8 +671,11 @@ you have a scrolling navigation:</p>
 
         <pre><code class="language-js">import '/dom/js/fullscreenable.js';</code></pre>
     <p>Links refering to [fullscreenable] elements put those elements into
-fullscreen. Style things that depend on fullscreen support with the
-.fullscreen-support class found on the document root.</p>
+fullscreen mode when clicked.</p>
+<p>Fullscreen capability is not reliably queried in CSS (through @supports or
+other means), so this script also adds the class <code>fullscreen-support</code> to the
+document root in navigators where support is detected, for styling of UI that
+depends on fullscreen support.</p>
 </article>
 
     <article class="attribute-toggle-block toggle-block block" toggleable="" id="popable">
@@ -662,28 +702,28 @@ accordions and so on.</p>
         </h3>
 
         <pre><code class="language-js">import '/dom/js/switchable.js';</code></pre>
-    <p>In any group of siblings with the <code>switchable</code> attribute, exactly one is
-always active.</p>
-<p>A <code>switchable</code> is given the class <code>"active"</code> when a link that references
-it is clicked, and all links to it are given the class <code>"on"</code>.</p><p></p>
+    <p>A <code>switchable</code> is given the class <code>"active"</code> when a link that references
+it is clicked, and all links to it are given the class <code>"on"</code>. In any group of
+siblings with the <code>switchable</code> attribute, exactly one is always active.</p>
 <p>Switchables can be used to make tabs, slideshows, accordions and so on.</p>
-<pre><code><span class="token operator">&lt;</span>nav<span class="token operator">&gt;</span>
-    <span class="token operator">&lt;</span>a <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tab-button button"</span> href<span class="token operator">=</span><span class="token string">"#tab-1"</span><span class="token operator">&gt;</span><span class="token number">1</span><span class="token operator">&lt;</span><span class="token operator">/</span>a<span class="token operator">&gt;</span>
-    <span class="token operator">&lt;</span>a <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tab-button button"</span> href<span class="token operator">=</span><span class="token string">"#tab-2"</span><span class="token operator">&gt;</span><span class="token number">2</span><span class="token operator">&lt;</span><span class="token operator">/</span>a<span class="token operator">&gt;</span>
-    <span class="token operator">&lt;</span>a <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tab-button button"</span> href<span class="token operator">=</span><span class="token string">"#tab-3"</span><span class="token operator">&gt;</span><span class="token number">3</span><span class="token operator">&lt;</span><span class="token operator">/</span>a<span class="token operator">&gt;</span>
-<span class="token operator">&lt;</span><span class="token operator">/</span>nav<span class="token operator">&gt;</span>
+<pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nav</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-button button on<span class="token punctuation">"</span></span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>#tab-1<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-button button<span class="token punctuation">"</span></span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>#tab-2<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-button button<span class="token punctuation">"</span></span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>#tab-3<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>3<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>nav</span><span class="token punctuation">&gt;</span></span>
 
-<span class="token operator">&lt;</span>section <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tab-block block active"</span> switchable id<span class="token operator">=</span><span class="token string">"tab-1"</span><span class="token operator">&gt;</span>
-    Tab <span class="token number">1</span>
-<span class="token operator">&lt;</span><span class="token operator">/</span>section
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>section</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-block block active<span class="token punctuation">"</span></span> <span class="token attr-name">switchable</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-1<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+    Tab 1
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>section</span><span class="token punctuation">&gt;</span></span>
 
-<span class="token operator">&gt;</span><span class="token operator">&lt;</span>section <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tab-block block"</span> switchable id<span class="token operator">=</span><span class="token string">"tab-2"</span><span class="token operator">&gt;</span>
-    Tab <span class="token number">2</span>
-<span class="token operator">&lt;</span><span class="token operator">/</span>section
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>section</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-block block<span class="token punctuation">"</span></span> <span class="token attr-name">switchable</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-2<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+    Tab 2
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>section</span><span class="token punctuation">&gt;</span></span>
 
-<span class="token operator">&gt;</span><span class="token operator">&lt;</span>section <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"tab-block block"</span> switchable id<span class="token operator">=</span><span class="token string">"tab-3"</span><span class="token operator">&gt;</span>
-    Tab <span class="token number">3</span>
-<span class="token operator">&lt;</span><span class="token operator">/</span>section<span class="token operator">&gt;</span></code></pre></article>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>section</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-block block<span class="token punctuation">"</span></span> <span class="token attr-name">switchable</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-3<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+    Tab 3
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>section</span><span class="token punctuation">&gt;</span></span></code></pre>
+</article>
 
     <article class="attribute-toggle-block toggle-block block" toggleable="" id="toggleable">
         <h3 class="text-5">
@@ -717,9 +757,10 @@ accordions and so on.</p>
     <p>The native behaviour of the <code>draggable="true"</code>*
 attribute is extended with the <code>draggable-mimetypes</code>
 attribute, which defines data to be carried by a drag action:</p>
-<pre><code><span class="token operator">&lt;</span>div draggable<span class="token operator">=</span><span class="token string">"true"</span> draggable<span class="token operator">-</span>mimetypes<span class="token operator">=</span><span class="token string">"application/json: [0,1,2,3]"</span><span class="token operator">&gt;</span>
+<pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">draggable</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>true<span class="token punctuation">"</span></span> <span class="token attr-name">draggable-mimetypes</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>application/json: [0,1,2,3]<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
     Drag me
-<span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">&gt;</span></code></pre><p><small>* Note that <code>draggable</code> must be <code>"true"</code>. It is not a boolean attribute.</small></p>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">&gt;</span></span></code></pre>
+<p><small>* Note that <code>draggable</code> must be <code>"true"</code>. It is not a boolean attribute.</small></p>
 </article>
 
     <article class="attribute-toggle-block toggle-block block" toggleable="" id="droppable">

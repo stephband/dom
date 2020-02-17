@@ -58,9 +58,9 @@
     "main": "index.js",
     "scripts": {
         "lint": "eslint modules/*.js",
-        "build": "npm run build-cjs && npm run build-esm",
-        "build-cjs": "rollup module.js --o build/script.js --f iife --output.name dom",
-        "build-esm": "rollup module.js --o build/module.js --f esm",
+        "build": "npm run build-script && npm run build-module && npm run build-docs",
+        "build-script": "rollup module.js --o build/script.js --f iife --output.name dom",
+        "build-module": "rollup module.js --o build/module.js --f esm",
         "build-docs": "node ../fn/render-html.js http://localhost/dom/template.html ./index.html 8 && git add index.html",
         "sass": "node-sass --output-style compact --indent-type tab --indent-width 1 -o css css/respond.scss"
     }

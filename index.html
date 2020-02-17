@@ -230,9 +230,65 @@ representing a value in pixels.</p>
                 <code class="function language-js"><span class="token function">tag</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
             </a>
         </h3>
-    <p>Returns the tag name of <code>node</code>.</p>
+    <p>Returns the tag name of <code>node</code>, in lowercase.</p>
 <pre><code><span class="token keyword">const</span> li <span class="token operator">=</span> <span class="token function">create</span><span class="token punctuation">(</span><span class="token string">'li'</span><span class="token punctuation">,</span> <span class="token string">'Salt and vinegar'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token function">tag</span><span class="token punctuation">(</span>li<span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 'li'</span></code></pre></article>
+
+    <article class="toggle-block block" toggleable="" id="type-node">
+        <h3 class="text-5 ">
+            <a href="#type-node">
+                <code class="function language-js"><span class="token function">type</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns one of <code>'element'</code>, <code>'text'</code>, <code>'comment'</code>, <code>'document'</code>,
+<code>'doctype'</code> or <code>'fragment'</code>.</p>
+</article>
+
+    <article class="toggle-block block" toggleable="" id="iselementnode-node">
+        <h3 class="text-5 ">
+            <a href="#iselementnode-node">
+                <code class="function language-js"><span class="token function">isElementNode</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if <code>node</code> is an element node.</p>
+</article>
+
+    <article class="toggle-block block" toggleable="" id="istextnode-node">
+        <h3 class="text-5 ">
+            <a href="#istextnode-node">
+                <code class="function language-js"><span class="token function">isTextNode</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if <code>node</code> is a text node.</p>
+</article>
+
+    <article class="toggle-block block" toggleable="" id="iscommentnode-node">
+        <h3 class="text-5 ">
+            <a href="#iscommentnode-node">
+                <code class="function language-js"><span class="token function">isCommentNode</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if <code>node</code> is a comment.</p>
+</article>
+
+    <article class="toggle-block block" toggleable="" id="isfragmentnode-node">
+        <h3 class="text-5 ">
+            <a href="#isfragmentnode-node">
+                <code class="function language-js"><span class="token function">isFragmentNode</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if <code>node</code> is a fragment.</p>
+</article>
+
+    <article class="toggle-block block" toggleable="" id="isinternallink-node">
+        <h3 class="text-5 ">
+            <a href="#isinternallink-node">
+                <code class="function language-js"><span class="token function">isInternalLink</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if the <code>href</code> of <code>node</code> points to a resource on the same domain
+as the current document.</p>
+</article>
 
             </div>
 
@@ -290,8 +346,7 @@ properties which are assigned with dom’s <code>assign(node, properties)</code>
                 <code class="function language-js"><span class="token function">clone</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
             </a>
         </h3>
-    <p>`</p>
-<p>Returns a deep copy of <code>node</code>.</p>
+    <p>Returns a deep copy of <code>node</code>.</p>
 </article>
 
     <article class="toggle-block block" toggleable="" id="prepend-target-node">
@@ -578,14 +633,31 @@ the duration of the transition. Returns a function that cancels the transition.<
     <p>Returns a DOM fragment containing the content of the template <code>node</code>.</p>
 </article>
 
-    <article class="toggle-block block" toggleable="" id="parse-type-string">
+    <article class="toggle-block block" toggleable="" id="parsehtml-string">
         <h3 class="text-5 ">
-            <a href="#parse-type-string">
-                <code class="function language-js"><span class="token function">parse</span><span class="token punctuation">(</span>type<span class="token punctuation">,</span> string<span class="token punctuation">)</span></code>
+            <a href="#parsehtml-string">
+                <code class="function language-js"><span class="token function">parseHTML</span><span class="token punctuation">(</span>string<span class="token punctuation">)</span></code>
             </a>
         </h3>
-    <p>Returns a document parsed from <code>string</code>, where <code>type</code> is one of <code>'xml'</code>,
-<code>'html'</code> or <code>'svg'</code>.</p>
+    <p>Returns an HTML document parsed from <code>string</code>, or undefined.</p>
+</article>
+
+    <article class="toggle-block block" toggleable="" id="parsesvg-string">
+        <h3 class="text-5 ">
+            <a href="#parsesvg-string">
+                <code class="function language-js"><span class="token function">parseSVG</span><span class="token punctuation">(</span>string<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns an SVG document parsed from <code>string</code>, or undefined.</p>
+</article>
+
+    <article class="toggle-block block" toggleable="" id="parsexml-string">
+        <h3 class="text-5 ">
+            <a href="#parsexml-string">
+                <code class="function language-js"><span class="token function">parseXML</span><span class="token punctuation">(</span>string<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns an XML document parsed from <code>string</code>, or undefined.</p>
 </article>
 
             </div>

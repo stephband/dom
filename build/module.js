@@ -554,7 +554,7 @@ function findByProperty(key, value, array) {
 }
 
 
-/* Get path */
+// Get path
 
 function getRegexPathThing(regex, path, object, fn) {
     var tokens = regex.exec(path);
@@ -767,8 +767,6 @@ function findByProperty$1(key, value, array) {
         }
     }
 }
-
-/* Set path */
 
 function setRegexPath(regex, path, object, thing) {
     var tokens = regex.exec(path);
@@ -3784,7 +3782,7 @@ function secondsToHours(n) { return n / 3600; }
 function secondsToDays(n) { return n / 86400; }
 function secondsToWeeks(n) { return n / 604800; }
 
-/* Months and years are not fixed durations – these are approximate */
+// Months and years are not fixed durations – these are approximate
 function secondsToMonths(n) { return n / 2629800; }
 function secondsToYears(n) { return n / 31557600; }
 
@@ -4115,7 +4113,7 @@ function toType$1(object) {
 // #332256
 
 if (window.console && window.console.log) {
-    window.console.log('%cFn%c          - https://github.com/stephband/fn', 'color: #de3b16; font-weight: 600;', 'color: inherit; font-weight: 400;');
+    window.console.log('%cFn%c          - https://stephen.band/fn', 'color: #de3b16; font-weight: 600;', 'color: inherit; font-weight: 400;');
 }
 const requestTime$1 = curry$1(requestTime, true, 2);
 const and     = curry$1(function and(a, b) { return !!(a && b); });
@@ -4767,7 +4765,7 @@ function parse(type, string) {
 	try {
 		xml = (new window.DOMParser()).parseFromString(string, mimetype);
 	} catch (e) {
-		xml = undefined;
+		return;
 	}
 
 	if (!xml || xml.getElementsByTagName("parsererror").length) {
@@ -4777,7 +4775,32 @@ function parse(type, string) {
 	return xml;
 }
 
-var parse$1 = curry$1(parse, true);
+/*
+parseHTML(string)
+Returns an HTML document parsed from `string`, or undefined.
+*/
+
+function parseHTML(string) {
+	return parse('html', string);
+}
+
+/*
+parseSVG(string)
+Returns an SVG document parsed from `string`, or undefined.
+*/
+
+function parseSVG(string) {
+	return parse('svg', string);
+}
+
+/*
+parseXML(string)
+Returns an XML document parsed from `string`, or undefined.
+*/
+
+function parseXML(string) {
+	return parse('xml', string);
+}
 
 // Types
 
@@ -4891,7 +4914,7 @@ var contains$3 = curry$1(contains$2, true);
 /*
 tag(node)
 
-Returns the tag name of `node`.
+Returns the tag name of `node`, in lowercase.
 
 ```
 const li = create('li', 'Salt and vinegar');
@@ -5073,8 +5096,7 @@ function prepend$2(target, node) {
 var prepend$3 = curry$1(prepend$2, true);
 
 /*
-clone(node)`
-
+clone(node)
 Returns a deep copy of `node`.
 */
 
@@ -6679,7 +6701,7 @@ function throttledRequest(type, mimetype, url) {
 }
 
 if (window.console && window.console.log) {
-    window.console.log('%cdom%c         – https://github.com/stephband/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
+    window.console.log('%cdom%c         – https://stephen.band/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
 }
 const before$1  = curry$1(before, true);
 const after$1   = curry$1(after, true);
@@ -6715,4 +6737,4 @@ const animate$1 = curry$1(animate, true);
 const transition$1 = curry$1(transition, true);
 const request$1 = curry$1(request, true, 4);
 
-export { Event$1 as Event, addClass$1 as addClass, after$1 as after, animate$1 as animate, append$2 as append, assign$5 as assign, attribute$1 as attribute, before$1 as before, boundingBox, media as breakpoint, children, classes, clone, closest$1 as closest, contains$3 as contains, create$1 as create, delegate$1 as delegate, disableScroll, element, empty, enableScroll, escape, events$1 as events, features, find$3 as find, fragmentFromChildren, fragmentFromHTML, fragmentFromId, fragmentFromTemplate, frameClass$1 as frameClass, fullscreen, gestures, get$2 as get, getCookie, identify, isCommentNode, isElementNode, isFragmentNode, isInternalLink, isPrimaryButton, isTargetEvent, isTextNode, isValid, match, matches$2 as matches, media, next, now, off$1 as off, offset$1 as offset, on$1 as on, parse$1 as parse, prefix$1 as prefix, prepend$3 as prepend, preventDefault, previous, select$1 as query, ready$1 as ready, rect, remove$3 as remove, removeClass$1 as removeClass, replace$1 as replace, request$1 as request, config$1 as requestConfig, requestDelete, requestGet, requestPatch, requestPost, safe, scrollRatio, select$1 as select, style$1 as style, tag, throttledRequest, toKey, toKeyCode, toKeyString, toPx, toRem, toVh, toVw, transition$1 as transition, trapFocus, trigger$2 as trigger, type, validate };
+export { Event$1 as Event, addClass$1 as addClass, after$1 as after, animate$1 as animate, append$2 as append, assign$5 as assign, attribute$1 as attribute, before$1 as before, boundingBox, media as breakpoint, children, classes, clone, closest$1 as closest, contains$3 as contains, create$1 as create, delegate$1 as delegate, disableScroll, element, empty, enableScroll, escape, events$1 as events, features, find$3 as find, fragmentFromChildren, fragmentFromHTML, fragmentFromId, fragmentFromTemplate, frameClass$1 as frameClass, fullscreen, gestures, get$2 as get, getCookie, identify, isCommentNode, isElementNode, isFragmentNode, isInternalLink, isPrimaryButton, isTargetEvent, isTextNode, isValid, match, matches$2 as matches, media, next, now, off$1 as off, offset$1 as offset, on$1 as on, parseHTML, parseSVG, parseXML, prefix$1 as prefix, prepend$3 as prepend, preventDefault, previous, select$1 as query, ready$1 as ready, rect, remove$3 as remove, removeClass$1 as removeClass, replace$1 as replace, request$1 as request, config$1 as requestConfig, requestDelete, requestGet, requestPatch, requestPost, safe, scrollRatio, select$1 as select, style$1 as style, tag, throttledRequest, toKey, toKeyCode, toKeyString, toPx, toRem, toVh, toVw, transition$1 as transition, trapFocus, trigger$2 as trigger, type, validate };

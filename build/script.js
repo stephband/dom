@@ -557,7 +557,7 @@ var dom = (function (exports) {
     }
 
 
-    /* Get path */
+    // Get path
 
     function getRegexPathThing(regex, path, object, fn) {
         var tokens = regex.exec(path);
@@ -770,8 +770,6 @@ var dom = (function (exports) {
             }
         }
     }
-
-    /* Set path */
 
     function setRegexPath(regex, path, object, thing) {
         var tokens = regex.exec(path);
@@ -3787,7 +3785,7 @@ var dom = (function (exports) {
     function secondsToDays(n) { return n / 86400; }
     function secondsToWeeks(n) { return n / 604800; }
 
-    /* Months and years are not fixed durations – these are approximate */
+    // Months and years are not fixed durations – these are approximate
     function secondsToMonths(n) { return n / 2629800; }
     function secondsToYears(n) { return n / 31557600; }
 
@@ -4118,7 +4116,7 @@ var dom = (function (exports) {
     // #332256
 
     if (window.console && window.console.log) {
-        window.console.log('%cFn%c          - https://github.com/stephband/fn', 'color: #de3b16; font-weight: 600;', 'color: inherit; font-weight: 400;');
+        window.console.log('%cFn%c          - https://stephen.band/fn', 'color: #de3b16; font-weight: 600;', 'color: inherit; font-weight: 400;');
     }
     const requestTime$1 = curry$1(requestTime, true, 2);
     const and     = curry$1(function and(a, b) { return !!(a && b); });
@@ -4770,7 +4768,7 @@ var dom = (function (exports) {
     	try {
     		xml = (new window.DOMParser()).parseFromString(string, mimetype);
     	} catch (e) {
-    		xml = undefined;
+    		return;
     	}
 
     	if (!xml || xml.getElementsByTagName("parsererror").length) {
@@ -4780,7 +4778,32 @@ var dom = (function (exports) {
     	return xml;
     }
 
-    var parse$1 = curry$1(parse, true);
+    /*
+    parseHTML(string)
+    Returns an HTML document parsed from `string`, or undefined.
+    */
+
+    function parseHTML(string) {
+    	return parse('html', string);
+    }
+
+    /*
+    parseSVG(string)
+    Returns an SVG document parsed from `string`, or undefined.
+    */
+
+    function parseSVG(string) {
+    	return parse('svg', string);
+    }
+
+    /*
+    parseXML(string)
+    Returns an XML document parsed from `string`, or undefined.
+    */
+
+    function parseXML(string) {
+    	return parse('xml', string);
+    }
 
     // Types
 
@@ -4894,7 +4917,7 @@ var dom = (function (exports) {
     /*
     tag(node)
 
-    Returns the tag name of `node`.
+    Returns the tag name of `node`, in lowercase.
 
     ```
     const li = create('li', 'Salt and vinegar');
@@ -5076,8 +5099,7 @@ var dom = (function (exports) {
     var prepend$3 = curry$1(prepend$2, true);
 
     /*
-    clone(node)`
-
+    clone(node)
     Returns a deep copy of `node`.
     */
 
@@ -6682,7 +6704,7 @@ var dom = (function (exports) {
     }
 
     if (window.console && window.console.log) {
-        window.console.log('%cdom%c         – https://github.com/stephband/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
+        window.console.log('%cdom%c         – https://stephen.band/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
     }
     const before$1  = curry$1(before, true);
     const after$1   = curry$1(after, true);
@@ -6769,7 +6791,9 @@ var dom = (function (exports) {
     exports.off = off$1;
     exports.offset = offset$1;
     exports.on = on$1;
-    exports.parse = parse$1;
+    exports.parseHTML = parseHTML;
+    exports.parseSVG = parseSVG;
+    exports.parseXML = parseXML;
     exports.prefix = prefix$1;
     exports.prepend = prepend$3;
     exports.preventDefault = preventDefault;

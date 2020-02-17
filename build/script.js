@@ -1585,18 +1585,6 @@ var dom = (function (exports) {
     }
 
     /*
-    remove(array, value)
-    Remove `value` from `array`. Where `value` is not in `array`, does nothing.
-    */
-
-    function remove$1(array, value) {
-        if (array.remove) { array.remove(value); }
-        var i = array.indexOf(value);
-        if (i !== -1) { array.splice(i, 1); }
-        return value;
-    }
-
-    /*
     Timer(duration, getTime)
 
     Create an object with a request/cancel pair of functions that
@@ -1671,8 +1659,6 @@ var dom = (function (exports) {
 
     function isDone$1(stream) {
         return stream.status === 'done';
-        // Accept arrays or streams
-        //return stream.length === 0 || stream.status === 'done';
     }
 
     function notify(object) {
@@ -1926,10 +1912,8 @@ var dom = (function (exports) {
 
         /* Map */
 
-        ///*
         //.chunk(n)
         //Batches values into arrays of length `n`.
-        //*/
 
         /*
         .flat()
@@ -2005,11 +1989,9 @@ var dom = (function (exports) {
         Filters the stream to the first `n` values.
         */
 
-        ///*
         //.clock(timer)
         //Emits values at the framerate of `timer`, one-per-frame. No values
         //are discarded.
-        //*/
         //
         //clock: function clock(timer) {
         //    return this.pipe(Stream.clock(timer));
@@ -2134,12 +2116,10 @@ var dom = (function (exports) {
             });
         },
 
-        ///*
         //.reduce(fn, accumulator)
         //Consumes the stream when stopped, calling `fn(accumulator, value)`
         //for each value in the stream. Returns a promise that resolves to
         //the last value returned by `fn(accumulator, value)`.
-        //*/
 
         reduce: function reduce(fn, accumulator) {
             // Support array.reduce semantics with optional seed
@@ -2627,6 +2607,18 @@ var dom = (function (exports) {
             return new ThrottleSource(notify, stop, timer);
         });
     };
+
+    /*
+    remove(array, value)
+    Remove `value` from `array`. Where `value` is not in `array`, does nothing.
+    */
+
+    function remove$1(array, value) {
+        if (array.remove) { array.remove(value); }
+        var i = array.indexOf(value);
+        if (i !== -1) { array.splice(i, 1); }
+        return value;
+    }
 
     const nothing$1      = Object.freeze([]);
 
@@ -3382,11 +3374,11 @@ var dom = (function (exports) {
     	YY:   function(date)       { return ('0' + date.getFullYear() % 100).slice(-2); },
     	MM:   function(date)       { return ('0' + (date.getMonth() + 1)).slice(-2); },
     	MMM:  function(date, lang) { return this.MMMM(date, lang).slice(0,3); },
-    	MMMM: function(date, lang) { return langs[lang || Time.lang].months[date.getMonth()]; },
+    	MMMM: function(date, lang) { return langs[lang].months[date.getMonth()]; },
     	D:    function(date)       { return '' + date.getDate(); },
     	DD:   function(date)       { return ('0' + date.getDate()).slice(-2); },
     	ddd:  function(date, lang) { return this.dddd(date, lang).slice(0,3); },
-    	dddd: function(date, lang) { return langs[lang || Time.lang].days[date.getDay()]; },
+    	dddd: function(date, lang) { return langs[lang].days[date.getDay()]; },
     	hh:   function(date)       { return ('0' + date.getHours()).slice(-2); },
     	//hh:   function(date)       { return ('0' + date.getHours() % 12).slice(-2); },
     	mm:   function(date)       { return ('0' + date.getMinutes()).slice(-2); },
@@ -3400,7 +3392,7 @@ var dom = (function (exports) {
     		return (date.getTimezoneOffset() < 0 ? '+' : '-') +
     			 ('0' + Math.round(100 * Math.abs(date.getTimezoneOffset()) / 60)).slice(-4) ;
     	},
-    	th:   function(date, lang) { return langs[lang || Time.lang].ordinals[date.getDate()]; },
+    	th:   function(date, lang) { return langs[lang].ordinals[date.getDate()]; },
     	n:    function(date) { return +date; },
     	ZZ:   function(date) { return -date.getTimezoneOffset() * 60; }
     };

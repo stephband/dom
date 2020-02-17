@@ -1,7 +1,6 @@
 import { cache } from '../../fn/module.js';
 import prefix from './prefix.js';
 
-const assign = Object.assign;
 const define = Object.defineProperties;
 
 /*

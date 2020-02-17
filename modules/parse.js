@@ -1,20 +1,11 @@
 
-/*
-parse(type, string)
-
-Returns a document parsed from `string`, where `type` is one of `'xml'`,
-`'html'` or `'svg'`.
-*/
-
-import { curry } from '../../fn/module.js';
-
 var mimetypes = {
 	xml: 'application/xml',
 	html: 'text/html',
 	svg: 'image/svg+xml'
 };
 
-export function parse(type, string) {
+function parse(type, string) {
 	if (!string) { return; }
 
 	var mimetype = mimetypes[type];
@@ -24,7 +15,7 @@ export function parse(type, string) {
 	try {
 		xml = (new window.DOMParser()).parseFromString(string, mimetype);
 	} catch (e) {
-		xml = undefined;
+		return;
 	}
 
 	if (!xml || xml.getElementsByTagName("parsererror").length) {
@@ -34,4 +25,29 @@ export function parse(type, string) {
 	return xml;
 }
 
-export default curry(parse, true);
+/*
+parseHTML(string)
+Returns an HTML document parsed from `string`, or undefined.
+*/
+
+export function parseHTML(string) {
+	return parse('html', string);
+}
+
+/*
+parseSVG(string)
+Returns an SVG document parsed from `string`, or undefined.
+*/
+
+export function parseSVG(string) {
+	return parse('svg', string);
+}
+
+/*
+parseXML(string)
+Returns an XML document parsed from `string`, or undefined.
+*/
+
+export function parseXML(string) {
+	return parse('xml', string);
+}

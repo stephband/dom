@@ -1,6 +1,6 @@
 
 if (window.console && window.console.log) {
-    window.console.log('%cdom%c         – https://github.com/stephband/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
+    window.console.log('%cdom%c         – https://stephen.band/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
 }
 
 import curry from '../fn/modules/curry.js';
@@ -18,7 +18,7 @@ export { default as features }   from './modules/features.js';
 
 export { default as element }    from './modules/element.js';
 export { default as escape }     from './modules/escape.js';
-export { default as parse }      from './modules/parse.js';
+export * from './modules/parse.js';
 
 // Inspect
 

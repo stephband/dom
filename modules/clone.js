@@ -2,8 +2,7 @@ import features from './features.js';
 import { select } from './select.js';
 
 /*
-clone(node)`
-
+clone(node)
 Returns a deep copy of `node`.
 */
 

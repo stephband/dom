@@ -2,7 +2,7 @@
 /*
 tag(node)
 
-Returns the tag name of `node`.
+Returns the tag name of `node`, in lowercase.
 
 ```
 const li = create('li', 'Salt and vinegar');

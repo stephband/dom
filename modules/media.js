@@ -22,8 +22,8 @@ A query object may contain any combination of the properties:
 }
 ```
 
-For each property, a number represents a value in pixels, a string must be
-a value with CSS units (eg. '3rem'), and a function must return a number
+For each property a number represents a value in pixels, a string must be
+a value with CSS units (eg. `'3rem'`), or a function must return a number
 representing a value in pixels.
 */
 

@@ -1,103 +1,122 @@
 
-import assignAttributes from './assign.js';
-
-const assign       = Object.assign;
+import { id, overload, toType } from '../../fn/module.js';
+import assign from './assign.js';
 const svgNamespace = 'http://www.w3.org/2000/svg';
-const testDiv      = document.createElement('div');
+const div = document.createElement('div');
 
-const constructors = {
-	text: function(text) {
-		return document.createTextNode(text || '');
-	},
 
-	comment: function(text) {
+// Constructors
+
+const construct = overload(id, {
+	comment: function(tag, text) {
 		return document.createComment(text || '');
 	},
 
-	fragment: function(html) {
+	fragment: function(tag, html) {
 		var fragment = document.createDocumentFragment();
 
 		if (html) {
-			testDiv.innerHTML = html;
-			append(fragment, testDiv.childNodes);
-			testDiv.innerHTML = '';
+			div.innerHTML = html;
+			const nodes = div.childNodes;
+			while (nodes[0]) {
+				fragment.appendChild(nodes[0]);
+			}
 		}
 
 		return fragment;
-	}
-};
+	},
 
-var svgs = [
-	'circle',
-	'ellipse',
-	'g',
-	'line',
-	'rect',
-	//'text',
-	'use',
-	'path',
-	'polygon',
-	'polyline',
-	'svg'
-];
+	text: function (tag, text) {
+		return document.createTextNode(text || '');
+	},
 
-svgs.forEach(function(tag) {
-	constructors[tag] = function(attributes) {
-		var node = document.createElementNS(svgNamespace, tag);
-		if (attributes) { setSVGAttributes(node, attributes); }
-		return node;
-	};
+	circle:   constructSVG,
+	ellipse:  constructSVG,
+	g:        constructSVG,
+	glyph:    constructSVG,
+	image:    constructSVG,
+	line:     constructSVG,
+	rect:     constructSVG,
+	use:      constructSVG,
+	path:     constructSVG,
+	pattern:  constructSVG,
+	polygon:  constructSVG,
+	polyline: constructSVG,
+	svg:      constructSVG,
+	default:  constructHTML
 });
 
-function setSVGAttributes(node, attributes) {
-	var names = Object.keys(attributes);
-	var n = names.length;
+function constructSVG(tag, html) {
+	var node = document.createElementNS(svgNamespace, tag);
 
-	while (n--) {
-		node.setAttributeNS(null, names[n], attributes[names[n]]);
-	}
-}
-
-/*
-create(tag, text)`
-
-Returns a new DOM node.
-
-- If `tag` is `"text"` returns a text node with the content `text`.
-- If `tag` is `"fragment"` returns a document fragment.
-- If `tag` is `"comment"` returns a comment `<!-- text -->`.
-- Anything else returns an element `<tag>text</tag>`, where `text` is inserted
-  as inner html.
-*/
-
-export default function create(tag, attributes) {
-	// create(type)
-	// create(type, text)
-	// create(type, attributes)
-
-	let node;
-
-	if (typeof tag === 'string') {
-		if (constructors[tag]) {
-			return constructors[tag](attributes);
-		}
-
-		node = document.createElement(tag);
-	}
-	else {
-		node = document.createElement(tag.tagName);
-		delete tag.tagName;
-		assignAttributes(node, tag);
-	}
-
-	if (attributes) {
-		if (typeof attributes === 'string') {
-			node.innerHTML = attributes;
-		}
-		else {
-			assignAttributes(node, attributes);
-		}
+	if (html) {
+		node.innerHTML = html;
 	}
 
 	return node;
 }
+
+function constructHTML(tag, html) {
+	var node = document.createElement(tag);
+
+	if (html) {
+		node.innerHTML = html;
+	}
+
+	return node;
+}
+
+
+/*
+create(tag, content)
+
+Constructs and returns a new DOM node.
+
+- If `tag` is `"text"` a text node is created.
+- If `tag` is `"fragment"` a fragment is created.
+- If `tag` is `"comment"` a comment is created.
+- If `tag` is any other string the element `<tag></tag>` is created.
+- Where `tag` is an object, it must have a `"tag"` or `"tagName"` property.
+A node is created according to the above rules for tag strings, and other
+properties of the object are assigned with dom's `assign(node, object)` function.
+
+If `content` is a string it is set as text content on a text or comment node,
+or as inner HTML on an element or fragment. It may also be an object of
+properties which are assigned with dom's `assign(node, properties)` function.
+*/
+
+function toTypes() {
+	return Array.prototype.map.call(arguments, toType).join(' ');
+}
+
+function validateTag(tag) {
+	if (typeof tag !== 'string') {
+		throw new Error('create(object, content) object must have string property .tag or .tagName');
+	}
+}
+
+export default overload(toTypes, {
+	'string string': construct,
+
+	'string object': function(tag, content) {
+		return assign(construct(tag, ''), content);
+	},
+
+	'object string': function(properties, text) {
+		const tag = properties.tag || properties.tagName;
+		validateTag(tag);
+		// Warning: text is set before properties, but text should override
+		// html or innerHTML property, ie, be set after.
+		return assign(construct(tag, text), properties);
+	},
+
+	'object object': function(properties, content) {
+		const tag = properties.tag || properties.tagName;
+		validateTag(tag);
+		return assign(assign(construct(tag, ''), properties), content);
+	},
+
+	default: function() {
+		throw new Error('create(tag, content) does not accept argument types "' + Array.prototype.map.apply(arguments, toType).join(' ') + '"');
+	}
+});

@@ -5,7 +5,8 @@ Returns the id of `node`, or where `node` has no id, a random id is generated,
 checked against the DOM for uniqueness, set on `node` and returned:
 
 ```
-query('button', document)
+// Get ids of all buttons in document
+select('button', document)
 .map(identify)
 .forEach((id) => ...)
 ```

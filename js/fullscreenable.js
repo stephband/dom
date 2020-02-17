@@ -2,11 +2,14 @@
 fullscreenable
 
 Links refering to [fullscreenable] elements put those elements into
-fullscreen. Style things that depend on fullscreen support with the
-.fullscreen-support class found on the document root.
+fullscreen mode when clicked.
+
+Fullscreen capability is not reliably queried in CSS (through @supports or
+other means), so this script also adds the class `fullscreen-support` to the
+document root in navigators where support is detected, for styling of UI that
+depends on fullscreen support.
 */
 
-import { noop } from '../../fn/module.js';
 import { matches } from '../module.js';
 import { handlers } from './dom-activate.js';
 

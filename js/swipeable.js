@@ -1,6 +1,6 @@
 
 import { last, wrap, set, toPolar } from '../../fn/module.js';
-import { attribute, box, events, children, classes, closest, gestures, matches, query, style } from '../module.js';
+import { attribute, box, events, children, classes, closest, gestures, matches, select, style } from '../module.js';
 import './switchable.js';
 
 const selector = '.swipeable, [swipeable]';
@@ -117,9 +117,6 @@ gestures(document)
 	classy.add('no-transition');
 
 	var ax = x;
-
-	// e.detail() is a stream of touch coordinates
-	//var stream = e.detail();
     var x0 = e.pageX;
 	var y0 = e.pageY;
 
@@ -148,19 +145,18 @@ gestures(document)
 
 		// Todo: Watch out, this may interfere with slides
 		var xSnaps = attribute('data-slide-snap', node);
+		var tx;
 
 		if (xSnaps) {
 			xSnaps = xSnaps.split(rspaces).map(parseFloat);
 
 			// Get closest x from list of snaps
-			var tx = xSnaps.reduce(function(prev, curr) {
+			tx = xSnaps.reduce(function(prev, curr) {
 				return Math.abs(curr - ax) < Math.abs(prev - ax) ?
 					curr : prev ;
 			});
 
-			//requestAnimationFrame(function() {
-				node.style.transform = transform + ' translate3d(' + tx + 'px, 0px, 0px)';
-			//});
+			node.style.transform = transform + ' translate3d(' + tx + 'px, 0px, 0px)';
 		}
 
 		//var x = data.x;
@@ -196,7 +192,7 @@ on(document, 'dom-activate', function activate(e) {
 
 on(window, 'resize', function resize() {
 	// Update swipeable positions
-	query(selector, document).forEach(function(swipeable) {
+	select(selector, document).forEach(function(swipeable) {
 		var node = children(swipeable).find(matches('.active'));
 		if (!node) { return; }
 		var classy = classes(swipeable);

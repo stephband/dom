@@ -28,13 +28,12 @@ you have a scrolling navigation:
 */
 
 import '../polyfills/element.scrollintoview.js';
-import { by, curry, get, isDefined, overload, requestTick } from '../../fn/module.js';
-import { append, box, classes, create, delegate, Event, events, features, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../module.js';
+import { by, get } from '../../fn/module.js';
+import { box, features, isInternalLink, select } from '../module.js';
 
 var DEBUG = false;
 
 const selector = ".locateable, [locateable]";
-const on       = events.on;
 const byTop    = by(get('top'));
 const nothing  = {};
 const scrollOptions = {
@@ -54,7 +53,7 @@ let locateables, locatedNode, scrollPaddingTop, frame;
 
 
 function queryLinks(id) {
-	return query('a[href$="#' + id + '"]', document.body)
+	return select('a[href$="#' + id + '"]', document.body)
 	.filter(isInternalLink);
 }
 
@@ -84,7 +83,7 @@ function update(time) {
 
     // Update things that rarely change only when we have not updated recently
     if (frameTime < time - config.scrollIdleDuration * 1000) {
-        locateables = query(selector, document);
+        locateables = select(selector, document);
         scrollPaddingTop = parseInt(getComputedStyle(document.documentElement).scrollPaddingTop, 10);
     }
 

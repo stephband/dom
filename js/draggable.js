@@ -14,8 +14,8 @@ attribute, which defines data to be carried by a drag action:
 <small>* Note that `draggable` must be `"true"`. It is not a boolean attribute.</small>
 */
 
-import { parse, requestTick, Stream } from '../../fn/module.js';
-import { attribute, classes, delegate, events, identify, query, remove, removeClass } from '../module.js';
+import { parse } from '../../fn/module.js';
+import { attribute, classes, delegate, events, identify, select, remove, removeClass } from '../module.js';
 import { register } from '../../sparky/module.js';
 
 var debug  = true;
@@ -85,8 +85,8 @@ on(document, 'dragend', dragend);
 
 
 function dragendButton(e) {
-	query('.dropzone', document).forEach(remove);
-	query('.dragover', document).forEach(removeClass('dragover'));
+	select('.dropzone', document).forEach(remove);
+	select('.dragover', document).forEach(removeClass('dragover'));
 }
 
 register('data-on-drag', function(node, params) {

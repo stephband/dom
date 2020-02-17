@@ -1,6 +1,6 @@
 
-import { curry, isDefined, overload, requestTick } from '../../fn/module.js';
-import { append, classes, create, delegate, Event, events, fragmentFromChildren, isInternalLink, isPrimaryButton, tag, query, ready, remove, trigger } from '../module.js';
+import { curry, isDefined, overload } from '../../fn/module.js';
+import { append, classes, create, delegate, Event, events, isInternalLink, isPrimaryButton, tag, select, ready, remove, trigger } from '../module.js';
 
 var DEBUG     = false;
 
@@ -27,12 +27,12 @@ export const handlers = [];
 
 
 function findButtons(id) {
-	return query('[href$="#' + id + '"]', document.body)
+	return select('[href$="#' + id + '"]', document.body)
 	.filter(overload(tag, {
 		a:       isInternalLink,
 		default: function() { return true; }
 	}))
-	.concat(query('[data-href="#' + id + '"]', document));
+	.concat(select('[data-href="#' + id + '"]', document));
 }
 
 function getData(node) {
@@ -363,7 +363,7 @@ on(document, 'click', delegate('a[target]', activateTarget));
 // Document setup
 ready(function() {
 	// Setup all things that should start out active
-	query('.' + config.activeClass, document).forEach(triggerActivate);
+	select('.' + config.activeClass, document).forEach(triggerActivate);
 });
 
 on(window, 'load', function() {
@@ -374,7 +374,7 @@ on(window, 'load', function() {
 
 	// Catch errors, as id may nonetheless be an invalid selector
 	try {
-		query(id, document).forEach(triggerActivate);
+		select(id, document).forEach(triggerActivate);
 	}
 	catch(e) {
 		console.warn('dom: Cannot activate ' + id, e.message);

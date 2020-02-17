@@ -40,17 +40,11 @@ export { default as children } from './modules/children.js';
 
 // Mutate
 
-import _assign from './modules/assign.js';
-export const assign  = curry(_assign, true);
-
-import _append from './modules/append.js';
-export const append  = curry(_append, true);
-
-import _prepend from './modules/prepend.js';
-export const prepend = curry(_prepend, true);
-
-export { default as clone } from './modules/clone.js';
-export { default as create } from './modules/create.js';
+export { default as assign }   from './modules/assign.js';
+export { default as append }   from './modules/append.js';
+export { default as prepend }  from './modules/prepend.js';
+export { default as clone }    from './modules/clone.js';
+export { default as create }   from './modules/create.js';
 export { default as identify } from './modules/identify.js';
 
 export { empty, remove } from './modules/mutation.js';

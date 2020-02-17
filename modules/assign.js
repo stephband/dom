@@ -56,4 +56,4 @@ export function assign(node, attributes) {
 	}
 }
 
-export default curry(assign);
+export default curry(assign, true);

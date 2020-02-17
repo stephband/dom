@@ -8,7 +8,11 @@ if (!Element.prototype.append) {
     throw new Error('A polyfill for Element.append() is needed (https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/append)');
 }
 
-export default function append(target, node) {
+import { curry } from '../../fn/module.js';
+
+export function append(target, node) {
     target.append(node);
     return target.lastChild;
 }
+
+export default curry(append, true);

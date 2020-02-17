@@ -187,7 +187,7 @@ Call `fn` on the next tick.
 
 const resolved = Promise.resolve();
 
-function requestTick$1(fn) {
+function requestTick(fn) {
     resolved.then(fn);
     return fn;
 }
@@ -1643,7 +1643,7 @@ function Timer(duration, getTime) {
                 id = setTimeout(frame, (t0 + duration - t1) * 1000);
             }
             else {
-                requestTick$1(frame) ;
+                requestTick(frame) ;
             }
 
             // Use the fn reference as the request id, because why not
@@ -5036,7 +5036,7 @@ function assign$4(node, attributes) {
 	}
 }
 
-var _assign = curry$1(assign$4);
+var assign$5 = curry$1(assign$4, true);
 
 /*
 append(target, node)
@@ -5053,14 +5053,24 @@ function append$1(target, node) {
     return target.lastChild;
 }
 
+var append$2 = curry$1(append$1, true);
+
+/*
+prepend(target, node)
+
+Prepends `node`, which may be a string or DOM node, to `target`. Returns `node`.
+*/
+
 if (!Element.prototype.prepend) {
-    console.warn('A polyfill for Element.prepend() is needed (https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/prepend)');
+    throw new Error('A polyfill for Element.prepend() is needed (https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/prepend)');
 }
 
 function prepend$2(target, node) {
     target.prepend(node);
-    return node;
+    return target.firstChild;
 }
+
+var prepend$3 = curry$1(prepend$2, true);
 
 /*
 clone(node)`
@@ -5192,7 +5202,7 @@ var create$1 = overload(toTypes, {
 	'string string': construct,
 
 	'string object': function(tag, content) {
-		return _assign(construct(tag, ''), content);
+		return assign$5(construct(tag, ''), content);
 	},
 
 	'object string': function(properties, text) {
@@ -5200,13 +5210,13 @@ var create$1 = overload(toTypes, {
 		validateTag(tag);
 		// Warning: text is set before properties, but text should override
 		// html or innerHTML property, ie, be set after.
-		return _assign(construct(tag, text), properties);
+		return assign$5(construct(tag, text), properties);
 	},
 
 	'object object': function(properties, content) {
 		const tag = properties.tag || properties.tagName;
 		validateTag(tag);
-		return _assign(_assign(construct(tag, ''), properties), content);
+		return assign$5(assign$5(construct(tag, ''), properties), content);
 	},
 
 	default: function() {
@@ -5394,7 +5404,7 @@ function fragmentFromChildren(node) {
 	var fragment = create$1('fragment');
 
 	while (node.firstChild) {
-		append$1(fragment, node.firstChild);
+		append$2(fragment, node.firstChild);
 	}
 
 	return fragment;
@@ -5448,7 +5458,7 @@ function fragmentFromId(id) {
 		fragmentFromChildren(node) ;
 }
 
-const assign$5      = Object.assign;
+const assign$6      = Object.assign;
 const CustomEvent = window.CustomEvent;
 
 const defaults    = {
@@ -5476,7 +5486,7 @@ function Event$1(type, options) {
 	let settings;
 
 	if (typeof type === 'object') {
-		settings = assign$5({}, defaults, type);
+		settings = assign$6({}, defaults, type);
 		type = settings.type;
 	}
 
@@ -5485,7 +5495,7 @@ function Event$1(type, options) {
 			settings.detail = options.detail;
 		}
 		else {
-			settings = assign$5({ detail: options.detail }, defaults);
+			settings = assign$6({ detail: options.detail }, defaults);
 		}
 	}
 
@@ -5493,13 +5503,13 @@ function Event$1(type, options) {
 
 	if (options) {
 		delete options.detail;
-		assign$5(event, options);
+		assign$6(event, options);
 	}
 
 	return event;
 }
 
-const assign$6  = Object.assign;
+const assign$7  = Object.assign;
 const rspaces = /\s+/;
 
 function prefixType(type) {
@@ -5582,7 +5592,7 @@ function Source(notify, stop, type, options, node) {
 	types.reduce(listen, this);
 }
 
-assign$6(Source.prototype, {
+assign$7(Source.prototype, {
 	shift: function shiftEvent() {
 		const buffer = this.buffer;
 		return buffer.shift();
@@ -6087,7 +6097,7 @@ function trapFocus(node) {
 	var focusNode = document.activeElement || document.body;
 
 	function resetFocus() {
-		var focusable = query('[tabindex], a, input, textarea, button', node)[0];
+		var focusable = select('[tabindex], a, input, textarea, button', node)[0];
 		if (focusable) { focusable.focus(); }
 	}
 
@@ -6371,7 +6381,7 @@ function getCookie(key) {
 	}
 }
 
-const assign$7 = Object.assign;
+const assign$8 = Object.assign;
 
 /*
 config
@@ -6405,35 +6415,35 @@ const config$1 = {
 
 const createHeaders = choose({
 	'application/x-www-form-urlencoded': function(headers) {
-		return assign$7(headers, {
+		return assign$8(headers, {
 			"Content-Type": 'application/x-www-form-urlencoded',
 			"X-Requested-With": "XMLHttpRequest"
 		});
 	},
 
 	'application/json': function(headers) {
-		return assign$7(headers, {
+		return assign$8(headers, {
 			"Content-Type": "application/json; charset=utf-8",
 			"X-Requested-With": "XMLHttpRequest"
 		});
 	},
 
 	'multipart/form-data': function(headers) {
-		return assign$7(headers, {
+		return assign$8(headers, {
 			"Content-Type": 'multipart/form-data',
 			"X-Requested-With": "XMLHttpRequest"
 		});
 	},
 
 	'audio/wav': function(headers) {
-		return assign$7(headers, {
+		return assign$8(headers, {
 			"Content-Type": 'audio/wav',
 			"X-Requested-With": "XMLHttpRequest"
 		});
 	},
 
 	'default': function(headers) {
-		return assign$7(headers, {
+		return assign$8(headers, {
 			"Content-Type": 'application/x-www-form-urlencoded',
 			"X-Requested-With": "XMLHttpRequest"
 		});
@@ -6671,9 +6681,6 @@ function throttledRequest(type, mimetype, url) {
 if (window.console && window.console.log) {
     window.console.log('%cdom%c         – https://github.com/stephband/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
 }
-const assign$8  = curry$1(_assign, true);
-const append$2  = curry$1(append$1, true);
-const prepend$3 = curry$1(prepend$2, true);
 const before$1  = curry$1(before, true);
 const after$1   = curry$1(after, true);
 const replace$1 = curry$1(replace, true);
@@ -6708,4 +6715,4 @@ const animate$1 = curry$1(animate, true);
 const transition$1 = curry$1(transition, true);
 const request$1 = curry$1(request, true, 4);
 
-export { Event$1 as Event, addClass$1 as addClass, after$1 as after, animate$1 as animate, append$2 as append, assign$8 as assign, attribute$1 as attribute, before$1 as before, boundingBox, box, media as breakpoint, children, classes, clone, closest$1 as closest, contains$3 as contains, create$1 as create, delegate$1 as delegate, disableScroll, element, empty, enableScroll, escape, events$1 as events, features, find$3 as find, fragmentFromChildren, fragmentFromHTML, fragmentFromId, fragmentFromTemplate, frameClass$1 as frameClass, fullscreen, gestures, get$2 as get, getCookie, identify, isCommentNode, isElementNode, isFragmentNode, isInternalLink, isPrimaryButton, isTargetEvent, isTextNode, isValid, match, matches$2 as matches, media, next, now, off$1 as off, offset$1 as offset, on$1 as on, parse$1 as parse, prefix$1 as prefix, prepend$3 as prepend, preventDefault, previous, select$1 as query, ready$1 as ready, remove$3 as remove, removeClass$1 as removeClass, replace$1 as replace, request$1 as request, config$1 as requestConfig, requestDelete, requestGet, requestPatch, requestPost, safe, scrollRatio, select$1 as select, style$1 as style, tag, throttledRequest, toKey, toKeyCode, toKeyString, toPx, toRem, toVh, toVw, transition$1 as transition, trapFocus, trigger$2 as trigger, type, validate };
+export { Event$1 as Event, addClass$1 as addClass, after$1 as after, animate$1 as animate, append$2 as append, assign$5 as assign, attribute$1 as attribute, before$1 as before, boundingBox, box, media as breakpoint, children, classes, clone, closest$1 as closest, contains$3 as contains, create$1 as create, delegate$1 as delegate, disableScroll, element, empty, enableScroll, escape, events$1 as events, features, find$3 as find, fragmentFromChildren, fragmentFromHTML, fragmentFromId, fragmentFromTemplate, frameClass$1 as frameClass, fullscreen, gestures, get$2 as get, getCookie, identify, isCommentNode, isElementNode, isFragmentNode, isInternalLink, isPrimaryButton, isTargetEvent, isTextNode, isValid, match, matches$2 as matches, media, next, now, off$1 as off, offset$1 as offset, on$1 as on, parse$1 as parse, prefix$1 as prefix, prepend$3 as prepend, preventDefault, previous, select$1 as query, ready$1 as ready, remove$3 as remove, removeClass$1 as removeClass, replace$1 as replace, request$1 as request, config$1 as requestConfig, requestDelete, requestGet, requestPatch, requestPost, safe, scrollRatio, select$1 as select, style$1 as style, tag, throttledRequest, toKey, toKeyCode, toKeyString, toPx, toRem, toVh, toVw, transition$1 as transition, trapFocus, trigger$2 as trigger, type, validate };

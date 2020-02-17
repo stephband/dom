@@ -1,4 +1,5 @@
-import { noop } from '../../fn/module.js';
+import { noop, requestTick } from '../../fn/module.js';
+import { select } from './select.js';
 
 let untrapFocus = noop;
 
@@ -20,7 +21,7 @@ export default function trapFocus(node) {
 	var focusNode = document.activeElement || document.body;
 
 	function resetFocus() {
-		var focusable = query('[tabindex], a, input, textarea, button', node)[0];
+		var focusable = select('[tabindex], a, input, textarea, button', node)[0];
 		if (focusable) { focusable.focus(); }
 	}
 

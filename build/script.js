@@ -190,7 +190,7 @@ var dom = (function (exports) {
 
     const resolved = Promise.resolve();
 
-    function requestTick$1(fn) {
+    function requestTick(fn) {
         resolved.then(fn);
         return fn;
     }
@@ -1646,7 +1646,7 @@ var dom = (function (exports) {
                     id = setTimeout(frame, (t0 + duration - t1) * 1000);
                 }
                 else {
-                    requestTick$1(frame) ;
+                    requestTick(frame) ;
                 }
 
                 // Use the fn reference as the request id, because why not
@@ -5039,7 +5039,7 @@ var dom = (function (exports) {
     	}
     }
 
-    var _assign = curry$1(assign$4);
+    var assign$5 = curry$1(assign$4, true);
 
     /*
     append(target, node)
@@ -5056,14 +5056,24 @@ var dom = (function (exports) {
         return target.lastChild;
     }
 
+    var append$2 = curry$1(append$1, true);
+
+    /*
+    prepend(target, node)
+
+    Prepends `node`, which may be a string or DOM node, to `target`. Returns `node`.
+    */
+
     if (!Element.prototype.prepend) {
-        console.warn('A polyfill for Element.prepend() is needed (https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/prepend)');
+        throw new Error('A polyfill for Element.prepend() is needed (https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/prepend)');
     }
 
     function prepend$2(target, node) {
         target.prepend(node);
-        return node;
+        return target.firstChild;
     }
+
+    var prepend$3 = curry$1(prepend$2, true);
 
     /*
     clone(node)`
@@ -5195,7 +5205,7 @@ var dom = (function (exports) {
     	'string string': construct,
 
     	'string object': function(tag, content) {
-    		return _assign(construct(tag, ''), content);
+    		return assign$5(construct(tag, ''), content);
     	},
 
     	'object string': function(properties, text) {
@@ -5203,13 +5213,13 @@ var dom = (function (exports) {
     		validateTag(tag);
     		// Warning: text is set before properties, but text should override
     		// html or innerHTML property, ie, be set after.
-    		return _assign(construct(tag, text), properties);
+    		return assign$5(construct(tag, text), properties);
     	},
 
     	'object object': function(properties, content) {
     		const tag = properties.tag || properties.tagName;
     		validateTag(tag);
-    		return _assign(_assign(construct(tag, ''), properties), content);
+    		return assign$5(assign$5(construct(tag, ''), properties), content);
     	},
 
     	default: function() {
@@ -5397,7 +5407,7 @@ var dom = (function (exports) {
     	var fragment = create$1('fragment');
 
     	while (node.firstChild) {
-    		append$1(fragment, node.firstChild);
+    		append$2(fragment, node.firstChild);
     	}
 
     	return fragment;
@@ -5451,7 +5461,7 @@ var dom = (function (exports) {
     		fragmentFromChildren(node) ;
     }
 
-    const assign$5      = Object.assign;
+    const assign$6      = Object.assign;
     const CustomEvent = window.CustomEvent;
 
     const defaults    = {
@@ -5479,7 +5489,7 @@ var dom = (function (exports) {
     	let settings;
 
     	if (typeof type === 'object') {
-    		settings = assign$5({}, defaults, type);
+    		settings = assign$6({}, defaults, type);
     		type = settings.type;
     	}
 
@@ -5488,7 +5498,7 @@ var dom = (function (exports) {
     			settings.detail = options.detail;
     		}
     		else {
-    			settings = assign$5({ detail: options.detail }, defaults);
+    			settings = assign$6({ detail: options.detail }, defaults);
     		}
     	}
 
@@ -5496,13 +5506,13 @@ var dom = (function (exports) {
 
     	if (options) {
     		delete options.detail;
-    		assign$5(event, options);
+    		assign$6(event, options);
     	}
 
     	return event;
     }
 
-    const assign$6  = Object.assign;
+    const assign$7  = Object.assign;
     const rspaces = /\s+/;
 
     function prefixType(type) {
@@ -5585,7 +5595,7 @@ var dom = (function (exports) {
     	types.reduce(listen, this);
     }
 
-    assign$6(Source.prototype, {
+    assign$7(Source.prototype, {
     	shift: function shiftEvent() {
     		const buffer = this.buffer;
     		return buffer.shift();
@@ -6090,7 +6100,7 @@ var dom = (function (exports) {
     	var focusNode = document.activeElement || document.body;
 
     	function resetFocus() {
-    		var focusable = query('[tabindex], a, input, textarea, button', node)[0];
+    		var focusable = select('[tabindex], a, input, textarea, button', node)[0];
     		if (focusable) { focusable.focus(); }
     	}
 
@@ -6374,7 +6384,7 @@ var dom = (function (exports) {
     	}
     }
 
-    const assign$7 = Object.assign;
+    const assign$8 = Object.assign;
 
     /*
     config
@@ -6408,35 +6418,35 @@ var dom = (function (exports) {
 
     const createHeaders = choose({
     	'application/x-www-form-urlencoded': function(headers) {
-    		return assign$7(headers, {
+    		return assign$8(headers, {
     			"Content-Type": 'application/x-www-form-urlencoded',
     			"X-Requested-With": "XMLHttpRequest"
     		});
     	},
 
     	'application/json': function(headers) {
-    		return assign$7(headers, {
+    		return assign$8(headers, {
     			"Content-Type": "application/json; charset=utf-8",
     			"X-Requested-With": "XMLHttpRequest"
     		});
     	},
 
     	'multipart/form-data': function(headers) {
-    		return assign$7(headers, {
+    		return assign$8(headers, {
     			"Content-Type": 'multipart/form-data',
     			"X-Requested-With": "XMLHttpRequest"
     		});
     	},
 
     	'audio/wav': function(headers) {
-    		return assign$7(headers, {
+    		return assign$8(headers, {
     			"Content-Type": 'audio/wav',
     			"X-Requested-With": "XMLHttpRequest"
     		});
     	},
 
     	'default': function(headers) {
-    		return assign$7(headers, {
+    		return assign$8(headers, {
     			"Content-Type": 'application/x-www-form-urlencoded',
     			"X-Requested-With": "XMLHttpRequest"
     		});
@@ -6674,9 +6684,6 @@ var dom = (function (exports) {
     if (window.console && window.console.log) {
         window.console.log('%cdom%c         – https://github.com/stephband/dom', 'color: #3a8ab0; font-weight: 600;', 'color: inherit; font-weight: 400;');
     }
-    const assign$8  = curry$1(_assign, true);
-    const append$2  = curry$1(append$1, true);
-    const prepend$3 = curry$1(prepend$2, true);
     const before$1  = curry$1(before, true);
     const after$1   = curry$1(after, true);
     const replace$1 = curry$1(replace, true);
@@ -6716,7 +6723,7 @@ var dom = (function (exports) {
     exports.after = after$1;
     exports.animate = animate$1;
     exports.append = append$2;
-    exports.assign = assign$8;
+    exports.assign = assign$5;
     exports.attribute = attribute$1;
     exports.before = before$1;
     exports.boundingBox = boundingBox;

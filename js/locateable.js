@@ -29,7 +29,7 @@ you have a scrolling navigation:
 
 import '../polyfills/element.scrollintoview.js';
 import { by, get } from '../../fn/module.js';
-import { box, features, isInternalLink, select } from '../module.js';
+import { rect, features, isInternalLink, select } from '../module.js';
 
 var DEBUG = false;
 
@@ -89,7 +89,7 @@ function update(time) {
 
     frameTime = time;
 
-    const boxes = locateables.map(box).sort(byTop);
+    const boxes = locateables.map(rect).sort(byTop);
     let  n = -1;
 
     while (boxes[++n]) {

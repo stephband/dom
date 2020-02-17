@@ -65,7 +65,7 @@ export const frameClass  = curry(_frameClass, true);
 
 // Style
 
-export { default as box } from './modules/box.js';
+export { default as rect } from './modules/rect.js';
 export { default as boundingBox } from './modules/bounding-box.js';
 
 import { default as _offset } from './modules/offset.js';

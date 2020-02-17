@@ -6,7 +6,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
 */
 
 import { exponentialOut as expOut, noop } from '../../fn/module.js';
-import { animate, box, features, offset } from '../module.js';
+import { animate, rect, features, offset } from '../module.js';
 
 // Duration and easing of scroll animation
 const config = {
@@ -25,7 +25,7 @@ function scrollToNode(target, behavior) {
         // We cannot gaurantee that body height is 100%. Use the window
         // innerHeight instead.
         window.innerHeight :
-        box(document.scrollingElement).height ;
+        rect(document.scrollingElement).height ;
 
     const top = (coords[1] - scrollPaddingTop) > (scrollHeight - scrollBoxHeight) ?
         scrollHeight - scrollBoxHeight :

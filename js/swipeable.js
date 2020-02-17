@@ -1,6 +1,6 @@
 
 import { last, wrap, set, toPolar } from '../../fn/module.js';
-import { attribute, box, events, children, classes, closest, gestures, matches, select, style } from '../module.js';
+import { attribute, rect, events, children, classes, closest, gestures, matches, select, style } from '../module.js';
 import './switchable.js';
 
 const selector = '.swipeable, [swipeable]';
@@ -55,8 +55,8 @@ function swipe(node, angle) {
 }
 
 function transform(node, active) {
-	var l1 = box(node).left;
-	var l2 = box(active).left;
+	var l1 = rect(node).left;
+	var l2 = rect(active).left;
 
 	// Round the translation - without rounding images and text become
 	// slightly fuzzy as they are antialiased.
@@ -65,13 +65,13 @@ function transform(node, active) {
 }
 
 function update(swipeable, node) {
-	var pos = box(node);
+	var pos = rect(node);
 
 	// node may not be visible, in which case we can't update
 	if (!pos) { return; }
 
 	var l1 = pos.left;
-	var l2 = box(swipeable).left;
+	var l2 = rect(swipeable).left;
 	var l  = l1 - l2 - style('margin-left', node);
 
 	swipeable.style.transform = 'translate3d(' + (-l) + 'px, 0px, 0px)';

@@ -5357,10 +5357,10 @@ var dom = (function (exports) {
     }
 
     /*
-    box(node)
+    rect(node)
 
-    Returns a `DOMRect` object describing the draw box of `node`.
-    (If `node` is `window` a plain object is returned).
+    Returns a `DOMRect` object describing the draw rectangle of `node`.
+    (If `node` is `window` a preudo-DOMRect object is returned).
     */
 
     function windowBox() {
@@ -5374,7 +5374,7 @@ var dom = (function (exports) {
     	};
     }
 
-    function box(node) {
+    function rect(node) {
     	return node === window ?
     		windowBox() :
     		node.getClientRects()[0] ;
@@ -5392,8 +5392,8 @@ var dom = (function (exports) {
     }
 
     function offset(node1, node2) {
-    	var box1 = box(node1);
-    	var box2 = box(node2);
+    	var box1 = rect(node1);
+    	var box2 = rect(node2);
     	return [box2.left - box1.left, box2.top - box1.top];
     }
 
@@ -6727,7 +6727,6 @@ var dom = (function (exports) {
     exports.attribute = attribute$1;
     exports.before = before$1;
     exports.boundingBox = boundingBox;
-    exports.box = box;
     exports.breakpoint = media;
     exports.children = children;
     exports.classes = classes;
@@ -6777,6 +6776,7 @@ var dom = (function (exports) {
     exports.previous = previous;
     exports.query = select$1;
     exports.ready = ready$1;
+    exports.rect = rect;
     exports.remove = remove$3;
     exports.removeClass = removeClass$1;
     exports.replace = replace$1;

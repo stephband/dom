@@ -1,4 +1,4 @@
-import { choose, compose, id } from '../../fn/module.js';
+import { choose, id } from '../../fn/module.js';
 
 const assign = Object.assign;
 
@@ -90,18 +90,6 @@ const createBody = choose({
 	}
 });
 
-function assignConfig(target, object, data) {
-	// Assigns value unless value is a function, in which case assigns
-	// the result of running value(data)
-	for (name in object) {
-		target[name] = typeof object[name] === 'function' ?
-			object[name](data) :
-			object[name] ;
-	}
-
-	return target;
-}
-
 function formDataToJSON(formData) {
 	return JSON.stringify(
 		// formData.entries() is an iterator, not an array
@@ -152,10 +140,6 @@ function createOptions(method, mimetype, data, controller) {
 		credentials: 'same-origin',
 		signal: controller && controller.signal
 	} ;
-}
-
-function throwError(object) {
-	throw object;
 }
 
 const responders = {
@@ -311,4 +295,4 @@ export function throttledRequest(type, mimetype, url) {
         .then(send)
         .catch(ignoreAbortError);
     };
-};
+}

@@ -28,12 +28,10 @@ representing a value in pixels.
 */
 
 import ready from './ready.js';
-import { call, id, overload, toType } from '../../fn/module.js';
+import { id, overload, toType } from '../../fn/module.js';
 import { toPx } from './values.js';
 
 const rules = [];
-const rem = /(\d*\.?\d+)r?em/;
-const rpercent = /(\d*\.?\d+)%/;
 
 const types = overload(toType, {
     'number':   id,

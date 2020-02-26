@@ -12,4 +12,4 @@ export function attribute(name, node) {
 	return node.getAttribute && node.getAttribute(name) || undefined ;
 }
 
-export default curry(attribute, true);
+export default curry(attribute, true)

@@ -19,4 +19,4 @@ export function matches(selector, node) {
 		tag(node) === selector ;
 }
 
-export default curry(matches, true);
+export default curry(matches, true)

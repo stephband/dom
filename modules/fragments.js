@@ -28,9 +28,9 @@ Returns a DOM fragment of the parsed html `string`.
 
 export function fragmentFromHTML(html, contextTag) {
     if (contextTag) {
-        let node = document.createElement(contextTag);
+        const node = document.createElement(contextTag);
         node.innerHTML = html;
-    	return fragmentFromChildren(node);
+        return fragmentFromChildren(node);
     }
 
     return document
@@ -60,7 +60,7 @@ export function fragmentFromId(id) {
 	// with content in the DOM - ids, for example. Remove the template as
 	// a precaution.
 	if (t === 'template' && !features.template) {
-		remove(node);
+		node.remove();
 	}
 
 	return t === 'template' ? fragmentFromTemplate(node) :

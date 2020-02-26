@@ -41,4 +41,4 @@ export default function transition(duration, fn) {
 	return function cancel() {
 		cancelAnimationFrame(id);
 	};
-};
+}

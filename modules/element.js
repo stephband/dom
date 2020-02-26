@@ -14,8 +14,6 @@ element(name, options)
    }
 */
 
-import { choose, isDefined, nothing } from '../../fn/module.js';
-
 const shadowOptions = { mode: 'open' };
 
 const constructors = {

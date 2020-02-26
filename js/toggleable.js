@@ -22,7 +22,7 @@ var match = matches('.toggleable, [toggleable]');
 // Functions
 
 var on      = events.on;
-var off     = events.off;
+//var off     = events.off;
 var trigger = events.trigger;
 
 var actives = [];

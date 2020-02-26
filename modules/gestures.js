@@ -183,7 +183,6 @@ function checkThreshold(e, events, touch, removeHandlers, push) {
 		return;
 	}
 
-	var e0   = events[0];
 	var node = events[0].target;
 
 	// Unbind handlers that tracked the touch or mouse up till now.
@@ -312,4 +311,4 @@ export default function gestures(node) {
 			}
 		};
 	});
-};
+}

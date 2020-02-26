@@ -11,4 +11,4 @@ export function select(selector, node) {
 	return toArray(node.querySelectorAll(selector));
 }
 
-export default curry(select, true);
+export default curry(select, true)

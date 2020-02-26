@@ -1,5 +1,5 @@
 
-/*
+/**
 attribute(name, node)
 
 Returns the string contents of attribute `name`. If the attribute is not set,

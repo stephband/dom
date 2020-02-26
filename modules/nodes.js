@@ -9,7 +9,7 @@ var types = {
 	11: 'fragment'
 };
 
-/*
+/**
 type(node)
 
 Returns one of `'element'`, `'text'`, `'comment'`, `'document'`,
@@ -20,7 +20,7 @@ export function type(node) {
 	return types[node.nodeType];
 }
 
-/*
+/**
 isElementNode(node)
 
 Returns `true` if `node` is an element node.
@@ -30,7 +30,7 @@ export function isElementNode(node) {
 	return node.nodeType === 1;
 }
 
-/*
+/**
 isTextNode(node)
 
 Returns `true` if `node` is a text node.
@@ -40,7 +40,7 @@ export function isTextNode(node) {
 	return node.nodeType === 3;
 }
 
-/*
+/**
 isCommentNode(node)
 
 Returns `true` if `node` is a comment.
@@ -50,7 +50,7 @@ export function isCommentNode(node) {
 	return node.nodeType === 8;
 }
 
-/*
+/**
 isFragmentNode(node)
 
 Returns `true` if `node` is a fragment.
@@ -68,7 +68,7 @@ function prefixSlash(str) {
 	return (/^\//.test(str) ? '' : '/') + str ;
 }
 
-/*
+/**
 isInternalLink(node)
 
 Returns `true` if the `href` of `node` points to a resource on the same domain

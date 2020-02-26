@@ -16,7 +16,7 @@ const defaults    = {
 	//composed: false
 };
 
-/*
+/**
 Event(type, properties)
 
 Creates a CustomEvent of type `type`.

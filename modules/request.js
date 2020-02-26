@@ -2,7 +2,7 @@ import { choose, compose, id } from '../../fn/module.js';
 
 const assign = Object.assign;
 
-/*
+/**
 config
 
 ```{
@@ -203,7 +203,7 @@ function respond(response) {
 }
 
 
-/*
+/**
 request(type, mimetype, url, data)
 */
 
@@ -220,7 +220,7 @@ export default function request(type = 'GET', mimetype = 'application/json', url
 	.then(respond);
 }
 
-/*
+/**
 requestGet(url)
 A shortcut for `request('get', 'application/json', url)`
 */
@@ -229,7 +229,7 @@ export function requestGet(url) {
 	return request('GET', 'application/json', url, {});
 }
 
-/*
+/**
 requestPatch(url, data)
 A shortcut for `request('patch', 'application/json', url, data)`
 */
@@ -238,7 +238,7 @@ export function requestPatch(url, data) {
 	return request('PATCH', 'application/json', url, data);
 }
 
-/*
+/**
 requestPost(url, data)
 A shortcut for `request('post', 'application/json', url, data)`
 */
@@ -247,7 +247,7 @@ export function requestPost(url, data) {
 	return request('POST', 'application/json', url, data);
 }
 
-/*
+/**
 requestDelete(url, data)
 A shortcut for `request('delete', 'application/json', url, data)`
 */
@@ -256,7 +256,7 @@ export function requestDelete(url, data) {
 	return request('DELETE', 'application/json', url, data);
 }
 
-/*
+/**
 throttledRequest(type, mimetype, url)
 */
 

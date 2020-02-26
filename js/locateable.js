@@ -1,6 +1,6 @@
 
-/*
-locateable
+/**
+[locateable]
 
 An element with a `locateable` attribute updates the browser location hash
 with its `id` when scrolled into view.
@@ -25,7 +25,7 @@ you have a scrolling navigation:
 <article locateable id="fish">...</article>
 <article locateable id="chips">...</article>
 ```
-*/
+**/
 
 import '../polyfills/element.scrollintoview.js';
 import { by, get } from '../../fn/module.js';

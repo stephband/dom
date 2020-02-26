@@ -1,6 +1,6 @@
-/* DOM Mutation */
+/** DOM Mutation */
 
-/*
+/**
 empty(node)
 
 Removes content of `node`.
@@ -11,7 +11,7 @@ export function empty(node) {
 	return node;
 }
 
-/*
+/**
 remove(node)
 
 Removes `node` from the DOM.
@@ -29,7 +29,7 @@ export function remove(node) {
 	return node;
 }
 
-/*
+/**
 before(target, node)
 
 Inserts `node` before target.
@@ -40,7 +40,7 @@ export function before(target, node) {
 	return node;
 }
 
-/*
+/**
 after(target, node)
 
 Inserts `node` after `target`.
@@ -51,7 +51,7 @@ export function after(target, node) {
 	return node;
 }
 
-/*
+/**
 replace(target, node)
 
 Swaps `target` for `node`.

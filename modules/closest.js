@@ -1,5 +1,5 @@
 
-/*
+/**
 closest(selector, node)
 
 Returns the node itself or the closest ancestor that matches `selector`.

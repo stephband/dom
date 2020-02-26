@@ -1,5 +1,5 @@
 
-/*
+/**
 rect(node)
 
 Returns a `DOMRect` object describing the draw rectangle of `node`.

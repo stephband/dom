@@ -1,4 +1,4 @@
-/*
+/**
 style(property, node)
 
 Returns the computed style `property` of `node`.

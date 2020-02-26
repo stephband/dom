@@ -1,6 +1,6 @@
 
 
-/*
+/**
 transition(duration, fn)
 
 Calls `fn` on each animation frame until `duration` seconds has elapsed. `fn`

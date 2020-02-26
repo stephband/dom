@@ -1,5 +1,5 @@
 
-/*
+/**
 gestures(node)
 
 Returns a stream of streams of events. Each stream of events represents the

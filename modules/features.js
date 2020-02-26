@@ -3,7 +3,7 @@ import prefix from './prefix.js';
 
 const define = Object.defineProperties;
 
-/*
+/**
 features
 
 An object of feature detection results.

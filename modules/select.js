@@ -1,5 +1,5 @@
 
-/*
+/**
 select(selector, node)
 
 Returns an array of all descendants of `node` that match `selector`.

@@ -1,6 +1,6 @@
 
 
-/*
+/**
 prefix(string)
 Returns a prefixed CSS property name where a prefix is required in the current
 browser.

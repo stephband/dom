@@ -75,7 +75,7 @@ const keyCodes = Object.entries(keyStrings).reduce(function(object, entry) {
 	return object;
 }, {});
 
-/*
+/**
 toKey(e)
 
 Returns key string corresponding to `e.keyCode`, or `undefined`.

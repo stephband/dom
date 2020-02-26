@@ -1,4 +1,4 @@
-/*
+/**
 identify(node)
 
 Returns the id of `node`, or where `node` has no id, a random id is generated,

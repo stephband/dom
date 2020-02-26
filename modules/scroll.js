@@ -1,5 +1,5 @@
 
-/*
+/**
 disableScroll(node)
 Disables scrolling by setting `overflow: hidden` on `node` while maintaining
 the current scrollTop, effectively causing the node to 'freeze' in position.
@@ -26,7 +26,7 @@ export function disableScroll(node) {
 	//add(document, 'touchmove', preventDefaultOutside, layer);
 }
 
-/*
+/**
 enableScroll(node)
 Enables scrolling by removing `overflow: hidden` on `node`.
 */

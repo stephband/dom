@@ -1,6 +1,6 @@
 
 
-/*
+/**
 animate(duration, transform, name, object, value)
 
 Animates property `name` of `object` to `value` over `duration` seconds, using

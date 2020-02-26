@@ -48,7 +48,7 @@ function unlisten(source, type) {
 	return source;
 }
 
-/*
+/**
 events(type, node)
 
 Returns a mappable stream of events heard on `node`:
@@ -112,7 +112,7 @@ export default function events(type, node) {
 }
 
 
-/*
+/**
 isPrimaryButton(e)
 
 Returns `true` if user event is from the primary (normally the left or only)
@@ -125,7 +125,7 @@ export function isPrimaryButton(e) {
 	return (e.which === 1 && !e.ctrlKey && !e.altKey && !e.shiftKey);
 }
 
-/*
+/**
 preventDefault(e)
 
 Calls `e.preventDefault()`.
@@ -223,7 +223,7 @@ export function off(node, type, fn) {
 	return node;
 }
 
-/*
+/**
 trigger(type, node)
 
 Triggers event of `type` on `node`.

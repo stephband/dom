@@ -1,5 +1,5 @@
 
-/*
+/**
 media(query, enterFn, exitFn)
 
 Evaluates `query` object, which is an object describing a media and scroll

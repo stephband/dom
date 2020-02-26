@@ -1,5 +1,5 @@
 
-/*
+/**
 tag(node)
 
 Returns the tag name of `node`, in lowercase.

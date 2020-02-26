@@ -1,4 +1,4 @@
-/*
+/**
 children(node)
 
 Returns an array of child elements of `node`.

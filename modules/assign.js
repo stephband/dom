@@ -1,4 +1,4 @@
-/*
+/**
 assign(node, properties)
 
 Assigns each property of `properties` to `node`, as a property where that

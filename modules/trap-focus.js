@@ -3,7 +3,7 @@ import { select } from './select.js';
 
 let untrapFocus = noop;
 
-/*
+/**
 trapFocus(node)
 Constrains focus to focusable elements inside `node`.
 Returns a function that removes the trap.

@@ -1,4 +1,4 @@
-/*
+/**
 toggleable
 
 An element with the `toggleable` attribute is activated and deactivated when
@@ -9,7 +9,7 @@ class `"on"`.
 
 With a little hide/show style, a toggleable can be used to make menus, drawers,
 accordions and so on.
-*/
+**/
 
 import { remove } from '../../fn/module.js';
 import { get, events, closest, matches, isPrimaryButton, isInternalLink, identify } from '../module.js';

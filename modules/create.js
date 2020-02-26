@@ -67,7 +67,7 @@ function constructHTML(tag, html) {
 }
 
 
-/*
+/**
 create(tag, content)
 
 Constructs and returns a new DOM node.

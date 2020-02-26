@@ -1,5 +1,5 @@
 
-/*
+/**
 matches(selector, node)
 
 Returns `true` if `node` matches `selector`, otherwise `false`.

@@ -25,7 +25,7 @@ function parse(type, string) {
 	return xml;
 }
 
-/*
+/**
 parseHTML(string)
 Returns an HTML document parsed from `string`, or undefined.
 */
@@ -34,7 +34,7 @@ export function parseHTML(string) {
 	return parse('html', string);
 }
 
-/*
+/**
 parseSVG(string)
 Returns an SVG document parsed from `string`, or undefined.
 */
@@ -43,7 +43,7 @@ export function parseSVG(string) {
 	return parse('svg', string);
 }
 
-/*
+/**
 parseXML(string)
 Returns an XML document parsed from `string`, or undefined.
 */

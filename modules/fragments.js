@@ -21,7 +21,7 @@ export function fragmentFromChildren(node) {
 }
 
 
-/*
+/**
 fragmentFromHTML(string)
 Returns a DOM fragment of the parsed html `string`.
 */
@@ -38,7 +38,7 @@ export function fragmentFromHTML(html, contextTag) {
     .createContextualFragment(html);
 }
 
-/*
+/**
 fragmentFromTemplate(node)
 Returns a DOM fragment containing the content of the template `node`.
 */

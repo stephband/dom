@@ -1,5 +1,5 @@
 
-/*
+/**
 element(name, options)
 
 - name: 'name'     Custom element tag name

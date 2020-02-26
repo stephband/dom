@@ -1,4 +1,4 @@
-/*
+/**
 append(target, node)
 
 Appends `node`, which may be a string or DOM node, to `target`. Returns `node`.

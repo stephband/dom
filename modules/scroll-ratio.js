@@ -1,4 +1,4 @@
-/*
+/**
 scrollRatio(node)
 Return the ratio of scrollTop to scrollHeight - clientHeight.
 */

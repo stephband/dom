@@ -1,4 +1,4 @@
-/*
+/**
 ready(fn)
 Calls `fn` on DOM content load, or if later than content load, immediately
 (on the next tick).

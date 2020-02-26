@@ -1,6 +1,6 @@
 
 
-/*
+/**
 escape(string)
 Escapes `string` for setting safely as HTML.
 */

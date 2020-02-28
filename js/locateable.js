@@ -1,6 +1,6 @@
 
 /**
-[locateable]
+locateable
 
 An element with a `locateable` attribute updates the browser location hash
 with its `id` when scrolled into view.

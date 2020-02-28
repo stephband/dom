@@ -1,5 +1,5 @@
 
-/*
+/**
 validateable
 
 <p>The <strong>validateable</strong> attribute can be set on an
@@ -55,7 +55,7 @@ validation messages are shown.</p>
 <label for="email">email</label>
 <input type="email" id="email" name="email" data-val-type="Wrong type, knucklehead" />
 </form>
-*/
+**/
 
 
 

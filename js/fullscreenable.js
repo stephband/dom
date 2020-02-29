@@ -1,4 +1,4 @@
-/*
+/**
 fullscreenable
 
 Links refering to [fullscreenable] elements put those elements into
@@ -8,7 +8,7 @@ Fullscreen capability is not reliably queried in CSS (through @supports or
 other means), so this script also adds the class `fullscreen-support` to the
 document root in navigators where support is detected, for styling of UI that
 depends on fullscreen support.
-*/
+**/
 
 import { matches } from '../module.js';
 import { handlers } from './dom-activate.js';

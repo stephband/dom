@@ -1,4 +1,4 @@
-/*
+/**
 switchable
 
 A `switchable` is given the class `"active"` when a link that references
@@ -26,7 +26,7 @@ Switchables can be used to make tabs, slideshows, accordions and so on.
     Tab 3
 </section>
 ```
-*/
+**/
 
 import { events, trigger, matches, children } from '../module.js';
 import { matchers } from './dom-activate.js';

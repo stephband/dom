@@ -1,4 +1,9 @@
 
+
+/**
+swipeable
+**/
+
 import { last, wrap, set, toPolar } from '../../fn/module.js';
 import { attribute, rect, events, children, classes, closest, gestures, matches, select, style } from '../module.js';
 import './switchable.js';

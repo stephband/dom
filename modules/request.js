@@ -2,7 +2,7 @@ import { choose, id } from '../../fn/module.js';
 
 const assign = Object.assign;
 
-/**
+/*
 config
 
 ```{
@@ -189,7 +189,11 @@ function respond(response) {
 
 /**
 request(type, mimetype, url, data)
-*/
+
+Uses `fetch()` to send a request to `url`. Where `type` is `"GET"`, `data` is
+serialised and appended to the URL, otherwise it is sent as a payload
+conforming to the given `mimetype`.
+**/
 
 export default function request(type = 'GET', mimetype = 'application/json', url, data) {
 	const method = type.toUpperCase();
@@ -207,7 +211,7 @@ export default function request(type = 'GET', mimetype = 'application/json', url
 /**
 requestGet(url)
 A shortcut for `request('get', 'application/json', url)`
-*/
+**/
 
 export function requestGet(url) {
 	return request('GET', 'application/json', url, {});
@@ -216,7 +220,7 @@ export function requestGet(url) {
 /**
 requestPatch(url, data)
 A shortcut for `request('patch', 'application/json', url, data)`
-*/
+**/
 
 export function requestPatch(url, data) {
 	return request('PATCH', 'application/json', url, data);
@@ -225,7 +229,7 @@ export function requestPatch(url, data) {
 /**
 requestPost(url, data)
 A shortcut for `request('post', 'application/json', url, data)`
-*/
+**/
 
 export function requestPost(url, data) {
 	return request('POST', 'application/json', url, data);
@@ -234,13 +238,13 @@ export function requestPost(url, data) {
 /**
 requestDelete(url, data)
 A shortcut for `request('delete', 'application/json', url, data)`
-*/
+**/
 
 export function requestDelete(url, data) {
 	return request('DELETE', 'application/json', url, data);
 }
 
-/**
+/*
 throttledRequest(type, mimetype, url)
 */
 

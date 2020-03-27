@@ -72,7 +72,7 @@ import { default as _offset } from './modules/offset.js';
 export const offset = curry(_offset, true);
 
 
-export * from './modules/values.js';
+export * from './modules/parse-value.js';
 
 export { default as prefix } from './modules/prefix.js';
 

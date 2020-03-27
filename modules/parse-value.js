@@ -32,12 +32,12 @@ function getFontSize() {
 }
 
 /**
-toPx(value)`
+parseValue(value)`
 
 Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in pixels.
 */
 
-export const toPx = overload(toType, {
+export const parseValue = overload(toType, {
 	'number': id,
 
 	'string': function(string) {
@@ -59,7 +59,7 @@ Takes number in pixels and returns a string of the form '10rem'.
 */
 
 export function toRem(n) {
-	return (toPx(n) / getFontSize()) + 'rem';
+	return (parseValue(n) / getFontSize()) + 'rem';
 }
 
 /**
@@ -69,7 +69,7 @@ Takes number in pixels and returns a string of the form '10vw'.
 */
 
 export function toVw(n) {
-	return (100 * toPx(n) / window.innerWidth) + 'vw';
+	return (100 * parseValue(n) / window.innerWidth) + 'vw';
 }
 
 /**
@@ -79,5 +79,5 @@ Takes number in pixels and returns a string of the form '10vh'.
 */
 
 export function toVh(n) {
-	return (100 * toPx(n) / window.innerHeight) + 'vh';
+	return (100 * parseValue(n) / window.innerHeight) + 'vh';
 }

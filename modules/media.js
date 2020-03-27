@@ -29,13 +29,13 @@ representing a value in pixels.
 
 import ready from './ready.js';
 import { id, overload, toType } from '../../fn/module.js';
-import { toPx } from './values.js';
+import { parseValue } from './parse-value.js';
 
 const rules = [];
 
 const types = overload(toType, {
     'number':   id,
-    'string':   toPx,
+    'string':   parseValue,
     'function': function(fn) { return fn(); }
 });
 

@@ -83,7 +83,7 @@ function update(swipeable, node) {
 }
 
 
-gestures(document)
+gestures({ selector: selector, threshold: 4 }, document)
 .each(function touch(stream) {
 	// First event is touchstart or mousedown
 	var e = stream.shift();
@@ -91,8 +91,6 @@ gestures(document)
 	if (e.defaultPrevented) { return; }
 
 	var node = closest(selector, e.target);
-	if (!node) { return; }
-
 	var classy = classes(node);
 	var transform = style('transform', node);
 

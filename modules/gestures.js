@@ -1,6 +1,6 @@
 
 /**
-gestures(node)
+gestures(options, node)
 
 Returns a stream of streams of events. Each stream of events represents the
 motion of a single finger. The types of events the stream contains is either
@@ -9,7 +9,8 @@ or the touch objects that go with `'touchstart'`, any number of `'touchmove'`s
 and a `'touchend'`.
 
 ```js
-gestures(document).each(function(events) {
+gestures({ selector: '.thing', threshold: '0.5rem' }, document)
+.each(function(events) {
 	// First event is a mousedown or touchstart event
 	const e0 = events.shift();
 
@@ -26,7 +27,8 @@ gestures(document).each(function(events) {
 */
 
 import { Stream } from '../../fn/module.js';
-import { isPrimaryButton, preventDefault, on, off } from './events.js';
+import { parseValue } from './parse-value.js';
+import { isPrimaryButton, on, off } from './events.js';
 
 export const config = {
 	// Number of pixels a pressed pointer travels before gesture is started.
@@ -55,6 +57,7 @@ var touchevents = {
 	end:    'touchend'
 };
 
+const assign = Object.assign;
 
 function isIgnoreTag(e) {
 	var tag = e.target.tagName;
@@ -95,30 +98,35 @@ function changedTouch(e, data) {
 	return touch;
 }
 
+function preventOne(e) {
+	e.preventDefault();
+	e.currentTarget.removeEventListener(e.type, preventOne);
+}
+
+function preventOneClick(e) {
+	e.currentTarget.addEventListener('click', preventOne);
+}
+
 
 // Handlers that decide when the first movestart is triggered
 
-function mousedown(e, push) {
+function mousedown(e, push, options) {
 	// Ignore non-primary buttons
 	if (!isPrimaryButton(e)) { return; }
 
 	// Ignore form and interactive elements
 	if (isIgnoreTag(e)) { return; }
 
-	// If we preventDefault we need to recreate focus... but we shouldnt
-	// preventDefault here anyway (this is a note that inherited from a
-	// refactor of dom-gesture event, which no longer exists).
-	//e.preventDefault();
-	//const focusable = e.target.closest('[tabindex]');
-	//focusable && focusable.focus();
+	// Check target matches selector
+	if (options.selector && !e.target.closest(options.selector)) { return; }
 
-	on(document, mouseevents.move, mousemove, [e], push);
+	on(document, mouseevents.move, mousemove, [e], push, options);
 	on(document, mouseevents.cancel, mouseend, [e]);
 }
 
-function mousemove(e, events, push){
+function mousemove(e, events, push, options){
 	events.push(e);
-	checkThreshold(e, events, e, removeMouse, push);
+	checkThreshold(e, events, e, removeMouse, push, options);
 }
 
 function mouseend(e, data) {
@@ -130,9 +138,9 @@ function removeMouse() {
 	off(document, mouseevents.cancel, mouseend);
 }
 
-function touchstart(e, push) {
-	// Don't get in the way of interaction with form elements
-	if (config.ignoreTags[e.target.tagName.toLowerCase()]) { return; }
+function touchstart(e, push, options) {
+	// Ignore form and interactive elements
+	if (isIgnoreTag(e)) { return; }
 
 	var touch = e.changedTouches[0];
 
@@ -153,14 +161,14 @@ function touchstart(e, push) {
 		touchend:   function() { touchend.apply(this, arguments); }
 	};
 
-	on(document, touchevents.move, event.touchmove, [event], push);
+	on(document, touchevents.move, event.touchmove, [event], push, options);
 	on(document, touchevents.cancel, event.touchend, [event]);
 }
 
-function touchmove(e, events, push) {
+function touchmove(e, events, push, options) {
 	var touch = changedTouch(e, events[0]);
 	if (!touch) { return; }
-	checkThreshold(e, events, touch, removeTouch, push);
+	checkThreshold(e, events, touch, removeTouch, push, options);
 }
 
 function touchend(e, events) {
@@ -174,12 +182,13 @@ function removeTouch(events) {
 	off(document, touchevents.cancel, events[0].touchend);
 }
 
-function checkThreshold(e, events, touch, removeHandlers, push) {
+function checkThreshold(e, events, touch, removeHandlers, push, options) {
 	var distX = touch.pageX - events[0].pageX;
 	var distY = touch.pageY - events[0].pageY;
+	var threshold = parseValue(options.threshold);
 
 	// Do nothing if the threshold has not been crossed.
-	if ((distX * distX) + (distY * distY) < (config.threshold * config.threshold)) {
+	if ((distX * distX) + (distY * distY) < (threshold * threshold)) {
 		return;
 	}
 
@@ -205,8 +214,9 @@ function activeMouseend(e, data, stop) {
 }
 
 function removeActiveMouse() {
+	off(document, mouseevents.end, preventOneClick);
 	off(document, mouseevents.move, activeMousemove);
-	off(document, mouseevents.end, activeMouseend);
+	off(document, mouseevents.cancel, activeMouseend);
 }
 
 function activeTouchmove(e, data, push) {
@@ -251,8 +261,8 @@ function touches(node, events) {
 			push.apply(null, events);
 
 			// We're dealing with a mouse event.
-			// Stop clicks from propagating during a move
-			on(node, 'click', preventDefault);
+			// Stop click from propagating at the end of a move
+			on(document, mouseevents.end, preventOneClick);
 			on(document, mouseevents.move, activeMousemove, data, push);
 			on(document, mouseevents.cancel, activeMouseend, data, stop);
 
@@ -262,15 +272,7 @@ function touches(node, events) {
 					stop();
 				}
 			};
-		})
-		.done(function () {
-			// Unbind the click suppressor, waiting until after mouseup
-			// has been handled. I don't know why it has to be any longer than
-			// a tick, but it does, in Chrome at least.
-			setTimeout(function () {
-				off(node, 'click', preventDefault);
-			}, 120);
-		}) :
+		}):
 
 		Stream(function TouchSource(push, stop) {
 			var data = {
@@ -299,10 +301,13 @@ function touches(node, events) {
 		});
 }
 
-export default function gestures(node) {
+export default function gestures(options, node) {
+	options = node ? assign({}, config, options) : config ;
+	node    = node ? node : options ;
+
 	return new Stream(function(push, stop) {
-		on(node, 'mousedown', mousedown, push);
-		on(node, 'touchstart', touchstart, push);
+		on(node, 'mousedown', mousedown, push, options);
+		on(node, 'touchstart', touchstart, push, options);
 
 		return {
 			stop: function() {

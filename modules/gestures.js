@@ -31,7 +31,8 @@ import { parseValue } from './parse-value.js';
 import { isPrimaryButton, on, off } from './events.js';
 
 export const config = {
-	// Number of pixels a pressed pointer travels before gesture is started.
+	// Number of pixels, or string CSS length, that a pressed pointer travels
+	// before gesture is started.
 	threshold: 4,
 
 	ignoreTags: {
@@ -141,6 +142,9 @@ function removeMouse() {
 function touchstart(e, push, options) {
 	// Ignore form and interactive elements
 	if (isIgnoreTag(e)) { return; }
+
+	// Check target matches selector
+	if (options.selector && !e.target.closest(options.selector)) { return; }
 
 	var touch = e.changedTouches[0];
 

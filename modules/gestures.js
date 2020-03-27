@@ -306,17 +306,35 @@ function touches(node, events) {
 }
 
 export default function gestures(options, node) {
-	options = node ? assign({}, config, options) : config ;
-	node    = node ? node : options ;
+	// Support legacy signature gestures(node)
+	if (!node) {
+		console.trace('Deprecated gestures(node), now gestures(options, node)');
+	}
+
+	options = node ?
+		options ? assign({}, config, options) : config :
+		config ;
+	node = node ?
+		node :
+		options ;
 
 	return new Stream(function(push, stop) {
-		on(node, 'mousedown', mousedown, push, options);
-		on(node, 'touchstart', touchstart, push, options);
+		function mouseHandler(e) {
+			mousedown(e, push, options);
+		}
+
+		function touchHandler(e) {
+			touchstart(e, push, options);
+		}
+
+		on(node, 'mousedown', mouseHandler);
+		on(node, 'touchstart', touchHandler);
 
 		return {
 			stop: function() {
-				off(node, 'mousedown', mousedown);
-				off(node, 'touchstart', touchstart);
+				off(node, 'mousedown', mouseHandler);
+				off(node, 'touchstart', touchHandler);
+				stop();
 			}
 		};
 	});

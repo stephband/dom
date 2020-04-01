@@ -195,9 +195,9 @@ serialised and appended to the URL, otherwise it is sent as a payload
 conforming to the given `mimetype`.
 **/
 
-export default function request(type = 'GET', url, data, mimetype = 'application/json') {
+export function request(type = 'GET', url, data, mimetype = 'application/json') {
     if (url.startsWith('application/') || url.startsWith('multipart/') || url.startsWith('text/') || url.startsWith('audio/')) {
-        console.warn('request(type, url, data, mimetype) parameter order has changed. You passed (type, mimetype, url, data).');
+        console.trace('request(type, url, data, mimetype) parameter order has changed. You passed (type, mimetype, url, data).');
         url      = arguments[1];
         data     = arguments[2];
         mimetype = arguments[3];

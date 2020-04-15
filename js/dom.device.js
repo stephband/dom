@@ -35,8 +35,16 @@ function mousedown(e) {
 }
 
 function keydown(e) {
-    // If key is not tab, enter or escape do nothing
-    if ([9, 13, 27].indexOf(e.keyCode) === -1) { return; }
+    // If key is not tab, enter, space, escape, page up/down, or arrow key do nothing
+    if ([9, 13, 27, 32, 33, 34, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) === -1) {
+        return;
+    }
+
+    // If current focus is on an input, do nothing
+    if (['input', 'textarea', 'select'].indexOf(document.activeElement.tagName.toLowerCase()) !== -1) {
+        return;
+    }
+
     updateClass(config.keyClass);
 }
 

@@ -1,7 +1,7 @@
 var dom = (function (exports) {
     'use strict';
 
-    /*
+    /**
     cache(fn)
     Returns a function that caches the output values of `fn(input)`
     against input values in a map, such that for each input value
@@ -23,7 +23,7 @@ var dom = (function (exports) {
         };
     }
 
-    /*
+    /**
     curry(fn [, muteable, arity])
     */
     const A     = Array.prototype;
@@ -113,7 +113,7 @@ var dom = (function (exports) {
 
     var curry$1 = curry;
 
-    /*
+    /**
     ready(fn)
     Calls `fn` on DOM content load, or if later than content load, immediately
     (on the next tick).
@@ -151,7 +151,7 @@ var dom = (function (exports) {
         return a;
     }
 
-    /*
+    /**
     choose(fn, map)
     Returns a function that takes its first argument as a key and uses it
     to select a function in `map` which is invoked with the remaining arguments.
@@ -176,14 +176,14 @@ var dom = (function (exports) {
         };
     }
 
-    /*
+    /**
     noop()
     Returns undefined.
     */
 
     function noop() {}
 
-    /*
+    /**
     requestTick(fn)
     Call `fn` on the next tick.
     */
@@ -195,7 +195,7 @@ var dom = (function (exports) {
         return fn;
     }
 
-    /*
+    /**
     toArray(object)
     */
 
@@ -316,7 +316,7 @@ var dom = (function (exports) {
             A$1.slice.call(object, n, m) ;
     }
 
-    /*
+    /**
     exec(regex, fn, string)
 
     Calls `fn` with the result of `regex.exec(string)` if that result is not null,
@@ -377,7 +377,7 @@ var dom = (function (exports) {
             acc ;
     }
 
-    /*
+    /**
     capture(regex, reducers, accumulator, string)
     Parse `string` with `regex`, calling functions in `reducers` to modify
     and return `accumulator`.
@@ -430,7 +430,7 @@ var dom = (function (exports) {
 
     curry$1(capture, true);
 
-    /*
+    /**
     choke(fn, time)
 
     Returns a function that waits for `time` seconds without being invoked
@@ -485,7 +485,7 @@ var dom = (function (exports) {
     //		};
     //	}
 
-    /*
+    /**
     compose(fn2, fn1)
     Calls `fn1`, passes the result to `fn2`, and returns that result.
     */
@@ -593,7 +593,7 @@ var dom = (function (exports) {
 
     curry$1(getPath, true);
 
-    /*
+    /**
     has(key, value, object)
     Returns `true` if `object[key]` is strictly equal to `value`.
     */
@@ -604,14 +604,14 @@ var dom = (function (exports) {
 
     curry$1(has, true);
 
-    /*
+    /**
     id(value)
     Returns `value`.
     */
 
     function id(value) { return value; }
 
-    /*
+    /**
     invoke(name, parameters, object)
     Invokes `object.name()` with `parameters` as arguments. For example:
 
@@ -635,7 +635,7 @@ var dom = (function (exports) {
         return value === undefined ? arguments[1] : latest(source, value) ;
     }
 
-    /*
+    /**
     matches(selector, object)
     Where `selector` is an object containing properties to be compared against
     properties of `object`. If they are all strictly equal, returns `true`,
@@ -680,7 +680,7 @@ var dom = (function (exports) {
         return +new Date() / 1000;
     }
 
-    /*
+    /**
     overload(fn, map)
 
     Returns a function that calls a function at the property of `object` that
@@ -716,7 +716,7 @@ var dom = (function (exports) {
         return fn(value);
     }
 
-    /*
+    /**
     pipe(fn1, fn2, ...)
     Returns a function that calls `fn1`, `fn2`, etc., passing the result of
     calling one function to the next and returning the the last result.
@@ -741,7 +741,7 @@ var dom = (function (exports) {
             })[$private] ;
     }
 
-    /*
+    /**
     set(key, object, value)
 
     ```
@@ -826,7 +826,7 @@ var dom = (function (exports) {
 
     curry$1(setPath, true);
 
-    /*
+    /**
     toClass(object)
     */
 
@@ -836,7 +836,7 @@ var dom = (function (exports) {
         return O.toString.apply(object).slice(8, -1);
     }
 
-    /*
+    /**
     toFixed(number)
     */
 
@@ -854,7 +854,7 @@ var dom = (function (exports) {
 
     curry$1(toFixed, true);
 
-    /*
+    /**
     toType(object)
     Returns `typeof object`.
     */
@@ -918,9 +918,9 @@ var dom = (function (exports) {
         return i;
     }
 
-    /* Properties */
+    /** Properties */
 
-    /*
+    /**
     .status
     Reflects the running status of the stream. When all values have been consumed
     status is `'done'`.
@@ -1048,7 +1048,7 @@ var dom = (function (exports) {
             });
         },
 
-        /*
+        /**
         .unshift(...values)
         Creates a buffer of values at the end of the stream that are read first.
         */
@@ -1197,7 +1197,7 @@ var dom = (function (exports) {
             return stream;
         },
 
-        /*
+        /**
         .dedup()
 
         Filters out consecutive equal values.
@@ -1212,7 +1212,7 @@ var dom = (function (exports) {
             });
         },
 
-        /*
+        /**
         .filter(fn)
 
         Filter values according to the truthiness of `fn(value)`.
@@ -1228,7 +1228,7 @@ var dom = (function (exports) {
             });
         },
 
-        /*
+        /**
         .flat()
         Flattens a list of lists into a single list.
         */
@@ -1254,7 +1254,7 @@ var dom = (function (exports) {
             });
         },
 
-        /*
+        /**
         .flatMap()
         Maps values to lists – `fn(value)` must return an array, stream
         or other type with a `.shift()` method – and flattens those lists into a
@@ -1270,7 +1270,7 @@ var dom = (function (exports) {
             return this.map(fn).flat();
         },
 
-        /*
+        /**
         .latest()
 
         When the stream has a values buffered, passes the last value
@@ -1284,7 +1284,7 @@ var dom = (function (exports) {
             });
         },
 
-        /*
+        /**
         .map(fn)
         Maps values to the result of `fn(value)`.
         */
@@ -1295,10 +1295,10 @@ var dom = (function (exports) {
             }, this.shift));
         },
 
-        ///*
+        ///**
         //.chunk(n)
         //Batches values into arrays of length `n`.
-        //*/
+        //**/
 
         chunk: function(n) {
             return this
@@ -1369,7 +1369,7 @@ var dom = (function (exports) {
             return this.scan(fn, seed).latest().shift();
         },
 
-        /*
+        /**
         .scan(fn, seed)
 
         Calls `fn(accumulator, value)` and emits `accumulator` for each value
@@ -1384,7 +1384,7 @@ var dom = (function (exports) {
             });
         },
 
-        /*
+        /**
         .take(n)
 
         Filters the stream to the first `n` values.
@@ -1457,7 +1457,7 @@ var dom = (function (exports) {
             });
         },
 
-        /*
+        /**
         .rest(n)
 
         Filters the stream to all values after the `n`th value.
@@ -1472,7 +1472,7 @@ var dom = (function (exports) {
             });
         },
 
-        /*
+        /**
         .unique()
 
         Filters the stream to remove any value already emitted.
@@ -1517,7 +1517,7 @@ var dom = (function (exports) {
             };
         },
 
-        /*
+        /**
         .pipe(stream)
 
         Pipes the current stream into `stream`.
@@ -1528,7 +1528,7 @@ var dom = (function (exports) {
             return stream;
         },
 
-        /*
+        /**
         .tap(fn)
 
         Calls `fn(value)` for each value in the stream without modifying
@@ -1584,7 +1584,7 @@ var dom = (function (exports) {
         };
     }
 
-    /*
+    /**
     Timer(duration, getTime)
 
     Create an object with a request/cancel pair of functions that
@@ -1844,9 +1844,9 @@ var dom = (function (exports) {
     });
 
 
-    /* Construct */
+    /** Construct */
 
-    /*
+    /**
     Stream(fn)
 
     Construct a new stream. `fn(push, stop)` is invoked when the stream is started,
@@ -1902,20 +1902,20 @@ var dom = (function (exports) {
     Stream$1.prototype = assign$1(Object.create(Fn.prototype), {
         constructor: Stream$1,
 
-        /* Write */
+        /** Write */
 
-        /*
+        /**
         .push(value)
         Pushes a `value` (or multiple values) into the head of a writeable stream.
         If the stream is not writeable, it does not have a `.push()` method.
         */
 
-        /* Map */
+        /** Map */
 
         //.chunk(n)
         //Batches values into arrays of length `n`.
 
-        /*
+        /**
         .flat()
         Flattens a stream of streams or arrays into a single stream.
         */
@@ -1930,19 +1930,19 @@ var dom = (function (exports) {
             return output;
         },
 
-        /*
+        /**
         .flatMap(fn)
         Maps values to lists – `fn(value)` must return an array, functor, stream
         (or any other duck with a `.shift()` method) and flattens those lists into a
         single stream.
         */
 
-        /*
+        /**
         .map(fn)
         Maps values to the result of `fn(value)`.
         */
 
-        /*
+        /**
         .merge(stream)
         Merges this stream with `stream`, which may be an array, array-like
         or functor.
@@ -1954,37 +1954,37 @@ var dom = (function (exports) {
             return Stream$1.Merge.apply(null, sources);
         },
 
-        /*
+        /**
         .scan(fn, seed)
         Calls `fn(accumulator, value)` and emits `accumulator` for each value
         in the stream.
         */
 
 
-        /* Filter */
+        /** Filter */
 
-        /*
+        /**
         .dedup()
         Filters out consecutive equal values.
         */
 
-        /*
+        /**
         .filter(fn)
         Filter values according to the truthiness of `fn(value)`.
         */
 
-        /*
+        /**
         .latest()
         When the stream has a values buffered, passes the last value
         in the buffer.
         */
 
-        /*
+        /**
         .rest(n)
         Filters the stream to the `n`th value and above.
         */
 
-        /*
+        /**
         .take(n)
         Filters the stream to the first `n` values.
         */
@@ -1997,7 +1997,7 @@ var dom = (function (exports) {
         //    return this.pipe(Stream.clock(timer));
         //},
 
-        /*
+        /**
         .throttle(time)
         Throttles values such that the latest value is emitted every `time` seconds.
         Other values are discarded. The parameter `time` may also be a timer options
@@ -2009,7 +2009,7 @@ var dom = (function (exports) {
             return this.pipe(Stream$1.throttle(timer));
         },
 
-        /*
+        /**
         .wait(time)
         Emits the latest value only after `time` seconds of inactivity.
         Other values are discarded.
@@ -2019,7 +2019,7 @@ var dom = (function (exports) {
             return this.pipe(Stream$1.Choke(time));
         },
 
-        /*
+        /**
         .combine(fn, stream)
         Combines the latest values from this stream and `stream` via the combinator
         `fn` any time a new value is emitted by either stream.
@@ -2032,9 +2032,9 @@ var dom = (function (exports) {
         },
 
 
-        /* Read */
+        /** Read */
 
-        /*
+        /**
         .clone()
         Creates a read-only copy of the stream.
         */
@@ -2070,7 +2070,7 @@ var dom = (function (exports) {
             });
         },
 
-        /*
+        /**
         .each(fn)
         Thirstilly consumes the stream, calling `fn(value)` whenever
         a value is available.
@@ -2087,7 +2087,7 @@ var dom = (function (exports) {
             return this.on(() => Fn.prototype.each.apply(source, args));
         },
 
-        /*
+        /**
         .last(fn)
         Consumes the stream when stopped, calling `fn(value)` with the
         last value read from the stream.
@@ -2101,7 +2101,7 @@ var dom = (function (exports) {
             return this;
         },
 
-        /*
+        /**
         .fold(fn, accumulator)
         Consumes the stream when stopped, calling `fn(accumulator, value)`
         for each value in the stream. Returns a promise.
@@ -2128,16 +2128,16 @@ var dom = (function (exports) {
                 this.fold((acc, value) => (acc === undefined ? value : fn(acc, value)), this.shift()) ;
         },
 
-        /*
+        /**
         .shift()
         Reads a value from the stream. If no values are in the stream, returns
         `undefined`. If this is the last value in the stream, `stream.status`
         is `'done'`.
         */
 
-        /* Lifecycle */
+        /** Lifecycle */
 
-        /*
+        /**
         .done(fn)
         Calls `fn()` after the stream is stopped and all values have been drained.
         */
@@ -2154,7 +2154,7 @@ var dom = (function (exports) {
             return this;
         },
 
-        /*
+        /**
         .start()
         If the stream's producer is startable, starts the stream.
         */
@@ -2165,7 +2165,7 @@ var dom = (function (exports) {
             return this;
         },
 
-        /*
+        /**
         .stop()
         Stops the stream. No more values can be pushed to the stream and any
         consumers added will do nothing. However, depending on the stream's source
@@ -2225,7 +2225,7 @@ var dom = (function (exports) {
     });
 
 
-    /*
+    /**
     Stream.from(values)
     Returns a writeable stream that consumes the array or array-like `values` as
     its buffer.
@@ -2241,7 +2241,7 @@ var dom = (function (exports) {
     };
 
 
-    /*
+    /**
     Stream.fromPromise(promise)
     Returns a stream that uses the given promise as its source. When the promise
     resolves the stream is given its value and stopped. If the promise errors
@@ -2367,7 +2367,7 @@ var dom = (function (exports) {
     });
 
 
-    /*
+    /**
     Stream.fromTimer(timer)
     Create a stream from a `timer` object. A `timer` is an object
     with the properties:
@@ -2401,7 +2401,7 @@ var dom = (function (exports) {
     };
 
 
-    /*
+    /**
     Stream.of(...values)
     Returns a stream that consumes arguments as a buffer. The stream is pushable.
     */
@@ -2613,7 +2613,7 @@ var dom = (function (exports) {
     Remove `value` from `array`. Where `value` is not in `array`, does nothing.
     */
 
-    function remove$1(array, value) {
+    function remove(array, value) {
         if (array.remove) { array.remove(value); }
         var i = array.indexOf(value);
         if (i !== -1) { array.splice(i, 1); }
@@ -3250,7 +3250,7 @@ var dom = (function (exports) {
     //                sign   year        month       day               T or -
     var rdatediff = /^([+-])?(\d{2,})(?:-(\d{2,})(?:-(\d{2,}))?)?(?:([T-])|$)/;
 
-    /*
+    /**
     parseDate(date)
     Parse a date, where, `date` may be:
 
@@ -3272,7 +3272,7 @@ var dom = (function (exports) {
         }
     });
 
-    /*
+    /**
     parseDateLocal(date)
     As `parseDate(date)`, but returns a date object with local time set to the
     result of the parse (or the original date object, if it validates).
@@ -3491,7 +3491,7 @@ var dom = (function (exports) {
     	});
     }
 
-    /*
+    /**
     formatDateLocal(format, locale, date)
     */
 
@@ -3505,7 +3505,7 @@ var dom = (function (exports) {
     	});
     }
 
-    /*
+    /**
     formatDateISO(date)
     Formats `date` (a string or a number or date accepted by `parseDate(date)`) as
     a string in the ISO date format.
@@ -3524,7 +3524,7 @@ var dom = (function (exports) {
 
     var dayMap = [6,0,1,2,3,4,5];
 
-    /*
+    /**
     toDay(date)
     Returns day of week as a number, where monday is `0`.
     */
@@ -3533,7 +3533,7 @@ var dom = (function (exports) {
     	return dayMap[date.getDay()];
     }
 
-    /*
+    /**
     cloneDate(date)
     Returns new date object set to same time.
     */
@@ -3687,7 +3687,7 @@ var dom = (function (exports) {
     	    floorDateByGrain(token, date) ;
     }
 
-    /*
+    /**
     addDate(diff, date)
     Sums `diff` and `date`, where `diff` is a string in ISO date format. Returns
     a new date object.
@@ -3704,7 +3704,7 @@ var dom = (function (exports) {
 
     const diffDateDays = curry$1(_diffDateDays);
 
-    /*
+    /**
     floorDate(token, date)
     Floors date to the start of nearest calendar point in time indicated by `token`:
 
@@ -3732,7 +3732,7 @@ var dom = (function (exports) {
     	return _floorDate(token, parseDate(date));
     });
 
-    /*
+    /**
     formatDate(locale, timezone, format, date)
     Formats `date` (a string or number or date accepted by `parseDate(date)`)
     to the format of the string `format`. The format string may contain the tokens:
@@ -3794,7 +3794,7 @@ var dom = (function (exports) {
     var rtime     = /^([+-])?(\d{2,}):([0-5]\d)(?::((?:[0-5]\d|60)(?:.\d+)?))?$/;
     var rtimediff = /^([+-])?(\d{2,}):(\d{2,})(?::(\d{2,}(?:.\d+)?))?$/;
 
-    /*
+    /**
     parseTime(time)
 
     Where `time` is a string it is parsed as a time in ISO time format: as
@@ -3878,7 +3878,7 @@ var dom = (function (exports) {
     	return n.toFixed(precision).replace(/\.?0+$/, '');
     }
 
-    /*
+    /**
     formatTime(format, time)
     Formats `time` (an 'hh:mm:sss' time string or a number in seconds) to match
     `format`, a string that may contain the tokens:
@@ -4000,7 +4000,7 @@ var dom = (function (exports) {
     		formatTimeString(string, parseTime(time)) ;
     });
 
-    /*
+    /**
     addTime(time1, time2)
     Sums `time2` and `time1`, returning UNIX time as a number in seconds.
     If `time1` is a string, it is parsed as a duration, where numbers
@@ -4024,7 +4024,7 @@ var dom = (function (exports) {
     	return parseTime(time1) - parseTime(time2);
     });
 
-    /*
+    /**
     floorTime(token, time)
     Floors `time` to the nearest `token`, where `token` is one of: `'week'`, `'day'`,
     `'hour'`, `'minute'` or `'second'`. `time` may be an ISO time string or a time
@@ -4128,7 +4128,7 @@ var dom = (function (exports) {
     const find$1        = curry$1(find, true);
     const map$1         = curry$1(map, true);
     const reduce$2      = curry$1(reduce, true);
-    const remove$2      = curry$1(remove$1, true);
+    const remove$1      = curry$1(remove, true);
     const rest$1        = curry$1(rest, true);
     const slice$1       = curry$1(slice, true, 3);
     const sort$1        = curry$1(sort, true);
@@ -4150,7 +4150,7 @@ var dom = (function (exports) {
         return a + b;
     });
 
-    /*
+    /**
     style(property, node)
 
     Returns the computed style `property` of `node`.
@@ -4255,13 +4255,13 @@ var dom = (function (exports) {
     		(fontSize = style("font-size", document.documentElement), 10);
     }
 
-    /*
-    toPx(value)`
+    /**
+    parseValue(value)`
 
     Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in pixels.
     */
 
-    const toPx = overload(toType, {
+    const parseValue = overload(toType, {
     	'number': id,
 
     	'string': function(string) {
@@ -4276,41 +4276,41 @@ var dom = (function (exports) {
     });
 
 
-    /*
+    /**
     toRem(value)
 
     Takes number in pixels and returns a string of the form '10rem'.
     */
 
     function toRem(n) {
-    	return (toPx(n) / getFontSize()) + 'rem';
+    	return (parseValue(n) / getFontSize()) + 'rem';
     }
 
-    /*
+    /**
     toVw(value)
 
     Takes number in pixels and returns a string of the form '10vw'.
     */
 
     function toVw(n) {
-    	return (100 * toPx(n) / window.innerWidth) + 'vw';
+    	return (100 * parseValue(n) / window.innerWidth) + 'vw';
     }
 
-    /*
+    /**
     toVh(value)
 
     Takes number in pixels and returns a string of the form '10vh'.
     */
 
     function toVh(n) {
-    	return (100 * toPx(n) / window.innerHeight) + 'vh';
+    	return (100 * parseValue(n) / window.innerHeight) + 'vh';
     }
 
     const rules = [];
 
     const types = overload(toType, {
         'number':   id,
-        'string':   toPx,
+        'string':   parseValue,
         'function': function(fn) { return fn(); }
     });
 
@@ -4401,7 +4401,7 @@ var dom = (function (exports) {
     ready$1(update$2);
     document.addEventListener('DOMContentLoaded', update$2);
 
-    /*
+    /**
     prefix(string)
     Returns a prefixed CSS property name where a prefix is required in the current
     browser.
@@ -4436,7 +4436,7 @@ var dom = (function (exports) {
 
     const define$1 = Object.defineProperties;
 
-    /*
+    /**
     features
 
     An object of feature detection results.
@@ -4566,6 +4566,21 @@ var dom = (function (exports) {
     		})
     	}
     });
+
+    /**
+    element(name, options)
+
+    - name: 'name'     Custom element tag name
+    - options: {
+           extends:    Name of tag to extend, makes the element a custom built-in
+           shadow:     String or template node or id used to create a shadow DOM
+           attributes: A `{name: fn}` map called when named attributes change
+           properties: A `{name: {get, set}}` map called on named property access
+           construct:  Lifecycle handler called during element construction
+           connect:    Lifecycle handler called when element added to DOM
+           disconnect: Lifecycle handler called when element removed from DOM
+       }
+    */
 
     const shadowOptions = { mode: 'open' };
 
@@ -4729,7 +4744,7 @@ var dom = (function (exports) {
         return Element;
     }
 
-    /*
+    /**
     escape(string)
     Escapes `string` for setting safely as HTML.
     */
@@ -4770,7 +4785,7 @@ var dom = (function (exports) {
     	return xml;
     }
 
-    /*
+    /**
     parseHTML(string)
     Returns an HTML document parsed from `string`, or undefined.
     */
@@ -4779,7 +4794,7 @@ var dom = (function (exports) {
     	return parse('html', string);
     }
 
-    /*
+    /**
     parseSVG(string)
     Returns an SVG document parsed from `string`, or undefined.
     */
@@ -4788,7 +4803,7 @@ var dom = (function (exports) {
     	return parse('svg', string);
     }
 
-    /*
+    /**
     parseXML(string)
     Returns an XML document parsed from `string`, or undefined.
     */
@@ -4808,7 +4823,7 @@ var dom = (function (exports) {
     	11: 'fragment'
     };
 
-    /*
+    /**
     type(node)
 
     Returns one of `'element'`, `'text'`, `'comment'`, `'document'`,
@@ -4819,7 +4834,7 @@ var dom = (function (exports) {
     	return types$1[node.nodeType];
     }
 
-    /*
+    /**
     isElementNode(node)
 
     Returns `true` if `node` is an element node.
@@ -4829,7 +4844,7 @@ var dom = (function (exports) {
     	return node.nodeType === 1;
     }
 
-    /*
+    /**
     isTextNode(node)
 
     Returns `true` if `node` is a text node.
@@ -4839,7 +4854,7 @@ var dom = (function (exports) {
     	return node.nodeType === 3;
     }
 
-    /*
+    /**
     isCommentNode(node)
 
     Returns `true` if `node` is a comment.
@@ -4849,7 +4864,7 @@ var dom = (function (exports) {
     	return node.nodeType === 8;
     }
 
-    /*
+    /**
     isFragmentNode(node)
 
     Returns `true` if `node` is a fragment.
@@ -4867,7 +4882,7 @@ var dom = (function (exports) {
     	return (/^\//.test(str) ? '' : '/') + str ;
     }
 
-    /*
+    /**
     isInternalLink(node)
 
     Returns `true` if the `href` of `node` points to a resource on the same domain
@@ -4906,7 +4921,7 @@ var dom = (function (exports) {
 
     var contains$3 = curry$1(contains$2, true);
 
-    /*
+    /**
     tag(node)
 
     Returns the tag name of `node`, in lowercase.
@@ -4966,7 +4981,7 @@ var dom = (function (exports) {
         return document.getElementById(id) || undefined;
     }
 
-    /*
+    /**
     next(node)
     Returns the next sibling element node, or `undefined`.
     */
@@ -4975,7 +4990,7 @@ var dom = (function (exports) {
     	return node.nextElementSibling || undefined;
     }
 
-    /*
+    /**
     previous(node)
     Returns the previous sibling element node, or `undefined`.
     */
@@ -4984,7 +4999,7 @@ var dom = (function (exports) {
     	return node.previousElementSibling || undefined;
     }
 
-    /*
+    /**
     children(node)
 
     Returns an array of child elements of `node`.
@@ -4998,7 +5013,7 @@ var dom = (function (exports) {
     	return toArray(node.children || node.querySelectorAll('*'));
     }
 
-    /*
+    /**
     assign(node, properties)
 
     Assigns each property of `properties` to `node`, as a property where that
@@ -5056,7 +5071,7 @@ var dom = (function (exports) {
 
     var assign$5 = curry$1(assign$4, true);
 
-    /*
+    /**
     append(target, node)
 
     Appends `node`, which may be a string or DOM node, to `target`. Returns `node`.
@@ -5073,7 +5088,7 @@ var dom = (function (exports) {
 
     var append$2 = curry$1(append$1, true);
 
-    /*
+    /**
     prepend(target, node)
 
     Prepends `node`, which may be a string or DOM node, to `target`. Returns `node`.
@@ -5090,7 +5105,7 @@ var dom = (function (exports) {
 
     var prepend$3 = curry$1(prepend$2, true);
 
-    /*
+    /**
     clone(node)
     Returns a deep copy of `node`.
     */
@@ -5187,7 +5202,7 @@ var dom = (function (exports) {
     }
 
 
-    /*
+    /**
     create(tag, content)
 
     Constructs and returns a new DOM node.
@@ -5241,7 +5256,7 @@ var dom = (function (exports) {
     	}
     });
 
-    /*
+    /**
     identify(node)
 
     Returns the id of `node`, or where `node` has no id, a random id is generated,
@@ -5267,9 +5282,9 @@ var dom = (function (exports) {
     	return id;
     }
 
-    /* DOM Mutation */
+    /** DOM Mutation */
 
-    /*
+    /**
     empty(node)
 
     Removes content of `node`.
@@ -5280,13 +5295,13 @@ var dom = (function (exports) {
     	return node;
     }
 
-    /*
+    /**
     remove(node)
 
     Removes `node` from the DOM.
     */
 
-    function remove$3(node) {
+    function remove$2(node) {
     	if (node.remove) {
     		node.remove();
     	}
@@ -5298,7 +5313,7 @@ var dom = (function (exports) {
     	return node;
     }
 
-    /*
+    /**
     before(target, node)
 
     Inserts `node` before target.
@@ -5309,7 +5324,7 @@ var dom = (function (exports) {
     	return node;
     }
 
-    /*
+    /**
     after(target, node)
 
     Inserts `node` after `target`.
@@ -5320,7 +5335,7 @@ var dom = (function (exports) {
     	return node;
     }
 
-    /*
+    /**
     replace(target, node)
 
     Swaps `target` for `node`.
@@ -5328,13 +5343,13 @@ var dom = (function (exports) {
 
     function replace(target, node) {
     	before(target, node);
-    	remove$3(target);
+    	remove$2(target);
     	return node;
     }
 
     const classes = get$1('classList');
 
-    /*
+    /**
     addClass(class, node)
     Adds `'class'` to the classList of `node`.
     */
@@ -5343,7 +5358,7 @@ var dom = (function (exports) {
     	classes(node).add(string);
     }
 
-    /*
+    /**
     removeClass(class, node)
     Removes `'class'` from the classList of `node`.
     */
@@ -5370,7 +5385,7 @@ var dom = (function (exports) {
     	requestFrame(2, () => list.remove(string));
     }
 
-    /*
+    /**
     rect(node)
 
     Returns a `DOMRect` object describing the draw rectangle of `node`.
@@ -5394,7 +5409,7 @@ var dom = (function (exports) {
     		node.getClientRects()[0] ;
     }
 
-    /*
+    /**
     bounds(node)
 
     Returns a `DOMRect` object describing the bounding box of `node` and its
@@ -5428,16 +5443,16 @@ var dom = (function (exports) {
     }
 
 
-    /*
+    /**
     fragmentFromHTML(string)
     Returns a DOM fragment of the parsed html `string`.
     */
 
     function fragmentFromHTML(html, contextTag) {
         if (contextTag) {
-            let node = document.createElement(contextTag);
+            const node = document.createElement(contextTag);
             node.innerHTML = html;
-        	return fragmentFromChildren(node);
+            return fragmentFromChildren(node);
         }
 
         return document
@@ -5445,7 +5460,7 @@ var dom = (function (exports) {
         .createContextualFragment(html);
     }
 
-    /*
+    /**
     fragmentFromTemplate(node)
     Returns a DOM fragment containing the content of the template `node`.
     */
@@ -5467,7 +5482,7 @@ var dom = (function (exports) {
     	// with content in the DOM - ids, for example. Remove the template as
     	// a precaution.
     	if (t === 'template' && !features.template) {
-    		remove(node);
+    		node.remove();
     	}
 
     	return t === 'template' ? fragmentFromTemplate(node) :
@@ -5492,7 +5507,7 @@ var dom = (function (exports) {
     	//composed: false
     };
 
-    /*
+    /**
     Event(type, properties)
 
     Creates a CustomEvent of type `type`.
@@ -5571,7 +5586,7 @@ var dom = (function (exports) {
     	return source;
     }
 
-    /*
+    /**
     events(type, node)
 
     Returns a mappable stream of events heard on `node`:
@@ -5635,7 +5650,7 @@ var dom = (function (exports) {
     }
 
 
-    /*
+    /**
     isPrimaryButton(e)
 
     Returns `true` if user event is from the primary (normally the left or only)
@@ -5648,7 +5663,7 @@ var dom = (function (exports) {
     	return (e.which === 1 && !e.ctrlKey && !e.altKey && !e.shiftKey);
     }
 
-    /*
+    /**
     preventDefault(e)
 
     Calls `e.preventDefault()`.
@@ -5746,7 +5761,7 @@ var dom = (function (exports) {
     	return node;
     }
 
-    /*
+    /**
     trigger(type, node)
 
     Triggers event of `type` on `node`.
@@ -5780,7 +5795,8 @@ var dom = (function (exports) {
     }
 
     const config = {
-    	// Number of pixels a pressed pointer travels before gesture is started.
+    	// Number of pixels, or string CSS length, that a pressed pointer travels
+    	// before gesture is started.
     	threshold: 4,
 
     	ignoreTags: {
@@ -5806,6 +5822,7 @@ var dom = (function (exports) {
     	end:    'touchend'
     };
 
+    const assign$8 = Object.assign;
 
     function isIgnoreTag(e) {
     	var tag = e.target.tagName;
@@ -5846,30 +5863,35 @@ var dom = (function (exports) {
     	return touch;
     }
 
+    function preventOne(e) {
+    	e.preventDefault();
+    	e.currentTarget.removeEventListener(e.type, preventOne);
+    }
+
+    function preventOneClick(e) {
+    	e.currentTarget.addEventListener('click', preventOne);
+    }
+
 
     // Handlers that decide when the first movestart is triggered
 
-    function mousedown(e, push) {
+    function mousedown(e, push, options) {
     	// Ignore non-primary buttons
     	if (!isPrimaryButton(e)) { return; }
 
     	// Ignore form and interactive elements
     	if (isIgnoreTag(e)) { return; }
 
-    	// If we preventDefault we need to recreate focus... but we shouldnt
-    	// preventDefault here anyway (this is a note that inherited from a
-    	// refactor of dom-gesture event, which no longer exists).
-    	//e.preventDefault();
-    	//const focusable = e.target.closest('[tabindex]');
-    	//focusable && focusable.focus();
+    	// Check target matches selector
+    	if (options.selector && !e.target.closest(options.selector)) { return; }
 
-    	on(document, mouseevents.move, mousemove, [e], push);
+    	on(document, mouseevents.move, mousemove, [e], push, options);
     	on(document, mouseevents.cancel, mouseend, [e]);
     }
 
-    function mousemove(e, events, push){
+    function mousemove(e, events, push, options){
     	events.push(e);
-    	checkThreshold(e, events, e, removeMouse, push);
+    	checkThreshold(e, events, e, removeMouse, push, options);
     }
 
     function mouseend(e, data) {
@@ -5881,9 +5903,12 @@ var dom = (function (exports) {
     	off(document, mouseevents.cancel, mouseend);
     }
 
-    function touchstart(e, push) {
-    	// Don't get in the way of interaction with form elements
-    	if (config.ignoreTags[e.target.tagName.toLowerCase()]) { return; }
+    function touchstart(e, push, options) {
+    	// Ignore form and interactive elements
+    	if (isIgnoreTag(e)) { return; }
+
+    	// Check target matches selector
+    	if (options.selector && !e.target.closest(options.selector)) { return; }
 
     	var touch = e.changedTouches[0];
 
@@ -5904,14 +5929,14 @@ var dom = (function (exports) {
     		touchend:   function() { touchend.apply(this, arguments); }
     	};
 
-    	on(document, touchevents.move, event.touchmove, [event], push);
+    	on(document, touchevents.move, event.touchmove, [event], push, options);
     	on(document, touchevents.cancel, event.touchend, [event]);
     }
 
-    function touchmove(e, events, push) {
+    function touchmove(e, events, push, options) {
     	var touch = changedTouch(e, events[0]);
     	if (!touch) { return; }
-    	checkThreshold(e, events, touch, removeTouch, push);
+    	checkThreshold(e, events, touch, removeTouch, push, options);
     }
 
     function touchend(e, events) {
@@ -5925,16 +5950,16 @@ var dom = (function (exports) {
     	off(document, touchevents.cancel, events[0].touchend);
     }
 
-    function checkThreshold(e, events, touch, removeHandlers, push) {
+    function checkThreshold(e, events, touch, removeHandlers, push, options) {
     	var distX = touch.pageX - events[0].pageX;
     	var distY = touch.pageY - events[0].pageY;
+    	var threshold = parseValue(options.threshold);
 
     	// Do nothing if the threshold has not been crossed.
-    	if ((distX * distX) + (distY * distY) < (config.threshold * config.threshold)) {
+    	if ((distX * distX) + (distY * distY) < (threshold * threshold)) {
     		return;
     	}
 
-    	var e0   = events[0];
     	var node = events[0].target;
 
     	// Unbind handlers that tracked the touch or mouse up till now.
@@ -5957,8 +5982,9 @@ var dom = (function (exports) {
     }
 
     function removeActiveMouse() {
+    	off(document, mouseevents.end, preventOneClick);
     	off(document, mouseevents.move, activeMousemove);
-    	off(document, mouseevents.end, activeMouseend);
+    	off(document, mouseevents.cancel, activeMouseend);
     }
 
     function activeTouchmove(e, data, push) {
@@ -6003,8 +6029,8 @@ var dom = (function (exports) {
     			push.apply(null, events);
 
     			// We're dealing with a mouse event.
-    			// Stop clicks from propagating during a move
-    			on(node, 'click', preventDefault);
+    			// Stop click from propagating at the end of a move
+    			on(document, mouseevents.end, preventOneClick);
     			on(document, mouseevents.move, activeMousemove, data, push);
     			on(document, mouseevents.cancel, activeMouseend, data, stop);
 
@@ -6014,15 +6040,7 @@ var dom = (function (exports) {
     					stop();
     				}
     			};
-    		})
-    		.done(function () {
-    			// Unbind the click suppressor, waiting until after mouseup
-    			// has been handled. I don't know why it has to be any longer than
-    			// a tick, but it does, in Chrome at least.
-    			setTimeout(function () {
-    				off(node, 'click', preventDefault);
-    			}, 120);
-    		}) :
+    		}):
 
     		Stream$1(function TouchSource(push, stop) {
     			var data = {
@@ -6051,15 +6069,36 @@ var dom = (function (exports) {
     		});
     }
 
-    function gestures(node) {
+    function gestures(options, node) {
+    	// Support legacy signature gestures(node)
+    	if (!node) {
+    		console.trace('Deprecated gestures(node), now gestures(options, node)');
+    	}
+
+    	options = node ?
+    		options ? assign$8({}, config, options) : config :
+    		config ;
+    	node = node ?
+    		node :
+    		options ;
+
     	return new Stream$1(function(push, stop) {
-    		on(node, 'mousedown', mousedown, push);
-    		on(node, 'touchstart', touchstart, push);
+    		function mouseHandler(e) {
+    			mousedown(e, push, options);
+    		}
+
+    		function touchHandler(e) {
+    			touchstart(e, push, options);
+    		}
+
+    		on(node, 'mousedown', mouseHandler);
+    		on(node, 'touchstart', touchHandler);
 
     		return {
     			stop: function() {
-    				off(node, 'mousedown', mousedown);
-    				off(node, 'touchstart', touchstart);
+    				off(node, 'mousedown', mouseHandler);
+    				off(node, 'touchstart', touchHandler);
+    				stop();
     			}
     		};
     	});
@@ -6096,7 +6135,7 @@ var dom = (function (exports) {
 
     let untrapFocus = noop;
 
-    /*
+    /**
     trapFocus(node)
     Constrains focus to focusable elements inside `node`.
     Returns a function that removes the trap.
@@ -6223,7 +6262,7 @@ var dom = (function (exports) {
     	return object;
     }, {});
 
-    /*
+    /**
     toKey(e)
 
     Returns key string corresponding to `e.keyCode`, or `undefined`.
@@ -6241,7 +6280,7 @@ var dom = (function (exports) {
     	return keyStrings[keyCode];
     }
 
-    /*
+    /**
     transition(duration, fn)
 
     Calls `fn` on each animation frame until `duration` seconds has elapsed. `fn`
@@ -6320,7 +6359,7 @@ var dom = (function (exports) {
         bottom: { get: function() { return window.innerHeight; }, enumerable: true, configurable: true }
     });
 
-    /*
+    /**
     scrollRatio(node)
     Return the ratio of scrollTop to scrollHeight - clientHeight.
     */
@@ -6329,7 +6368,7 @@ var dom = (function (exports) {
     	return node.scrollTop / (node.scrollHeight - node.clientHeight);
     }
 
-    /*
+    /**
     disableScroll(node)
     Disables scrolling by setting `overflow: hidden` on `node` while maintaining
     the current scrollTop, effectively causing the node to 'freeze' in position.
@@ -6356,7 +6395,7 @@ var dom = (function (exports) {
     	//add(document, 'touchmove', preventDefaultOutside, layer);
     }
 
-    /*
+    /**
     enableScroll(node)
     Enables scrolling by removing `overflow: hidden` on `node`.
     */
@@ -6398,117 +6437,117 @@ var dom = (function (exports) {
     	}
     }
 
-    const assign$8 = Object.assign;
+    const assign$9 = Object.assign;
 
     /*
     config
 
     ```{
-    	headers:    fn(data),    // Must return an object with properties to add to the header
-    	body:       fn(data),    // Must return an object to send as data
-    	onresponse: function(response)
+        headers:    fn(data),    // Must return an object with properties to add to the header
+        body:       fn(data),    // Must return an object to send as data
+        onresponse: function(response)
     }```
     */
 
     const config$1 = {
         // Takes data, returns headers
-    	headers: function(data) { return {}; },
+        headers: function(data) { return {}; },
 
-    	// Takes data (can be FormData object or plain object), returns data
-    	body: id,
+        // Takes data (can be FormData object or plain object), returns data
+        body: id,
 
-    	// Takes response, returns response
-    	onresponse: function(response) {
-    		// If redirected, navigate the browser away from here. Can get
-    		// annoying when receiving 404s, maybe not a good default...
-    		if (response.redirected) {
-    			window.location = response.url;
-    			return;
-    		}
+        // Takes response, returns response
+        onresponse: function(response) {
+            // If redirected, navigate the browser away from here. Can get
+            // annoying when receiving 404s, maybe not a good default...
+            if (response.redirected) {
+                window.location = response.url;
+                return;
+            }
 
-    		return response;
-    	}
+            return response;
+        }
     };
 
     const createHeaders = choose({
-    	'application/x-www-form-urlencoded': function(headers) {
-    		return assign$8(headers, {
-    			"Content-Type": 'application/x-www-form-urlencoded',
-    			"X-Requested-With": "XMLHttpRequest"
-    		});
-    	},
+        'application/x-www-form-urlencoded': function(headers) {
+            return assign$9(headers, {
+                "Content-Type": 'application/x-www-form-urlencoded',
+                "X-Requested-With": "XMLHttpRequest"
+            });
+        },
 
-    	'application/json': function(headers) {
-    		return assign$8(headers, {
-    			"Content-Type": "application/json; charset=utf-8",
-    			"X-Requested-With": "XMLHttpRequest"
-    		});
-    	},
+        'application/json': function(headers) {
+            return assign$9(headers, {
+                "Content-Type": "application/json; charset=utf-8",
+                "X-Requested-With": "XMLHttpRequest"
+            });
+        },
 
-    	'multipart/form-data': function(headers) {
-    		return assign$8(headers, {
-    			"Content-Type": 'multipart/form-data',
-    			"X-Requested-With": "XMLHttpRequest"
-    		});
-    	},
+        'multipart/form-data': function(headers) {
+            return assign$9(headers, {
+                "Content-Type": 'multipart/form-data',
+                "X-Requested-With": "XMLHttpRequest"
+            });
+        },
 
-    	'audio/wav': function(headers) {
-    		return assign$8(headers, {
-    			"Content-Type": 'audio/wav',
-    			"X-Requested-With": "XMLHttpRequest"
-    		});
-    	},
+        'audio/wav': function(headers) {
+            return assign$9(headers, {
+                "Content-Type": 'audio/wav',
+                "X-Requested-With": "XMLHttpRequest"
+            });
+        },
 
-    	'default': function(headers) {
-    		return assign$8(headers, {
-    			"Content-Type": 'application/x-www-form-urlencoded',
-    			"X-Requested-With": "XMLHttpRequest"
-    		});
-    	}
+        'default': function(headers) {
+            return assign$9(headers, {
+                "Content-Type": 'application/x-www-form-urlencoded',
+                "X-Requested-With": "XMLHttpRequest"
+            });
+        }
     });
 
     const createBody = choose({
-    	'application/json': function(data) {
-    		return data.get ?
-    			formDataToJSON(data) :
-    			JSON.stringify(data);
-    	},
+        'application/json': function(data) {
+            return data.get ?
+                formDataToJSON(data) :
+                JSON.stringify(data);
+        },
 
-    	'application/x-www-form-urlencoded': function(data) {
-    		return data.get ?
-    			formDataToQuery(data) :
-    			dataToQuery(data) ;
-    	},
+        'application/x-www-form-urlencoded': function(data) {
+            return data.get ?
+                formDataToQuery(data) :
+                dataToQuery(data) ;
+        },
 
-    	'multipart/form-data': function(data) {
-    		// Mmmmmhmmm?
-    		return data.get ?
+        'multipart/form-data': function(data) {
+            // Mmmmmhmmm?
+            return data.get ?
                 data :
                 dataToFormData() ;
-    	}
+        }
     });
 
     function formDataToJSON(formData) {
-    	return JSON.stringify(
-    		// formData.entries() is an iterator, not an array
-    		Array
-    		.from(formData.entries())
-    		.reduce(function(output, entry) {
-    			output[entry[0]] = entry[1];
-    			return output;
-    		}, {})
-    	);
+        return JSON.stringify(
+            // formData.entries() is an iterator, not an array
+            Array
+            .from(formData.entries())
+            .reduce(function(output, entry) {
+                output[entry[0]] = entry[1];
+                return output;
+            }, {})
+        );
     }
 
     function formDataToQuery(data) {
-    	return new URLSearchParams(data).toString();
+        return new URLSearchParams(data).toString();
     }
 
     function dataToQuery(data) {
-    	return Object.keys(data).reduce((params, key) => {
-    		params.append(key, data[key]);
-    		return params;
-    	}, new URLSearchParams());
+        return Object.keys(data).reduce((params, key) => {
+            params.append(key, data[key]);
+            return params;
+        }, new URLSearchParams());
     }
 
     function dataToFormData(data) {
@@ -6516,126 +6555,137 @@ var dom = (function (exports) {
     }
 
     function urlFromData(url, data) {
-    	// Form data
-    	return data instanceof FormData ?
-    		url + '?' + formDataToQuery(data) :
-    		url + '?' + dataToQuery(data) ;
+        // Form data
+        return data instanceof FormData ?
+            url + '?' + formDataToQuery(data) :
+            url + '?' + dataToQuery(data) ;
     }
 
     function createOptions(method, mimetype, data, controller) {
-    	return method === 'GET' ? {
-    		method:  method,
-    		headers: createHeaders(mimetype, config$1.headers ? config$1.headers(data) : {}),
-    		credentials: 'same-origin',
-    		signal: controller && controller.signal
-    	} : {
-    		method:  method,
-    		// Process headers before body, allowing us to read a CSRFToken,
+        return method === 'GET' ? {
+            method:  method,
+            headers: createHeaders(mimetype, config$1.headers ? config$1.headers(data) : {}),
+            credentials: 'same-origin',
+            signal: controller && controller.signal
+        } : {
+            method:  method,
+            // Process headers before body, allowing us to read a CSRFToken,
             // which may be in data, in createHeaders() before removing it
             // from data in body().
-    		headers: createHeaders(mimetype, config$1.headers ? config$1.headers(data) : {}),
-    		body:    createBody(mimetype, config$1.body ? config$1.body(data) : data),
-    		credentials: 'same-origin',
-    		signal: controller && controller.signal
-    	} ;
+            headers: createHeaders(mimetype, config$1.headers ? config$1.headers(data) : {}),
+            body:    createBody(mimetype, config$1.body ? config$1.body(data) : data),
+            credentials: 'same-origin',
+            signal: controller && controller.signal
+        } ;
     }
 
     const responders = {
-    	'text/html': respondText,
-    	'application/json': respondJSON,
-    	'multipart/form-data': respondForm,
-    	'application/x-www-form-urlencoded': respondForm,
-    	'audio': respondBlob,
-    	'audio/wav': respondBlob,
-    	'audio/m4a': respondBlob
+        'text/html': respondText,
+        'application/json': respondJSON,
+        'multipart/form-data': respondForm,
+        'application/x-www-form-urlencoded': respondForm,
+        'audio': respondBlob,
+        'audio/wav': respondBlob,
+        'audio/m4a': respondBlob
     };
 
     function respondBlob(response) {
-    	return response.blob();
+        return response.blob();
     }
 
     function respondJSON(response) {
-    	return response.json();
+        return response.json();
     }
 
     function respondForm(response) {
-    	return response.formData();
+        return response.formData();
     }
 
     function respondText(response) {
-    	return response.text();
+        return response.text();
     }
 
     function respond(response) {
-    	if (config$1.onresponse) {
-    		response = config$1.onresponse(response);
-    	}
+        if (config$1.onresponse) {
+            response = config$1.onresponse(response);
+        }
 
-    	if (!response.ok) {
-    		throw new Error(response.statusText + '');
-    	}
+        if (!response.ok) {
+            throw new Error(response.statusText + '');
+        }
 
-    	// Get mimetype from Content-Type, remembering to hoik off any
-    	// parameters first
-    	const mimetype = response.headers
-    	.get('Content-Type')
-    	.replace(/\;.*$/, '');
+        // Get mimetype from Content-Type, remembering to hoik off any
+        // parameters first
+        const mimetype = response.headers
+        .get('Content-Type')
+        .replace(/\;.*$/, '');
 
-    	return responders[mimetype](response);
+        return responders[mimetype](response);
     }
 
 
-    /*
-    request(type, mimetype, url, data)
-    */
+    /**
+    request(type, url, data, mimetype)
 
-    function request(type = 'GET', mimetype = 'application/json', url, data) {
-    	const method = type.toUpperCase();
+    Uses `fetch()` to send a request to `url`. Where `type` is `"GET"`, `data` is
+    serialised and appended to the URL, otherwise it is sent as a payload
+    conforming to the given `mimetype`.
+    **/
 
-    	// If this is a GET and there is data, append data to the URL query string
-    	if (method === 'GET' && data) {
-    		url = urlFromData(url, data);
-    	}
+    function request(type = 'GET', url, data, mimetype = 'application/json') {
+        if (url.startsWith('application/') || url.startsWith('multipart/') || url.startsWith('text/') || url.startsWith('audio/')) {
+            console.trace('request(type, url, data, mimetype) parameter order has changed. You passed (type, mimetype, url, data).');
+            url      = arguments[1];
+            data     = arguments[2];
+            mimetype = arguments[3];
+        }
 
-    	// param[4] is an optional abort controller
-    	return fetch(url, createOptions(method, mimetype, data, arguments[4]))
-    	.then(respond);
+        const method = type.toUpperCase();
+
+        // If this is a GET and there is data, append data to the URL query string
+        if (method === 'GET' && data) {
+            url = urlFromData(url, data);
+        }
+
+        // param[4] is an optional abort controller
+        return fetch(url, createOptions(method, mimetype, data, arguments[4]))
+        .then(respond);
     }
 
-    /*
+    /**
     requestGet(url)
     A shortcut for `request('get', 'application/json', url)`
-    */
+    **/
 
     function requestGet(url) {
-    	return request('GET', 'application/json', url, {});
+        return request('GET', url);
     }
 
-    /*
+    /**
     requestPatch(url, data)
     A shortcut for `request('patch', 'application/json', url, data)`
-    */
+    **/
 
     function requestPatch(url, data) {
-    	return request('PATCH', 'application/json', url, data);
+        return request('PATCH', url, data, 'application/json');
     }
 
-    /*
+    /**
     requestPost(url, data)
     A shortcut for `request('post', 'application/json', url, data)`
-    */
+    **/
 
     function requestPost(url, data) {
-    	return request('POST', 'application/json', url, data);
+        return request('POST', url, data, 'application/json');
     }
 
-    /*
+    /**
     requestDelete(url, data)
     A shortcut for `request('delete', 'application/json', url, data)`
-    */
+    **/
 
     function requestDelete(url, data) {
-    	return request('DELETE', 'application/json', url, data);
+        return request('DELETE', url, data, 'application/json');
     }
 
     /*
@@ -6643,36 +6693,36 @@ var dom = (function (exports) {
     */
 
     function ignoreAbortError(error) {
-    	// Swallow AbortErrors, since we generate one every time we use
-    	// the AbortController.
-    	if (error.name === 'AbortError') {
-    		console.log('Request aborted by throttle. Nothing to worry about.');
+        // Swallow AbortErrors, since we generate one every time we use
+        // the AbortController.
+        if (error.name === 'AbortError') {
+            console.log('Request aborted by throttle. Nothing to worry about.');
 
-    		// JS promises have no machanism to conditionally catch different
-    		// types of error – throw undefined to fall through to the next
-    		// catch without a value.
-    		throw undefined;
-    	}
+            // JS promises have no machanism to conditionally catch different
+            // types of error – throw undefined to fall through to the next
+            // catch without a value.
+            throw undefined;
+        }
 
-    	// Rethrow all other errors
-    	throw error;
+        // Rethrow all other errors
+        throw error;
     }
 
     function throttledRequest(type, mimetype, url) {
-    	var controller, data, promise;
+        var controller, data, promise;
 
         function then() {
             controller = undefined;
         }
 
-    	function send() {
+        function send() {
             controller = new AbortController();
             var req = request(type, mimetype, url, data, controller);
             req.then(then);
             promise = undefined;
             data    = undefined;
             return req;
-    	}
+        }
 
         return function(object) {
             data = object;
@@ -6683,9 +6733,9 @@ var dom = (function (exports) {
 
             // Cancel previous request
             if (controller) {
-    			controller.abort();
+                controller.abort();
                 controller = undefined;
-    		}
+            }
 
             // Batch requests to ticks
             return promise = Promise
@@ -6730,7 +6780,6 @@ var dom = (function (exports) {
     const delegate$1 = curry$1(delegate, true);
     const animate$1 = curry$1(animate, true);
     const transition$1 = curry$1(transition, true);
-    const request$1 = curry$1(request, true, 4);
 
     exports.Event = Event$1;
     exports.addClass = addClass$1;
@@ -6785,6 +6834,7 @@ var dom = (function (exports) {
     exports.on = on$1;
     exports.parseHTML = parseHTML;
     exports.parseSVG = parseSVG;
+    exports.parseValue = parseValue;
     exports.parseXML = parseXML;
     exports.prefix = prefix$1;
     exports.prepend = prepend$3;
@@ -6793,10 +6843,10 @@ var dom = (function (exports) {
     exports.query = select$1;
     exports.ready = ready$1;
     exports.rect = rect;
-    exports.remove = remove$3;
+    exports.remove = remove$2;
     exports.removeClass = removeClass$1;
     exports.replace = replace$1;
-    exports.request = request$1;
+    exports.request = request;
     exports.requestConfig = config$1;
     exports.requestDelete = requestDelete;
     exports.requestGet = requestGet;
@@ -6811,7 +6861,6 @@ var dom = (function (exports) {
     exports.toKey = toKey;
     exports.toKeyCode = toKeyCode;
     exports.toKeyString = toKeyString;
-    exports.toPx = toPx;
     exports.toRem = toRem;
     exports.toVh = toVh;
     exports.toVw = toVw;

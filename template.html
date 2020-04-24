@@ -238,6 +238,6 @@
         import '../dom/js/fullscreenable.js';
         import '../dom/js/validateable.js';
         import * as dom from './module.js';
-        window.$ = dom;
+        Object.assign(window, dom);
     </script>
 </body>

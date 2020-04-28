@@ -1,6 +1,11 @@
 
 /*
-submittable
+[submittable]
+
+```html
+<form submittable action="" method="">
+</form>
+```
 
 Hijacks the submit event and submits the form via `fetch()`. Reads the form's
 standard `enctype` attribute to set the mimetype of the request, but extends
@@ -8,7 +13,7 @@ it by permitting the value `"application/json"` as well as the standard
 `"application/x-www-form-urlencoded"` and `"multipart/form-data"`.
 */
 
-import { choose, compose, get, noop } from '../../fn/module.js';
+import { compose, get } from '../../fn/module.js';
 import { events, matches, preventDefault, request } from '../module.js';
 
 // Define
@@ -31,7 +36,7 @@ events('submit', document)
 	const mimetype = form.getAttribute('enctype') || form.enctype;
 	const formData = new FormData(form);
 
-	request(method, mimetype, url, formData)
+	request(method, url, formData, mimetype)
 	.then(function(data) {
 		events.trigger(form, 'dom-submitted', {
 			detail: data

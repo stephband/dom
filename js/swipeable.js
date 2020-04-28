@@ -120,17 +120,17 @@ gestures({ selector: selector, threshold: 4 }, document)
 	classy.add('no-transition');
 
 	var ax = x;
-    var x0 = e.pageX;
-	var y0 = e.pageY;
+    var x0 = e.clientX;
+	var y0 = e.clientY;
 
 	// TEMP: keep it around to use the last one in .done().
 	var x1, y1;
 
 	stream.map(function(e) {
-		x1 = e.pageX;
-		y1 = e.pageY;
+		x1 = e.clientX;
+		y1 = e.clientY;
 
-		var diffX = e.pageX - x0;
+		var diffX = e.clientX - x0;
 		ax = x + diffX;
 		var tx = ax > 0 ?
 				eMax ? elasticEase(ax / elasticDistance) * elasticDistance - x :

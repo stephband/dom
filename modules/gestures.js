@@ -17,8 +17,8 @@ gestures({ selector: '.thing', threshold: '0.5rem' }, document)
 	events.each(function(e1) {
 		// Mousemove or touchmove events
 		const distance = Math.pow(
-			Math.pow(e1.pageX - e0.pageX, 2),
-			Math.pow(e1.pageY - e0.pageY, 2),
+			Math.pow(e1.clientX - e0.clientX, 2),
+			Math.pow(e1.clientY - e0.clientY, 2),
 		0.5);
 		...
 	});
@@ -94,7 +94,7 @@ function changedTouch(e, data) {
 	// Chrome Android (at least) includes touches that have not
 	// changed in e.changedTouches. That's a bit annoying. Check
 	// that this touch has changed.
-	if (touch.pageX === data.pageX && touch.pageY === data.pageY) { return; }
+	if (touch.clientX === data.clientX && touch.clientY === data.clientY) { return; }
 
 	return touch;
 }
@@ -154,8 +154,8 @@ function touchstart(e, push, options) {
 	// movestart, move and moveend event objects.
 	var event = {
 		target:     touch.target,
-		pageX:      touch.pageX,
-		pageY:      touch.pageY,
+		clientX:      touch.clientX,
+		clientY:      touch.clientY,
 		identifier: touch.identifier,
 
 		// The only way to make handlers individually unbindable is by
@@ -187,8 +187,8 @@ function removeTouch(events) {
 }
 
 function checkThreshold(e, events, touch, removeHandlers, push, options) {
-	var distX = touch.pageX - events[0].pageX;
-	var distY = touch.pageY - events[0].pageY;
+	var distX = touch.clientX - events[0].clientX;
+	var distY = touch.clientY - events[0].clientY;
 	var threshold = parseValue(options.threshold);
 
 	// Do nothing if the threshold has not been crossed.

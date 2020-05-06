@@ -1,4 +1,4 @@
-import { choose, id } from '../../fn/module.js';
+import { choose, id, nothing } from '../../fn/module.js';
 
 const assign = Object.assign;
 
@@ -124,22 +124,28 @@ function urlFromData(url, data) {
         url + '?' + dataToQuery(data) ;
 }
 
-function createOptions(method, mimetype, data, controller) {
-    return method === 'GET' ? {
+function createOptions(method, data, head, controller) {
+    const contentType = typeof head === 'string' ?
+        head :
+        head['Content-Type'] ;
+
+    const headers = createHeaders(contentType, assign(
+        config.headers && data ? config.headers(data) : {},
+        typeof head === 'string' ? nothing : head
+    ));
+
+    const options = {
         method:  method,
-        headers: createHeaders(mimetype, config.headers ? config.headers(data) : {}),
+        headers: headers,
         credentials: 'same-origin',
         signal: controller && controller.signal
-    } : {
-        method:  method,
-        // Process headers before body, allowing us to read a CSRFToken,
-        // which may be in data, in createHeaders() before removing it
-        // from data in body().
-        headers: createHeaders(mimetype, config.headers ? config.headers(data) : {}),
-        body:    createBody(mimetype, config.body ? config.body(data) : data),
-        credentials: 'same-origin',
-        signal: controller && controller.signal
-    } ;
+    };
+
+    if (method !== 'GET') {
+        options.body = createBody(contentType, config.body ? config.body(data) : data);
+    }
+
+    return options;
 }
 
 const responders = {
@@ -188,11 +194,12 @@ function respond(response) {
 
 
 /**
-request(type, url, data, mimetype)
+request(type, url, data, mimetype | headers)
 
 Uses `fetch()` to send a request to `url`. Where `type` is `"GET"`, `data` is
-serialised and appended to the URL, otherwise it is sent as a payload
-conforming to the given `mimetype`.
+serialised and appended to the URL, otherwise it is sent as a request body.
+The 4th parameter may be a content type string or a headers object (in which
+case it must have a `'Content-Type'` property).
 **/
 
 export function request(type = 'GET', url, data, mimetype = 'application/json') {
@@ -211,7 +218,7 @@ export function request(type = 'GET', url, data, mimetype = 'application/json') 
     }
 
     // param[4] is an optional abort controller
-    return fetch(url, createOptions(method, mimetype, data, arguments[4]))
+    return fetch(url, createOptions(method, data, mimetype, arguments[4]))
     .then(respond);
 }
 

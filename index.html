@@ -1,162 +1,38 @@
-<!DOCTYPE html><html lang="en" is="sparky" class="js fullscreen-support"><head>
+<!DOCTYPE html><html lang="en" class="js fullscreen-support"><head>
     <meta charset="utf-8">
-
     <meta name="author" content="@stephband">
-    <meta name="description" content="Documentation for dom. A small library of functions, event streams and behaviour attributes for HTML and SVG.">
+    <meta name="description" content="Documentation for dom. A library of DOM functions for HTML and SVG, importable as individual ES modules.">
     <meta name="viewport" content="width=device-width">
 
     <title>dom</title>
 
-    <script>
-    document.documentElement.className = 'js';
-    window.DEBUG = false;
+    <script title="load">
+    document.documentElement.className += ' js content-loading loading';
+    window.addEventListener('DOMContentLoaded', () => document.documentElement.classList.remove('content-loading'));
+    window.addEventListener('load', () => document.documentElement.classList.remove('loading'));
     </script>
+
+    
 
     <link rel="shortcut icon" href="images/logo-64x64.ico">
     <link rel="icon" type="image/png" href="images/logo-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="images/logo-64x64.png" sizes="64x64">
     <link rel="icon" type="image/png" href="images/logo-128x128.png" sizes="128x128">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700">
+    <link rel="stylesheet" href="style.min.css">
 
-    <link rel="stylesheet" href="../bolt/css/html.css">
-    <link rel="stylesheet" href="../bolt/css/root.css">
-    <link rel="stylesheet" href="../bolt/css/body.css">
-    <link rel="stylesheet" href="../bolt/css/block.css">
-    <link rel="stylesheet" href="../bolt/css/bubble.css">
-    <link rel="stylesheet" href="../bolt/css/button.css">
-    <link rel="stylesheet" href="../bolt/css/dialog.css">
-    <link rel="stylesheet" href="../bolt/css/layer.css">
-    <link rel="stylesheet" href="../bolt/css/type.css">
-    <link rel="stylesheet" href="../bolt/css/text.css">
-    <link rel="stylesheet" href="../bolt/css/color.css">
-
-    <link rel="stylesheet" href="../dom/css/dom.css">
-    <link rel="stylesheet" href="../fn/css/prism-cruncher.css">
-    <link rel="stylesheet" href="../fn/css/tests.css">
-    <link rel="stylesheet" href="../fn/css/docs.css">
-    <link rel="stylesheet" href="../dom/css/theme.css">
-    <link rel="stylesheet" href="../fn/css/respond.css">
-<template id="header-template" title="/fn/">
-    <h1>{[title]} <span class="doctext-06">{[version]}</span></h1>
-
-    <p class="doctext-08">
-        {[description]}
-    </p>
-
-    <ul class="link-index index">
-        <li><strong>repo:</strong> <a href="{[repository.url]}">{[repository.url]}</a></li>
-        <li><strong>bugs:</strong> <a href="{[bugs.url]}">{[bugs.url]}</a></li>
-    </ul>
-</template><template id="title-template" title="/fn/">
-    <h3 class="doctext-04" build-fn="after:body">{[name]}</h3>
-</template><template id="h2-template" title="/fn/">
-    <header class="x-1 4x @1-x-1 @2-x-2">
-        <h2 class="doctext-02">
-            <a href="#{[id]}">
-                <code class="language-js" build-fn="append:title" style="color: inherit;"></code>
-            </a>
-        </h2>
-    </header>
-
-    <div class="x-1 3x @2-x-2" build-fn="append:body"></div>
-</template><template id="attribute-template" title="/fn/">
-    <article build-fn="append:body" class="attribute-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="attribute-{[id]}">
-        <h3 class="doctext-05">
-            <a href="#attribute-{[id]}">
-                <code class="token language-js">[<span build-fn="append:title"></span>]</code>
-            </a>
-        </h3>
-    </article>
-</template><template id="constructor-template" title="/fn/">
-    <article class="function-doc-toggle-block doc-toggle-block toggle-block block 3x" toggleable="" id="{[0.id]}">
-        <h3 build-fn="get:0 after:body" class="doctext-05 dot-indent">
-            <a href="#{[id]}">
-                <code class="property language-js">"{[name|lowercase]}"</code>
-            </a>
-        </h3>
-
-        <template build-src="/fn/templates.html#property-method-template"></template>
-    </article>
-</template><template id="method-template" title="/fn/">
-    <article build-fn="append:body" class="method-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="method-{[id]}">
-        <h3 class="doctext-05 {[prefix|is:'.'|yesno:'dot-indent','']}">
-            <a href="#method-{[id]}">
-                <code build-fn="append:title" class="function language-js"></code>
-            </a>
-        </h3>
-    </article>
-</template><template id="property-template" title="/fn/">
-    <article build-fn="append:body" class="property-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="property-{[id]}">
-        <h3 class="doctext-05 {[prefix|is:'.'|yesno:'dot-indent','']}">
-            <a href="#property-{[id]}">
-                <code build-fn="append:title" class="property language-js"></code>
-            </a>
-        </h3>
-    </article>
-</template><template id="class-template" title="/fn/">
-    <article build-fn="append:body" class="class-doc-toggle-block doc-toggle-block toggle-block block class-grid grid @2-9-grid" toggleable="" id="class-{[id]}">
-        <h3 class="doctext-05 {[prefix|is:'.'|yesno:'dot-indent','']}">
-            <a href="#class-{[id]}">
-                <code build-fn="append:title" class=""></code>
-            </a>
-        </h3>
-    </article>
-</template><template id="component-template" title="/fn/">
-    <section class="component-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="component-{[0.id]}">
-        <header class="class-grid grid 3-grid @1-6-grid @2-9-grid">
-            <h3 build-fn="after:'0.body'" class="x-1 3x @1-x-2 @2-x-3 doctext-03 {[0.prefix|is:'.'|yesno:'dot-indent','']}">
-                <a build-fn="append:'0.title'" class="doctoggle-button button" href="#component-{[0.id]}"></a>
-            </h3>
-        </header>
-
-        <section build-fn="rest:1 each append:body" class="block class-grid grid @1-6-grid @2-9-grid">
-            <h4 class="x-1 start-x 3x @2-2x @2-end-x doctext-05 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                <code build-fn="append:title" class=""></code>
-            </h4>
-        </section>
-    </section>
-</template><template id="function-template" title="/fn/">
-    <article build-fn="append:body" class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-{[id]}">
-        <h3 class="doctext-05 {[prefix|is:'.'|yesno:'dot-indent','']}">
-            <a href="#function-{[id]}">
-                <code build-fn="append:title" class="function language-js"></code>
-            </a>
-        </h3>
-    </article>
-</template><template id="fn-template" title="/fn/">
-    <article build-fn="append:body" class="fn-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="fn-{[id]}">
-        <h3 class="doctext-05 {[prefix|is:'.'|yesno:'dot-indent','']}">
-            <a href="#fn-{[id]}">
-                <code build-fn="append:title" class="language-js"></code>
-            </a>
-        </h3>
-    </article>
-</template><template id="section-template" title="/fn/">
-    <article build-fn="append:body" class="section-doc-toggle-block doc-toggle-block toggle-block block active" id="section-{[id]}">
-        <h3 class="doctext-05 {[prefix|is:'.'|yesno:'dot-indent','']}">
-            <code build-fn="append:title" class="function language-js"></code>
-        </h3>
-    </article>
-</template><template id="body-template" title="/fn/">
-    <article build-fn="append:body" class="body-doc-toggle-block doc-toggle-block toggle-block block active" id="{[id]}"></article>
-</template><template id="property-method-template" title="/fn/">
-    <section class="x-1 2x @1-x-1 @2-x-2">
-        <template build-fn="filter-property each" build-src="/fn/templates.html#{[type]}-template"></template>
-    </section>
-
-    <section class="x-1 2x @1-x-3 @2-x-4">
-        <template build-fn="filter-method each" build-src="/fn/templates.html#{[type]}-template"></template>
-    </section>
-</template></head>
+    <!--template build-fn="get:style each">
+        <link rel="stylesheet" href="{[.]}" />
+    </template-->
+</head>
 
 <body class="@3-12-grid grid">
     <header class="x-1 3x @1-6x @2-9x @3-x-2 @3-9x" id="header">
-
-    <h1>dom <span class="doctext-06">1.3.1</span></h1>
+        
+    <h1 class="doctext-01">dom <span class="doctext-06">1.3.1</span></h1>
 
     <p class="doctext-08">
-        A small library of functions, event streams and behaviour attributes for HTML and SVG.
+        A library of DOM functions for HTML and SVG, importable as individual ES modules.
     </p>
 
     <ul class="link-index index">
@@ -168,7 +44,7 @@
 
     <section class="x-1 3x @1-6x @2-9x @3-x-2 grid" locateable="" id="functions">
         <header class="x-1 3x @1-4x">
-            <h2 class="text-2">Functions</h2>
+            <h2 class="doctext-02">Functions</h2>
         </header>
 
         <div class="x-1 3x @2-4x">
@@ -179,8 +55,8 @@
 
         <div class="x-1 3x column-grid grid">
             <div class="x-1">
-                <h4 class="text-4">select.</h4>
-
+                <h4 class="doctext-03">select.</h4>
+                <!--template-->
     <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-closest-selector-node">
         <h3 class="doctext-05 ">
             <a href="#function-closest-selector-node">
@@ -221,8 +97,8 @@ If no match is found, returns <code>undefined</code>.</p>
             </div>
 
             <div class="x-1">
-                <h4 class="text-4">inspect.</h4>
-
+                <h4 class="doctext-03">inspect.</h4>
+                <!--template-->
     <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-attribute-name-node">
         <h3 class="doctext-05 ">
             <a href="#function-attribute-name-node">
@@ -341,8 +217,8 @@ as the current document.</p>
             </div>
 
             <div class="x-1">
-                <h4 class="text-4">mutate.</h4>
-
+                <h4 class="doctext-03">mutate.</h4>
+                <!--template-->
     <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-append-target-node">
         <h3 class="doctext-05 ">
             <a href="#function-append-target-node">
@@ -411,8 +287,8 @@ properties which are assigned with dom’s <code>assign(node, properties)</code>
 
         <div class="x-1 3x @1-x-4 column-grid grid">
             <div class="x-1">
-                <h4 class="text-4">events.</h4>
-
+                <h4 class="doctext-03">events.</h4>
+                <!--template-->
     <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-events-type-node">
         <h3 class="doctext-05 ">
             <a href="#function-events-type-node">
@@ -474,8 +350,8 @@ and a <code>'touchend'</code>.</p>
     events<span class="token punctuation">.</span><span class="token function">each</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>e1<span class="token punctuation">)</span> <span class="token punctuation">{</span>
         <span class="token comment">// Mousemove or touchmove events</span>
         <span class="token keyword">const</span> distance <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>
-            Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>e1<span class="token punctuation">.</span>pageX <span class="token operator">-</span> e0<span class="token punctuation">.</span>pageX<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-            Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>e1<span class="token punctuation">.</span>pageY <span class="token operator">-</span> e0<span class="token punctuation">.</span>pageY<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>e1<span class="token punctuation">.</span>clientX <span class="token operator">-</span> e0<span class="token punctuation">.</span>clientX<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>e1<span class="token punctuation">.</span>clientY <span class="token operator">-</span> e0<span class="token punctuation">.</span>clientY<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
         <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token operator">...</span>
     <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -505,8 +381,8 @@ Calling <code>trapFocus(node)</code> again also removes the existing trap.</p>
             </div>
 
             <div class="x-1">
-                <h4 class="text-4">style.</h4>
-
+                <h4 class="doctext-03">style.</h4>
+                <!--template-->
     <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-classes-node">
         <h3 class="doctext-05 ">
             <a href="#function-classes-node">
@@ -610,8 +486,8 @@ is returned.</p>
 
         <div class="x-1 3x @2-x-7 column-grid grid">
             <div class="x-1">
-                <h4 class="text-4">animate.</h4>
-
+                <h4 class="doctext-03">animate.</h4>
+                <!--template-->
     <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-animate-duration-transform-name-object-value">
         <h3 class="doctext-05 ">
             <a href="#function-animate-duration-transform-name-object-value">
@@ -643,8 +519,8 @@ the duration of the transition. Returns a function that cancels the transition.<
             </div>
 
             <div class="x-1">
-                <h4 class="text-4">HTML.</h4>
-
+                <h4 class="doctext-03">HTML.</h4>
+                <!--template-->
     <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-escape-string">
         <h3 class="doctext-05 ">
             <a href="#function-escape-string">
@@ -700,12 +576,65 @@ the duration of the transition. Returns a function that cancels the transition.<
 </article>
 
             </div>
+
+            <div class="x-1">
+                <h4 class="doctext-03">communicate.</h4>
+                <!--template-->
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-request-type-url-data-mimetype-headers">
+        <h3 class="doctext-05 ">
+            <a href="#function-request-type-url-data-mimetype-headers">
+                <code class="function language-js"><span class="token function">request</span><span class="token punctuation">(</span>type<span class="token punctuation">,</span> url<span class="token punctuation">,</span> data<span class="token punctuation">,</span> mimetype <span class="token operator">|</span> headers<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Uses <code>fetch()</code> to send a request to <code>url</code>. Where <code>type</code> is <code>"GET"</code>, <code>data</code> is
+serialised and appended to the URL, otherwise it is sent as a request body.
+The 4th parameter may be a content type string or a headers object (in which
+case it must have a <code>'Content-Type'</code> property).</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-requestget-url">
+        <h3 class="doctext-05 ">
+            <a href="#function-requestget-url">
+                <code class="function language-js"><span class="token function">requestGet</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>A shortcut for <code>request('get', 'application/json', url)</code></p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-requestpatch-url-data">
+        <h3 class="doctext-05 ">
+            <a href="#function-requestpatch-url-data">
+                <code class="function language-js"><span class="token function">requestPatch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> data<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>A shortcut for <code>request('patch', 'application/json', url, data)</code></p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-requestpost-url-data">
+        <h3 class="doctext-05 ">
+            <a href="#function-requestpost-url-data">
+                <code class="function language-js"><span class="token function">requestPost</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> data<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>A shortcut for <code>request('post', 'application/json', url, data)</code></p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-requestdelete-url-data">
+        <h3 class="doctext-05 ">
+            <a href="#function-requestdelete-url-data">
+                <code class="function language-js"><span class="token function">requestDelete</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> data<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>A shortcut for <code>request('delete', 'application/json', url, data)</code></p>
+</article>
+
+            </div>
         </div>
     </section>
 
     <section class="x-1 3x @1-6x @2-9x @3-x-2 columns-grid grid" locateable="" id="attributes">
         <header class="x-1 3x @1-4x block">
-            <h2 class="text-2">Attributes</h2>
+            <h2 class="doctext-02">Attributes</h2>
 
             <p>The library has a number of scripts for cheekily extending the
             default behaviour of DOM elements, declared via 'behaviour'&nbsp;attributes.</p>
@@ -740,8 +669,8 @@ the duration of the transition. Returns a function that cancels the transition.<
         </header>
 
         <div class="x-1 y-2 3x @2-4x">
-            <h3 class="text-4">Navigate</h3>
-
+            <h3 class="doctext-03">Navigate</h3>
+            <!--template-->
     <article class="attribute-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="attribute-locateable">
         <h3 class="doctext-05">
             <a href="#attribute-locateable">
@@ -769,8 +698,8 @@ you have a scrolling navigation:</p>
 </article>
 
 
-            <h3 class="text-4">Hijack</h3>
-
+            <h3 class="doctext-03">Hijack</h3>
+            <!--template-->
     <article class="attribute-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="attribute-fullscreenable">
         <h3 class="doctext-05">
             <a href="#attribute-fullscreenable">
@@ -831,10 +760,10 @@ accordions and so on.</p>
         </div>
 
         <div class="x-1 y-2 3x @2-x-6 @2-4x">
-            <h3 class="text-4">Data</h3>
-
-            <h3 class="text-4">Forms</h3>
-
+            <h3 class="doctext-03">Data</h3>
+            <!--template-->
+            <h3 class="doctext-03">Forms</h3>
+            <!--template-->
     <article class="attribute-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="attribute-validateable">
         <h3 class="doctext-05">
             <a href="#attribute-validateable">
@@ -896,7 +825,7 @@ validation messages are shown.</p>
 
     <!--section class="x-1 3x @1-6x @2-9x @3-x-2 columns-grid grid" locateable id="observer">
         <header class="x-1 3x @1-4x">
-            <h2 class="text-2" style="font-size: 1.875rem;">Events</h2>
+            <h2 class="doctext-02" style="font-size: 1.875rem;">Events</h2>
         </header>
 
         <div class="x-1 3x list-grid grid">
@@ -907,13 +836,7 @@ validation messages are shown.</p>
         </div>
     </section-->
 
-    <!--js/removeable.js,
-    js/submittable.js,
-    js/switchable.js,
-    js/toggleable.js,
-    js/validateable.js-->
-    <!-- Build document -->
-
+    
 
     <!-- Document interactivity -->
     <script type="module">

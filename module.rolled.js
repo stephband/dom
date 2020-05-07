@@ -22,6 +22,7 @@ function cache(fn) {
 
 /**
 curry(fn [, muteable, arity])
+Returns a function that wraps `fn` and makes it partially applicable.
 */
 const A     = Array.prototype;
 
@@ -134,9 +135,9 @@ function now() {
    return window.performance.now() / 1000;
 }
 
-/*
+/**
 rest(n, array)
-*/
+**/
 
 function rest(i, object) {
     if (object.slice) { return object.slice(i); }
@@ -220,7 +221,7 @@ function toArray(object) {
 const A$1 = Array.prototype;
 const S = String.prototype;
 
-/*
+/**
 by(fn, a, b)
 Compares `fn(a)` against `fn(b)` and returns `-1`, `0` or `1`. Useful for sorting
 objects by property:
@@ -228,7 +229,7 @@ objects by property:
 ```
 [{id: '2'}, {id: '1'}].sort(by(get('id')));  // [{id: '1'}, {id: '2'}]
 ```
-*/
+**/
 
 function by(fn, a, b) {
     const fna = fn(a);
@@ -236,9 +237,19 @@ function by(fn, a, b) {
     return fnb === fna ? 0 : fna > fnb ? 1 : -1 ;
 }
 
+/**
+byAlphabet(a, b)
+Compares `a` against `b` alphabetically using the current locale alphabet.
+**/
+
 function byAlphabet(a, b) {
     return S.localeCompare.call(a, b);
 }
+
+/**
+each(fn, array)
+Calls `fn` for each member in `array`.
+**/
 
 function each(fn, object) {
     // A stricter version of .forEach, where the callback fn
@@ -257,15 +268,32 @@ function each(fn, object) {
     return object;
 }
 
+/**
+map(fn, object)
+Delegates to `object.map` or `Array.map` to return a new collection of mapped
+values.
+**/
+
 function map(fn, object) {
     return object && object.map ? object.map(fn) : A$1.map.call(object, fn) ;
 }
+
+/**
+filter(fn, object)
+Delegates to `object.filter` or `Array.filter` to return a new collection of
+filtered objects.
+**/
 
 function filter(fn, object) {
     return object.filter ?
         object.filter(fn) :
         A$1.filter.call(object, fn) ;
 }
+
+/**
+reduce(fn, seed, object)
+Delegates to `object.reduce` or `Array.reduce` to return a reduced value.
+**/
 
 function reduce(fn, seed, object) {
     return object.reduce ?
@@ -276,6 +304,12 @@ function reduce(fn, seed, object) {
 function sort(fn, object) {
     return object.sort ? object.sort(fn) : A$1.sort.call(object, fn);
 }
+
+/**
+concat(array2, array1)
+Where JavaScript's Array.concat only works reliably on arrays, `concat`
+will glue together any old array-like object.
+**/
 
 function concat(array2, array1) {
     // A.concat only works with arrays - it does not flatten array-like
@@ -859,6 +893,11 @@ Returns `typeof object`.
 function toType(object) {
     return typeof object;
 }
+
+/**
+prepend(string1, string2)
+Returns `str1 + str2`.
+**/
 
 function prepend(string1, string2) {
     return '' + string1 + string2;
@@ -2605,10 +2644,10 @@ Stream$1.throttle = function(timer) {
     });
 };
 
-/*
+/**
 remove(array, value)
 Remove `value` from `array`. Where `value` is not in `array`, does nothing.
-*/
+**/
 
 function remove(array, value) {
     if (array.remove) { array.remove(value); }
@@ -2622,17 +2661,21 @@ const nothing$1      = Object.freeze([]);
 { window.observeCount = 0; }
 const nothing$2 = Object.freeze([]);
 
-/*
-.append(str2, str1)
+/**
+append(str2, str1)
+Returns `str1 + str2`.
+**/
 
-Returns `str1 + str2` as string.
-*/
-
-function append(string1, string2) {
-    return '' + string2 + string1;
+function append(string2, string1) {
+    return '' + string1 + string2;
 }
 
 curry$1(append);
+
+/**
+prepad(chars, n, string)
+Pads `string` to `n` characters by prepending `chars`.
+**/
 
 function prepad(chars, n, value) {
     var string = value + '';
@@ -2648,6 +2691,11 @@ function prepad(chars, n, value) {
 }
 
 curry$1(prepad);
+
+/**
+postpad(chars, n, string)
+Pads `string` to `n` characters by appending `chars`.
+**/
 
 function postpad(chars, n, value) {
     var string = value + '';
@@ -2673,11 +2721,11 @@ function ap(data, fns) {
 	}
 }
 
-/*
+/**
 insert(fn, array, object)
 Inserts `object` into `array` at the first index where the result of
 `fn(object)` is greater than `fn(array[index])`.
-*/
+**/
 
 const A$3 = Array.prototype;
 
@@ -2690,9 +2738,9 @@ function insert(fn, array, object) {
     return object;
 }
 
-/*
+/**
 take(n, array)
-*/
+**/
 
 function take(i, object) {
     if (object.slice) { return object.slice(0, i); }
@@ -2704,7 +2752,7 @@ function take(i, object) {
     return a;
 }
 
-/*
+/**
 update(create, destroy, fn, target, source)
 
 Returns a new array containing items that are either matched objects from
@@ -2712,7 +2760,7 @@ Returns a new array containing items that are either matched objects from
 new objects created by calling `create` on a `source` object. Any objects
 in `target` that are not matched to `source` objects are destroyed by calling
 `destroy` on them.
-*/
+**/
 
 const assign$2 = Object.assign;
 
@@ -2746,6 +2794,10 @@ function update(create, destroy, fn, target, source) {
 
     return output;
 }
+
+/**
+diff(array1, array2)
+**/
 
 function diff(array, object) {
     var values = toArray(array);
@@ -2788,17 +2840,18 @@ function exp(n, x) { return Math.pow(n, x); }
 function log(n, x) { return Math.log(x) / Math.log(n); }
 function root(n, x) { return Math.pow(x, 1/n); }
 
-/*
-limit(min, max, n)
-*/
+/**
+clamp(min, max, n)
+**/
 
 function limit(min, max, n) {
+    console.trace('Deprecated: Fn limit() is now clamp()');
     return n > max ? max : n < min ? min : n;
 }
 
-/*
+/**
 wrap(min, max, n)
-*/
+**/
 
 function wrap(min, max, n) {
     return (n < min ? max : min) + (n - min) % (max - min);
@@ -2815,11 +2868,11 @@ const curriedRoot  = curry$1(root);
 const curriedLimit = curry$1(limit);
 const curriedWrap  = curry$1(wrap);
 
-/*
+/**
 gcd(a, b)
 
 Returns the greatest common divider of a and b.
-*/
+**/
 
 function gcd(a, b) {
     return b ? gcd(b, a % b) : a;
@@ -2827,11 +2880,11 @@ function gcd(a, b) {
 
 const curriedGcd = curry$1(gcd);
 
-/*
+/**
 lcm(a, b)
 
 Returns the lowest common multiple of a and b.
-*/
+**/
 
 function lcm(a, b) {
     return a * b / gcd(a, b);
@@ -2839,13 +2892,13 @@ function lcm(a, b) {
 
 const curriedLcm = curry$1(lcm);
 
-/*
+/**
 mod(divisor, n)
 
 JavaScript's modulu operator (`%`) uses Euclidean division, but for
 stuff that cycles through 0 the symmetrics of floored division are often
 are more useful. This function implements floored division.
-*/
+**/
 
 function mod(d, n) {
     var value = n % d;
@@ -4228,28 +4281,28 @@ const runit = /(\d*\.?\d+)(r?em|vw|vh)/;
 //var rpercent = /(\d*\.?\d+)%/;
 
 const units = {
-	em: function(n) {
-		return getFontSize() * n;
-	},
+    em: function(n) {
+        return getFontSize() * n;
+    },
 
-	rem: function(n) {
-		return getFontSize() * n;
-	},
+    rem: function(n) {
+        return getFontSize() * n;
+    },
 
-	vw: function(n) {
-		return window.innerWidth * n / 100;
-	},
+    vw: function(n) {
+        return window.innerWidth * n / 100;
+    },
 
-	vh: function(n) {
-		return window.innerHeight * n / 100;
-	}
+    vh: function(n) {
+        return window.innerHeight * n / 100;
+    }
 };
 
 let fontSize;
 
 function getFontSize() {
-	return fontSize ||
-		(fontSize = style("font-size", document.documentElement), 10);
+    return fontSize ||
+        (fontSize = style("font-size", document.documentElement), 10);
 }
 
 /**
@@ -4259,28 +4312,35 @@ Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in p
 */
 
 const parseValue = overload(toType, {
-	'number': id,
+    'number': id,
 
-	'string': function(string) {
-		var data = runit.exec(string);
+    'string': function(string) {
+        var data = runit.exec(string);
 
-		if (data) {
-			return units[data[2]](parseFloat(data[1]));
-		}
+        if (data) {
+            return units[data[2]](parseFloat(data[1]));
+        }
 
-		throw new Error('dom: "' + string + '" cannot be parsed as rem, em, vw or vh units.');
-	}
+        throw new Error('dom: "' + string + '" cannot be parsed as rem, em, vw or vh units.');
+    }
 });
 
 
 /**
 toRem(value)
 
-Takes number in pixels and returns a string of the form '10rem'.
+Takes number in pixels or a CSS value as a string and returns a string
+of the form '10.25rem'.
 */
 
 function toRem(n) {
-	return (parseValue(n) / getFontSize()) + 'rem';
+    return (parseValue(n) / getFontSize())
+        // Chrome needs 7 digit precision for accurate rendering
+        .toFixed(8)
+        // Remove trailing 0s
+        .replace(/\.?0*$/, '')
+        // Postfix
+        + 'rem';
 }
 
 /**
@@ -4290,7 +4350,7 @@ Takes number in pixels and returns a string of the form '10vw'.
 */
 
 function toVw(n) {
-	return (100 * parseValue(n) / window.innerWidth) + 'vw';
+    return (100 * parseValue(n) / window.innerWidth) + 'vw';
 }
 
 /**
@@ -4300,7 +4360,7 @@ Takes number in pixels and returns a string of the form '10vh'.
 */
 
 function toVh(n) {
-	return (100 * parseValue(n) / window.innerHeight) + 'vh';
+    return (100 * parseValue(n) / window.innerHeight) + 'vh';
 }
 
 const rules = [];
@@ -5855,7 +5915,7 @@ function changedTouch(e, data) {
 	// Chrome Android (at least) includes touches that have not
 	// changed in e.changedTouches. That's a bit annoying. Check
 	// that this touch has changed.
-	if (touch.pageX === data.pageX && touch.pageY === data.pageY) { return; }
+	if (touch.clientX === data.clientX && touch.clientY === data.clientY) { return; }
 
 	return touch;
 }
@@ -5915,8 +5975,8 @@ function touchstart(e, push, options) {
 	// movestart, move and moveend event objects.
 	var event = {
 		target:     touch.target,
-		pageX:      touch.pageX,
-		pageY:      touch.pageY,
+		clientX:      touch.clientX,
+		clientY:      touch.clientY,
 		identifier: touch.identifier,
 
 		// The only way to make handlers individually unbindable is by
@@ -5948,8 +6008,8 @@ function removeTouch(events) {
 }
 
 function checkThreshold(e, events, touch, removeHandlers, push, options) {
-	var distX = touch.pageX - events[0].pageX;
-	var distY = touch.pageY - events[0].pageY;
+	var distX = touch.clientX - events[0].clientX;
+	var distY = touch.clientY - events[0].clientY;
 	var threshold = parseValue(options.threshold);
 
 	// Do nothing if the threshold has not been crossed.
@@ -6558,22 +6618,28 @@ function urlFromData(url, data) {
         url + '?' + dataToQuery(data) ;
 }
 
-function createOptions(method, mimetype, data, controller) {
-    return method === 'GET' ? {
+function createOptions(method, data, head, controller) {
+    const contentType = typeof head === 'string' ?
+        head :
+        head['Content-Type'] ;
+
+    const headers = createHeaders(contentType, assign$9(
+        config$1.headers && data ? config$1.headers(data) : {},
+        typeof head === 'string' ? nothing : head
+    ));
+
+    const options = {
         method:  method,
-        headers: createHeaders(mimetype, config$1.headers ? config$1.headers(data) : {}),
+        headers: headers,
         credentials: 'same-origin',
         signal: controller && controller.signal
-    } : {
-        method:  method,
-        // Process headers before body, allowing us to read a CSRFToken,
-        // which may be in data, in createHeaders() before removing it
-        // from data in body().
-        headers: createHeaders(mimetype, config$1.headers ? config$1.headers(data) : {}),
-        body:    createBody(mimetype, config$1.body ? config$1.body(data) : data),
-        credentials: 'same-origin',
-        signal: controller && controller.signal
-    } ;
+    };
+
+    if (method !== 'GET') {
+        options.body = createBody(contentType, config$1.body ? config$1.body(data) : data);
+    }
+
+    return options;
 }
 
 const responders = {
@@ -6622,11 +6688,12 @@ function respond(response) {
 
 
 /**
-request(type, url, data, mimetype)
+request(type, url, data, mimetype | headers)
 
 Uses `fetch()` to send a request to `url`. Where `type` is `"GET"`, `data` is
-serialised and appended to the URL, otherwise it is sent as a payload
-conforming to the given `mimetype`.
+serialised and appended to the URL, otherwise it is sent as a request body.
+The 4th parameter may be a content type string or a headers object (in which
+case it must have a `'Content-Type'` property).
 **/
 
 function request(type = 'GET', url, data, mimetype = 'application/json') {
@@ -6645,7 +6712,7 @@ function request(type = 'GET', url, data, mimetype = 'application/json') {
     }
 
     // param[4] is an optional abort controller
-    return fetch(url, createOptions(method, mimetype, data, arguments[4]))
+    return fetch(url, createOptions(method, data, mimetype, arguments[4]))
     .then(respond);
 }
 

@@ -52,6 +52,7 @@
         "rollup": "^1.32.1"
     },
     "module": "module.js",
+    "image": "https://stephen.band/images/logo.png",
     "scripts": {
         "lint": "eslint modules/*.js",
         "build-css": "node ../fn/build-css.js package.json style.min.css",

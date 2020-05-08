@@ -10,7 +10,7 @@
     <meta property="og:url" content="http://stephen.band/dom/">
     <meta property="og:title" content="dom">
     <meta property="og:description" content="A library of DOM functions for HTML and SVG, importable as individual ES modules.">
-    <meta property="og:image" content="images/logo.png">
+    <meta property="og:image" content="https://stephen.band/images/logo.png">
 
     <title>dom</title>
 
@@ -648,7 +648,7 @@ case it must have a <code>'Content-Type'</code> property).</p>
             <p>The library has a number of scripts for cheekily extending the
             default behaviour of DOM elements, declared via 'behaviour'&nbsp;attributes.</p>
 
-			<!--p>Behaviours may be imported and used before
+            <!--p>Behaviours may be imported and used before
             <code class="language-js">'DOMContentLoad'</code>, there are no
             'setup' functions to run, and elements that are added
             to the DOM later get to use them&nbsp;automatically.</p-->
@@ -656,9 +656,9 @@ case it must have a <code>'Content-Type'</code> property).</p>
             <p>No style is given to make these behaviours do anything <i>visual</i>
             however. Behaviours, largely, add and remove classes, how that <i>looks</i>
             is up to your CSS. This is deliberate: by seperating style
-            and behaviour many different styles of interactive –
+            and behaviour many different styles of interactive —
             <a href="#example-menu">a menu</a>, <a href="#example-dialog">a dialog</a>,
-            <a href="#example-tooltip">a tooltip</a> – may share, for example,
+            <a href="#example-tooltip">a tooltip</a> — may share, for example,
             <code class=" language-js">popable</code>&nbsp;behaviour.</p>
 
             <nav class="menu-toggle-block toggle-block block" popable="" id="example-menu">
@@ -857,6 +857,8 @@ validation messages are shown.</p>
         import '../dom/js/switchable.js';
         import '../dom/js/fullscreenable.js';
         import '../dom/js/validateable.js';
+        import '../bolt/components/toggle-block.js';
+
         import * as dom from './module.js';
         Object.assign(window, dom);
     </script>

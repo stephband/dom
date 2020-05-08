@@ -55,6 +55,7 @@
     "image": "https://stephen.band/images/logo.png",
     "scripts": {
         "lint": "eslint modules/*.js",
+        "build": "npm run build-module && npm run build-css && npm run build-docs",
         "build-css": "node ../fn/build-css.js package.json style.min.css",
         "build-module": "rollup ./module.js --o ./module.rolled.js --f esm",
         "build-docs": "node ../fn/build-html.js index.template.html index.html"

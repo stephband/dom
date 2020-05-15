@@ -29,7 +29,7 @@ you have a scrolling navigation:
 
 import '../polyfills/element.scrollintoview.js';
 import { by, get } from '../../fn/module.js';
-import { rect, features, isInternalLink, select } from '../module.js';
+import { rect, features, isInternalLink, select, trigger } from '../module.js';
 
 var DEBUG = false;
 
@@ -121,6 +121,7 @@ function update(time) {
     unlocate();
     locate(node);
     window.history.replaceState(nothing, '', '#' + node.id);
+    trigger('hashchange', window);
 }
 
 function scroll(e) {

@@ -292,9 +292,6 @@ function load(e) {
     // Is there a node with that id?
     const node = document.getElementById(window.location.hash.slice(1));
     if (node) {
-        // It's smooth scrolling. It shouldn't. It may be because we have
-        // scroll-behavior: smooth on :root.
-        console.log(node, scrollOptions.behavior);
         node.scrollIntoView(scrollOptions);
     }
 

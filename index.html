@@ -17,7 +17,10 @@
     <script title="load">
     document.documentElement.className += ' js content-loading loading';
     window.addEventListener('DOMContentLoaded', () => document.documentElement.classList.remove('content-loading'));
-    window.addEventListener('load', () => document.documentElement.classList.remove('loading'));
+    // Wait for other load handlers to run first - Bolt does a few things on
+    // load (eg. locateable scrolls) and we want them to run before the loading
+    // class is removed
+    window.addEventListener('load', () => window.requestAnimationFrame(() => document.documentElement.classList.remove('loading')));
     </script>
 
     <link rel="shortcut icon" href="images/logo-64x64.ico">

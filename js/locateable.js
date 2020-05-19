@@ -28,7 +28,7 @@ you have a scrolling navigation:
 **/
 
 import '../polyfills/element.scrollintoview.js';
-import { by, get } from '../../fn/module.js';
+import { by, get, weakCache } from '../../fn/module.js';
 import { rect, features, isInternalLink, select, trigger } from '../module.js';
 
 var DEBUG = false;
@@ -46,10 +46,11 @@ export const config = {
     scrollIdleDuration: 0.18
 };
 
-let hashTime     = -Infinity;
+let hashTime     = 0;
 let frameTime    = -Infinity;
+let scrollLeft   = document.scrollingElement.scrollLeft;
 let scrollTop    = document.scrollingElement.scrollTop;
-let locateables, locatedNode, scrollPaddingTop, frame;
+let locateables, locatedNode, scrollPaddingLeft, scrollPaddingTop, frame;
 
 
 function queryLinks(id) {
@@ -84,7 +85,8 @@ function update(time) {
     // Update things that rarely change only when we have not updated recently
     if (frameTime < time - config.scrollIdleDuration * 1000) {
         locateables = select(selector, document);
-        scrollPaddingTop = parseInt(getComputedStyle(document.documentElement).scrollPaddingTop, 10);
+        scrollPaddingLeft = parseInt(getComputedStyle(document.documentElement).scrollPaddingLeft, 10);
+        scrollPaddingTop  = parseInt(getComputedStyle(document.documentElement).scrollPaddingTop, 10);
     }
 
     frameTime = time;
@@ -126,14 +128,15 @@ function update(time) {
 
 function scroll(e) {
     if (DEBUG) {
-        console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollTop);
+        console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollLeft + ', ' + document.scrollingElement.scrollTop);
     }
 
     const aMomentAgo = e.timeStamp - config.scrollIdleDuration * 1000;
 
     // Keep a record of scrollTop in order to restore it in Safari,
     // where popstate and hashchange are preceeded by a scroll jump
-    scrollTop = document.scrollingElement.scrollTop;
+    scrollLeft = document.scrollingElement.scrollLeft;
+    scrollTop  = document.scrollingElement.scrollTop;
 
     // For a moment after the last hashchange dont update while
     // smooth scrolling settles to the right place.
@@ -150,9 +153,97 @@ function scroll(e) {
     frame = requestAnimationFrame(update);
 }
 
+const store = weakCache(function(node) {
+    return {
+        node: node
+    };
+});
+
+
+function updateElement(time, data) {
+    data.frame = undefined;
+
+    // Update things that rarely change only when we have not updated recently
+    if (frameTime < time - config.scrollIdleDuration * 1000) {
+        data.box               = rect(data.node);
+        data.locateables       = select(selector, data.node);
+
+        // scrollPaddingN may compute to "auto", which parses as NaN.
+        // Default to 0.
+        data.scrollPaddingLeft = parseInt(getComputedStyle(data.node).scrollPaddingLeft, 10) || 0;
+        data.scrollPaddingTop  = parseInt(getComputedStyle(data.node).scrollPaddingTop, 10) || 0;
+    }
+
+    frameTime = time;
+
+    const boxes = data.locateables.map(rect).sort(byTop);
+    let n = -1;
+    let node;
+
+    while (boxes[++n]) {
+        // Stop on locateable lower than the break
+        if ((boxes[n].top - data.box.top) > data.scrollPaddingTop + 1
+        || (boxes[n].left - data.box.left) > data.scrollPaddingLeft + 1) {
+            break;
+        }
+
+        node = data.locateables[n];
+    }
+
+    // Check that node and locateNode are different before continueing
+    if (node === locatedNode) {
+        return;
+    }
+
+    // Before the first or after the last locateable. (The latter
+    // should not be possible according to the above while loop)
+    unlocate();
+
+    if (node) {
+        locate(node);
+        window.history.replaceState(nothing, '', '#' + node.id);
+        trigger('hashchange', window);
+        return;
+    }
+
+    window.history.replaceState(nothing, '', '#');
+}
+
+function scrollElement(e) {
+    if (e.target === document) {
+        return false;
+    }
+
+    if (DEBUG) {
+        console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollLeft + ', ' + document.scrollingElement.scrollTop);
+    }
+
+    const aMomentAgo = e.timeStamp - config.scrollIdleDuration * 1000;
+
+    // Keep a record of scrollTop in order to restore it in Safari,
+    // where popstate and hashchange are preceeded by a scroll jump
+    //scrollLeft = document.scrollingElement.scrollLeft;
+    //scrollTop  = document.scrollingElement.scrollTop;
+
+    // For a moment after the last hashchange dont update while
+    // smooth scrolling settles to the right place.
+    if (hashTime > aMomentAgo) {
+        hashTime = e.timeStamp;
+        return;
+    }
+
+    const data = store(e.target);
+
+    // Is frame already cued?
+    if (data.frame) { return; }
+
+    // Cue an update
+    data.frame = requestAnimationFrame((time) => updateElement(time, data));
+}
+
 function popstate(e) {
     if (DEBUG) {
-        console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollTop);
+        console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollLeft + ', ' + document.scrollingElement.scrollTop);
     }
 
     // Record the timeStamp
@@ -163,11 +254,13 @@ function popstate(e) {
 
     const hash = window.location.hash;
     const id   = hash.slice(1);
+
     if (!id) {
         if (!features.scrollBehavior) {
             // In Safari, popstate and hashchange are preceeded by scroll jump -
             // restore previous scrollTop.
-            document.scrollingElement.scrollTop = scrollTop;
+            document.scrollingElement.scrollLeft = scrollLeft;
+            document.scrollingElement.scrollTop  = scrollTop;
 
             // Then animate
             document.body.scrollIntoView(scrollOptions);
@@ -187,7 +280,8 @@ function popstate(e) {
     if (!features.scrollBehavior) {
         // In Safari, popstate and hashchange are preceeded by scroll jump -
         // restore previous scrollTop.
-        document.scrollingElement.scrollTop = scrollTop;
+        document.scrollingElement.scrollLeft = scrollLeft;
+        document.scrollingElement.scrollTop  = scrollTop;
 
         // Then animate
         node.scrollIntoView(scrollOptions);
@@ -195,12 +289,25 @@ function popstate(e) {
 }
 
 function load(e) {
+    // Is there a node with that id?
+    const node = document.getElementById(window.location.hash.slice(1));
+    if (node) {
+        // It's smooth scrolling. It shouldn't. It may be because we have
+        // scroll-behavior: smooth on :root.
+        console.log(node, scrollOptions.behavior);
+        node.scrollIntoView(scrollOptions);
+    }
+
     popstate(e);
     scroll(e);
 
     // Start listening to popstate and scroll
     window.addEventListener('popstate', popstate);
     window.addEventListener('scroll', scroll);
+
+    // Capture scroll events in capture phase, as scroll events from elements
+    // other than document do not bubble
+    window.addEventListener('scroll', scrollElement, true);
 
     // Scroll smoothly from now on
     scrollOptions.behavior = 'smooth';

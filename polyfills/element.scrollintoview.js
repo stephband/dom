@@ -53,7 +53,9 @@ function scrollToNode(target, behavior) {
 }
 
 if (!features.scrollBehavior) {
-    // Get the methoid from HTMLElement - in some browsers it is here rather
+    console.log('Polyfilling Element.scrollIntoView(options).');
+
+    // Get the method from HTMLElement - in some browsers it is here rather
     // than on Element
     const constructor    = 'scrollIntoView' in Element.prototype ? Element : HTMLElement ;
     const scrollIntoView = constructor.scrollIntoView;

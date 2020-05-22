@@ -159,7 +159,6 @@ const store = weakCache(function(node) {
     };
 });
 
-
 function updateElement(time, data) {
     data.frame = undefined;
 
@@ -262,7 +261,6 @@ function restoreScroll(node) {
     scrollParent.scrollLeft = data.scrollLeft;
     scrollParent.scrollTop  = data.scrollTop;
 }
-
 
 function popstate(e) {
     if (DEBUG) {

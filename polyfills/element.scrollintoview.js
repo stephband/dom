@@ -17,19 +17,19 @@ const config = {
 
 let cancel = noop;
 
-function scrollToNode(target, behavior) {
-    const scrollPaddingTop = parseInt(getComputedStyle(document.documentElement).scrollPaddingTop, 10);
-    const coords = offset(document.scrollingElement, target);
-    const scrollHeight = document.scrollingElement.scrollHeight;
-    const scrollBoxHeight = document.scrollingElement === document.body ?
+function scrollToNode(target, scrollParent, behavior) {
+    const scrollPaddingTop = parseInt(getComputedStyle(scrollParent).scrollPaddingTop, 10);
+    const coords = offset(scrollParent, target);
+    const scrollHeight = scrollParent.scrollHeight;
+    const scrollBoxHeight = scrollParent === document.body ?
         // We cannot gaurantee that body height is 100%. Use the window
         // innerHeight instead.
         window.innerHeight :
-        rect(document.scrollingElement).height ;
+        rect(scrollParent).height ;
 
     const top = (coords[1] - scrollPaddingTop) > (scrollHeight - scrollBoxHeight) ?
         scrollHeight - scrollBoxHeight :
-        (coords[1] - scrollPaddingTop) ;
+        (scrollParent.scrollTop + coords[1] - scrollPaddingTop) ;
 
     cancel();
 
@@ -42,13 +42,13 @@ function scrollToNode(target, behavior) {
     if (behavior === 'smooth') {
         const scrollDuration = config.scrollDuration
             + config.scrollDurationPerHeight
-            * Math.abs(scrollTop - document.scrollingElement.scrollTop)
+            * Math.abs(scrollTop - scrollParent.scrollTop)
             / scrollBoxHeight ;
 
-        cancel = animate(scrollDuration, config.scrollTransform, 'scrollTop', document.scrollingElement, scrollTop);
+        cancel = animate(scrollDuration, config.scrollTransform, 'scrollTop', scrollParent, scrollTop);
     }
     else {
-        document.scrollingElement.scrollTop = scrollTop ;
+        scrollParent.scrollTop = scrollTop ;
     }
 }
 
@@ -70,7 +70,20 @@ if (!features.scrollBehavior) {
                 console.warn('Element.scrollIntoView polyfill does not support options.inline... add support!');
             }
 
-            scrollToNode(this, options.behavior);
+            let scrollParent = this;
+
+            while((scrollParent = scrollParent.parentNode)) {
+                if (scrollParent === document.body || scrollParent === document.documentElement) {
+                    scrollParent = document.scrollingElement;
+                    break;
+                }
+
+                if (scrollParent.scrollHeight > scrollParent.clientHeight) {
+                    break;
+                }
+            }
+
+            scrollToNode(this, scrollParent, options.behavior);
         }
         else {
             scrollIntoView.apply(this, arguments);

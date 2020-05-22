@@ -131,12 +131,12 @@ function scroll(e) {
         console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollLeft + ', ' + document.scrollingElement.scrollTop);
     }
 
-    const aMomentAgo = e.timeStamp - config.scrollIdleDuration * 1000;
-
     // Keep a record of scrollTop in order to restore it in Safari,
     // where popstate and hashchange are preceeded by a scroll jump
     scrollLeft = document.scrollingElement.scrollLeft;
     scrollTop  = document.scrollingElement.scrollTop;
+
+    const aMomentAgo = e.timeStamp - config.scrollIdleDuration * 1000;
 
     // For a moment after the last hashchange dont update while
     // smooth scrolling settles to the right place.
@@ -218,12 +218,14 @@ function scrollElement(e) {
         console.log(e.type, e.timeStamp, window.location.hash, document.scrollingElement.scrollLeft + ', ' + document.scrollingElement.scrollTop);
     }
 
-    const aMomentAgo = e.timeStamp - config.scrollIdleDuration * 1000;
+    const data = store(e.target);
 
     // Keep a record of scrollTop in order to restore it in Safari,
     // where popstate and hashchange are preceeded by a scroll jump
-    //scrollLeft = document.scrollingElement.scrollLeft;
-    //scrollTop  = document.scrollingElement.scrollTop;
+    data.scrollLeft = e.target.scrollLeft;
+    data.scrollTop  = e.target.scrollTop;
+
+    const aMomentAgo = e.timeStamp - config.scrollIdleDuration * 1000;
 
     // For a moment after the last hashchange dont update while
     // smooth scrolling settles to the right place.
@@ -232,14 +234,35 @@ function scrollElement(e) {
         return;
     }
 
-    const data = store(e.target);
-
     // Is frame already cued?
     if (data.frame) { return; }
 
     // Cue an update
     data.frame = requestAnimationFrame((time) => updateElement(time, data));
 }
+
+function restoreScroll(node) {
+    var scrollParent = node;
+
+    while ((scrollParent = scrollParent.parentNode)) {
+        if (scrollParent === document.body || scrollParent === document.documentElement) {
+            // Todo: generalise scrollingElement to use data object too
+            document.scrollingElement.scrollLeft = scrollLeft;
+            document.scrollingElement.scrollTop  = scrollTop;
+            return;
+        }
+
+        if (scrollParent.scrollHeight > scrollParent.clientHeight) {
+            break;
+        }
+    }
+
+    var data = store(scrollParent);
+
+    scrollParent.scrollLeft = data.scrollLeft;
+    scrollParent.scrollTop  = data.scrollTop;
+}
+
 
 function popstate(e) {
     if (DEBUG) {
@@ -259,8 +282,7 @@ function popstate(e) {
         if (!features.scrollBehavior) {
             // In Safari, popstate and hashchange are preceeded by scroll jump -
             // restore previous scrollTop.
-            document.scrollingElement.scrollLeft = scrollLeft;
-            document.scrollingElement.scrollTop  = scrollTop;
+            restoreScroll(document.body);
 
             // Then animate
             document.body.scrollIntoView(scrollOptions);
@@ -280,8 +302,7 @@ function popstate(e) {
     if (!features.scrollBehavior) {
         // In Safari, popstate and hashchange are preceeded by scroll jump -
         // restore previous scrollTop.
-        document.scrollingElement.scrollLeft = scrollLeft;
-        document.scrollingElement.scrollTop  = scrollTop;
+        restoreScroll(node);
 
         // Then animate
         node.scrollIntoView(scrollOptions);

@@ -1,4 +1,6 @@
 
+/* DEPRECATED use bolt/css/device.css */
+
 /*
 Transition
 
@@ -17,19 +19,4 @@ Styleguide: zutilities.transition
        -moz-transition: none !important;
          -o-transition: all 0 linear 0 !important;
             transition: none !important;
-}
-
-/* Respond to device input classes. */
-
-.mouse-device a:focus,
-.mouse-device button:focus,
-.mouse-device input:focus,
-.touch-device a:focus,
-.touch-device button:focus,
-.touch-device input:focus {
-     outline-width: 0;
-}
-
-.mouse-device button:focus {
-    box-shadow: none;
 }

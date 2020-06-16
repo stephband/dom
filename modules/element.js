@@ -14,6 +14,8 @@ element(name, options)
    }
 */
 
+const assign = Object.assign;
+
 const shadowOptions = { mode: 'open' };
 
 const constructors = {
@@ -22,6 +24,26 @@ const constructors = {
     'br':       HTMLBRElement,
     'img':      HTMLImageElement,
     'template': HTMLTemplateElement
+};
+
+const formAssociation = ('ElementInternals' in window && 'setFormData' in window.ElementInternals);
+
+const internals = Symbol('internals');
+
+const formProperties = {
+    // These properties echo those provided by native form controls.
+    // They are not strictly necessary, but provided for consistency.
+    form: { get: function() { return this[internals].form; }},
+    name: { get: function() { return this.getAttribute('name'); }},
+    type: { get: function() { return this.localName; }},
+    labels: { get: function() { return this[internals].labels; }},
+    validity: { get: function() { return this[internals].validity; }},
+    validationMessage: { get: function() { return this[internals].validationMessage; }},
+    willValidate: { get: function() { return this[internals].willValidate; }},
+
+    // Methods
+    checkValidity: { value: function() { return this[internals].checkValidity(); }},
+    reportValidity: { value: function() { return this[internals].reportValidity(); }}
 };
 
 function getElementConstructor(tag) {
@@ -107,6 +129,11 @@ export default function element(name, options) {
         const elem   = Reflect.construct(constructor, arguments, Element);
         const shadow = createShadow(template, elem);
 
+        if (Element.formAssociated) {
+            // Get access to the internal form control API
+            elem[internals] = elem.attachInternals();
+        }
+
         options.construct
         && options.construct.call(elem, shadow);
 
@@ -138,8 +165,30 @@ export default function element(name, options) {
     // {
     //     name: { get: fn, set: fn }
     // }
+    //
+    // Where one of the properties is `value`, this element is set up as a form
+    // element.
 
-    Element.prototype = Object.create(constructor.prototype, options.properties || {}) ;
+    if (options.properties && options.properties.value) {
+        // Flag the Element class as formAssociated
+        Element.formAssociated = true;
+
+        Element.prototype = Object.create(constructor.prototype, assign({}, formProperties, options.properties, {
+            value: {
+                get: options.properties.value.get,
+                set: function() {
+                    // After setting value
+                    options.properties.value.set.apply(this, arguments);
+
+                    // Copy it to internal form state
+                    this[internals].setFormValue('' + this.value);
+                }
+            }
+        })) ;
+    }
+    else {
+        Element.prototype = Object.create(constructor.prototype, options.properties || {}) ;
+    }
 
     // options.attributes
     //
@@ -168,6 +217,11 @@ export default function element(name, options) {
     if (options.disconnect) {
         Element.prototype.disconnectedCallback = options.disconnect;
     }
+
+    // formAssociatedCallback(form)
+    // formDisabledCallback(disabled)
+    // formResetCallback()
+    // formStateRestoreCallback(state, mode)
 
     // options.extends
 

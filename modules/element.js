@@ -1,22 +1,29 @@
 
+import create from './create.js';
+
 /**
 element(name, options)
 
-- name: 'name'     Custom element tag name
+- name: 'name'     Custom element tag name, eg. ''
 - options: {
-       extends:    Name of tag to extend, makes the element a custom built-in
-       shadow:     String or template node or id used to create a shadow DOM
+       extends:    Name of tag to extend, makes the element a custom built-in element
+       mode:       'open' or 'closed', defaults to closed
+       template:   String or template node or id used to create a shadow DOM
        attributes: A `{name: fn}` map called when named attributes change
-       properties: A `{name: {get, set}}` map called on named property access
-       construct:  Lifecycle handler called during element construction
-       connect:    Lifecycle handler called when element added to DOM
+       properties: A map of properties defined on the element prototype. Where
+            the property `value` is defined extra work is done to make the
+            element work inside a form
+       construct:  Lifecycle handler called during element construction with shadow as first argument
+       connect:    Lifecycle handler called when element added to DOM with shadow as first argument
        disconnect: Lifecycle handler called when element removed from DOM
+       enable:     Lifecycle handler called when form element enabled
+       disable:    Lifecycle handler called when form element disabled
+       reset:      Lifecycle handler called when form element reset
+       restore:    Lifecycle handler called when form element restored
    }
 */
 
 const assign = Object.assign;
-
-const shadowOptions = { mode: 'open' };
 
 const constructors = {
     'a':        HTMLAnchorElement,
@@ -26,24 +33,30 @@ const constructors = {
     'template': HTMLTemplateElement
 };
 
-const formAssociation = ('ElementInternals' in window && 'setFormData' in window.ElementInternals);
+//const inputEvent = new CustomEvent('input', eventOptions);
 
-const internals = Symbol('internals');
+const $internals = Symbol('internals');
+const $shadow    = Symbol('shadow');
 
 const formProperties = {
     // These properties echo those provided by native form controls.
     // They are not strictly necessary, but provided for consistency.
-    form: { get: function() { return this[internals].form; }},
-    name: { get: function() { return this.getAttribute('name'); }},
-    type: { get: function() { return this.localName; }},
-    labels: { get: function() { return this[internals].labels; }},
-    validity: { get: function() { return this[internals].validity; }},
-    validationMessage: { get: function() { return this[internals].validationMessage; }},
-    willValidate: { get: function() { return this[internals].willValidate; }},
+    type: { value: 'text' },
+
+    name: {
+        set: function(name) { return this.setAttribute('name', name); },
+        get: function() { return this.getAttribute('name') || ''; }
+    },
+
+    form: { get: function() { return this[$internals].form; }},
+    labels: { get: function() { return this[$internals].labels; }},
+    validity: { get: function() { return this[$internals].validity; }},
+    validationMessage: { get: function() { return this[$internals].validationMessage; }},
+    willValidate: { get: function() { return this[$internals].willValidate; }},
 
     // Methods
-    checkValidity: { value: function() { return this[internals].checkValidity(); }},
-    reportValidity: { value: function() { return this[internals].reportValidity(); }}
+    checkValidity: { value: function() { return this[$internals].checkValidity(); }},
+    reportValidity: { value: function() { return this[$internals].reportValidity(); }}
 };
 
 function getElementConstructor(tag) {
@@ -72,17 +85,20 @@ function getTemplateById(id) {
     const template = document.getElementById(id);
 
     if (!template || !template.content) {
-        throw new Error('Template "' + options.shadow + '" not found in document');
+        throw new Error('Template id="' + id + '" not found in document');
     }
 
     return template;
 }
 
-function createShadow(template, elem) {
+function createShadow(template, elem, options) {
     if (!template) { return; }
 
-    // Create a shadow root if there is DOM content
-    const shadow = elem.attachShadow(shadowOptions) ;
+    // Create a shadow root if there is DOM content. Shadows may be 'open' or
+    // 'closed'. Closed shadows are not exposed via element.shadowRoot, and
+    // events propagating from inside of them report the element as target.
+    const shadow = elem.attachShadow({ mode: options.mode || 'closed' }) ;
+    elem[$shadow] = shadow;
 
     // If template is a <template>
     if (typeof template === 'string') {
@@ -95,47 +111,60 @@ function createShadow(template, elem) {
     return shadow;
 }
 
-export default function element(name, options) {
-    // Legacy...
-    // element() has changed signature from (name, template, attributes, properties, options) –
-    // support the old signature with a warning.
-    if (typeof options === 'string') {
-        throw new Error('dom element(): new signature element(name, options). Everything is an option.');
+function attachInternals(elem) {
+    // Use native attachInternals where it exists
+    if (elem.attachInternals) {
+        return elem.attachInternals();
     }
 
-    // Get the element constructor from options.tag, or the
+    // Otherwise polyfill it with a pseudo internals object, actually a hidden
+    // input that we put inside element (but outside the shadow DOM)
+    const hidden = create('input', { type: 'hidden', name: elem.name });
+    elem.appendChild(hidden);
+
+    // Polyfill internals object setFormValue
+    hidden.setFormValue = function(value) {
+        this.value = value;
+    };
+
+    return hidden;
+}
+
+
+export default function element(name, options) {
+
+    // Get the element constructor from options.extends, or the
     // base HTMLElement constructor
     const constructor = options.extends ?
         getElementConstructor(options.extends) :
         HTMLElement ;
 
-    const template = options && options.shadow && (
-        typeof options.shadow === 'string' ?
-            // If options.shadow is an #id, search for <template id="id">
-            options.shadow[0] === '#' ? getTemplateById(options.shadow.slice(1)) :
+    const template = options && options.template && (
+        typeof options.template === 'string' ?
+            // If options.template is an #id, search for <template id="id">
+            options.template[0] === '#' ? getTemplateById(options.template.slice(1)) :
             // It must be a string of HTML
-            options.shadow :
-        options.shadow.content ?
+            options.template :
+        options.template.content ?
             // It must be a template node
-            options.shadow :
+            options.template :
         // Whatever it is, we don't support it
         function(){
-            throw new Error('element() options.shadow not recognised as template node, id or string');
+            throw new Error('element() options.template not recognised as template node, id or string');
         }()
     );
 
     function Element() {
-        // Construct on instance of Constructor using the Element prototype
+        // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);
-        const shadow = createShadow(template, elem);
+        const shadow = createShadow(template, elem, options);
 
         if (Element.formAssociated) {
             // Get access to the internal form control API
-            elem[internals] = elem.attachInternals();
+            elem[$internals] = attachInternals(elem);
         }
 
-        options.construct
-        && options.construct.call(elem, shadow);
+        options.construct && options.construct.call(elem, shadow);
 
         // At this point, if properties have already been set before the
         // element was upgraded, they exist on the elem itself, where we have
@@ -158,9 +187,11 @@ export default function element(name, options) {
         return elem;
     }
 
+
     // options.properties
     //
-    // Map of getter/setters called when properties mutate.
+    // Map of getter/setters called when properties mutate. Must be defined
+    // before attributeChangedCallback, but I'm not sure why right now.
     //
     // {
     //     name: { get: fn, set: fn }
@@ -181,7 +212,7 @@ export default function element(name, options) {
                     options.properties.value.set.apply(this, arguments);
 
                     // Copy it to internal form state
-                    this[internals].setFormValue('' + this.value);
+                    this[$internals].setFormValue('' + this.value);
                 }
             }
         })) ;
@@ -189,6 +220,7 @@ export default function element(name, options) {
     else {
         Element.prototype = Object.create(constructor.prototype, options.properties || {}) ;
     }
+
 
     // options.attributes
     //
@@ -206,26 +238,64 @@ export default function element(name, options) {
         };
     }
 
-    // options.connect
+
+    // Lifecycle
+    // https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-reactions
+    //
+    // More lifecycle reactions are available in the spec:
+    // adoptedCallback
+    // formAssociatedCallback
 
     if (options.connect) {
-        Element.prototype.connectedCallback = options.connect;
-    }
+        // Pass shadow to connect(shadow) function
+        Element.prototype.connectedCallback = function() {
+            return options.connect.call(this, this[$shadow]);
 
-    // options.disconnect
+            // 'input' events are suppused to traverse the shadow boundary
+            // but they do not. At least not in Chrome 2019 - a
+            /*this[$shadow].addEventListener('input', (e) => {
+                if (!e.composed) {
+                    console.warn('Custom element not allowing input event to traverse shadow boundary');
+                    this.dispatchEvent(inputEvent);
+                }
+            });*/
+        };
+    }
 
     if (options.disconnect) {
-        Element.prototype.disconnectedCallback = options.disconnect;
+        Element.prototype.disconnectedCallback = function() {
+            return options.disconnect.call(this, this[$shadow]);
+        };
     }
 
-    // formAssociatedCallback(form)
-    // formDisabledCallback(disabled)
-    // formResetCallback()
-    // formStateRestoreCallback(state, mode)
 
-    // options.extends
+    // Form lifecycle
+
+    if (Element.formAssociated) {
+        if (options.enable || options.disable) {
+            Element.prototype.formDisabledCallback = function(disabled) {
+                return disabled ?
+                    options.disable && options.disable.call(this, this[$shadow]) :
+                    options.enable && options.enable.call(this, this[$shadow]) ;
+            };
+        }
+
+        if (options.reset) {
+            Element.prototype.formResetCallback = function() {
+                return options.reset.call(this, this[$shadow]);
+            };
+        }
+
+        if (options.restore) {
+            Element.prototype.formStateRestoreCallback = function() {
+                return options.restore.call(this, this[$shadow]);
+            };
+        }
+    }
+
+
+    // Define element
 
     window.customElements.define(name, Element, options);
-
     return Element;
 }

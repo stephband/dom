@@ -97,7 +97,11 @@ function createShadow(template, elem, options) {
     // Create a shadow root if there is DOM content. Shadows may be 'open' or
     // 'closed'. Closed shadows are not exposed via element.shadowRoot, and
     // events propagating from inside of them report the element as target.
-    const shadow = elem.attachShadow({ mode: options.mode || 'closed' }) ;
+    const shadow = elem.attachShadow({
+        mode: options.mode || 'closed',
+        delegatesFocus: true
+    });
+
     elem[$shadow] = shadow;
 
     // If template is a <template>

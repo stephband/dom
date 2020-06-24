@@ -1,27 +1,62 @@
 
-import create from './create.js';
-
 /**
 element(name, options)
 
-- name: 'name'     Custom element tag name, eg. ''
+Registers a custom element and returns its constructor. This function aims to
+render the API for creating custom elements a little more... sane.
+
+- name: 'name'     Custom element tag name
 - options: {
-       extends:    Name of tag to extend, makes the element a custom built-in element
-       mode:       'open' or 'closed', defaults to closed
+       extends:    Name of tag to extend to make the element a custom built-in
+       mode:       'open' or 'closed', defaults to 'closed'
        template:   String or template node or id used to create a shadow DOM
-       attributes: A `{name: fn}` map called when named attributes change
-       properties: A map of properties defined on the element prototype. Where
-            the property `value` is defined extra work is done to make the
-            element work inside a form
-       construct:  Lifecycle handler called during element construction with shadow as first argument
-       connect:    Lifecycle handler called when element added to DOM with shadow as first argument
+       attributes: An object of handler functions for attribute changes
+       properties: An object of property definitions for the element prototype
+       construct:  Lifecycle handler called during element construction
+       connect:    Lifecycle handler called when element added to DOM
        disconnect: Lifecycle handler called when element removed from DOM
        enable:     Lifecycle handler called when form element enabled
        disable:    Lifecycle handler called when form element disabled
        reset:      Lifecycle handler called when form element reset
        restore:    Lifecycle handler called when form element restored
-   }
+  }
+
+The `extends` property can only create customised built-in elements in browsers
+that support the feature. Safari is a known culprit. Mileage will vary.
+
+The effects of the `mode` option are subtle. In 'closed' mode, the element is
+not given a publicly accessible `shadowRoot` property, and events that traverse
+the shadow boundary are retargeted (as they are in 'open' mode) but also have
+their `path` list truncated.
+
+Where the `properties` object contains a definition for a `value` property work
+is done to give the element form field behaviour. The constructor is assigned
+the property `formAssociated` which signals to the browser that it constructs
+form fields. Where they are not defined in `properties` the prototype is
+assigned default handlers for the standard properties `type`, `name`, `form`,
+`labels`, `validity`, `validationMessage`, `willValidate`, `checkValidity`
+and `reportValidity`. Form behaviour is also mildly polyfilled in browsers
+without support by inserting a hidden input inside the element but outside the
+shadow DOM. Mileage will vary. Managing focus can be a problem.
+
+At the start of initialisation the `construct` handler is called. Use it to
+set up a shadow root and define event handlers. Children and attributes must
+not be inspected or assigned at this point – doing so will throw in some cases,
+eg. construction via `createElement()`.
+
+Following that, attribute handlers are called for attributes declared in the
+HTML. The parser normally calls these in source order. This can be problematic
+if you require setup to run in a specific order. Here, they are run in the order
+declared in the `attributes` object.
+
+Finally the `connect` handler is called when the element is placed in the DOM
+or if it is already in the DOM and is being upgraded. All lifecycle handlers
+are called with the parameter `shadow`.
 */
+
+import create from './create.js';
+
+const DEBUG = true;
 
 const assign = Object.assign;
 
@@ -33,14 +68,12 @@ const constructors = {
     'template': HTMLTemplateElement
 };
 
-//const inputEvent = new CustomEvent('input', eventOptions);
-
 const $internals = Symbol('internals');
 const $shadow    = Symbol('shadow');
 
 const formProperties = {
     // These properties echo those provided by native form controls.
-    // They are not strictly necessary, but provided for consistency.
+    // They are not strictly required, but provided for consistency.
     type: { value: 'text' },
 
     name: {
@@ -48,15 +81,13 @@ const formProperties = {
         get: function() { return this.getAttribute('name') || ''; }
     },
 
-    form: { get: function() { return this[$internals].form; }},
-    labels: { get: function() { return this[$internals].labels; }},
-    validity: { get: function() { return this[$internals].validity; }},
+    form:              { get: function() { return this[$internals].form; }},
+    labels:            { get: function() { return this[$internals].labels; }},
+    validity:          { get: function() { return this[$internals].validity; }},
     validationMessage: { get: function() { return this[$internals].validationMessage; }},
-    willValidate: { get: function() { return this[$internals].willValidate; }},
-
-    // Methods
-    checkValidity: { value: function() { return this[$internals].checkValidity(); }},
-    reportValidity: { value: function() { return this[$internals].reportValidity(); }}
+    willValidate:      { get: function() { return this[$internals].willValidate; }},
+    checkValidity:     { value: function() { return this[$internals].checkValidity(); }},
+    reportValidity:    { value: function() { return this[$internals].reportValidity(); }}
 };
 
 function getElementConstructor(tag) {
@@ -71,16 +102,6 @@ function getElementConstructor(tag) {
         })();
 }
 
-function transferProperty(elem, key) {
-    if (elem.hasOwnProperty(key)) {
-        const value = elem[key];
-        delete elem[key];
-        elem[key] = value;
-    }
-
-    return elem;
-}
-
 function getTemplateById(id) {
     const template = document.getElementById(id);
 
@@ -89,6 +110,33 @@ function getTemplateById(id) {
     }
 
     return template;
+}
+
+function getTemplate(template) {
+    if (!template) { return; }
+
+    return typeof template === 'string' ?
+        // If template is an #id search for <template id="id">
+        template[0] === '#' ? getTemplateById(template.slice(1)) :
+        // It must be a string of HTML
+        template :
+    template.content ?
+        // It must be a template node
+        template :
+        // Whatever it is, we don't support it
+        function(){
+            throw new Error('element() options.template not a template node, id or string');
+        }() ;
+}
+
+function transferProperty(elem, key) {
+    if (elem.hasOwnProperty(key)) {
+        const value = elem[key];
+        delete elem[key];
+        elem[key] = value;
+    }
+
+    return elem;
 }
 
 function createShadow(template, elem, options) {
@@ -122,9 +170,11 @@ function attachInternals(elem) {
     }
 
     // Otherwise polyfill it with a pseudo internals object, actually a hidden
-    // input that we put inside element (but outside the shadow DOM)
+    // input that we put inside element (but outside the shadow DOM). We may
+    // not yet put this in the DOM however – it violates the spec to give a
+    // custom element children before it's contents are parsed. Instead we
+    // wait until connectCallback.
     const hidden = create('input', { type: 'hidden', name: elem.name });
-    elem.appendChild(hidden);
 
     // Polyfill internals object setFormValue
     hidden.setFormValue = function(value) {
@@ -134,29 +184,55 @@ function attachInternals(elem) {
     return hidden;
 }
 
+function appendInternalsCallback() {
+    // If we have simulated form internals, append the hidden input now
+    if (this[$internals] && !this.attachInternals) {
+        this.appendChild(this[$internals]);
+    }
+}
+
+function primeAttributes(elem) {
+    elem._initialAttributes = {};
+    elem._n = 0;
+}
+
+function advanceAttributes(elem, attributes, handlers) {
+    const values = elem._initialAttributes;
+
+    while(elem._n < attributes.length && values[attributes[elem._n]] !== undefined) {
+        //console.log('ADVANCE ATTR', attributes[elem._n]);
+        handlers[attributes[elem._n]].call(elem, values[attributes[elem._n]]);
+        ++elem._n;
+    }
+}
+
+function flushAttributes(elem, attributes, handlers) {
+    if (!elem._initialAttributes) { return; }
+
+    const values = elem._initialAttributes;
+
+    while(elem._n < attributes.length) {
+        //console.log('FLUSH ATTR', attributes[elem._n]);
+        if (values[attributes[elem._n]] !== undefined) {
+            handlers[attributes[elem._n]].call(elem, values[attributes[elem._n]]);
+        }
+        ++elem._n;
+    }
+
+    delete elem._initialAttributes;
+    delete elem._n;
+}
+
 
 export default function element(name, options) {
-
     // Get the element constructor from options.extends, or the
     // base HTMLElement constructor
     const constructor = options.extends ?
         getElementConstructor(options.extends) :
         HTMLElement ;
 
-    const template = options && options.template && (
-        typeof options.template === 'string' ?
-            // If options.template is an #id, search for <template id="id">
-            options.template[0] === '#' ? getTemplateById(options.template.slice(1)) :
-            // It must be a string of HTML
-            options.template :
-        options.template.content ?
-            // It must be a template node
-            options.template :
-        // Whatever it is, we don't support it
-        function(){
-            throw new Error('element() options.template not recognised as template node, id or string');
-        }()
-    );
+    // Get a template node or HTML string from options.template
+    const template = getTemplate(options.template);
 
     function Element() {
         // Construct an instance from Constructor using the Element prototype
@@ -169,6 +245,17 @@ export default function element(name, options) {
         }
 
         options.construct && options.construct.call(elem, shadow);
+
+        // Preserve initialisation order of attribute initialisation by
+        // queueing them
+        if (options.attributes) {
+            primeAttributes(elem);
+
+            // Wait a tick to flush attributes
+            Promise.resolve(1).then(function() {
+                flushAttributes(elem, Element.observedAttributes, options);
+            });
+        }
 
         // At this point, if properties have already been set before the
         // element was upgraded, they exist on the elem itself, where we have
@@ -192,17 +279,11 @@ export default function element(name, options) {
     }
 
 
-    // options.properties
+    // Properties
     //
-    // Map of getter/setters called when properties mutate. Must be defined
-    // before attributeChangedCallback, but I'm not sure why right now.
-    //
-    // {
-    //     name: { get: fn, set: fn }
-    // }
-    //
-    // Where one of the properties is `value`, this element is set up as a form
-    // element.
+    // Must be defined before attributeChangedCallback, but I cannot figure out
+    // why. Where one of the properties is `value`, the element is set up as a
+    // form element.
 
     if (options.properties && options.properties.value) {
         // Flag the Element class as formAssociated
@@ -226,44 +307,40 @@ export default function element(name, options) {
     }
 
 
-    // options.attributes
-    //
-    // Map of functions called when named attributes change.
-    //
-    // {
-    //     name: fn
-    // }
+    // Attributes
 
     if (options.attributes) {
         Element.observedAttributes = Object.keys(options.attributes);
 
         Element.prototype.attributeChangedCallback = function(name, old, value) {
-            options.attributes[name].call(this, value, name);
+            if (!this._initialAttributes) {
+                return options.attributes[name].call(this, value);
+            }
+
+            // Keep a record of attribute values to be applied in
+            // observedAttributes order
+            this._initialAttributes[name] = value;
+            advanceAttributes(this, Element.observedAttributes, options.attributes);
         };
     }
 
 
     // Lifecycle
-    // https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-reactions
-    //
-    // More lifecycle reactions are available in the spec:
-    // adoptedCallback
-    // formAssociatedCallback
 
-    if (options.connect) {
-        // Pass shadow to connect(shadow) function
-        Element.prototype.connectedCallback = function() {
-            return options.connect.call(this, this[$shadow]);
+    Element.prototype.connectedCallback = function() {
+        if (this._initialAttributes) {
+            flushAttributes(this, Element.observedAttributes, options.attributes);
+        }
 
-            // 'input' events are suppused to traverse the shadow boundary
-            // but they do not. At least not in Chrome 2019 - a
-            /*this[$shadow].addEventListener('input', (e) => {
-                if (!e.composed) {
-                    console.warn('Custom element not allowing input event to traverse shadow boundary');
-                    this.dispatchEvent(inputEvent);
-                }
-            });*/
-        };
+        if (Element.formAssociated) {
+            appendInternalsCallback.call(this);
+        }
+
+        if (options.connect) {
+            options.connect.call(this, this[$shadow]);
+        }
+
+        if (DEBUG) { console.log('Connected to document:', this); }
     }
 
     if (options.disconnect) {
@@ -271,9 +348,6 @@ export default function element(name, options) {
             return options.disconnect.call(this, this[$shadow]);
         };
     }
-
-
-    // Form lifecycle
 
     if (Element.formAssociated) {
         if (options.enable || options.disable) {

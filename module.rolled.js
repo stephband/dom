@@ -359,8 +359,8 @@ function exec(regex, fn, string) {
 
     // If string looks like a regex result, get rest of string
     // from latest index
-    if (string.input !== undefined && string.index !== undefined) {
-        data   = string;
+    if (typeof string !== 'string' && string.input !== undefined && string.index !== undefined) {
+        data = string;
         string = data.input.slice(
             string.index
             + string[0].length
@@ -385,14 +385,14 @@ function exec(regex, fn, string) {
     return output;
 }
 
-curry$1(exec, true);
+var exec$1 = curry$1(exec, true);
 
 function error(regex, reducers, string) {
     if (string.input !== undefined && string.index !== undefined) {
         string = string.input;
     }
 
-    throw new Error('Cannot parse invalid string "' + string + '"');
+    throw new Error('Cannot parse string "' + string + '"');
 }
 
 function reduce$1(reducers, acc, tokens) {
@@ -694,6 +694,7 @@ var nothing = Object.freeze({
     // Standard array methods
     shift: noop,
     push:  noop,
+    join:  function() { return ''; },
 
     // Stream methods
     start: noop,
@@ -742,6 +743,49 @@ function overload(fn, map) {
             return handler.apply(this, arguments);
         } ;
 }
+
+/**
+parseValue(units, string)
+
+Parse `string` as a value with a unit (such as `"3px"`). Parameter `units` is an
+object of functions keyed by the unit postfix. It may also have a `catch`
+function.
+
+```js=
+const value = parseValue({
+    px: function(n) {
+        return n;
+    },
+
+    catch: function(string) {
+        if (typeof string === 'number') {
+            return string;
+        }
+
+        throw new Error('Cannot parse px value');
+    }
+}, '36px');
+```
+**/
+
+// Be generous in what we accept, space-wise
+const runit = /^\s*(-?\d*\.?\d+)(\w+|%)?\s*$/;
+
+function parseValue(units, string) {
+    var entry = runit.exec(string);
+
+    if (!entry || !units[entry[2]]) {
+        if (!units.catch) {
+            throw new Error('Cannot parse value "' + string + '"');
+        }
+
+        return units.catch(string);
+    }
+
+    return units[entry[2]](parseFloat(entry[1]));
+}
+
+var parseVal = curry$1(parseValue);
 
 function apply(value, fn) {
     return fn(value);
@@ -2841,15 +2885,6 @@ function log(n, x) { return Math.log(x) / Math.log(n); }
 function root(n, x) { return Math.pow(x, 1/n); }
 
 /**
-clamp(min, max, n)
-**/
-
-function limit(min, max, n) {
-    console.trace('Deprecated: Fn limit() is now clamp()');
-    return n > max ? max : n < min ? min : n;
-}
-
-/**
 wrap(min, max, n)
 **/
 
@@ -2865,7 +2900,6 @@ const curriedPow   = curry$1(pow);
 const curriedExp   = curry$1(exp);
 const curriedLog   = curry$1(log);
 const curriedRoot  = curry$1(root);
-const curriedLimit = curry$1(limit);
 const curriedWrap  = curry$1(wrap);
 
 /**
@@ -2891,6 +2925,16 @@ function lcm(a, b) {
 }
 
 const curriedLcm = curry$1(lcm);
+
+/**
+clamp(min, max, n)
+**/
+
+function clamp(min, max, n) {
+    return n > max ? max : n < min ? min : n;
+}
+
+curry$1(clamp);
 
 /**
 mod(divisor, n)
@@ -3249,6 +3293,294 @@ function exponentialOut(e, x) {
     return 1 - Math.pow(1 - x, e);
 }
 
+// Time
+
+// Decimal places to round to when comparing times
+const precision = 9;
+
+// Find template tokens for replacement
+var rtoken = /([YZMDdhmswz]{2,4}|D|\+-)/g;
+function minutesToSeconds(n) { return n * 60; }
+function hoursToSeconds(n) { return n * 3600; }
+
+function secondsToMilliseconds(n) { return n * 1000; }
+function secondsToMinutes(n) { return n / 60; }
+function secondsToHours(n) { return n / 3600; }
+function secondsToDays(n) { return n / 86400; }
+function secondsToWeeks(n) { return n / 604800; }
+
+// Months and years are not fixed durations – these are approximate
+function secondsToMonths(n) { return n / 2629800; }
+function secondsToYears(n) { return n / 31557600; }
+
+
+function prefix(n) {
+	return n >= 10 ? '' : '0';
+}
+
+// Hours:   00-23 - 24 should be allowed according to spec
+// Minutes: 00-59 -
+// Seconds: 00-60 - 60 is allowed, denoting a leap second
+
+//                sign   hh       mm           ss
+var rtime     = /^([+-])?(\d{2,}):([0-5]\d)(?::((?:[0-5]\d|60)(?:.\d+)?))?$/;
+var rtimediff = /^([+-])?(\d{2,}):(\d{2,})(?::(\d{2,}(?:.\d+)?))?$/;
+
+/**
+parseTime(time)
+
+Where `time` is a string it is parsed as a time in ISO time format: as
+hours `'13'`, with minutes `'13:25'`, with seconds `'13:25:14'` or with
+decimal seconds `'13:25:14.001'`. Returns a number in seconds.
+
+```
+const time = parseTime('13:25:14.001');   // 48314.001
+```
+
+Where `time` is a number it is assumed to represent a time in seconds
+and is returned directly.
+
+```
+const time = parseTime(60);               // 60
+```
+**/
+
+const parseTime = overload(toType, {
+	number:  id,
+	string:  exec$1(rtime, createTime),
+	default: function(object) {
+		throw new Error('parseTime() does not accept objects of type ' + (typeof object));
+	}
+});
+
+const parseTimeDiff = overload(toType, {
+	number:  id,
+	string:  exec$1(rtimediff, createTime),
+	default: function(object) {
+		throw new Error('parseTime() does not accept objects of type ' + (typeof object));
+	}
+});
+
+
+function createTime(match, sign, hh, mm, sss) {
+	var time = hoursToSeconds(parseInt(hh, 10))
+        + (mm ? minutesToSeconds(parseInt(mm, 10))
+            + (sss ? parseFloat(sss, 10) : 0)
+        : 0) ;
+
+	return sign === '-' ? -time : time ;
+}
+
+function formatTimeString(string, time) {
+	return string.replace(rtoken, function($0) {
+		return timeFormatters[$0] ? timeFormatters[$0](time) : $0 ;
+	}) ;
+}
+
+function _formatTimeISO(time) {
+	var sign = time < 0 ? '-' : '' ;
+
+	if (time < 0) { time = -time; }
+
+	var hours = Math.floor(time / 3600);
+	var hh = prefix(hours) + hours ;
+	time = time % 3600;
+	if (time === 0) { return sign + hh + ':00'; }
+
+	var minutes = Math.floor(time / 60);
+	var mm = prefix(minutes) + minutes ;
+	time = time % 60;
+	if (time === 0) { return sign + hh + ':' + mm; }
+
+	var sss = prefix(time) + toMaxDecimals(precision, time);
+	return sign + hh + ':' + mm + ':' + sss;
+}
+
+function toMaxDecimals(precision, n) {
+	// Make some effort to keep rounding errors under control by fixing
+	// decimals and lopping off trailing zeros
+	return n.toFixed(precision).replace(/\.?0+$/, '');
+}
+
+/**
+formatTime(format, time)
+Formats `time`, an 'hh:mm:ss' time string or a number in seconds, to match
+`format`, a string that may contain the tokens:
+
+- `'±'`   Sign, renders '-' if time is negative, otherwise nothing
+- `'Y'`   Years, approx.
+- `'M'`   Months, approx.
+- `'MM'`  Months, remainder from years (max 12), approx.
+- `'w'`   Weeks
+- `'ww'`  Weeks, remainder from months (max 4)
+- `'d'`   Days
+- `'dd'`  Days, remainder from weeks (max 7)
+- `'h'`   Hours
+- `'hh'`  Hours, remainder from days (max 24), 2-digit format
+- `'m'`   Minutes
+- `'mm'`  Minutes, remainder from hours (max 60), 2-digit format
+- `'s'`   Seconds
+- `'ss'`  Seconds, remainder from minutes (max 60), 2-digit format
+- `'sss'` Seconds, remainder from minutes (max 60), fractional
+- `'ms'`  Milliseconds, remainder from seconds (max 1000), 3-digit format
+
+```
+const time = formatTime('±hh:mm:ss', 3600);   // 01:00:00
+```
+**/
+
+var timeFormatters = {
+	'±': function sign(time) {
+		return time < 0 ? '-' : '';
+	},
+
+	Y: function Y(time) {
+		time = time < 0 ? -time : time;
+		return Math.floor(secondsToYears(time));
+	},
+
+	M: function M(time) {
+		time = time < 0 ? -time : time;
+		return Math.floor(secondsToMonths(time));
+	},
+
+	MM: function MM(time) {
+		time = time < 0 ? -time : time;
+		return Math.floor(secondsToMonths(time % 31557600));
+	},
+
+	W: function W(time) {
+		time = time < 0 ? -time : time;
+		return Math.floor(secondsToWeeks(time));
+	},
+
+	WW: function WW(time) {
+		time = time < 0 ? -time : time;
+		return Math.floor(secondsToDays(time % 2629800));
+	},
+
+	d: function dd(time) {
+		time = time < 0 ? -time : time;
+		return Math.floor(secondsToDays(time));
+	},
+
+	dd: function dd(time) {
+		time = time < 0 ? -time : time;
+		return Math.floor(secondsToDays(time % 604800));
+	},
+
+	h: function hhh(time) {
+		time = time < 0 ? -time : time;
+		return Math.floor(secondsToHours(time));
+	},
+
+	hh: function hh(time) {
+		time = time < 0 ? -time : time;
+		var hours = Math.floor(secondsToHours(time % 86400));
+		return prefix(hours) + hours;
+	},
+
+	m: function mm(time) {
+		time = time < 0 ? -time : time;
+		var minutes = Math.floor(secondsToMinutes(time));
+		return prefix(minutes) + minutes;
+	},
+
+	mm: function mm(time) {
+		time = time < 0 ? -time : time;
+		var minutes = Math.floor(secondsToMinutes(time % 3600));
+		return prefix(minutes) + minutes;
+	},
+
+	s: function s(time) {
+		time = time < 0 ? -time : time;
+		return Math.floor(time);
+	},
+
+	ss: function ss(time) {
+		time = time < 0 ? -time : time;
+		var seconds = Math.floor(time % 60);
+		return prefix(seconds) + seconds;
+	},
+
+	sss: function sss(time) {
+		time = time < 0 ? -time : time;
+		var seconds = time % 60;
+		return prefix(seconds) + toMaxDecimals(precision, seconds);
+	},
+
+	ms: function ms(time) {
+		time = time < 0 ? -time : time;
+		var ms = Math.floor(secondsToMilliseconds(time % 1));
+		return ms >= 100 ? ms :
+			ms >= 10 ? '0' + ms :
+				'00' + ms;
+	}
+};
+
+const formatTime = curry$1(function(string, time) {
+	return string === 'ISO' ?
+		_formatTimeISO(parseTime(time)) :
+		formatTimeString(string, parseTime(time)) ;
+});
+
+/**
+addTime(time1, time2)
+
+Sums `time2` and `time1`, which may be 'hh:mm:sss' time strings or numbers in
+seconds, and returns time as a number in seconds. `time1` may contain hours
+outside the range 0-24 or minutes or seconds outside the range 0-60. For
+example, to add 75 minutes to a list of times you may write:
+
+```
+const laters = times.map(addTime('00:75'));
+```
+*/
+
+const addTime = curry$1(function(time1, time2) {
+	return parseTime(time2) + parseTimeDiff(time1);
+});
+
+const subTime = curry$1(function(time1, time2) {
+	return parseTime(time2) - parseTimeDiff(time1);
+});
+
+const diffTime = curry$1(function(time1, time2) {
+	return parseTime(time1) - parseTime(time2);
+});
+
+/**
+floorTime(token, time)
+
+Floors time to the start of the nearest `token`, where `token` is one of:
+
+- `'w'`   Week
+- `'d'`   Day
+- `'h'`   Hour
+- `'m'`   Minute
+- `'s'`   Second
+- `'ms'`  Millisecond
+
+`time` may be an ISO time string or a time in seconds. Returns a time in seconds.
+
+```
+const hourCounts = times.map(floorTime('h'));
+```
+**/
+
+var _floorTime = choose({
+	w:  function(time) { return time - mod(604800, time); },
+	d:  function(time) { return time - mod(86400, time); },
+	h:  function(time) { return time - mod(3600, time); },
+	m:  function(time) { return time - mod(60, time); },
+	s:  function(time) { return time - mod(1, time); },
+	ms: function(time) { return time - mod(0.001, time); }
+});
+
+const floorTime = curry$1(function(token, time) {
+	return _floorTime(token, parseTime(time));
+});
+
 function createOrdinals(ordinals) {
 	var array = [], n = 0;
 
@@ -3302,14 +3634,15 @@ var rdatediff = /^([+-])?(\d{2,})(?:-(\d{2,})(?:-(\d{2,}))?)?(?:([T-])|$)/;
 
 /**
 parseDate(date)
+
 Parse a date, where, `date` may be:
 
 - a string in ISO date format
 - a number in seconds UNIX time
 - a date object
 
-Returns a date object, or *the* date object, if it validates.
-*/
+Returns a date object (or *the* date object, if it represents a valid date).
+**/
 
 const parseDate = overload(toType, {
 	number:  secondsToDate,
@@ -3324,9 +3657,10 @@ const parseDate = overload(toType, {
 
 /**
 parseDateLocal(date)
+
 As `parseDate(date)`, but returns a date object with local time set to the
-result of the parse (or the original date object, if it validates).
-*/
+result of the parse.
+**/
 
 const parseDateLocal = overload(toType, {
 	number:  secondsToDate,
@@ -3381,18 +3715,8 @@ function createDateLocal(year, month, day, hour, minute, second, ms, zone) {
 		new Date(year) ;
 }
 
-function exec$1(regex, fn, error) {
-	return function exec(string) {
-		var parts = regex.exec(string);
-		if (!parts && error) { throw error; }
-		return parts ?
-			fn.apply(null, parts) :
-			undefined ;
-	};
-}
-
 function secondsToDate(n) {
-	return new Date(secondsToMilliseconds(n));
+	return new Date(n * 1000);
 }
 
 function setTimeZoneOffset(sign, hour, minute, date) {
@@ -3473,7 +3797,7 @@ var componentKeys = {
 	default: ['weekday', 'day', 'month', 'year', 'hour', 'minute', 'second']
 };
 
-var options$1 = {
+var options = {
 	// Time zone
 	timeZone:      'UTC',
 	// Use specified locale matcher
@@ -3491,7 +3815,7 @@ var options$1 = {
 	//timeZoneName:  'short'
 };
 
-var rtoken    = /([YZMDdhmswz]{2,4}|D|\+-)/g;
+var rtoken$1    = /([YZMDdhmswz]{2,4}|D|\+-)/g;
 var rusdate   = /\w{3,}|\d+/g;
 var rdatejson = /^"(-?\d{4,}-\d\d-\d\d)/;
 
@@ -3503,8 +3827,8 @@ function matchEach(regex, fn, text) {
 }
 
 function toLocaleString(timezone, locale, date) {
-	options$1.timeZone = timezone || 'UTC';
-	var string = date.toLocaleString(locale, options$1);
+	options.timeZone = timezone || 'UTC';
+	var string = date.toLocaleString(locale, options);
 	return string;
 }
 
@@ -3534,7 +3858,7 @@ function _formatDate(string, timezone, locale, date) {
 	var data    = toLocaleComponents(timezone, locale, date);
 	var formats = componentFormatters;
 
-	return string.replace(rtoken, function($0) {
+	return string.replace(rtoken$1, function($0) {
 		return formats[$0] ?
 			formats[$0](data, lang) :
 			$0 ;
@@ -3542,15 +3866,53 @@ function _formatDate(string, timezone, locale, date) {
 }
 
 /**
-formatDateLocal(format, locale, date)
+formatDate(format, locale, timezone, date)
+Formats `date`, an ISO string or number in seconds or a JS date object,
+to the format of the string `format`. The format string may contain the tokens:
+
+- `'YYYY'` years
+- `'YY'`   2-digit year
+- `'MM'`   month, 2-digit
+- `'MMM'`  month, 3-letter
+- `'MMMM'` month, full name
+- `'D'`    day of week
+- `'DD'`   day of week, two-digit
+- `'DDD'`  weekday, 3-letter
+- `'DDDD'` weekday, full name
+- `'hh'`   hours
+- `'mm'`   minutes
+- `'ss'`   seconds
+
+The `locale` string may be `'en'` or `'fr'`. The `'timezone'` parameter is
+either `'UTC'` or an IANA timezone such as '`Europe/Zurich`'
+([timezones on Wikipedia](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)).
+
+```
+const date = formatDate('YYYY', 'en', 'UTC', new Date());   // 2020
+```
 */
 
-function formatDateLocal(string, locale, date) {
+const formatDate = curry$1(function (format, locale, timezone, date) {
+	return format === 'ISO' ?
+		formatDateISO(parseDate(date)) :
+	timezone === 'local' ?
+		formatDateLocal(format, locale, date) :
+	_formatDate(format, timezone, locale, parseDate(date)) ;
+});
+
+/**
+formatDateLocal(format, locale, date)
+
+As `formatDate(date)`, but returns a date object with local time set to the
+result of the parse.
+**/
+
+function formatDateLocal(format, locale, date) {
 	var formatters = dateFormatters;
 	var lang = locale.slice(0, 2);
 
 	// Use date formatters to get time as current local time
-	return string.replace(rtoken, function($0) {
+	return format.replace(rtoken$1, function($0) {
 		return formatters[$0] ? formatters[$0](date, lang) : $0 ;
 	});
 }
@@ -3566,26 +3928,29 @@ function formatDateISO(date) {
 }
 
 
+
 // Time operations
 
 var days   = {
 	mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, sun: 0
 };
 
-var dayMap = [6,0,1,2,3,4,5];
 
-/**
+
+/*
 toDay(date)
 Returns day of week as a number, where monday is `0`.
 */
+
+const dayMap = [6,0,1,2,3,4,5];
 
 function toDay(date) {
 	return dayMap[date.getDay()];
 }
 
-/**
+/*
 cloneDate(date)
-Returns new date object set to same time.
+Returns new date object set to same date.
 */
 
 function cloneDate(date) {
@@ -3598,7 +3963,7 @@ function addDateComponents(sign, yy, mm, dd, date) {
 	if (!mm) { return; }
 
 	// Adding and subtracting months can give weird results with the JS
-	// date object. For example, taking a montha way from 2018-03-31 results
+	// date object. For example, taking a month away from 2018-03-31 results
 	// in 2018-03-03 (or the 31st of February), whereas adding a month on to
 	// 2018-05-31 results in the 2018-07-01 (31st of June).
 	//
@@ -3756,7 +4121,8 @@ const diffDateDays = curry$1(_diffDateDays);
 
 /**
 floorDate(token, date)
-Floors date to the start of nearest calendar point in time indicated by `token`:
+Floors date to the start of nearest calendar point in increment indicated
+by `token`:
 
 - `'Y'`   Year
 - `'M'`   Month
@@ -3774,319 +4140,12 @@ Floors date to the start of nearest calendar point in time indicated by `token`:
 - `'sun'` Sunday
 
 ```
-const dayCounts = times.map(floorTime('days'));
+const dayCounts = times.map(floorDate('d'));
 ```
 */
 
 const floorDate = curry$1(function(token, date) {
 	return _floorDate(token, parseDate(date));
-});
-
-/**
-formatDate(locale, timezone, format, date)
-Formats `date` (a string or number or date accepted by `parseDate(date)`)
-to the format of the string `format`. The format string may contain the tokens:
-
-- `'YYYY'` years
-- `'YY'`   2-digit year
-- `'MM'`   month, 2-digit
-- `'MMM'`  month, 3-letter
-- `'MMMM'` month, full name
-- `'D'`    day of week
-- `'DD'`   day of week, two-digit
-- `'DDD'`  weekday, 3-letter
-- `'DDDD'` weekday, full name
-- `'hh'`   hours
-- `'mm'`   minutes
-- `'ss'`   seconds
-
-```
-const date = formatDate('en', '', 'YYYY', new Date());   // 2020
-```
-*/
-
-const formatDate = curry$1(function (timezone, locale, format, date) {
-	return format === 'ISO' ?
-		formatDateISO(parseDate(date)) :
-	timezone === 'local' ?
-		formatDateLocal(format, locale, date) :
-	_formatDate(format, timezone, locale, parseDate(date)) ;
-});
-
-
-// Time
-
-// Decimal places to round to when comparing times
-var precision = 9;
-function minutesToSeconds(n) { return n * 60; }
-function hoursToSeconds(n) { return n * 3600; }
-
-function secondsToMilliseconds(n) { return n * 1000; }
-function secondsToMinutes(n) { return n / 60; }
-function secondsToHours(n) { return n / 3600; }
-function secondsToDays(n) { return n / 86400; }
-function secondsToWeeks(n) { return n / 604800; }
-
-// Months and years are not fixed durations – these are approximate
-function secondsToMonths(n) { return n / 2629800; }
-function secondsToYears(n) { return n / 31557600; }
-
-
-function prefix(n) {
-	return n >= 10 ? '' : '0';
-}
-
-// Hours:   00-23 - 24 should be allowed according to spec
-// Minutes: 00-59 -
-// Seconds: 00-60 - 60 is allowed, denoting a leap second
-
-//                sign   hh       mm           ss
-var rtime     = /^([+-])?(\d{2,}):([0-5]\d)(?::((?:[0-5]\d|60)(?:.\d+)?))?$/;
-var rtimediff = /^([+-])?(\d{2,}):(\d{2,})(?::(\d{2,}(?:.\d+)?))?$/;
-
-/**
-parseTime(time)
-
-Where `time` is a string it is parsed as a time in ISO time format: as
-hours `'13'`, with minutes `'13:25'`, with seconds `'13:25:14'` or with
-decimal seconds `'13:25:14.001'`. Returns a number in seconds.
-
-```
-const time = parseTime('13:25:14.001');   // 48314.001
-```
-
-Where `time` is a number it is assumed to represent a time in seconds
-and is returned directly.
-
-```
-const time = parseTime(60);               // 60
-```
-*/
-
-const parseTime = overload(toType, {
-	number:  id,
-	string:  exec$1(rtime, createTime),
-	default: function(object) {
-		throw new Error('parseTime() does not accept objects of type ' + (typeof object));
-	}
-});
-
-var parseTimeDiff = overload(toType, {
-	number:  id,
-	string:  exec$1(rtimediff, createTime),
-	default: function(object) {
-		throw new Error('parseTime() does not accept objects of type ' + (typeof object));
-	}
-});
-
-var _floorTime = choose({
-	week:   function(time) { return time - mod(604800, time); },
-	day:    function(time) { return time - mod(86400, time); },
-	hour:   function(time) { return time - mod(3600, time); },
-	minute: function(time) { return time - mod(60, time); },
-	second: function(time) { return time - mod(1, time); }
-});
-
-
-function createTime(match, sign, hh, mm, sss) {
-	var time = hoursToSeconds(parseInt(hh, 10))
-        + (mm ? minutesToSeconds(parseInt(mm, 10))
-            + (sss ? parseFloat(sss, 10) : 0)
-        : 0) ;
-
-	return sign === '-' ? -time : time ;
-}
-
-function formatTimeString(string, time) {
-	return string.replace(rtoken, function($0) {
-		return timeFormatters[$0] ? timeFormatters[$0](time) : $0 ;
-	}) ;
-}
-
-function _formatTimeISO(time) {
-	var sign = time < 0 ? '-' : '' ;
-
-	if (time < 0) { time = -time; }
-
-	var hours = Math.floor(time / 3600);
-	var hh = prefix(hours) + hours ;
-	time = time % 3600;
-	if (time === 0) { return sign + hh + ':00'; }
-
-	var minutes = Math.floor(time / 60);
-	var mm = prefix(minutes) + minutes ;
-	time = time % 60;
-	if (time === 0) { return sign + hh + ':' + mm; }
-
-	var sss = prefix(time) + toMaxDecimals(precision, time);
-	return sign + hh + ':' + mm + ':' + sss;
-}
-
-function toMaxDecimals(precision, n) {
-	// Make some effort to keep rounding errors under control by fixing
-	// decimals and lopping off trailing zeros
-	return n.toFixed(precision).replace(/\.?0+$/, '');
-}
-
-/**
-formatTime(format, time)
-Formats `time` (an 'hh:mm:sss' time string or a number in seconds) to match
-`format`, a string that may contain the tokens:
-
-- `'±'`   Sign, renders '-' if time is negative, otherwise nothing
-- `'Y'`   Years, approx.
-- `'M'`   Months, approx.
-- `'MM'`  Months, remainder from years (max 12), approx.
-- `'w'`   Weeks
-- `'ww'`  Weeks, remainder from months (max 4)
-- `'d'`   Days
-- `'dd'`  Days, remainder from weeks (max 7)
-- `'h'`   Hours
-- `'hh'`  Hours, remainder from days (max 24), 2-digit format
-- `'m'`   Minutes
-- `'mm'`  Minutes, remainder from hours (max 60), 2-digit format
-- `'s'`   Seconds
-- `'ss'`  Seconds, remainder from minutes (max 60), 2-digit format
-- `'sss'` Seconds, remainder from minutes (max 60), fractional
-- `'ms'`  Milliseconds, remainder from seconds (max 1000), 3-digit format
-
-```
-const time = formatTime('±hh:mm:ss', 3600);   // 01:00:00
-```
-*/
-
-var timeFormatters = {
-	'±': function sign(time) {
-		return time < 0 ? '-' : '';
-	},
-
-	Y: function Y(time) {
-		time = time < 0 ? -time : time;
-		return Math.floor(secondsToYears(time));
-	},
-
-	M: function M(time) {
-		time = time < 0 ? -time : time;
-		return Math.floor(secondsToMonths(time));
-	},
-
-	MM: function MM(time) {
-		time = time < 0 ? -time : time;
-		return Math.floor(secondsToMonths(time % 31557600));
-	},
-
-	W: function W(time) {
-		time = time < 0 ? -time : time;
-		return Math.floor(secondsToWeeks(time));
-	},
-
-	WW: function WW(time) {
-		time = time < 0 ? -time : time;
-		return Math.floor(secondsToDays(time % 2629800));
-	},
-
-	d: function dd(time) {
-		time = time < 0 ? -time : time;
-		return Math.floor(secondsToDays(time));
-	},
-
-	dd: function dd(time) {
-		time = time < 0 ? -time : time;
-		return Math.floor(secondsToDays(time % 604800));
-	},
-
-	h: function hhh(time) {
-		time = time < 0 ? -time : time;
-		return Math.floor(secondsToHours(time));
-	},
-
-	hh: function hh(time) {
-		time = time < 0 ? -time : time;
-		var hours = Math.floor(secondsToHours(time % 86400));
-		return prefix(hours) + hours;
-	},
-
-	m: function mm(time) {
-		time = time < 0 ? -time : time;
-		var minutes = Math.floor(secondsToMinutes(time));
-		return prefix(minutes) + minutes;
-	},
-
-	mm: function mm(time) {
-		time = time < 0 ? -time : time;
-		var minutes = Math.floor(secondsToMinutes(time % 3600));
-		return prefix(minutes) + minutes;
-	},
-
-	s: function s(time) {
-		time = time < 0 ? -time : time;
-		return Math.floor(time);
-	},
-
-	ss: function ss(time) {
-		time = time < 0 ? -time : time;
-		var seconds = Math.floor(time % 60);
-		return prefix(seconds) + seconds;
-	},
-
-	sss: function sss(time) {
-		time = time < 0 ? -time : time;
-		var seconds = time % 60;
-		return prefix(seconds) + toMaxDecimals(precision, seconds);
-	},
-
-	ms: function ms(time) {
-		time = time < 0 ? -time : time;
-		var ms = Math.floor(secondsToMilliseconds(time % 1));
-		return ms >= 100 ? ms :
-			ms >= 10 ? '0' + ms :
-				'00' + ms;
-	}
-};
-
-const formatTime = curry$1(function(string, time) {
-	return string === 'ISO' ?
-		_formatTimeISO(parseTime(time)) :
-		formatTimeString(string, parseTime(time)) ;
-});
-
-/**
-addTime(time1, time2)
-Sums `time2` and `time1`, returning UNIX time as a number in seconds.
-If `time1` is a string, it is parsed as a duration, where numbers
-are accepted outside the bounds of 0-24 hours or 0-60 minutes or seconds.
-For example, to add 72 minutes to a list of times:
-
-```
-const laters = times.map(addTime('00:72'));
-```
-*/
-
-const addTime = curry$1(function(time1, time2) {
-	return parseTime(time2) + parseTimeDiff(time1);
-});
-
-const subTime = curry$1(function(time1, time2) {
-	return parseTime(time2) - parseTimeDiff(time1);
-});
-
-const diffTime = curry$1(function(time1, time2) {
-	return parseTime(time1) - parseTime(time2);
-});
-
-/**
-floorTime(token, time)
-Floors `time` to the nearest `token`, where `token` is one of: `'week'`, `'day'`,
-`'hour'`, `'minute'` or `'second'`. `time` may be an ISO time string or a time
-in seconds. Returns a time in seconds.
-
-```
-const hourCounts = times.map(floorTime('hour'));
-```
-*/
-
-const floorTime = curry$1(function(token, time) {
-	return _floorTime(token, parseTime(time));
 });
 
 var rcomment = /\s*\/\*([\s\S]*)\*\/\s*/;
@@ -4200,263 +4259,56 @@ const add = curry$1(function (a, b) {
     return a + b;
 });
 
+const assign$4      = Object.assign;
+const CustomEvent = window.CustomEvent;
+
+const defaults    = {
+	// The event bubbles (false by default)
+	// https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
+	bubbles: true,
+
+	// The event may be cancelled (false by default)
+	// https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
+	cancelable: true
+
+	// Trigger listeners outside of a shadow root (false by default)
+	// https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
+	//composed: false
+};
+
 /**
-style(property, node)
+Event(type, properties)
 
-Returns the computed style `property` of `node`.
-
-    style('transform', node);            // returns transform
-
-If `property` is of the form `"property:name"`, a named aspect of the property
-is returned.
-
-    style('transform:rotate', node);     // returns rotation, as a number, in radians
-    style('transform:scale', node);      // returns scale, as a number
-    style('transform:translateX', node); // returns translation, as a number, in px
-    style('transform:translateY', node); // returns translation, as a number, in px
+Creates a CustomEvent of type `type`.
+Additionally, `properties` are assigned to the event object.
 */
 
-var rpx          = /px$/;
-var styleParsers = {
-	"transform:translateX": function(node) {
-		var matrix = computedStyle('transform', node);
-		if (!matrix || matrix === "none") { return 0; }
-		var values = valuesFromCssFn(matrix);
-		return parseFloat(values[4]);
-	},
+function Event$1(type, options) {
+	let settings;
 
-	"transform:translateY": function(node) {
-		var matrix = computedStyle('transform', node);
-		if (!matrix || matrix === "none") { return 0; }
-		var values = valuesFromCssFn(matrix);
-		return parseFloat(values[5]);
-	},
-
-	"transform:scale": function(node) {
-		var matrix = computedStyle('transform', node);
-		if (!matrix || matrix === "none") { return 0; }
-		var values = valuesFromCssFn(matrix);
-		var a = parseFloat(values[0]);
-		var b = parseFloat(values[1]);
-		return Math.sqrt(a * a + b * b);
-	},
-
-	"transform:rotate": function(node) {
-		var matrix = computedStyle('transform', node);
-		if (!matrix || matrix === "none") { return 0; }
-		var values = valuesFromCssFn(matrix);
-		var a = parseFloat(values[0]);
-		var b = parseFloat(values[1]);
-		return Math.atan2(b, a);
+	if (typeof type === 'object') {
+		settings = assign$4({}, defaults, type);
+		type = settings.type;
 	}
-};
 
-function valuesFromCssFn(string) {
-	return string.split('(')[1].split(')')[0].split(/\s*,\s*/);
+	if (options && options.detail) {
+		if (settings) {
+			settings.detail = options.detail;
+		}
+		else {
+			settings = assign$4({ detail: options.detail }, defaults);
+		}
+	}
+
+	var event = new CustomEvent(type, settings || defaults);
+
+	if (options) {
+		delete options.detail;
+		assign$4(event, options);
+	}
+
+	return event;
 }
-
-function computedStyle(name, node) {
-	return window.getComputedStyle ?
-		window
-		.getComputedStyle(node, null)
-		.getPropertyValue(name) :
-		0 ;
-}
-
-function style(name, node) {
-    // If name corresponds to a custom property name in styleParsers...
-    if (styleParsers[name]) { return styleParsers[name](node); }
-
-    var value = computedStyle(name, node);
-
-    // Pixel values are converted to number type
-    return typeof value === 'string' && rpx.test(value) ?
-        parseFloat(value) :
-        value ;
-}
-
-// Units
-
-const runit = /(\d*\.?\d+)(r?em|vw|vh)/;
-//var rpercent = /(\d*\.?\d+)%/;
-
-const units = {
-    em: function(n) {
-        return getFontSize() * n;
-    },
-
-    rem: function(n) {
-        return getFontSize() * n;
-    },
-
-    vw: function(n) {
-        return window.innerWidth * n / 100;
-    },
-
-    vh: function(n) {
-        return window.innerHeight * n / 100;
-    }
-};
-
-let fontSize;
-
-function getFontSize() {
-    return fontSize ||
-        (fontSize = style("font-size", document.documentElement), 10);
-}
-
-/**
-parseValue(value)`
-
-Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in pixels.
-*/
-
-const parseValue = overload(toType, {
-    'number': id,
-
-    'string': function(string) {
-        var data = runit.exec(string);
-
-        if (data) {
-            return units[data[2]](parseFloat(data[1]));
-        }
-
-        throw new Error('dom: "' + string + '" cannot be parsed as rem, em, vw or vh units.');
-    }
-});
-
-
-/**
-toRem(value)
-
-Takes number in pixels or a CSS value as a string and returns a string
-of the form '10.25rem'.
-*/
-
-function toRem(n) {
-    return (parseValue(n) / getFontSize())
-        // Chrome needs 7 digit precision for accurate rendering
-        .toFixed(8)
-        // Remove trailing 0s
-        .replace(/\.?0*$/, '')
-        // Postfix
-        + 'rem';
-}
-
-/**
-toVw(value)
-
-Takes number in pixels and returns a string of the form '10vw'.
-*/
-
-function toVw(n) {
-    return (100 * parseValue(n) / window.innerWidth) + 'vw';
-}
-
-/**
-toVh(value)
-
-Takes number in pixels and returns a string of the form '10vh'.
-*/
-
-function toVh(n) {
-    return (100 * parseValue(n) / window.innerHeight) + 'vh';
-}
-
-const rules = [];
-
-const types = overload(toType, {
-    'number':   id,
-    'string':   parseValue,
-    'function': function(fn) { return fn(); }
-});
-
-const tests = {
-    minWidth: function(value)  { return width >= types(value); },
-    maxWidth: function(value)  { return width <  types(value); },
-    minHeight: function(value) { return height >= types(value); },
-    maxHeight: function(value) { return height <  types(value); },
-    minScrollTop: function(value) { return scrollTop >= types(value); },
-    maxScrollTop: function(value) { return scrollTop <  types(value); },
-    minScrollBottom: function(value) { return (scrollHeight - height - scrollTop) >= types(value); },
-    maxScrollBottom: function(value) { return (scrollHeight - height - scrollTop) <  types(value); }
-};
-
-let width = window.innerWidth;
-let height = window.innerHeight;
-let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-let scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-
-function test(query) {
-    var keys = Object.keys(query);
-    var n = keys.length;
-    var key;
-
-    if (keys.length === 0) { return false; }
-
-    while (n--) {
-        key = keys[n];
-        if (!tests[key](query[key])) { return false; }
-    }
-
-    return true;
-}
-
-function update$2(e) {
-    var l = rules.length;
-    var rule;
-
-    // Run exiting rules
-    while (l--) {
-        rule = rules[l];
-
-        if (rule.state && !test(rule.query)) {
-            rule.state = false;
-            rule.exit && rule.exit(e);
-        }
-    }
-
-    l = rules.length;
-
-    // Run entering rules
-    while (l--) {
-        rule = rules[l];
-
-        if (!rule.state && test(rule.query)) {
-            rule.state = true;
-            rule.enter && rule.enter(e);
-        }
-    }
-}
-
-function media(query, fn1, fn2) {
-    var rule = {};
-
-    rule.query = query;
-    rule.enter = fn1;
-    rule.exit = fn2;
-    rules.push(rule);
-
-    return query;
-}
-
-function scroll(e) {
-    scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    update$2(e);
-}
-
-function resize(e) {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-    update$2(e);
-}
-
-window.addEventListener('scroll', scroll);
-window.addEventListener('resize', resize);
-
-ready$1(update$2);
-document.addEventListener('DOMContentLoaded', update$2);
 
 /**
 prefix(string)
@@ -4624,22 +4476,677 @@ var features = define$1({
 	}
 });
 
-/**
-element(name, options)
+const assign$5  = Object.assign;
+const rspaces = /\s+/;
 
-- name: 'name'     Custom element tag name
-- options: {
-       extends:    Name of tag to extend, makes the element a custom built-in
-       shadow:     String or template node or id used to create a shadow DOM
-       attributes: A `{name: fn}` map called when named attributes change
-       properties: A `{name: {get, set}}` map called on named property access
-       construct:  Lifecycle handler called during element construction
-       connect:    Lifecycle handler called when element added to DOM
-       disconnect: Lifecycle handler called when element removed from DOM
-   }
+function prefixType(type) {
+	return features.events[type] || type ;
+}
+
+
+// Handle event types
+
+// DOM click events may be simulated on inputs when their labels are
+// clicked. The tell-tale is they have the same timeStamp. Track click
+// timeStamps.
+var clickTimeStamp = 0;
+
+window.addEventListener('click', function(e) {
+	clickTimeStamp = e.timeStamp;
+});
+
+function listen(source, type) {
+	if (type === 'click') {
+		source.clickUpdate = function click(e) {
+			// Ignore clicks with the same timeStamp as previous clicks –
+			// they are likely simulated by the browser.
+			if (e.timeStamp <= clickTimeStamp) { return; }
+			source.update(e);
+		};
+
+		source.node.addEventListener(type, source.clickUpdate, source.options);
+		return source;
+	}
+
+	source.node.addEventListener(type, source.update, source.options);
+	return source;
+}
+
+function unlisten(source, type) {
+	source.node.removeEventListener(type, type === 'click' ?
+		source.clickUpdate :
+		source.update
+	);
+
+	return source;
+}
+
+/**
+events(type, node)
+
+Returns a mappable stream of events heard on `node`:
+
+    var stream = events('click', document.body);
+    .map(get('target'))
+    .each(function(node) {
+        // Do something with nodes
+    });
+
+Stopping the stream removes the event listeners:
+
+    stream.stop();
 */
 
-const shadowOptions = { mode: 'open' };
+function Source(notify, stop, type, options, node) {
+	const types  = type.split(rspaces).map(prefixType);
+	const buffer = [];
+
+	function update(value) {
+		buffer.push(value);
+		notify();
+	}
+
+	this._stop   = stop;
+	this.types   = types;
+	this.node    = node;
+	this.buffer  = buffer;
+	this.update  = update;
+	this.options = options;
+
+	// Potential hard-to-find error here if type has repeats, ie 'click click'.
+	// Lets assume nobody is dumb enough to do this, I dont want to have to
+	// check for that every time.
+	types.reduce(listen, this);
+}
+
+assign$5(Source.prototype, {
+	shift: function shiftEvent() {
+		const buffer = this.buffer;
+		return buffer.shift();
+	},
+
+	stop: function stopEvent() {
+		this.types.reduce(unlisten, this);
+		this._stop(this.buffer.length);
+	}
+});
+
+function events(type, node) {
+	let options;
+
+	if (typeof type === 'object') {
+		options = type;
+		type    = options.type;
+	}
+
+	return new Stream$1(function(notify, stop) {
+		return new Source(notify, stop, type, options, node)
+	});
+}
+
+
+/**
+isPrimaryButton(e)
+
+Returns `true` if user event is from the primary (normally the left or only)
+button of an input device. Use this to avoid listening to right-clicks.
+*/
+
+function isPrimaryButton(e) {
+	// Ignore mousedowns on any button other than the left (or primary)
+	// mouse button, or when a modifier key is pressed.
+	return (e.which === 1 && !e.ctrlKey && !e.altKey && !e.shiftKey);
+}
+
+/**
+preventDefault(e)
+
+Calls `e.preventDefault()`.
+*/
+
+function preventDefault(e) {
+	e.preventDefault();
+}
+
+function isTargetEvent(e) {
+	return e.target === e.currentTarget;
+}
+
+
+// -----------------
+
+const A$4 = Array.prototype;
+const eventsSymbol = Symbol('events');
+
+function applyTail(fn, args) {
+	return function() {
+		A$4.push.apply(arguments, args);
+		fn.apply(null, arguments);
+	};
+}
+
+function on(node, type, fn) {
+	var options;
+
+	if (typeof type === 'object') {
+		options = type;
+		type    = options.type;
+	}
+
+	var types   = type.split(rspaces);
+	var events  = node[eventsSymbol] || (node[eventsSymbol] = {});
+	var handler = arguments.length > 3 ? applyTail(fn, A$4.slice.call(arguments, 3)) : fn ;
+	var handlers, listener;
+	var n = -1;
+
+	while (++n < types.length) {
+		type = types[n];
+		handlers = events[type] || (events[type] = []);
+		listener = type === 'click' ?
+			function(e) {
+				// Ignore clicks with the same timeStamp as previous clicks –
+				// they are likely simulated by the browser on inputs when
+				// their labels are clicked
+				if (e.timeStamp <= clickTimeStamp) { return; }
+				handler(e);
+			} :
+			handler ;
+		handlers.push([fn, listener]);
+		node.addEventListener(type, listener, options);
+	}
+
+	return node;
+}
+
+function once(node, types, fn, data) {
+	on(node, types, function once() {
+		off(node, types, once);
+		fn.apply(null, arguments);
+	}, data);
+}
+
+function off(node, type, fn) {
+	var options;
+
+	if (typeof type === 'object') {
+		options = type;
+		type    = options.type;
+	}
+
+	var types   = type.split(rspaces);
+	var events  = node[eventsSymbol];
+	var handlers, i;
+
+	if (!events) { return node; }
+
+	var n = -1;
+	while (n++ < types.length) {
+		type = types[n];
+		handlers = events[type];
+		if (!handlers) { continue; }
+		i = handlers.length;
+		while (i--) {
+			if (handlers[i][0] === fn) {
+				node.removeEventListener(type, handlers[i][1]);
+				handlers.splice(i, 1);
+			}
+		}
+	}
+
+	return node;
+}
+
+/**
+trigger(type, node)
+
+Triggers event of `type` on `node`.
+
+```
+trigger('dom-activate', node);
+```
+*/
+
+function trigger(node, type, properties) {
+	// Don't cache events. It prevents you from triggering an event of a
+	// given type from inside the handler of another event of that type.
+	var event = Event$1(type, properties);
+	node.dispatchEvent(event);
+}
+
+/**
+style(property, node)
+
+Returns the computed style `property` of `node`.
+
+    style('transform', node);            // returns transform
+
+If `property` is of the form `"property:name"`, a named aspect of the property
+is returned.
+
+    style('transform:rotate', node);     // returns rotation, as a number, in radians
+    style('transform:scale', node);      // returns scale, as a number
+    style('transform:translateX', node); // returns translation, as a number, in px
+    style('transform:translateY', node); // returns translation, as a number, in px
+*/
+
+var rpx          = /px$/;
+var styleParsers = {
+	"transform:translateX": function(node) {
+		var matrix = computedStyle('transform', node);
+		if (!matrix || matrix === "none") { return 0; }
+		var values = valuesFromCssFn(matrix);
+		return parseFloat(values[4]);
+	},
+
+	"transform:translateY": function(node) {
+		var matrix = computedStyle('transform', node);
+		if (!matrix || matrix === "none") { return 0; }
+		var values = valuesFromCssFn(matrix);
+		return parseFloat(values[5]);
+	},
+
+	"transform:scale": function(node) {
+		var matrix = computedStyle('transform', node);
+		if (!matrix || matrix === "none") { return 0; }
+		var values = valuesFromCssFn(matrix);
+		var a = parseFloat(values[0]);
+		var b = parseFloat(values[1]);
+		return Math.sqrt(a * a + b * b);
+	},
+
+	"transform:rotate": function(node) {
+		var matrix = computedStyle('transform', node);
+		if (!matrix || matrix === "none") { return 0; }
+		var values = valuesFromCssFn(matrix);
+		var a = parseFloat(values[0]);
+		var b = parseFloat(values[1]);
+		return Math.atan2(b, a);
+	}
+};
+
+function valuesFromCssFn(string) {
+	return string.split('(')[1].split(')')[0].split(/\s*,\s*/);
+}
+
+function computedStyle(name, node) {
+	return window.getComputedStyle ?
+		window
+		.getComputedStyle(node, null)
+		.getPropertyValue(name) :
+		0 ;
+}
+
+function style(name, node) {
+    // If name corresponds to a custom property name in styleParsers...
+    if (styleParsers[name]) { return styleParsers[name](node); }
+
+    var value = computedStyle(name, node);
+
+    // Pixel values are converted to number type
+    return typeof value === 'string' && rpx.test(value) ?
+        parseFloat(value) :
+        value ;
+}
+
+// Units
+
+
+/* Track document font size */
+
+let fontSize;
+
+function getFontSize() {
+    return fontSize ||
+        (fontSize = style("font-size", document.documentElement));
+}
+
+events('resize', window).each(() => fontSize = undefined);
+
+
+/**
+parseValue(value)`
+Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in pixels.
+*/
+
+const parseValue$1 = overload(toType, {
+    'number': id,
+
+    'string': parseVal({
+        em: function(n) {
+            return getFontSize() * n;
+        },
+
+        px: function(n) {
+            return n;
+        },
+
+        rem: function(n) {
+            return getFontSize() * n;
+        },
+
+        vw: function(n) {
+            return window.innerWidth * n / 100;
+        },
+
+        vh: function(n) {
+            return window.innerHeight * n / 100;
+        }
+    })
+});
+
+
+/**
+toRem(value)
+Takes number in pixels or a CSS value as a string and returns a string
+of the form '10.25rem'.
+*/
+
+function toRem(n) {
+    return (parseValue$1(n) / getFontSize())
+        // Chrome needs min 7 digit precision for accurate rendering
+        .toFixed(8)
+        // Remove trailing 0s
+        .replace(/\.?0*$/, '')
+        // Postfix
+        + 'rem';
+}
+
+
+/**
+toVw(value)
+Takes number in pixels and returns a string of the form '10vw'.
+*/
+
+function toVw(n) {
+    return (100 * parseValue$1(n) / window.innerWidth) + 'vw';
+}
+
+
+/**
+toVh(value)
+Takes number in pixels and returns a string of the form '10vh'.
+*/
+
+function toVh(n) {
+    return (100 * parseValue$1(n) / window.innerHeight) + 'vh';
+}
+
+const rules = [];
+
+const types = overload(toType, {
+    'number':   id,
+    'string':   parseValue$1,
+    'function': function(fn) { return fn(); }
+});
+
+const tests = {
+    minWidth: function(value)  { return width >= types(value); },
+    maxWidth: function(value)  { return width <  types(value); },
+    minHeight: function(value) { return height >= types(value); },
+    maxHeight: function(value) { return height <  types(value); },
+    minScrollTop: function(value) { return scrollTop >= types(value); },
+    maxScrollTop: function(value) { return scrollTop <  types(value); },
+    minScrollBottom: function(value) { return (scrollHeight - height - scrollTop) >= types(value); },
+    maxScrollBottom: function(value) { return (scrollHeight - height - scrollTop) <  types(value); }
+};
+
+let width = window.innerWidth;
+let height = window.innerHeight;
+let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+let scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+
+function test(query) {
+    var keys = Object.keys(query);
+    var n = keys.length;
+    var key;
+
+    if (keys.length === 0) { return false; }
+
+    while (n--) {
+        key = keys[n];
+        if (!tests[key](query[key])) { return false; }
+    }
+
+    return true;
+}
+
+function update$2(e) {
+    var l = rules.length;
+    var rule;
+
+    // Run exiting rules
+    while (l--) {
+        rule = rules[l];
+
+        if (rule.state && !test(rule.query)) {
+            rule.state = false;
+            rule.exit && rule.exit(e);
+        }
+    }
+
+    l = rules.length;
+
+    // Run entering rules
+    while (l--) {
+        rule = rules[l];
+
+        if (!rule.state && test(rule.query)) {
+            rule.state = true;
+            rule.enter && rule.enter(e);
+        }
+    }
+}
+
+function media(query, fn1, fn2) {
+    var rule = {};
+
+    rule.query = query;
+    rule.enter = fn1;
+    rule.exit = fn2;
+    rules.push(rule);
+
+    return query;
+}
+
+function scroll(e) {
+    scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    update$2(e);
+}
+
+function resize(e) {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+    update$2(e);
+}
+
+window.addEventListener('scroll', scroll);
+window.addEventListener('resize', resize);
+
+ready$1(update$2);
+document.addEventListener('DOMContentLoaded', update$2);
+
+/**
+assign(node, properties)
+
+Assigns each property of `properties` to `node`, as a property where that
+property exists in `node`, otherwise as an attribute.
+
+If `properties` has a property `'children'` it must be an array of nodes;
+they are appended to 'node'.
+
+The property `'html'` is treated as an alias of `'innerHTML'`. The property
+`'tag'` is treated as an alias of `'tagName'` (which is ignored, as
+`node.tagName` is read-only). The property `'is'` is also ignored.
+*/
+
+const assignProperty = overload(id, {
+	// Ignore read-only properties or attributes
+	is: noop,
+	tag: noop,
+
+	html: function(name, node, content) {
+		node.innerHTML = content;
+	},
+
+	children: function(name, node, content) {
+		// Empty the node and append children
+		node.innerHTML = '';
+		content.forEach((child) => { node.appendChild(child); });
+	},
+
+	// SVG points property must be set as string attribute - SVG elements
+	// have a read-only API exposed at .points
+	points: setAttribute,
+
+	default: function(name, node, content) {
+		if (name in node) {
+			node[name] = content;
+		}
+		else {
+			node.setAttribute(name, content);
+		}
+	}
+});
+
+function setAttribute(name, node, content) {
+	node.setAttribute(name, content);
+}
+
+function assign$6(node, attributes) {
+	var names = Object.keys(attributes);
+	var n = names.length;
+
+	while (n--) {
+		assignProperty(names[n], node, attributes[names[n]]);
+	}
+
+	return node;
+}
+
+var assign$7 = curry$1(assign$6, true);
+
+const svgNamespace = 'http://www.w3.org/2000/svg';
+const div = document.createElement('div');
+
+
+// Constructors
+
+const construct = overload(id, {
+    comment: function(tag, text) {
+        return document.createComment(text || '');
+    },
+
+    fragment: function(tag, html) {
+        var fragment = document.createDocumentFragment();
+
+        if (html) {
+            div.innerHTML = html;
+            const nodes = div.childNodes;
+            while (nodes[0]) {
+                fragment.appendChild(nodes[0]);
+            }
+        }
+
+        return fragment;
+    },
+
+    text: function (tag, text) {
+        return document.createTextNode(text || '');
+    },
+
+    circle:   constructSVG,
+    ellipse:  constructSVG,
+    g:        constructSVG,
+    glyph:    constructSVG,
+    image:    constructSVG,
+    line:     constructSVG,
+    rect:     constructSVG,
+    use:      constructSVG,
+    path:     constructSVG,
+    pattern:  constructSVG,
+    polygon:  constructSVG,
+    polyline: constructSVG,
+    svg:      constructSVG,
+    default:  constructHTML
+});
+
+function constructSVG(tag, html) {
+    var node = document.createElementNS(svgNamespace, tag);
+
+    if (html) {
+        node.innerHTML = html;
+    }
+
+    return node;
+}
+
+function constructHTML(tag, html) {
+    var node = document.createElement(tag);
+
+    if (html) {
+        node.innerHTML = html;
+    }
+
+    return node;
+}
+
+
+/**
+create(tag, content)
+
+Constructs and returns a new DOM node.
+
+- If `tag` is `"text"` a text node is created.
+- If `tag` is `"fragment"` a fragment is created.
+- If `tag` is `"comment"` a comment is created.
+- If `tag` is any other string the element `<tag></tag>` is created.
+- Where `tag` is an object, it must have a `"tag"` or `"tagName"` property.
+A node is created according to the above rules for tag strings, and other
+properties of the object are assigned with dom's `assign(node, object)` function.
+
+If `content` is a string it is set as text content on a text or comment node,
+or as inner HTML on an element or fragment. It may also be an object of
+properties which are assigned with dom's `assign(node, properties)` function.
+*/
+
+function toTypes() {
+    return Array.prototype.map.call(arguments, toType).join(' ');
+}
+
+function validateTag(tag) {
+    if (typeof tag !== 'string') {
+        throw new Error('create(object, content) object must have string property .tag or .tagName');
+    }
+}
+
+var create$1 = overload(toTypes, {
+    'string string': construct,
+
+    'string object': function(tag, content) {
+        return assign$7(construct(tag, ''), content);
+    },
+
+    'object string': function(properties, text) {
+        const tag = properties.tag || properties.tagName;
+        validateTag(tag);
+        // Warning: text is set before properties, but text should override
+        // html or innerHTML property, ie, be set after.
+        return assign$7(construct(tag, text), properties);
+    },
+
+    'object object': function(properties, content) {
+        const tag = properties.tag || properties.tagName;
+        validateTag(tag);
+        return assign$7(assign$7(construct(tag, ''), properties), content);
+    },
+
+    default: function() {
+        throw new Error('create(tag, content) does not accept argument types "' + Array.prototype.map.apply(arguments, toType).join(' ') + '"');
+    }
+});
+
+const assign$8 = Object.assign;
 
 const constructors = {
     'a':        HTMLAnchorElement,
@@ -4647,6 +5154,28 @@ const constructors = {
     'br':       HTMLBRElement,
     'img':      HTMLImageElement,
     'template': HTMLTemplateElement
+};
+
+const $internals = Symbol('internals');
+const $shadow    = Symbol('shadow');
+
+const formProperties = {
+    // These properties echo those provided by native form controls.
+    // They are not strictly required, but provided for consistency.
+    type: { value: 'text' },
+
+    name: {
+        set: function(name) { return this.setAttribute('name', name); },
+        get: function() { return this.getAttribute('name') || ''; }
+    },
+
+    form:              { get: function() { return this[$internals].form; }},
+    labels:            { get: function() { return this[$internals].labels; }},
+    validity:          { get: function() { return this[$internals].validity; }},
+    validationMessage: { get: function() { return this[$internals].validationMessage; }},
+    willValidate:      { get: function() { return this[$internals].willValidate; }},
+    checkValidity:     { value: function() { return this[$internals].checkValidity(); }},
+    reportValidity:    { value: function() { return this[$internals].reportValidity(); }}
 };
 
 function getElementConstructor(tag) {
@@ -4661,6 +5190,33 @@ function getElementConstructor(tag) {
         })();
 }
 
+function getTemplateById(id) {
+    const template = document.getElementById(id);
+
+    if (!template || !template.content) {
+        throw new Error('Template id="' + id + '" not found in document');
+    }
+
+    return template;
+}
+
+function getTemplate(template) {
+    if (!template) { return; }
+
+    return typeof template === 'string' ?
+        // If template is an #id search for <template id="id">
+        template[0] === '#' ? getTemplateById(template.slice(1)) :
+        // It must be a string of HTML
+        template :
+    template.content ?
+        // It must be a template node
+        template :
+        // Whatever it is, we don't support it
+        function(){
+            throw new Error('element() options.template not a template node, id or string');
+        }() ;
+}
+
 function transferProperty(elem, key) {
     if (elem.hasOwnProperty(key)) {
         const value = elem[key];
@@ -4671,21 +5227,18 @@ function transferProperty(elem, key) {
     return elem;
 }
 
-function getTemplateById(id) {
-    const template = document.getElementById(id);
-
-    if (!template || !template.content) {
-        throw new Error('Template "' + options.shadow + '" not found in document');
-    }
-
-    return template;
-}
-
-function createShadow(template, elem) {
+function createShadow(template, elem, options) {
     if (!template) { return; }
 
-    // Create a shadow root if there is DOM content
-    const shadow = elem.attachShadow(shadowOptions) ;
+    // Create a shadow root if there is DOM content. Shadows may be 'open' or
+    // 'closed'. Closed shadows are not exposed via element.shadowRoot, and
+    // events propagating from inside of them report the element as target.
+    const shadow = elem.attachShadow({
+        mode: options.mode || 'closed',
+        delegatesFocus: true
+    });
+
+    elem[$shadow] = shadow;
 
     // If template is a <template>
     if (typeof template === 'string') {
@@ -4698,42 +5251,99 @@ function createShadow(template, elem) {
     return shadow;
 }
 
-function element(name, options) {
-    // Legacy...
-    // element() has changed signature from (name, template, attributes, properties, options) –
-    // support the old signature with a warning.
-    if (typeof options === 'string') {
-        throw new Error('dom element(): new signature element(name, options). Everything is an option.');
+function attachInternals(elem) {
+    // Use native attachInternals where it exists
+    if (elem.attachInternals) {
+        return elem.attachInternals();
     }
 
-    // Get the element constructor from options.tag, or the
+    // Otherwise polyfill it with a pseudo internals object, actually a hidden
+    // input that we put inside element (but outside the shadow DOM). We may
+    // not yet put this in the DOM however – it violates the spec to give a
+    // custom element children before it's contents are parsed. Instead we
+    // wait until connectCallback.
+    const hidden = create$1('input', { type: 'hidden', name: elem.name });
+
+    // Polyfill internals object setFormValue
+    hidden.setFormValue = function(value) {
+        this.value = value;
+    };
+
+    return hidden;
+}
+
+function appendInternalsCallback() {
+    // If we have simulated form internals, append the hidden input now
+    if (this[$internals] && !this.attachInternals) {
+        this.appendChild(this[$internals]);
+    }
+}
+
+function primeAttributes(elem) {
+    elem._initialAttributes = {};
+    elem._n = 0;
+}
+
+function advanceAttributes(elem, attributes, handlers) {
+    const values = elem._initialAttributes;
+
+    while(elem._n < attributes.length && values[attributes[elem._n]] !== undefined) {
+        //console.log('ADVANCE ATTR', attributes[elem._n]);
+        handlers[attributes[elem._n]].call(elem, values[attributes[elem._n]]);
+        ++elem._n;
+    }
+}
+
+function flushAttributes(elem, attributes, handlers) {
+    if (!elem._initialAttributes) { return; }
+
+    const values = elem._initialAttributes;
+
+    while(elem._n < attributes.length) {
+        //console.log('FLUSH ATTR', attributes[elem._n]);
+        if (values[attributes[elem._n]] !== undefined) {
+            handlers[attributes[elem._n]].call(elem, values[attributes[elem._n]]);
+        }
+        ++elem._n;
+    }
+
+    delete elem._initialAttributes;
+    delete elem._n;
+}
+
+
+function element(name, options) {
+    // Get the element constructor from options.extends, or the
     // base HTMLElement constructor
     const constructor = options.extends ?
         getElementConstructor(options.extends) :
         HTMLElement ;
 
-    const template = options && options.shadow && (
-        typeof options.shadow === 'string' ?
-            // If options.shadow is an #id, search for <template id="id">
-            options.shadow[0] === '#' ? getTemplateById(options.shadow.slice(1)) :
-            // It must be a string of HTML
-            options.shadow :
-        options.shadow.content ?
-            // It must be a template node
-            options.shadow :
-        // Whatever it is, we don't support it
-        function(){
-            throw new Error('element() options.shadow not recognised as template node, id or string');
-        }()
-    );
+    // Get a template node or HTML string from options.template
+    const template = getTemplate(options.template);
 
     function Element() {
-        // Construct on instance of Constructor using the Element prototype
+        // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);
-        const shadow = createShadow(template, elem);
+        const shadow = createShadow(template, elem, options);
 
-        options.construct
-        && options.construct.call(elem, shadow);
+        if (Element.formAssociated) {
+            // Get access to the internal form control API
+            elem[$internals] = attachInternals(elem);
+        }
+
+        options.construct && options.construct.call(elem, shadow);
+
+        // Preserve initialisation order of attribute initialisation by
+        // queueing them
+        if (options.attributes) {
+            primeAttributes(elem);
+
+            // Wait a tick to flush attributes
+            Promise.resolve(1).then(function() {
+                flushAttributes(elem, Element.observedAttributes, options);
+            });
+        }
 
         // At this point, if properties have already been set before the
         // element was upgraded, they exist on the elem itself, where we have
@@ -4756,48 +5366,103 @@ function element(name, options) {
         return elem;
     }
 
-    // options.properties
-    //
-    // Map of getter/setters called when properties mutate.
-    //
-    // {
-    //     name: { get: fn, set: fn }
-    // }
 
-    Element.prototype = Object.create(constructor.prototype, options.properties || {}) ;
+    // Properties
+    //
+    // Must be defined before attributeChangedCallback, but I cannot figure out
+    // why. Where one of the properties is `value`, the element is set up as a
+    // form element.
 
-    // options.attributes
-    //
-    // Map of functions called when named attributes change.
-    //
-    // {
-    //     name: fn
-    // }
+    if (options.properties && options.properties.value) {
+        // Flag the Element class as formAssociated
+        Element.formAssociated = true;
+
+        Element.prototype = Object.create(constructor.prototype, assign$8({}, formProperties, options.properties, {
+            value: {
+                get: options.properties.value.get,
+                set: function() {
+                    // After setting value
+                    options.properties.value.set.apply(this, arguments);
+
+                    // Copy it to internal form state
+                    this[$internals].setFormValue('' + this.value);
+                }
+            }
+        })) ;
+    }
+    else {
+        Element.prototype = Object.create(constructor.prototype, options.properties || {}) ;
+    }
+
+
+    // Attributes
 
     if (options.attributes) {
         Element.observedAttributes = Object.keys(options.attributes);
 
         Element.prototype.attributeChangedCallback = function(name, old, value) {
-            options.attributes[name].call(this, value, name);
+            if (!this._initialAttributes) {
+                return options.attributes[name].call(this, value);
+            }
+
+            // Keep a record of attribute values to be applied in
+            // observedAttributes order
+            this._initialAttributes[name] = value;
+            advanceAttributes(this, Element.observedAttributes, options.attributes);
         };
     }
 
-    // options.connect
 
-    if (options.connect) {
-        Element.prototype.connectedCallback = options.connect;
-    }
+    // Lifecycle
 
-    // options.disconnect
+    Element.prototype.connectedCallback = function() {
+        if (this._initialAttributes) {
+            flushAttributes(this, Element.observedAttributes, options.attributes);
+        }
+
+        if (Element.formAssociated) {
+            appendInternalsCallback.call(this);
+        }
+
+        if (options.connect) {
+            options.connect.call(this, this[$shadow]);
+        }
+
+        { console.log('Connected to document:', this); }
+    };
 
     if (options.disconnect) {
-        Element.prototype.disconnectedCallback = options.disconnect;
+        Element.prototype.disconnectedCallback = function() {
+            return options.disconnect.call(this, this[$shadow]);
+        };
     }
 
-    // options.extends
+    if (Element.formAssociated) {
+        if (options.enable || options.disable) {
+            Element.prototype.formDisabledCallback = function(disabled) {
+                return disabled ?
+                    options.disable && options.disable.call(this, this[$shadow]) :
+                    options.enable && options.enable.call(this, this[$shadow]) ;
+            };
+        }
+
+        if (options.reset) {
+            Element.prototype.formResetCallback = function() {
+                return options.reset.call(this, this[$shadow]);
+            };
+        }
+
+        if (options.restore) {
+            Element.prototype.formStateRestoreCallback = function() {
+                return options.restore.call(this, this[$shadow]);
+            };
+        }
+    }
+
+
+    // Define element
 
     window.customElements.define(name, Element, options);
-
     return Element;
 }
 
@@ -4817,29 +5482,30 @@ function escape(value) {
 }
 
 var mimetypes = {
-	xml: 'application/xml',
-	html: 'text/html',
-	svg: 'image/svg+xml'
+    xml: 'application/xml',
+    html: 'text/html',
+    svg: 'image/svg+xml'
 };
 
 function parse(type, string) {
-	if (!string) { return; }
+    if (!string) { return; }
 
-	var mimetype = mimetypes[type];
-	var xml;
+    var mimetype = mimetypes[type.toLowerCase()];
+    var xml;
 
-	// From jQuery source...
-	try {
-		xml = (new window.DOMParser()).parseFromString(string, mimetype);
-	} catch (e) {
-		return;
-	}
+    // Cludged from jQuery source...
+    try {
+        xml = (new window.DOMParser()).parseFromString(string, mimetype);
+    }
+    catch (e) {
+        return;
+    }
 
-	if (!xml || xml.getElementsByTagName("parsererror").length) {
-		throw new Error("dom: Invalid XML: " + string);
-	}
+    if (!xml || xml.getElementsByTagName("parsererror").length) {
+        throw new Error("Invalid " + type.toUpperCase() + ": " + string);
+    }
 
-	return xml;
+    return xml;
 }
 
 /**
@@ -4848,7 +5514,7 @@ Returns an HTML document parsed from `string`, or undefined.
 */
 
 function parseHTML(string) {
-	return parse('html', string);
+    return parse('html', string);
 }
 
 /**
@@ -4857,7 +5523,7 @@ Returns an SVG document parsed from `string`, or undefined.
 */
 
 function parseSVG(string) {
-	return parse('svg', string);
+    return parse('svg', string);
 }
 
 /**
@@ -4866,7 +5532,7 @@ Returns an XML document parsed from `string`, or undefined.
 */
 
 function parseXML(string) {
-	return parse('xml', string);
+    return parse('xml', string);
 }
 
 // Types
@@ -5071,64 +5737,6 @@ function children(node) {
 }
 
 /**
-assign(node, properties)
-
-Assigns each property of `properties` to `node`, as a property where that
-property exists in `node`, otherwise as an attribute.
-
-If `properties` has a property `'children'` it must be an array of nodes;
-they are appended to 'node'.
-
-The property `'html'` is treated as an alias of `'innerHTML'`. The property
-`'tag'` is treated as an alias of `'tagName'` (which is ignored, as
-`node.tagName` is read-only). The property `'is'` is also ignored.
-*/
-
-const assignProperty = overload(id, {
-	// Ignore read-only properties or attributes
-	is: noop,
-	tag: noop,
-
-	html: function(name, node, content) {
-		node.innerHTML = content;
-	},
-
-	children: function(name, node, content) {
-		// Empty the node and append children
-		node.innerHTML = '';
-		content.forEach((child) => { node.appendChild(child); });
-	},
-
-	// SVG points property must be set as string attribute - SVG elements
-	// have a read-only API exposed at .points
-	points: setAttribute,
-
-	default: function(name, node, content) {
-		if (name in node) {
-			node[name] = content;
-		}
-		else {
-			node.setAttribute(name, content);
-		}
-	}
-});
-
-function setAttribute(name, node, content) {
-	node.setAttribute(name, content);
-}
-
-function assign$4(node, attributes) {
-	var names = Object.keys(attributes);
-	var n = names.length;
-
-	while (n--) {
-		assignProperty(names[n], node, attributes[names[n]]);
-	}
-}
-
-var assign$5 = curry$1(assign$4, true);
-
-/**
 append(target, node)
 
 Appends `node`, which may be a string or DOM node, to `target`. Returns `node`.
@@ -5192,126 +5800,6 @@ var clone = features.textareaPlaceholderSet ?
 
 		return clone;
 	} ;
-
-const svgNamespace = 'http://www.w3.org/2000/svg';
-const div = document.createElement('div');
-
-
-// Constructors
-
-const construct = overload(id, {
-	comment: function(tag, text) {
-		return document.createComment(text || '');
-	},
-
-	fragment: function(tag, html) {
-		var fragment = document.createDocumentFragment();
-
-		if (html) {
-			div.innerHTML = html;
-			const nodes = div.childNodes;
-			while (nodes[0]) {
-				fragment.appendChild(nodes[0]);
-			}
-		}
-
-		return fragment;
-	},
-
-	text: function (tag, text) {
-		return document.createTextNode(text || '');
-	},
-
-	circle:   constructSVG,
-	ellipse:  constructSVG,
-	g:        constructSVG,
-	glyph:    constructSVG,
-	image:    constructSVG,
-	line:     constructSVG,
-	rect:     constructSVG,
-	use:      constructSVG,
-	path:     constructSVG,
-	pattern:  constructSVG,
-	polygon:  constructSVG,
-	polyline: constructSVG,
-	svg:      constructSVG,
-	default:  constructHTML
-});
-
-function constructSVG(tag, html) {
-	var node = document.createElementNS(svgNamespace, tag);
-
-	if (html) {
-		node.innerHTML = html;
-	}
-
-	return node;
-}
-
-function constructHTML(tag, html) {
-	var node = document.createElement(tag);
-
-	if (html) {
-		node.innerHTML = html;
-	}
-
-	return node;
-}
-
-
-/**
-create(tag, content)
-
-Constructs and returns a new DOM node.
-
-- If `tag` is `"text"` a text node is created.
-- If `tag` is `"fragment"` a fragment is created.
-- If `tag` is `"comment"` a comment is created.
-- If `tag` is any other string the element `<tag></tag>` is created.
-- Where `tag` is an object, it must have a `"tag"` or `"tagName"` property.
-A node is created according to the above rules for tag strings, and other
-properties of the object are assigned with dom's `assign(node, object)` function.
-
-If `content` is a string it is set as text content on a text or comment node,
-or as inner HTML on an element or fragment. It may also be an object of
-properties which are assigned with dom's `assign(node, properties)` function.
-*/
-
-function toTypes() {
-	return Array.prototype.map.call(arguments, toType).join(' ');
-}
-
-function validateTag(tag) {
-	if (typeof tag !== 'string') {
-		throw new Error('create(object, content) object must have string property .tag or .tagName');
-	}
-}
-
-var create$1 = overload(toTypes, {
-	'string string': construct,
-
-	'string object': function(tag, content) {
-		return assign$5(construct(tag, ''), content);
-	},
-
-	'object string': function(properties, text) {
-		const tag = properties.tag || properties.tagName;
-		validateTag(tag);
-		// Warning: text is set before properties, but text should override
-		// html or innerHTML property, ie, be set after.
-		return assign$5(construct(tag, text), properties);
-	},
-
-	'object object': function(properties, content) {
-		const tag = properties.tag || properties.tagName;
-		validateTag(tag);
-		return assign$5(assign$5(construct(tag, ''), properties), content);
-	},
-
-	default: function() {
-		throw new Error('create(tag, content) does not accept argument types "' + Array.prototype.map.apply(arguments, toType).join(' ') + '"');
-	}
-});
 
 /**
 identify(node)
@@ -5547,294 +6035,6 @@ function fragmentFromId(id) {
 		fragmentFromChildren(node) ;
 }
 
-const assign$6      = Object.assign;
-const CustomEvent = window.CustomEvent;
-
-const defaults    = {
-	// The event bubbles (false by default)
-	// https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
-	bubbles: true,
-
-	// The event may be cancelled (false by default)
-	// https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
-	cancelable: true
-
-	// Trigger listeners outside of a shadow root (false by default)
-	// https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
-	//composed: false
-};
-
-/**
-Event(type, properties)
-
-Creates a CustomEvent of type `type`.
-Additionally, `properties` are assigned to the event object.
-*/
-
-function Event$1(type, options) {
-	let settings;
-
-	if (typeof type === 'object') {
-		settings = assign$6({}, defaults, type);
-		type = settings.type;
-	}
-
-	if (options && options.detail) {
-		if (settings) {
-			settings.detail = options.detail;
-		}
-		else {
-			settings = assign$6({ detail: options.detail }, defaults);
-		}
-	}
-
-	var event = new CustomEvent(type, settings || defaults);
-
-	if (options) {
-		delete options.detail;
-		assign$6(event, options);
-	}
-
-	return event;
-}
-
-const assign$7  = Object.assign;
-const rspaces = /\s+/;
-
-function prefixType(type) {
-	return features.events[type] || type ;
-}
-
-
-// Handle event types
-
-// DOM click events may be simulated on inputs when their labels are
-// clicked. The tell-tale is they have the same timeStamp. Track click
-// timeStamps.
-var clickTimeStamp = 0;
-
-window.addEventListener('click', function(e) {
-	clickTimeStamp = e.timeStamp;
-});
-
-function listen(source, type) {
-	if (type === 'click') {
-		source.clickUpdate = function click(e) {
-			// Ignore clicks with the same timeStamp as previous clicks –
-			// they are likely simulated by the browser.
-			if (e.timeStamp <= clickTimeStamp) { return; }
-			source.update(e);
-		};
-
-		source.node.addEventListener(type, source.clickUpdate, source.options);
-		return source;
-	}
-
-	source.node.addEventListener(type, source.update, source.options);
-	return source;
-}
-
-function unlisten(source, type) {
-	source.node.removeEventListener(type, type === 'click' ?
-		source.clickUpdate :
-		source.update
-	);
-
-	return source;
-}
-
-/**
-events(type, node)
-
-Returns a mappable stream of events heard on `node`:
-
-    var stream = events('click', document.body);
-    .map(get('target'))
-    .each(function(node) {
-        // Do something with nodes
-    });
-
-Stopping the stream removes the event listeners:
-
-    stream.stop();
-*/
-
-function Source(notify, stop, type, options, node) {
-	const types  = type.split(rspaces).map(prefixType);
-	const buffer = [];
-
-	function update(value) {
-		buffer.push(value);
-		notify();
-	}
-
-	this._stop   = stop;
-	this.types   = types;
-	this.node    = node;
-	this.buffer  = buffer;
-	this.update  = update;
-	this.options = options;
-
-	// Potential hard-to-find error here if type has repeats, ie 'click click'.
-	// Lets assume nobody is dumb enough to do this, I dont want to have to
-	// check for that every time.
-	types.reduce(listen, this);
-}
-
-assign$7(Source.prototype, {
-	shift: function shiftEvent() {
-		const buffer = this.buffer;
-		return buffer.shift();
-	},
-
-	stop: function stopEvent() {
-		this.types.reduce(unlisten, this);
-		this._stop(this.buffer.length);
-	}
-});
-
-function events(type, node) {
-	let options;
-
-	if (typeof type === 'object') {
-		options = type;
-		type    = options.type;
-	}
-
-	return new Stream$1(function(notify, stop) {
-		return new Source(notify, stop, type, options, node)
-	});
-}
-
-
-/**
-isPrimaryButton(e)
-
-Returns `true` if user event is from the primary (normally the left or only)
-button of an input device. Use this to avoid listening to right-clicks.
-*/
-
-function isPrimaryButton(e) {
-	// Ignore mousedowns on any button other than the left (or primary)
-	// mouse button, or when a modifier key is pressed.
-	return (e.which === 1 && !e.ctrlKey && !e.altKey && !e.shiftKey);
-}
-
-/**
-preventDefault(e)
-
-Calls `e.preventDefault()`.
-*/
-
-function preventDefault(e) {
-	e.preventDefault();
-}
-
-function isTargetEvent(e) {
-	return e.target === e.currentTarget;
-}
-
-
-// -----------------
-
-const A$4 = Array.prototype;
-const eventsSymbol = Symbol('events');
-
-function applyTail(fn, args) {
-	return function() {
-		A$4.push.apply(arguments, args);
-		fn.apply(null, arguments);
-	};
-}
-
-function on(node, type, fn) {
-	var options;
-
-	if (typeof type === 'object') {
-		options = type;
-		type    = options.type;
-	}
-
-	var types   = type.split(rspaces);
-	var events  = node[eventsSymbol] || (node[eventsSymbol] = {});
-	var handler = arguments.length > 3 ? applyTail(fn, A$4.slice.call(arguments, 3)) : fn ;
-	var handlers, listener;
-	var n = -1;
-
-	while (++n < types.length) {
-		type = types[n];
-		handlers = events[type] || (events[type] = []);
-		listener = type === 'click' ?
-			function(e) {
-				// Ignore clicks with the same timeStamp as previous clicks –
-				// they are likely simulated by the browser on inputs when
-				// their labels are clicked
-				if (e.timeStamp <= clickTimeStamp) { return; }
-				handler(e);
-			} :
-			handler ;
-		handlers.push([fn, listener]);
-		node.addEventListener(type, listener, options);
-	}
-
-	return node;
-}
-
-function once(node, types, fn, data) {
-	on(node, types, function once() {
-		off(node, types, once);
-		fn.apply(null, arguments);
-	}, data);
-}
-
-function off(node, type, fn) {
-	var options;
-
-	if (typeof type === 'object') {
-		options = type;
-		type    = options.type;
-	}
-
-	var types   = type.split(rspaces);
-	var events  = node[eventsSymbol];
-	var handlers, i;
-
-	if (!events) { return node; }
-
-	var n = -1;
-	while (n++ < types.length) {
-		type = types[n];
-		handlers = events[type];
-		if (!handlers) { continue; }
-		i = handlers.length;
-		while (i--) {
-			if (handlers[i][0] === fn) {
-				node.removeEventListener(type, handlers[i][1]);
-				handlers.splice(i, 1);
-			}
-		}
-	}
-
-	return node;
-}
-
-/**
-trigger(type, node)
-
-Triggers event of `type` on `node`.
-
-```
-trigger('dom-activate', node);
-```
-*/
-
-function trigger(node, type, properties) {
-	// Don't cache events. It prevents you from triggering an event of a
-	// given type from inside the handler of another event of that type.
-	var event = Event$1(type, properties);
-	node.dispatchEvent(event);
-}
-
 function match(fn, options) {
 	var key;
 	return function(e) {
@@ -5852,313 +6052,313 @@ function match(fn, options) {
 }
 
 const config = {
-	// Number of pixels, or string CSS length, that a pressed pointer travels
-	// before gesture is started.
-	threshold: 4,
+    // Number of pixels, or string CSS length, that a pressed pointer travels
+    // before gesture is started.
+    threshold: 4,
 
-	ignoreTags: {
-		textarea: true,
-		input: true,
-		select: true,
-		button: true
-	}
+    ignoreTags: {
+        textarea: true,
+        input: true,
+        select: true,
+        button: true
+    }
 };
 
 var mouseevents = {
-	move:   'mousemove',
-	cancel: 'mouseup dragstart',
-	end:    'mouseup'
+    move:   'mousemove',
+    cancel: 'mouseup dragstart',
+    end:    'mouseup'
 };
 
 var touchevents = {
-	// Todo: why do we need passive: false? On iOS scrolling can be blocked with
-	// touch-action: none... do we want to block on any arbitrary thing that we
-	// gesture on or leave it to be explicitly set in CSS?
-	move:   { type: 'touchmove', passive: false },
-	cancel: 'touchend',
-	end:    'touchend'
+    // Todo: why do we need passive: false? On iOS scrolling can be blocked with
+    // touch-action: none... do we want to block on any arbitrary thing that we
+    // gesture on or leave it to be explicitly set in CSS?
+    move:   { type: 'touchmove', passive: false },
+    cancel: 'touchend',
+    end:    'touchend'
 };
 
-const assign$8 = Object.assign;
+const assign$9 = Object.assign;
 
 function isIgnoreTag(e) {
-	var tag = e.target.tagName;
-	return tag && !!config.ignoreTags[tag.toLowerCase()];
+    var tag = e.target.tagName;
+    return tag && !!config.ignoreTags[tag.toLowerCase()];
 }
 
 function identifiedTouch(touchList, id) {
-	var i, l;
+    var i, l;
 
-	if (touchList.identifiedTouch) {
-		return touchList.identifiedTouch(id);
-	}
+    if (touchList.identifiedTouch) {
+        return touchList.identifiedTouch(id);
+    }
 
-	// touchList.identifiedTouch() does not exist in
-	// webkit yet… we must do the search ourselves...
+    // touchList.identifiedTouch() does not exist in
+    // webkit yet… we must do the search ourselves...
 
-	i = -1;
-	l = touchList.length;
+    i = -1;
+    l = touchList.length;
 
-	while (++i < l) {
-		if (touchList[i].identifier === id) {
-			return touchList[i];
-		}
-	}
+    while (++i < l) {
+        if (touchList[i].identifier === id) {
+            return touchList[i];
+        }
+    }
 }
 
 function changedTouch(e, data) {
-	var touch = identifiedTouch(e.changedTouches, data.identifier);
+    var touch = identifiedTouch(e.changedTouches, data.identifier);
 
-	// This isn't the touch you're looking for.
-	if (!touch) { return; }
+    // This isn't the touch you're looking for.
+    if (!touch) { return; }
 
-	// Chrome Android (at least) includes touches that have not
-	// changed in e.changedTouches. That's a bit annoying. Check
-	// that this touch has changed.
-	if (touch.clientX === data.clientX && touch.clientY === data.clientY) { return; }
+    // Chrome Android (at least) includes touches that have not
+    // changed in e.changedTouches. That's a bit annoying. Check
+    // that this touch has changed.
+    if (touch.clientX === data.clientX && touch.clientY === data.clientY) { return; }
 
-	return touch;
+    return touch;
 }
 
 function preventOne(e) {
-	e.preventDefault();
-	e.currentTarget.removeEventListener(e.type, preventOne);
+    e.preventDefault();
+    e.currentTarget.removeEventListener(e.type, preventOne);
 }
 
 function preventOneClick(e) {
-	e.currentTarget.addEventListener('click', preventOne);
+    e.currentTarget.addEventListener('click', preventOne);
 }
 
 
 // Handlers that decide when the first movestart is triggered
 
 function mousedown(e, push, options) {
-	// Ignore non-primary buttons
-	if (!isPrimaryButton(e)) { return; }
+    // Ignore non-primary buttons
+    if (!isPrimaryButton(e)) { return; }
 
-	// Ignore form and interactive elements
-	if (isIgnoreTag(e)) { return; }
+    // Ignore form and interactive elements
+    if (isIgnoreTag(e)) { return; }
 
-	// Check target matches selector
-	if (options.selector && !e.target.closest(options.selector)) { return; }
+    // Check target matches selector
+    if (options.selector && !e.target.closest(options.selector)) { return; }
 
-	on(document, mouseevents.move, mousemove, [e], push, options);
-	on(document, mouseevents.cancel, mouseend, [e]);
+    on(document, mouseevents.move, mousemove, [e], push, options);
+    on(document, mouseevents.cancel, mouseend, [e]);
 }
 
 function mousemove(e, events, push, options){
-	events.push(e);
-	checkThreshold(e, events, e, removeMouse, push, options);
+    events.push(e);
+    checkThreshold(e, events, e, removeMouse, push, options);
 }
 
 function mouseend(e, data) {
-	removeMouse();
+    removeMouse();
 }
 
 function removeMouse() {
-	off(document, mouseevents.move, mousemove);
-	off(document, mouseevents.cancel, mouseend);
+    off(document, mouseevents.move, mousemove);
+    off(document, mouseevents.cancel, mouseend);
 }
 
 function touchstart(e, push, options) {
-	// Ignore form and interactive elements
-	if (isIgnoreTag(e)) { return; }
+    // Ignore form and interactive elements
+    if (isIgnoreTag(e)) { return; }
 
-	// Check target matches selector
-	if (options.selector && !e.target.closest(options.selector)) { return; }
+    // Check target matches selector
+    if (options.selector && !e.target.closest(options.selector)) { return; }
 
-	var touch = e.changedTouches[0];
+    var touch = e.changedTouches[0];
 
-	// iOS live updates the touch objects whereas Android gives us copies.
-	// That means we can't trust the touchstart object to stay the same,
-	// so we must copy the data. This object acts as a template for
-	// movestart, move and moveend event objects.
-	var event = {
-		target:     touch.target,
-		clientX:      touch.clientX,
-		clientY:      touch.clientY,
-		identifier: touch.identifier,
+    // iOS live updates the touch objects whereas Android gives us copies.
+    // That means we can't trust the touchstart object to stay the same,
+    // so we must copy the data. This object acts as a template for
+    // movestart, move and moveend event objects.
+    var event = {
+        target:     touch.target,
+        clientX:      touch.clientX,
+        clientY:      touch.clientY,
+        identifier: touch.identifier,
 
-		// The only way to make handlers individually unbindable is by
-		// making them unique. This is a crap place to put them, but it
-		// will work.
-		touchmove:  function() { touchmove.apply(this, arguments); },
-		touchend:   function() { touchend.apply(this, arguments); }
-	};
+        // The only way to make handlers individually unbindable is by
+        // making them unique. This is a crap place to put them, but it
+        // will work.
+        touchmove:  function() { touchmove.apply(this, arguments); },
+        touchend:   function() { touchend.apply(this, arguments); }
+    };
 
-	on(document, touchevents.move, event.touchmove, [event], push, options);
-	on(document, touchevents.cancel, event.touchend, [event]);
+    on(document, touchevents.move, event.touchmove, [event], push, options);
+    on(document, touchevents.cancel, event.touchend, [event]);
 }
 
 function touchmove(e, events, push, options) {
-	var touch = changedTouch(e, events[0]);
-	if (!touch) { return; }
-	checkThreshold(e, events, touch, removeTouch, push, options);
+    var touch = changedTouch(e, events[0]);
+    if (!touch) { return; }
+    checkThreshold(e, events, touch, removeTouch, push, options);
 }
 
 function touchend(e, events) {
-	var touch = identifiedTouch(e.changedTouches, events[0].identifier);
-	if (!touch) { return; }
-	removeTouch(events);
+    var touch = identifiedTouch(e.changedTouches, events[0].identifier);
+    if (!touch) { return; }
+    removeTouch(events);
 }
 
 function removeTouch(events) {
-	off(document, touchevents.move, events[0].touchmove);
-	off(document, touchevents.cancel, events[0].touchend);
+    off(document, touchevents.move, events[0].touchmove);
+    off(document, touchevents.cancel, events[0].touchend);
 }
 
 function checkThreshold(e, events, touch, removeHandlers, push, options) {
-	var distX = touch.clientX - events[0].clientX;
-	var distY = touch.clientY - events[0].clientY;
-	var threshold = parseValue(options.threshold);
+    var distX = touch.clientX - events[0].clientX;
+    var distY = touch.clientY - events[0].clientY;
+    var threshold = parseValue$1(options.threshold);
 
-	// Do nothing if the threshold has not been crossed.
-	if ((distX * distX) + (distY * distY) < (threshold * threshold)) {
-		return;
-	}
+    // Do nothing if the threshold has not been crossed.
+    if ((distX * distX) + (distY * distY) < (threshold * threshold)) {
+        return;
+    }
 
-	var node = events[0].target;
+    var node = events[0].target;
 
-	// Unbind handlers that tracked the touch or mouse up till now.
-	removeHandlers(events);
-	push(touches(node, events));
+    // Unbind handlers that tracked the touch or mouse up till now.
+    removeHandlers(events);
+    push(touches(node, events));
 }
 
 
 // Handlers that control what happens following a movestart
 
 function activeMousemove(e, data, push) {
-	data.touch = e;
-	data.timeStamp = e.timeStamp;
-	push(e);
+    data.touch = e;
+    data.timeStamp = e.timeStamp;
+    push(e);
 }
 
 function activeMouseend(e, data, stop) {
-	removeActiveMouse();
-	stop();
+    removeActiveMouse();
+    stop();
 }
 
 function removeActiveMouse() {
-	off(document, mouseevents.end, preventOneClick);
-	off(document, mouseevents.move, activeMousemove);
-	off(document, mouseevents.cancel, activeMouseend);
+    off(document, mouseevents.end, preventOneClick);
+    off(document, mouseevents.move, activeMousemove);
+    off(document, mouseevents.cancel, activeMouseend);
 }
 
 function activeTouchmove(e, data, push) {
-	var touch = changedTouch(e, data);
+    var touch = changedTouch(e, data);
 
-	if (!touch) { return; }
+    if (!touch) { return; }
 
-	// Stop the interface from scrolling
-	e.preventDefault();
+    // Stop the interface from scrolling
+    e.preventDefault();
 
-	data.touch = touch;
-	data.timeStamp = e.timeStamp;
-	push(touch);
+    data.touch = touch;
+    data.timeStamp = e.timeStamp;
+    push(touch);
 }
 
 function activeTouchend(e, data, stop) {
-	var touch  = identifiedTouch(e.changedTouches, data.identifier);
+    var touch  = identifiedTouch(e.changedTouches, data.identifier);
 
-	// This isn't the touch you're looking for.
-	if (!touch) { return; }
-	removeActiveTouch(data);
-	stop();
+    // This isn't the touch you're looking for.
+    if (!touch) { return; }
+    removeActiveTouch(data);
+    stop();
 }
 
 function removeActiveTouch(data) {
-	off(document, touchevents.move, data.activeTouchmove);
-	off(document, touchevents.end, data.activeTouchend);
+    off(document, touchevents.move, data.activeTouchmove);
+    off(document, touchevents.end, data.activeTouchend);
 }
 
 function touches(node, events) {
-	return events[0].identifier === undefined ?
-		Stream$1(function MouseSource(push, stop) {
-			var data = {
-				target: node,
-				touch: undefined
-			};
+    return events[0].identifier === undefined ?
+        Stream$1(function MouseSource(push, stop) {
+            var data = {
+                target: node,
+                touch: undefined
+            };
 
-			// Todo: Should Stream, perhaps, take { buffer } as a source
-			// property, allowing us to return any old buffer (as long as
-			// it has .shift())? Or are we happy pushing in, which causes
-			// a bit of internal complexity in Stream?
-			push.apply(null, events);
+            // Todo: Should Stream, perhaps, take { buffer } as a source
+            // property, allowing us to return any old buffer (as long as
+            // it has .shift())? Or are we happy pushing in, which causes
+            // a bit of internal complexity in Stream?
+            push.apply(null, events);
 
-			// We're dealing with a mouse event.
-			// Stop click from propagating at the end of a move
-			on(document, mouseevents.end, preventOneClick);
-			on(document, mouseevents.move, activeMousemove, data, push);
-			on(document, mouseevents.cancel, activeMouseend, data, stop);
+            // We're dealing with a mouse event.
+            // Stop click from propagating at the end of a move
+            on(document, mouseevents.end, preventOneClick);
+            on(document, mouseevents.move, activeMousemove, data, push);
+            on(document, mouseevents.cancel, activeMouseend, data, stop);
 
-			return {
-				stop: function() {
-					removeActiveMouse();
-					stop();
-				}
-			};
-		}):
+            return {
+                stop: function() {
+                    removeActiveMouse();
+                    stop();
+                }
+            };
+        }):
 
-		Stream$1(function TouchSource(push, stop) {
-			var data = {
-				target: node,
-				touch: undefined,
-				identifier: events[0].identifier
-			};
+        Stream$1(function TouchSource(push, stop) {
+            var data = {
+                target: node,
+                touch: undefined,
+                identifier: events[0].identifier
+            };
 
-			push.apply(null, events);
+            push.apply(null, events);
 
-			// Track a touch
-			// In order to unbind correct handlers they have to be unique
-			data.activeTouchmove = function (e) { activeTouchmove(e, data, push); };
-			data.activeTouchend = function (e) { activeTouchend(e, data, stop); };
+            // Track a touch
+            // In order to unbind correct handlers they have to be unique
+            data.activeTouchmove = function (e) { activeTouchmove(e, data, push); };
+            data.activeTouchend = function (e) { activeTouchend(e, data, stop); };
 
-			// We're dealing with a touch.
-			on(document, touchevents.move, data.activeTouchmove);
-			on(document, touchevents.end, data.activeTouchend);
+            // We're dealing with a touch.
+            on(document, touchevents.move, data.activeTouchmove);
+            on(document, touchevents.end, data.activeTouchend);
 
-			return {
-				stop: function () {
-					removeActiveTouch(data);
-					stop();
-				}
-			};
-		});
+            return {
+                stop: function () {
+                    removeActiveTouch(data);
+                    stop();
+                }
+            };
+        });
 }
 
 function gestures(options, node) {
-	// Support legacy signature gestures(node)
-	if (!node) {
-		console.trace('Deprecated gestures(node), now gestures(options, node)');
-	}
+    // Support legacy signature gestures(node)
+    if (!node) {
+        console.trace('Deprecated gestures(node), now gestures(options, node)');
+    }
 
-	options = node ?
-		options ? assign$8({}, config, options) : config :
-		config ;
-	node = node ?
-		node :
-		options ;
+    options = node ?
+        options ? assign$9({}, config, options) : config :
+        config ;
+    node = node ?
+        node :
+        options ;
 
-	return new Stream$1(function(push, stop) {
-		function mouseHandler(e) {
-			mousedown(e, push, options);
-		}
+    return new Stream$1(function(push, stop) {
+        function mouseHandler(e) {
+            mousedown(e, push, options);
+        }
 
-		function touchHandler(e) {
-			touchstart(e, push, options);
-		}
+        function touchHandler(e) {
+            touchstart(e, push, options);
+        }
 
-		on(node, 'mousedown', mouseHandler);
-		on(node, 'touchstart', touchHandler);
+        on(node, 'mousedown', mouseHandler);
+        on(node, 'touchstart', touchHandler);
 
-		return {
-			stop: function() {
-				off(node, 'mousedown', mouseHandler);
-				off(node, 'touchstart', touchHandler);
-				stop();
-			}
-		};
-	});
+        return {
+            stop: function() {
+                off(node, 'mousedown', mouseHandler);
+                off(node, 'touchstart', touchHandler);
+                stop();
+            }
+        };
+    });
 }
 
 // trigger('type', node)
@@ -6494,7 +6694,7 @@ function getCookie(key) {
 	}
 }
 
-const assign$9 = Object.assign;
+const assign$a = Object.assign;
 
 /*
 config
@@ -6528,35 +6728,35 @@ const config$1 = {
 
 const createHeaders = choose({
     'application/x-www-form-urlencoded': function(headers) {
-        return assign$9(headers, {
+        return assign$a(headers, {
             "Content-Type": 'application/x-www-form-urlencoded',
             "X-Requested-With": "XMLHttpRequest"
         });
     },
 
     'application/json': function(headers) {
-        return assign$9(headers, {
+        return assign$a(headers, {
             "Content-Type": "application/json; charset=utf-8",
             "X-Requested-With": "XMLHttpRequest"
         });
     },
 
     'multipart/form-data': function(headers) {
-        return assign$9(headers, {
+        return assign$a(headers, {
             "Content-Type": 'multipart/form-data',
             "X-Requested-With": "XMLHttpRequest"
         });
     },
 
     'audio/wav': function(headers) {
-        return assign$9(headers, {
+        return assign$a(headers, {
             "Content-Type": 'audio/wav',
             "X-Requested-With": "XMLHttpRequest"
         });
     },
 
     'default': function(headers) {
-        return assign$9(headers, {
+        return assign$a(headers, {
             "Content-Type": 'application/x-www-form-urlencoded',
             "X-Requested-With": "XMLHttpRequest"
         });
@@ -6623,7 +6823,7 @@ function createOptions(method, data, head, controller) {
         head :
         head['Content-Type'] ;
 
-    const headers = createHeaders(contentType, assign$9(
+    const headers = createHeaders(contentType, assign$a(
         config$1.headers && data ? config$1.headers(data) : {},
         typeof head === 'string' ? nothing : head
     ));
@@ -6845,4 +7045,4 @@ const delegate$1 = curry$1(delegate, true);
 const animate$1 = curry$1(animate, true);
 const transition$1 = curry$1(transition, true);
 
-export { Event$1 as Event, addClass$1 as addClass, after$1 as after, animate$1 as animate, append$2 as append, assign$5 as assign, attribute$1 as attribute, before$1 as before, boundingBox, media as breakpoint, children, classes, clone, closest$1 as closest, contains$3 as contains, create$1 as create, delegate$1 as delegate, disableScroll, element, empty, enableScroll, escape, events$1 as events, features, find$3 as find, fragmentFromChildren, fragmentFromHTML, fragmentFromId, fragmentFromTemplate, frameClass$1 as frameClass, fullscreen, gestures, get$2 as get, getCookie, identify, isCommentNode, isElementNode, isFragmentNode, isInternalLink, isPrimaryButton, isTargetEvent, isTextNode, isValid, match, matches$2 as matches, media, next, now, off$1 as off, offset$1 as offset, on$1 as on, parseHTML, parseSVG, parseValue, parseXML, prefix$1 as prefix, prepend$3 as prepend, preventDefault, previous, select$1 as query, ready$1 as ready, rect, remove$2 as remove, removeClass$1 as removeClass, replace$1 as replace, request, config$1 as requestConfig, requestDelete, requestGet, requestPatch, requestPost, safe, scrollRatio, select$1 as select, style$1 as style, tag, throttledRequest, toKey, toKeyCode, toKeyString, toRem, toVh, toVw, transition$1 as transition, trapFocus, trigger$2 as trigger, type, validate };
+export { Event$1 as Event, addClass$1 as addClass, after$1 as after, animate$1 as animate, append$2 as append, assign$7 as assign, attribute$1 as attribute, before$1 as before, boundingBox, media as breakpoint, children, classes, clone, closest$1 as closest, contains$3 as contains, create$1 as create, delegate$1 as delegate, disableScroll, element, empty, enableScroll, escape, events$1 as events, features, find$3 as find, fragmentFromChildren, fragmentFromHTML, fragmentFromId, fragmentFromTemplate, frameClass$1 as frameClass, fullscreen, gestures, get$2 as get, getCookie, identify, isCommentNode, isElementNode, isFragmentNode, isInternalLink, isPrimaryButton, isTargetEvent, isTextNode, isValid, match, matches$2 as matches, media, next, now, off$1 as off, offset$1 as offset, on$1 as on, parseHTML, parseSVG, parseValue$1 as parseValue, parseXML, prefix$1 as prefix, prepend$3 as prepend, preventDefault, previous, select$1 as query, ready$1 as ready, rect, remove$2 as remove, removeClass$1 as removeClass, replace$1 as replace, request, config$1 as requestConfig, requestDelete, requestGet, requestPatch, requestPost, safe, scrollRatio, select$1 as select, style$1 as style, tag, throttledRequest, toKey, toKeyCode, toKeyString, toRem, toVh, toVw, transition$1 as transition, trapFocus, trigger$2 as trigger, type, validate };

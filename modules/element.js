@@ -231,10 +231,12 @@ export default function element(name, options) {
         getElementConstructor(options.extends) :
         HTMLElement ;
 
-    // Get a template node or HTML string from options.template
-    const template = getTemplate(options.template);
+    let template;
 
     function Element() {
+        // Get a template node or HTML string from options.template
+        template = template || getTemplate(options.template);
+
         // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);
         const shadow = createShadow(template, elem, options);

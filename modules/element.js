@@ -14,6 +14,7 @@ render the API for creating custom elements a little more... sane.
        properties: An object of property definitions for the element prototype
        construct:  Lifecycle handler called during element construction
        connect:    Lifecycle handler called when element added to DOM
+       load:       Lifecycle handler called when stylesheets load
        disconnect: Lifecycle handler called when element removed from DOM
        enable:     Lifecycle handler called when form element enabled
        disable:    Lifecycle handler called when form element disabled
@@ -49,9 +50,14 @@ HTML. The parser normally calls these in source order. This can be problematic
 if you require setup to run in a specific order. Here, they are run in the order
 declared in the `attributes` object.
 
-Finally the `connect` handler is called when the element is placed in the DOM
-or if it is already in the DOM and is being upgraded. All lifecycle handlers
-are called with the parameter `shadow`.
+Then the `connect` handler is called when the element is placed in the DOM
+or if it is already in the DOM and is being upgraded.
+
+Finally the `load` handler is called after the first connect, and after any
+stylesheet links in the shadow DOM have loaded. If there are no links, it is
+called immediately after `connect`.
+
+All lifecycle handlers are called with the parameters `(element, shadow)`.
 */
 
 import create from './create.js';
@@ -70,6 +76,7 @@ const constructors = {
 
 const $internals = Symbol('internals');
 const $shadow    = Symbol('shadow');
+const $loading   = Symbol('loading');
 
 const formProperties = {
     // These properties echo those provided by native form controls.
@@ -88,6 +95,10 @@ const formProperties = {
     willValidate:      { get: function() { return this[$internals].willValidate; }},
     checkValidity:     { value: function() { return this[$internals].checkValidity(); }},
     reportValidity:    { value: function() { return this[$internals].reportValidity(); }}
+};
+
+const onceEvent = {
+    once: true
 };
 
 function getElementConstructor(tag) {
@@ -152,12 +163,16 @@ function createShadow(template, elem, options) {
 
     elem[$shadow] = shadow;
 
-    // If template is a <template>
+    // If template is a string
     if (typeof template === 'string') {
         shadow.innerHTML = template;
     }
     else {
         shadow.appendChild(template.content.cloneNode(true));
+    }
+
+    if (options.load) {
+        elem._initialLoad = true;
     }
 
     return shadow;
@@ -231,10 +246,12 @@ export default function element(name, options) {
         getElementConstructor(options.extends) :
         HTMLElement ;
 
-    // Get a template node or HTML string from options.template
-    const template = getTemplate(options.template);
+    let template;
 
     function Element() {
+        // Get a template node or HTML string from options.template
+        template = template || getTemplate(options.template);
+
         // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);
         const shadow = createShadow(template, elem, options);
@@ -244,7 +261,7 @@ export default function element(name, options) {
             elem[$internals] = attachInternals(elem);
         }
 
-        options.construct && options.construct.call(elem, shadow);
+        options.construct && options.construct.call(null, elem, shadow);
 
         // Preserve initialisation order of attribute initialisation by
         // queueing them
@@ -328,24 +345,68 @@ export default function element(name, options) {
     // Lifecycle
 
     Element.prototype.connectedCallback = function() {
-        if (this._initialAttributes) {
-            flushAttributes(this, Element.observedAttributes, options.attributes);
+        const elem   = this;
+        const shadow = elem[$shadow];
+
+        // Initialise any attributes that appeared out of order
+        if (elem._initialAttributes) {
+            flushAttributes(elem, Element.observedAttributes, options.attributes);
         }
 
         if (Element.formAssociated) {
-            appendInternalsCallback.call(this);
+            appendInternalsCallback.call(elem);
         }
 
-        if (options.connect) {
-            options.connect.call(this, this[$shadow]);
+        // If this is the first connect and there is an options.load fn,
+        // _initialLoad is true
+        if (elem._initialLoad) {
+            const links = shadow.querySelectorAll('link[rel="stylesheet"]');
+
+            if (links.length) {
+                let count  = 0;
+                let n      = links.length;
+
+                const load = function load(e) {
+                    if (++count >= links.length) {
+                        // Delete _initialLoad. If the element is removed
+                        // and added to the DOM again, stylesheets do not load
+                        // again
+                        delete elem._initialLoad;
+                        if (options.load) {
+                            options.load.call(elem, elem, shadow);
+                        }
+                    }
+                };
+
+                // Todo: But do we pick these load events up if the stylesheet is cached??
+                while (n--) {
+                    links[n].addEventListener('load', load, onceEvent);
+                }
+
+                if (options.connect) {
+                    options.connect.call(null, elem, shadow);
+                }
+            }
+            else {
+                if (options.connect) {
+                    options.connect.call(null, elem, shadow);
+                }
+
+                if (options.load) {
+                    options.load.call(null, elem, shadow);
+                }
+            }
+        }
+        else if (options.connect) {
+            options.connect.call(null, elem, shadow);
         }
 
-        if (DEBUG) { console.log('Connected to document:', this); }
+        if (DEBUG) { console.log('Connected to document:', elem); }
     }
 
     if (options.disconnect) {
         Element.prototype.disconnectedCallback = function() {
-            return options.disconnect.call(this, this[$shadow]);
+            return options.disconnect.call(null, this, this[$shadow]);
         };
     }
 
@@ -353,20 +414,20 @@ export default function element(name, options) {
         if (options.enable || options.disable) {
             Element.prototype.formDisabledCallback = function(disabled) {
                 return disabled ?
-                    options.disable && options.disable.call(this, this[$shadow]) :
-                    options.enable && options.enable.call(this, this[$shadow]) ;
+                    options.disable && options.disable.call(null, this, this[$shadow]) :
+                    options.enable && options.enable.call(null, this, this[$shadow]) ;
             };
         }
 
         if (options.reset) {
             Element.prototype.formResetCallback = function() {
-                return options.reset.call(this, this[$shadow]);
+                return options.reset.call(null, this, this[$shadow]);
             };
         }
 
         if (options.restore) {
             Element.prototype.formStateRestoreCallback = function() {
-                return options.restore.call(this, this[$shadow]);
+                return options.restore.call(null, this, this[$shadow]);
             };
         }
     }

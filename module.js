@@ -86,6 +86,7 @@ export * from './modules/fragments.js';
 // Events
 
 export { default as Event } from './modules/event.js';
+
 export { isPrimaryButton, isTargetEvent, preventDefault } from './modules/events.js';
 export { default as match } from './modules/match.js';
 import { default as _events, on as __on, once as __once, off as __off, trigger as __trigger } from './modules/events.js';
@@ -93,12 +94,15 @@ export const events = curry(_events, true);
 
 // Legacy uncurried functions
 
+/*
+THIS CAUSES EXPORT OF CURRY AND STUFF WHEN BUNDLED
 Object.assign(events, {
     on:      __on,
     once:    __once,
     off:     __off,
     trigger: __trigger
 });
+*/
 
 export const on = curry(function(type, fn, node) {
     __on(node, type, fn);

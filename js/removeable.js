@@ -6,8 +6,7 @@
 <p>Can be used to make one-off messages, like <a href="#one-off-dialog">this dialog</a>.</p>
 */
 
-import { noop } from '../../fn/module.js';
-import { remove, events, matches } from '../module.js';
+import { remove, on, off, matches } from '../module.js';
 import './dom-activate.js';
 
 // Define
@@ -15,10 +14,6 @@ var match = matches('.removeable, [removeable]');
 
 // Max duration of deactivation transition in seconds
 var maxDuration = 1;
-
-// Functions
-var on      = events.on;
-var off     = events.off;
 
 function activate(e) {
 	// Use method detection - e.defaultPrevented is not set in time for

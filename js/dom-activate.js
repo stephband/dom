@@ -1,11 +1,8 @@
 
 import { curry, isDefined, overload } from '../../fn/module.js';
-import { append, classes, create, delegate, Event, events, isInternalLink, isPrimaryButton, tag, select, ready, remove, trigger } from '../module.js';
+import { append, classes, create, delegate, Event, events, isInternalLink, isPrimaryButton, tag, select, ready, remove, trigger, on, off } from '../module.js';
 
 var DEBUG     = false;
-
-var on        = events.on;
-var off       = events.off;
 
 var location  = window.location;
 var id        = location.hash;

@@ -76,7 +76,6 @@ const constructors = {
 
 const $internals = Symbol('internals');
 const $shadow    = Symbol('shadow');
-const $loading   = Symbol('loading');
 
 const formProperties = {
     // These properties echo those provided by native form controls.
@@ -401,7 +400,9 @@ export default function element(name, options) {
             options.connect.call(null, elem, shadow);
         }
 
-        if (DEBUG) { console.log('Element:', elem); }
+        if (DEBUG) {
+            console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', elem);
+        }
     }
 
     if (options.disconnect) {

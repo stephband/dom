@@ -5,12 +5,11 @@ swipeable
 **/
 
 import { last, wrap, set, toPolar } from '../../fn/module.js';
-import { attribute, rect, events, children, classes, closest, gestures, matches, select, style } from '../module.js';
+import { attribute, rect, events, children, classes, closest, gestures, matches, select, style, on } from '../module.js';
 import './switchable.js';
 
 const selector = '.swipeable, [swipeable]';
 
-var on       = events.on;
 var trigger  = events.trigger;
 var tau      = Math.PI * 2;
 

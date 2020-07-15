@@ -21,11 +21,9 @@ attribute:</p>
 ```
 */
 
-import { Fn, choose, id, intersect, nothing, prepend, requestTick, Stream } from '../../fn/module.js';
-import { after, attribute, classes, closest, delegate, events, preventDefault, query, remove } from '../module.js';
+import { choose, id, intersect, nothing, prepend } from '../../fn/module.js';
+import { attribute, classes, closest, events, on } from '../module.js';
 
-const on      = events.on;
-const off     = events.off;
 const trigger = events.trigger;
 
 let overnode;

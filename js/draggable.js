@@ -15,12 +15,10 @@ attribute, which defines data to be carried by a drag action:
 */
 
 import { parse } from '../../fn/module.js';
-import { attribute, classes, delegate, events, identify, select, remove, removeClass } from '../module.js';
+import { attribute, classes, delegate, events, identify, select, remove, removeClass, on, off } from '../module.js';
 import { register } from '../../sparky/module.js';
 
 var debug  = true;
-var on     = events.on;
-var off    = events.off;
 
 //                 xxxxx: wef;
 var rmimetype = /^([^:\s]+)\s*:\s*([^;\s]+);\s*/;

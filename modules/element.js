@@ -62,7 +62,7 @@ All lifecycle handlers are called with the parameters `(element, shadow)`.
 
 import create from './create.js';
 
-const DEBUG = true;
+const DEBUG = window.DEBUG === true;
 
 const assign = Object.assign;
 
@@ -401,7 +401,7 @@ export default function element(name, options) {
             options.connect.call(null, elem, shadow);
         }
 
-        if (DEBUG) { console.log('Connected to document:', elem); }
+        if (DEBUG) { console.log('Element:', elem); }
     }
 
     if (options.disconnect) {

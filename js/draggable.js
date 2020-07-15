@@ -78,8 +78,8 @@ function dragend(e) {
 	classes(e.target).remove('dragging');
 }
 
-on(document, 'dragstart', dragstart);
-on(document, 'dragend', dragend);
+on('dragstart', dragstart, document);
+on('dragend', dragend, document);
 
 
 function dragendButton(e) {
@@ -92,12 +92,12 @@ register('data-on-drag', function(node, params) {
 	var dragend   = delegate('[draggable]', dragendButton);
 
 	//.on('selectstart', '.node-button', cache, selectstartIE9)
-	on(node, 'dragstart', dragstart);
+	on('dragstart', dragstart, node);
 	//.on('drag', '.node-button', cache, dragButton)
-	on(node, 'dragend', dragend);
+	on('dragend', dragend, node);
 
 	this.done(function() {
-		off(node, 'dragstart', dragstart);
-		off(node, 'dragend', dragend);
+		off('dragstart', dragstart, node);
+		off('dragend', dragend, node);
 	});
 });

@@ -152,7 +152,7 @@ function applyTail(fn, args) {
 	};
 }
 
-export function on(node, type, fn) {
+export function on(type, fn, node) {
 	var options;
 
 	if (typeof type === 'object') {
@@ -186,13 +186,13 @@ export function on(node, type, fn) {
 }
 
 export function once(node, types, fn, data) {
-	on(node, types, function once() {
-		off(node, types, once);
+	on(types, function once() {
+		off(types, once, node);
 		fn.apply(null, arguments);
-	}, data);
+	}, node, data);
 }
 
-export function off(node, type, fn) {
+export function off(type, fn, node) {
 	var options;
 
 	if (typeof type === 'object') {

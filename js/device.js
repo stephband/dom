@@ -44,6 +44,6 @@ function touchend(e) {
     updateClass(config.touchClass);
 }
 
-on(document, 'mousedown', mousedown);
-on(document, 'keydown', keydown);
-on(document, 'touchend', touchend);
+on('mousedown', mousedown, document);
+on('keydown', keydown, document);
+on('touchend', touchend, document);

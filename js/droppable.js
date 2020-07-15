@@ -133,12 +133,12 @@ function drop(e) {
 }
 
 
-on(document, 'dragenter', dragenter);
-on(document, 'dragover', dragover);
-on(document, 'drop', drop);
+on('dragenter', dragenter, document);
+on('dragover', dragover, document);
+on('drop', drop, document);
 
 if (window.console) {
-    on(document, 'dom-drop', function(e) {
+    on('dom-drop', function(e) {
         console.log('Dropped data:', e.detail);
-    });
+    }, document);
 }

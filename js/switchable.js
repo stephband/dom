@@ -65,6 +65,6 @@ function deactivate(e) {
 	e.default();
 }
 
-on(document, 'dom-activate', activate);
-on(document, 'dom-deactivate', deactivate);
+on('dom-activate', activate, document);
+on('dom-deactivate', deactivate, document);
 matchers.push(match);

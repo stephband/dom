@@ -173,7 +173,7 @@ gestures({ selector: selector, threshold: 4 }, document)
 	});
 });
 
-on(document, 'dom-activate', function activate(e) {
+on('dom-activate', function activate(e) {
 	// Use method detection - e.defaultPrevented is not set in time for
 	// subsequent listeners on the same node
 	if (!e.default) { return; }
@@ -190,9 +190,9 @@ on(document, 'dom-activate', function activate(e) {
 	document.documentElement.clientWidth;
 	e.preventDefault();
 	update(parent, node);
-});
+}, document);
 
-on(window, 'resize', function resize() {
+on('resize', function resize() {
 	// Update swipeable positions
 	select(selector, document).forEach(function(swipeable) {
 		var node = children(swipeable).find(matches('.active'));
@@ -205,4 +205,4 @@ on(window, 'resize', function resize() {
 		document.documentElement.clientWidth;
 		classy.remove('no-transition');
 	});
-});
+}, window);

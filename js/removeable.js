@@ -35,15 +35,15 @@ function deactivate(e, data, fn) {
 
 	function update() {
 		clearTimeout(timer);
-		off(target, 'transitionend', update);
+		off('transitionend', update, target);
 		remove(target);
 	}
 
 	var timer = setTimeout(update, maxDuration * 1000);
-	on(target, 'transitionend', update);
+	on('transitionend', update, target);
 
 	e.default();
 }
 
-on(document, 'dom-activate', activate);
-on(document, 'dom-deactivate', deactivate);
+on('dom-activate', activate, document);
+on('dom-deactivate', deactivate, document);

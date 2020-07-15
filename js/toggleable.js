@@ -75,8 +75,8 @@ function deactivate(e, data, fn) {
 	e.default();
 }
 
-on(document.documentElement, 'click', click);
-on(document, 'dom-activate', activate);
-on(document, 'dom-deactivate', deactivate);
+on('click', click, document.documentElement);
+on('dom-activate', activate, document);
+on('dom-deactivate', deactivate, document);
 
 matchers.push(match);

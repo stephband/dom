@@ -121,13 +121,22 @@ function mousedown(e, push, options) {
     // Check target matches selector
     if (options.selector && !e.target.closest(options.selector)) { return; }
 
-    on(document, mouseevents.move, mousemove, [e], push, options);
-    on(document, mouseevents.cancel, mouseend, [e]);
+    // Keep target around as it is redefined on the event
+    // if it passes through a shadow boundary
+    var event = {
+        target:        e.target,
+        currentTarget: e.currentTarget,
+        clientX:       e.clientX,
+        clientY:       e.clientY
+    };
+
+    on(document, mouseevents.move, mousemove, [event], push, options, e.target);
+    on(document, mouseevents.cancel, mouseend, [event]);
 }
 
-function mousemove(e, events, push, options){
+function mousemove(e, events, push, options, target){
     events.push(e);
-    checkThreshold(e, events, e, removeMouse, push, options);
+    checkThreshold(e, events, e, removeMouse, push, options, target);
 }
 
 function mouseend(e, data) {
@@ -154,8 +163,8 @@ function touchstart(e, push, options) {
     // movestart, move and moveend event objects.
     var event = {
         target:     touch.target,
-        clientX:      touch.clientX,
-        clientY:      touch.clientY,
+        clientX:    touch.clientX,
+        clientY:    touch.clientY,
         identifier: touch.identifier,
 
         // The only way to make handlers individually unbindable is by
@@ -165,14 +174,14 @@ function touchstart(e, push, options) {
         touchend:   function() { touchend.apply(this, arguments); }
     };
 
-    on(document, touchevents.move, event.touchmove, [event], push, options);
+    on(document, touchevents.move, event.touchmove, [event], push, options, event.target);
     on(document, touchevents.cancel, event.touchend, [event]);
 }
 
-function touchmove(e, events, push, options) {
+function touchmove(e, events, push, options, target) {
     var touch = changedTouch(e, events[0]);
     if (!touch) { return; }
-    checkThreshold(e, events, touch, removeTouch, push, options);
+    checkThreshold(e, events, touch, removeTouch, push, options, target);
 }
 
 function touchend(e, events) {
@@ -186,7 +195,7 @@ function removeTouch(events) {
     off(document, touchevents.cancel, events[0].touchend);
 }
 
-function checkThreshold(e, events, touch, removeHandlers, push, options) {
+function checkThreshold(e, events, touch, removeHandlers, push, options, target) {
     var distX = touch.clientX - events[0].clientX;
     var distY = touch.clientY - events[0].clientY;
     var threshold = parseValue(options.threshold);
@@ -196,11 +205,9 @@ function checkThreshold(e, events, touch, removeHandlers, push, options) {
         return;
     }
 
-    var node = events[0].target;
-
     // Unbind handlers that tracked the touch or mouse up till now.
     removeHandlers(events);
-    push(touches(node, events));
+    push(touches(target, events));
 }
 
 

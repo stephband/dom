@@ -226,8 +226,7 @@ function flushAttributes(elem, attributes, handlers) {
     const values = elem._initialAttributes;
 
     while(elem._n < attributes.length) {
-        //console.log('FLUSH ATTR', attributes[elem._n]);
-        if (values[attributes[elem._n]] !== undefined) {
+        if (values[attributes[elem._n]] !== undefined && handlers[attributes[elem._n]]) {
             handlers[attributes[elem._n]].call(elem, values[attributes[elem._n]]);
         }
         ++elem._n;

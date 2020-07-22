@@ -62,7 +62,7 @@ All lifecycle handlers are called with the parameters `(element, shadow)`.
 
 import create from './create.js';
 
-const DEBUG = true;
+const DEBUG = window.DEBUG === true;
 
 const assign = Object.assign;
 
@@ -76,7 +76,6 @@ const constructors = {
 
 const $internals = Symbol('internals');
 const $shadow    = Symbol('shadow');
-const $loading   = Symbol('loading');
 
 const formProperties = {
     // These properties echo those provided by native form controls.
@@ -199,13 +198,6 @@ function attachInternals(elem) {
     return hidden;
 }
 
-function appendInternalsCallback() {
-    // If we have simulated form internals, append the hidden input now
-    if (this[$internals] && !this.attachInternals) {
-        this.appendChild(this[$internals]);
-    }
-}
-
 function primeAttributes(elem) {
     elem._initialAttributes = {};
     elem._n = 0;
@@ -261,7 +253,7 @@ export default function element(name, options) {
             elem[$internals] = attachInternals(elem);
         }
 
-        options.construct && options.construct.call(null, elem, shadow);
+        options.construct && options.construct.call(null, elem, shadow, elem[$internals]);
 
         // Preserve initialisation order of attribute initialisation by
         // queueing them
@@ -305,19 +297,7 @@ export default function element(name, options) {
     if (options.properties && options.properties.value) {
         // Flag the Element class as formAssociated
         Element.formAssociated = true;
-
-        Element.prototype = Object.create(constructor.prototype, assign({}, formProperties, options.properties, {
-            value: {
-                get: options.properties.value.get,
-                set: function() {
-                    // After setting value
-                    options.properties.value.set.apply(this, arguments);
-
-                    // Copy it to internal form state
-                    this[$internals].setFormValue('' + this.value);
-                }
-            }
-        })) ;
+        Element.prototype = Object.create(constructor.prototype, assign({}, formProperties, options.properties));
     }
     else {
         Element.prototype = Object.create(constructor.prototype, options.properties || {}) ;
@@ -344,17 +324,23 @@ export default function element(name, options) {
 
     // Lifecycle
 
+    Element.prototype.handleEvent = function() {
+        console.log('handleEvent', arguments);
+    }
+
     Element.prototype.connectedCallback = function() {
-        const elem   = this;
-        const shadow = elem[$shadow];
+        const elem      = this;
+        const shadow    = elem[$shadow];
+        const internals = elem[$internals];
 
         // Initialise any attributes that appeared out of order
         if (elem._initialAttributes) {
             flushAttributes(elem, Element.observedAttributes, options.attributes);
         }
 
-        if (Element.formAssociated) {
-            appendInternalsCallback.call(elem);
+        // If we have simulated form internals, append the hidden input now
+        if (elem[$internals] && !elem.attachInternals) {
+            elem.appendChild(elem[$internals]);
         }
 
         // If this is the first connect and there is an options.load fn,
@@ -384,29 +370,31 @@ export default function element(name, options) {
                 }
 
                 if (options.connect) {
-                    options.connect.call(null, elem, shadow);
+                    options.connect.call(null, elem, shadow, internals);
                 }
             }
             else {
                 if (options.connect) {
-                    options.connect.call(null, elem, shadow);
+                    options.connect.call(null, elem, shadow, internals);
                 }
 
                 if (options.load) {
-                    options.load.call(null, elem, shadow);
+                    options.load.call(null, elem, shadow, internals);
                 }
             }
         }
         else if (options.connect) {
-            options.connect.call(null, elem, shadow);
+            options.connect.call(null, elem, shadow, internals);
         }
 
-        if (DEBUG) { console.log('Connected to document:', elem); }
+        if (DEBUG) {
+            console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', elem);
+        }
     }
 
     if (options.disconnect) {
         Element.prototype.disconnectedCallback = function() {
-            return options.disconnect.call(null, this, this[$shadow]);
+            return options.disconnect.call(null, this, this[$shadow], this[$internals]);
         };
     }
 
@@ -414,20 +402,20 @@ export default function element(name, options) {
         if (options.enable || options.disable) {
             Element.prototype.formDisabledCallback = function(disabled) {
                 return disabled ?
-                    options.disable && options.disable.call(null, this, this[$shadow]) :
-                    options.enable && options.enable.call(null, this, this[$shadow]) ;
+                    options.disable && options.disable.call(null, this, this[$shadow], this[$internals]) :
+                    options.enable && options.enable.call(null, this, this[$shadow], this[$internals]) ;
             };
         }
 
         if (options.reset) {
             Element.prototype.formResetCallback = function() {
-                return options.reset.call(null, this, this[$shadow]);
+                return options.reset.call(null, this, this[$shadow], this[$internals]);
             };
         }
 
         if (options.restore) {
             Element.prototype.formStateRestoreCallback = function() {
-                return options.restore.call(null, this, this[$shadow]);
+                return options.restore.call(null, this, this[$shadow], this[$internals]);
             };
         }
     }

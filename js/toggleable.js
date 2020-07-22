@@ -12,7 +12,7 @@ accordions and so on.
 **/
 
 import { remove } from '../../fn/module.js';
-import { get, events, closest, matches, isPrimaryButton, isInternalLink, identify } from '../module.js';
+import { get, events, closest, matches, isPrimaryButton, isInternalLink, identify, on } from '../module.js';
 import { matchers } from './dom-activate.js';
 
 // Define
@@ -21,8 +21,6 @@ var match = matches('.toggleable, [toggleable]');
 
 // Functions
 
-var on      = events.on;
-//var off     = events.off;
 var trigger = events.trigger;
 
 var actives = [];
@@ -77,8 +75,8 @@ function deactivate(e, data, fn) {
 	e.default();
 }
 
-on(document.documentElement, 'click', click);
-on(document, 'dom-activate', activate);
-on(document, 'dom-deactivate', deactivate);
+on('click', click, document.documentElement);
+on('dom-activate', activate, document);
+on('dom-deactivate', deactivate, document);
 
 matchers.push(match);

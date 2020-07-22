@@ -130,13 +130,13 @@ function mousedown(e, push, options) {
         clientY:       e.clientY
     };
 
-    on(document, mouseevents.move, mousemove, [event], push, options, e.target);
-    on(document, mouseevents.cancel, mouseend, [event]);
+    on(mouseevents.move, mousemove, document, [event], push, options);
+    on(mouseevents.cancel, mouseend, document, [event]);
 }
 
-function mousemove(e, events, push, options, target){
+function mousemove(e, events, push, options){
     events.push(e);
-    checkThreshold(e, events, e, removeMouse, push, options, target);
+    checkThreshold(e, events, e, removeMouse, push, options);
 }
 
 function mouseend(e, data) {
@@ -144,8 +144,8 @@ function mouseend(e, data) {
 }
 
 function removeMouse() {
-    off(document, mouseevents.move, mousemove);
-    off(document, mouseevents.cancel, mouseend);
+    off(mouseevents.move, mousemove, document);
+    off(mouseevents.cancel, mouseend, document);
 }
 
 function touchstart(e, push, options) {
@@ -174,14 +174,14 @@ function touchstart(e, push, options) {
         touchend:   function() { touchend.apply(this, arguments); }
     };
 
-    on(document, touchevents.move, event.touchmove, [event], push, options, event.target);
-    on(document, touchevents.cancel, event.touchend, [event]);
+    on(touchevents.move, event.touchmove, document, [event], push, options);
+    on(touchevents.cancel, event.touchend, document, [event]);
 }
 
-function touchmove(e, events, push, options, target) {
+function touchmove(e, events, push, options) {
     var touch = changedTouch(e, events[0]);
     if (!touch) { return; }
-    checkThreshold(e, events, touch, removeTouch, push, options, target);
+    checkThreshold(e, events, touch, removeTouch, push, options);
 }
 
 function touchend(e, events) {
@@ -191,11 +191,11 @@ function touchend(e, events) {
 }
 
 function removeTouch(events) {
-    off(document, touchevents.move, events[0].touchmove);
-    off(document, touchevents.cancel, events[0].touchend);
+    off(touchevents.move, events[0].touchmove, document);
+    off(touchevents.cancel, events[0].touchend, document);
 }
 
-function checkThreshold(e, events, touch, removeHandlers, push, options, target) {
+function checkThreshold(e, events, touch, removeHandlers, push, options) {
     var distX = touch.clientX - events[0].clientX;
     var distY = touch.clientY - events[0].clientY;
     var threshold = parseValue(options.threshold);
@@ -207,7 +207,7 @@ function checkThreshold(e, events, touch, removeHandlers, push, options, target)
 
     // Unbind handlers that tracked the touch or mouse up till now.
     removeHandlers(events);
-    push(touches(target, events));
+    push(touches(events[0].target, events));
 }
 
 
@@ -225,9 +225,9 @@ function activeMouseend(e, data, stop) {
 }
 
 function removeActiveMouse() {
-    off(document, mouseevents.end, preventOneClick);
-    off(document, mouseevents.move, activeMousemove);
-    off(document, mouseevents.cancel, activeMouseend);
+    off(mouseevents.end, preventOneClick, document);
+    off(mouseevents.move, activeMousemove, document);
+    off(mouseevents.cancel, activeMouseend, document);
 }
 
 function activeTouchmove(e, data, push) {
@@ -253,8 +253,8 @@ function activeTouchend(e, data, stop) {
 }
 
 function removeActiveTouch(data) {
-    off(document, touchevents.move, data.activeTouchmove);
-    off(document, touchevents.end, data.activeTouchend);
+    off(touchevents.move, data.activeTouchmove, document);
+    off(touchevents.end, data.activeTouchend, document);
 }
 
 function touches(node, events) {
@@ -273,9 +273,9 @@ function touches(node, events) {
 
             // We're dealing with a mouse event.
             // Stop click from propagating at the end of a move
-            on(document, mouseevents.end, preventOneClick);
-            on(document, mouseevents.move, activeMousemove, data, push);
-            on(document, mouseevents.cancel, activeMouseend, data, stop);
+            on(mouseevents.end, preventOneClick, document);
+            on(mouseevents.move, activeMousemove, document, data, push);
+            on(mouseevents.cancel, activeMouseend, document, data, stop);
 
             return {
                 stop: function() {
@@ -300,8 +300,8 @@ function touches(node, events) {
             data.activeTouchend = function (e) { activeTouchend(e, data, stop); };
 
             // We're dealing with a touch.
-            on(document, touchevents.move, data.activeTouchmove);
-            on(document, touchevents.end, data.activeTouchend);
+            on(touchevents.move, data.activeTouchmove, document);
+            on(touchevents.end, data.activeTouchend, document);
 
             return {
                 stop: function () {
@@ -334,13 +334,13 @@ export default function gestures(options, node) {
             touchstart(e, push, options);
         }
 
-        on(node, 'mousedown', mouseHandler);
-        on(node, 'touchstart', touchHandler);
+        on('mousedown', mouseHandler, node);
+        on('touchstart', touchHandler, node);
 
         return {
             stop: function() {
-                off(node, 'mousedown', mouseHandler);
-                off(node, 'touchstart', touchHandler);
+                off('mousedown', mouseHandler, node);
+                off('touchstart', touchHandler, node);
                 stop();
             }
         };

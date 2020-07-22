@@ -15,12 +15,10 @@ attribute, which defines data to be carried by a drag action:
 */
 
 import { parse } from '../../fn/module.js';
-import { attribute, classes, delegate, events, identify, select, remove, removeClass } from '../module.js';
+import { attribute, classes, delegate, events, identify, select, remove, removeClass, on, off } from '../module.js';
 import { register } from '../../sparky/module.js';
 
 var debug  = true;
-var on     = events.on;
-var off    = events.off;
 
 //                 xxxxx: wef;
 var rmimetype = /^([^:\s]+)\s*:\s*([^;\s]+);\s*/;
@@ -80,8 +78,8 @@ function dragend(e) {
 	classes(e.target).remove('dragging');
 }
 
-on(document, 'dragstart', dragstart);
-on(document, 'dragend', dragend);
+on('dragstart', dragstart, document);
+on('dragend', dragend, document);
 
 
 function dragendButton(e) {
@@ -94,12 +92,12 @@ register('data-on-drag', function(node, params) {
 	var dragend   = delegate('[draggable]', dragendButton);
 
 	//.on('selectstart', '.node-button', cache, selectstartIE9)
-	on(node, 'dragstart', dragstart);
+	on('dragstart', dragstart, node);
 	//.on('drag', '.node-button', cache, dragButton)
-	on(node, 'dragend', dragend);
+	on('dragend', dragend, node);
 
 	this.done(function() {
-		off(node, 'dragstart', dragstart);
-		off(node, 'dragend', dragend);
+		off('dragstart', dragstart, node);
+		off('dragend', dragend, node);
 	});
 });

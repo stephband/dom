@@ -21,11 +21,9 @@ attribute:</p>
 ```
 */
 
-import { Fn, choose, id, intersect, nothing, prepend, requestTick, Stream } from '../../fn/module.js';
-import { after, attribute, classes, closest, delegate, events, preventDefault, query, remove } from '../module.js';
+import { choose, id, intersect, nothing, prepend } from '../../fn/module.js';
+import { attribute, classes, closest, events, on } from '../module.js';
 
-const on      = events.on;
-const off     = events.off;
 const trigger = events.trigger;
 
 let overnode;
@@ -135,12 +133,12 @@ function drop(e) {
 }
 
 
-on(document, 'dragenter', dragenter);
-on(document, 'dragover', dragover);
-on(document, 'drop', drop);
+on('dragenter', dragenter, document);
+on('dragover', dragover, document);
+on('drop', drop, document);
 
 if (window.console) {
-    on(document, 'dom-drop', function(e) {
+    on('dom-drop', function(e) {
         console.log('Dropped data:', e.detail);
-    });
+    }, document);
 }

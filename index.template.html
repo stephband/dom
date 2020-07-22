@@ -116,96 +116,18 @@
         </div>
     </section>
 
-    <section class="x-1 3x @1-6x @2-9x @3-x-2 columns-grid grid" locateable id="attributes">
-        <header class="x-1 3x @1-4x block">
-            <h2 class="doctext-02">Attributes</h2>
-
-            <p>The library has a number of scripts for cheekily extending the
-            default behaviour of DOM elements, declared via 'behaviour'&nbsp;attributes.</p>
-
-            <!--p>Behaviours may be imported and used before
-            <code class="language-js">'DOMContentLoad'</code>, there are no
-            'setup' functions to run, and elements that are added
-            to the DOM later get to use them&nbsp;automatically.</p-->
-
-            <p>No style is given to make these behaviours do anything <i>visual</i>
-            however. Behaviours, largely, add and remove classes, how that <i>looks</i>
-            is up to your CSS. This is deliberate: by seperating style
-            and behaviour many different styles of interactive &mdash;
-            <a href="#example-menu">a menu</a>, <a href="#example-dialog">a dialog</a>,
-            <a href="#example-tooltip">a tooltip</a> &mdash; may share, for example,
-            <code class="language-js">popable</code>&nbsp;behaviour.</p>
-
-            <nav class="menu-toggle-block toggle-block block" popable id="example-menu">
-                <a class="menu-button button" href="#">One</a>
-                <a class="menu-button button" href="#">Two</a>
-                <a class="menu-button button" href="#">Three</a>
-                <a class="menu-button button" href="#">Boo</a>
-            </nav>
-
-            <section class="dialog" popable id="example-dialog">
-                Boo
-            </section>
-
-            <aside class="top-bubble bubble" popable id="example-tooltip">
-                Boo
-            </aside>
-        </header>
-
-        <div class="x-1 y-2 3x @2-4x">
-            <h3 class="doctext-03">Navigate</h3>
-            <template build-fn="docs:
-                js/locateable.js
-                each" build-src="/fn/templates.html#attribute-template"></template>
-
-            <h3 class="doctext-03">Hijack</h3>
-            <template build-fn="docs:
-                js/fullscreenable.js,
-                js/popable.js,
-                js/switchable.js,
-                js/toggleable.js
-                each" build-src="/fn/templates.html#attribute-template"></template>
-        </div>
-
-        <div class="x-1 y-2 3x @2-x-6 @2-4x">
-            <h3 class="doctext-03">Data</h3>
-            <template build-fn="docs:
-                js/draggable.js,
-                js/droppable.js
-                each" build-src="/fn/templates.html#attribute-template"></template>
-            <h3 class="doctext-03">Forms</h3>
-            <template build-fn="docs:
-                js/submittable.js,
-                js/validateable.js
-                each" build-src="/fn/templates.html#attribute-template"></template>
-        </div>
-    </section>
-
-    <!--section class="x-1 3x @1-6x @2-9x @3-x-2 columns-grid grid" locateable id="observer">
-        <header class="x-1 3x @1-4x">
-            <h2 class="doctext-02" style="font-size: 1.875rem;">Events</h2>
-        </header>
-
-        <div class="x-1 3x list-grid grid">
-            <template build-fn="docs:
-            js/dom-activate.js,
-            js/dom-gesture.js
-            each" build-src="/fn/templates.html#{[type]}-template"></template>
-        </div>
-    </section-->
-
     <script build-remove type="module" src="../fn/docs-build.js"></script>
 
     <!-- Document interactivity -->
     <script type="module">
-        import '../dom/js/device.js';
-        import '../dom/js/popable.js';
-        import '../dom/js/toggleable.js';
-        import '../dom/js/locateable.js';
-        import '../dom/js/submittable.js';
-        import '../dom/js/switchable.js';
-        import '../dom/js/fullscreenable.js';
-        import '../dom/js/validateable.js';
+        import '../bolt/modules/device.js';
+        import '../bolt/modules/popable.js';
+        import '../bolt/modules/toggleable.js';
+        import '../bolt/modules/locateable.js';
+        import '../bolt/modules/submittable.js';
+        import '../bolt/modules/switchable.js';
+        import '../bolt/modules/fullscreenable.js';
+        import '../bolt/modules/validateable.js';
         import '../bolt/components/toggle-block.js';
 
         import * as dom from './module.js';

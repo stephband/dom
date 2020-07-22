@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en" class="fullscreen-support js content-loading loading"><head>
+<!DOCTYPE html><html lang="en" class=" js content-loading loading"><head>
     
     <meta charset="utf-8">
     <meta name="author" content="stephband">
@@ -637,222 +637,18 @@ case it must have a <code>'Content-Type'</code> property).</p>
         </div>
     </section>
 
-    <section class="x-1 3x @1-6x @2-9x @3-x-2 columns-grid grid" locateable="" id="attributes">
-        <header class="x-1 3x @1-4x block">
-            <h2 class="doctext-02">Attributes</h2>
-
-            <p>The library has a number of scripts for cheekily extending the
-            default behaviour of DOM elements, declared via 'behaviour'&nbsp;attributes.</p>
-
-            <!--p>Behaviours may be imported and used before
-            <code class="language-js">'DOMContentLoad'</code>, there are no
-            'setup' functions to run, and elements that are added
-            to the DOM later get to use them&nbsp;automatically.</p-->
-
-            <p>No style is given to make these behaviours do anything <i>visual</i>
-            however. Behaviours, largely, add and remove classes, how that <i>looks</i>
-            is up to your CSS. This is deliberate: by seperating style
-            and behaviour many different styles of interactive —
-            <a href="#example-menu">a menu</a>, <a href="#example-dialog">a dialog</a>,
-            <a href="#example-tooltip">a tooltip</a> — may share, for example,
-            <code class=" language-js">popable</code>&nbsp;behaviour.</p>
-
-            <nav class="menu-toggle-block toggle-block block" popable="" id="example-menu">
-                <a class="menu-button button" href="#">One</a>
-                <a class="menu-button button" href="#">Two</a>
-                <a class="menu-button button" href="#">Three</a>
-                <a class="menu-button button" href="#">Boo</a>
-            </nav>
-
-            <section class="dialog" popable="" id="example-dialog">
-                Boo
-            </section>
-
-            <aside class="top-bubble bubble" popable="" id="example-tooltip">
-                Boo
-            </aside>
-        </header>
-
-        <div class="x-1 y-2 3x @2-4x">
-            <h3 class="doctext-03">Navigate</h3>
-            <!--template-->
-    <article class="attribute-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="attribute-locateable">
-        <h3 class="doctext-05">
-            <a href="#attribute-locateable">
-                <code class="token language-js">[<span>locateable</span>]</code>
-            </a>
-        </h3>
-    <p>An element with a <code>locateable</code> attribute updates the browser location hash
-with its <code>id</code> when scrolled into view.</p>
-<p>When the location hash changes to be equal to a <code>locateable</code>‘s id
-the locateable gets the class <code>"located"</code>, and links that reference that
-locateable via their <code>href</code> attribute get the class <code>"on"</code>.</p>
-<p>Build a list of links that reference locateables and with a little style
-you have a scrolling navigation:</p>
-<pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>style</span><span class="token punctuation">&gt;</span></span><span class="token style language-css">
-    <span class="token selector">a</span>               <span class="token punctuation">{</span> <span class="token property">color</span><span class="token punctuation">:</span> #888888<span class="token punctuation">;</span> <span class="token punctuation">}</span>
-    <span class="token selector">a.on</span>            <span class="token punctuation">{</span> <span class="token property">color</span><span class="token punctuation">:</span> black<span class="token punctuation">;</span> <span class="token punctuation">}</span>
-    <span class="token selector">article.located</span> <span class="token punctuation">{</span> ... <span class="token punctuation">}</span>
-</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>style</span><span class="token punctuation">&gt;</span></span>
-
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>#fish<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>...<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>#chips<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>...<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>
-
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>article</span> <span class="token attr-name">locateable</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>fish<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>...<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>article</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>article</span> <span class="token attr-name">locateable</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>chips<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>...<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>article</span><span class="token punctuation">&gt;</span></span></code></pre>
-</article>
-
-
-            <h3 class="doctext-03">Hijack</h3>
-            <!--template-->
-    <article class="attribute-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="attribute-fullscreenable">
-        <h3 class="doctext-05">
-            <a href="#attribute-fullscreenable">
-                <code class="token language-js">[<span>fullscreenable</span>]</code>
-            </a>
-        </h3>
-    <p>Links refering to [fullscreenable] elements put those elements into
-fullscreen mode when clicked.</p>
-<p>Fullscreen capability is not reliably queried in CSS (through @supports or
-other means), so this script also adds the class <code>fullscreen-support</code> to the
-document root in navigators where support is detected, for styling of UI that
-depends on fullscreen support.</p>
-</article>
-
-    <article class="attribute-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="attribute-switchable">
-        <h3 class="doctext-05">
-            <a href="#attribute-switchable">
-                <code class="token language-js">[<span>switchable</span>]</code>
-            </a>
-        </h3>
-    <p>A <code>switchable</code> is given the class <code>"active"</code> when a link that references
-it is clicked, and all links to it are given the class <code>"on"</code>. In any group of
-siblings with the <code>switchable</code> attribute, exactly one is always active.</p>
-<p>Switchables can be used to make tabs, slideshows, accordions and so on.</p>
-<pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nav</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-button button on<span class="token punctuation">"</span></span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>#tab-1<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-button button<span class="token punctuation">"</span></span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>#tab-2<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-button button<span class="token punctuation">"</span></span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>#tab-3<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>3<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>nav</span><span class="token punctuation">&gt;</span></span>
-
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>section</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-block block active<span class="token punctuation">"</span></span> <span class="token attr-name">switchable</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-1<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
-    Tab 1
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>section</span><span class="token punctuation">&gt;</span></span>
-
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>section</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-block block<span class="token punctuation">"</span></span> <span class="token attr-name">switchable</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-2<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
-    Tab 2
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>section</span><span class="token punctuation">&gt;</span></span>
-
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>section</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-block block<span class="token punctuation">"</span></span> <span class="token attr-name">switchable</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>tab-3<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
-    Tab 3
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>section</span><span class="token punctuation">&gt;</span></span></code></pre>
-</article>
-
-    <article class="attribute-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="attribute-toggleable">
-        <h3 class="doctext-05">
-            <a href="#attribute-toggleable">
-                <code class="token language-js">[<span>toggleable</span>]</code>
-            </a>
-        </h3>
-    <p>An element with the <code>toggleable</code> attribute is activated and deactivated when
-a link that references it is clicked.</p>
-<p>An active <code>toggleable</code> has the class <code>"active"</code>, and links to it have the
-class <code>"on"</code>.</p>
-<p>With a little hide/show style, a toggleable can be used to make menus, drawers,
-accordions and so on.</p>
-</article>
-
-        </div>
-
-        <div class="x-1 y-2 3x @2-x-6 @2-4x">
-            <h3 class="doctext-03">Data</h3>
-            <!--template-->
-            <h3 class="doctext-03">Forms</h3>
-            <!--template-->
-    <article class="attribute-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="attribute-validateable">
-        <h3 class="doctext-05">
-            <a href="#attribute-validateable">
-                <code class="token language-js">[<span>validateable</span>]</code>
-            </a>
-        </h3>
-    <p>The <strong>validateable</strong> attribute can be set on an
-individual input, or on a form to make all descendant inputs
-validateable.</p>
-
-<p>A validateable input is validated on <code>focusout</code>, and
-if an <code>invalid</code> event is emitted an error label is
-appended to the DOM directly after it. The label's text is read
-from…</p>
-
-<ol>
-    <li>a <code>data-validation-xxx</code> attribute on the input,
-    (where <code>xxxx</code> is the name of the failed constraint), OR</li>
-    <li>the object <code>dom.validation.messages</code>, OR</li>
-    <li>the browser's default message</li>
-</ol>
-
-<p>In addition, the first time a validation is performed on an
-element the class <code>"validated"</code> is added, providing a
-hook for pre- and post- validation <code>:invalid</code> styles.</p>
-<p>Constraints are named after the validation attributes that impose
-them.</p>
-<pre><code>dom.validation.messages = {
-    pattern:   'Pattern does not match',
-    max:       'Number too small',
-    min:       'Number too big',
-    step:      'Number not in step',
-    maxlength: 'Input too long',
-    type:      'Input not of type',
-    required:  ''
-};
-</code></pre>
-
-<p>This messages object is unpopulated by default, so the browser's default
-validation messages are shown.</p>
-
-<form class="block" validateable="">
-<label for="text">text</label>
-<input type="text" id="text" name="text" required="" maxlength="20">
-
-<p><label for="password">password</label>
-<input type="password" id="password" name="password" required=""></p>
-<p><label for="number">number</label>
-<input type="number" id="number" name="number" min="0" max="1" step="0.1"></p>
-<p><label for="url">url</label>
-<input type="url" id="url" name="url"></p>
-<p><label for="email">email</label>
-<input type="email" id="email" name="email" data-val-type="Wrong type, knucklehead"></p>
-</form>
-</article>
-
-        </div>
-    </section>
-
-    <!--section class="x-1 3x @1-6x @2-9x @3-x-2 columns-grid grid" locateable id="observer">
-        <header class="x-1 3x @1-4x">
-            <h2 class="doctext-02" style="font-size: 1.875rem;">Events</h2>
-        </header>
-
-        <div class="x-1 3x list-grid grid">
-            <template build-fn="docs:
-            js/dom-activate.js,
-            js/dom-gesture.js
-            each" build-src="/fn/templates.html#{[type]}-template"></template>
-        </div>
-    </section-->
-
     
 
     <!-- Document interactivity -->
     <script type="module">
-        import '../dom/js/device.js';
-        import '../dom/js/popable.js';
-        import '../dom/js/toggleable.js';
-        import '../dom/js/locateable.js';
-        import '../dom/js/submittable.js';
-        import '../dom/js/switchable.js';
-        import '../dom/js/fullscreenable.js';
-        import '../dom/js/validateable.js';
+        import '../bolt/modules/device.js';
+        import '../bolt/modules/popable.js';
+        import '../bolt/modules/toggleable.js';
+        import '../bolt/modules/locateable.js';
+        import '../bolt/modules/submittable.js';
+        import '../bolt/modules/switchable.js';
+        import '../bolt/modules/fullscreenable.js';
+        import '../bolt/modules/validateable.js';
         import '../bolt/components/toggle-block.js';
 
         import * as dom from './module.js';

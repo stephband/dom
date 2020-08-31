@@ -29,6 +29,7 @@ export default function Event(type, options) {
 	if (typeof type === 'object') {
 		settings = assign({}, defaults, type);
 		type = settings.type;
+        delete settings.type;
 	}
 
 	if (options && options.detail) {
@@ -40,6 +41,12 @@ export default function Event(type, options) {
 		}
 	}
 
+    // Settings accepted by CustomEvent:
+    // detail:     any
+    // bubbles:    true | false
+    // cancelable: true | false
+    // composed:   true | false
+    // https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
 	var event = new CustomEvent(type, settings || defaults);
 
 	if (options) {

@@ -61,6 +61,7 @@ All lifecycle handlers are called with the parameters `(element, shadow)`.
 */
 
 import create from './create.js';
+import requestTemplate from './request-template.js';
 
 const DEBUG = window.DEBUG === true;
 
@@ -419,9 +420,25 @@ export default function element(name, options) {
         }
     }
 
-
     // Define element
+    // Todo: make this async regardless of external template, for consistency? Does
+    // that cause problems? It shouldn't, we should be able to define custom elements 
+    // whenever we like.
+    if (typeof options.template === 'string' && /^(?:\.?\/|https?:\/\/)/.test(options.template)) {
+        // Template src begins with ./ or / or http:// or https://
+        // preload it before defining custom element
+        requestTemplate(options.template)
+        .then(function(node) {
+            if (DEBUG) {
+                console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', 'template "' + options.template + '" imported');
+            }
+            template = node;
+            window.customElements.define(name, Element, options);
+        });
+    }
+    else {
+        window.customElements.define(name, Element, options);
+    }
 
-    window.customElements.define(name, Element, options);
     return Element;
 }

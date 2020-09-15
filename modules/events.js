@@ -222,20 +222,3 @@ export function off(type, fn, node) {
 
 	return node;
 }
-
-/**
-trigger(type, node)
-
-Triggers event of `type` on `node`.
-
-```
-trigger('dom-activate', node);
-```
-*/
-
-export function trigger(node, type, properties) {
-	// Don't cache events. It prevents you from triggering an event of a
-	// given type from inside the handler of another event of that type.
-	var event = Event(type, properties);
-	node.dispatchEvent(event);
-}

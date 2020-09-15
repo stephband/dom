@@ -1,9 +1,26 @@
-// trigger('type', node)
-// trigger({
-//     type: 'type',
-//     detail: {},
-//     relatedTarget: etc.
-// }, node)
+
+/**
+trigger(type, node)
+
+Triggers event of `type` on `node`.
+
+```
+trigger('dom-activate', node);
+```
+*/
+
+/**
+trigger(data, node)
+
+Triggers event described by `data` on `node`.
+
+```
+trigger({
+    type: 'dom-activate',
+    details: {...}
+}, node);
+```
+*/
 
 import Event from './event.js';
 
@@ -15,6 +32,7 @@ export default function trigger(type, node) {
     if (typeof type === 'object') {
         properties = type;
         type = properties.type;
+        delete properties.type;
     }
 
     // Don't cache events. It prevents you from triggering an event of a

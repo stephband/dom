@@ -90,7 +90,7 @@ export { default as Event } from './modules/event.js';
 export { isPrimaryButton, isTargetEvent, preventDefault } from './modules/events.js';
 export { default as match } from './modules/match.js';
 export { on, off } from './modules/events.js';
-import { default as _events, trigger as __trigger } from './modules/events.js';
+import { default as _events } from './modules/events.js';
 export const events = curry(_events, true);
 
 export { default as gestures } from './modules/gestures.js';

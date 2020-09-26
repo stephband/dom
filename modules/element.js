@@ -9,6 +9,7 @@ render the API for creating custom elements a little more... sane.
 - options: {
        extends:    Name of tag to extend to make the element a custom built-in
        mode:       'open' or 'closed', defaults to 'closed'
+       focusable:  true or false, defaults to true
        template:   String or template node or id used to create a shadow DOM
        attributes: An object of handler functions for attribute changes
        properties: An object of property definitions for the element prototype
@@ -157,8 +158,8 @@ function createShadow(template, elem, options) {
     // 'closed'. Closed shadows are not exposed via element.shadowRoot, and
     // events propagating from inside of them report the element as target.
     const shadow = elem.attachShadow({
-        mode: options.mode || 'closed',
-        delegatesFocus: true
+        mode:           options.mode || 'closed',
+        delegatesFocus: options.delegatesFocus || false
     });
 
     elem[$shadow] = shadow;

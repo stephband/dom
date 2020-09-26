@@ -131,9 +131,11 @@ function getTemplate(template) {
         // If template is an #id search for <template id="id">
         template[0] === '#' ? getTemplateById(template.slice(1)) :
         // It must be a string of HTML
-        template :
+        template :        
     template.content ?
         // It must be a template node
+        template :
+    typeof template === 'function' ?
         template :
         // Whatever it is, we don't support it
         function(){
@@ -159,7 +161,7 @@ function createShadow(template, elem, options) {
     // events propagating from inside of them report the element as target.
     const shadow = elem.attachShadow({
         mode:           options.mode || 'closed',
-        delegatesFocus: options.delegatesFocus || false
+        delegatesFocus: options.focusable || false
     });
 
     elem[$shadow] = shadow;
@@ -167,6 +169,9 @@ function createShadow(template, elem, options) {
     // If template is a string
     if (typeof template === 'string') {
         shadow.innerHTML = template;
+    }
+    else if (typeof template === 'function') {
+        template(elem, shadow);
     }
     else {
         shadow.appendChild(template.content.cloneNode(true));

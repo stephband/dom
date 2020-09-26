@@ -7,9 +7,10 @@ property exists in `node`, otherwise as an attribute.
 If `properties` has a property `'children'` it must be an array of nodes;
 they are appended to 'node'.
 
-The property `'html'` is treated as an alias of `'innerHTML'`. The property
-`'tag'` is treated as an alias of `'tagName'` (which is ignored, as
-`node.tagName` is read-only). The property `'is'` is also ignored.
+The property `'html'` is aliased to `'innerHTML'`. The property `'text'` 
+is aliased to `'textContent'`. The property `'tag'` is treated as an alias 
+of `'tagName'` (which is ignored, as `node.tagName` is read-only). The 
+property `'is'` is also ignored.
 */
 
 import { curry, id, noop, overload } from '../../fn/module.js';
@@ -21,6 +22,10 @@ const assignProperty = overload(id, {
 
 	html: function(name, node, content) {
 		node.innerHTML = content;
+	},
+
+	text: function(name, node, content) {
+		node.textContent = content;
 	},
 
 	children: function(name, node, content) {

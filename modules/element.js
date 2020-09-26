@@ -124,7 +124,7 @@ function getTemplateById(id) {
 }
 
 function getTemplate(template) {
-    if (!template) { return; }
+    if (template === undefined) { return; }
 
     return typeof template === 'string' ?
         // If template is an #id search for <template id="id">
@@ -151,7 +151,7 @@ function transferProperty(elem, key) {
 }
 
 function createShadow(template, elem, options) {
-    if (!template) { return; }
+    if (template === undefined) { return; }
 
     // Create a shadow root if there is DOM content. Shadows may be 'open' or
     // 'closed'. Closed shadows are not exposed via element.shadowRoot, and
@@ -242,7 +242,9 @@ export default function element(name, options) {
 
     function Element() {
         // Get a template node or HTML string from options.template
-        template = template || getTemplate(options.template);
+        template = template === undefined ?
+            getTemplate(options.template) :
+            template ;
 
         // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);

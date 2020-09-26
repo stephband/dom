@@ -1,11 +1,32 @@
 
 import { id, overload, toType } from '../../fn/module.js';
 import assign from './assign.js';
+
 const svgNamespace = 'http://www.w3.org/2000/svg';
 const div = document.createElement('div');
 
 
 // Constructors
+
+function constructHTML(tag, html) {
+    var node = document.createElement(tag);
+
+    if (html) {
+        node.innerHTML = html;
+    }
+
+    return node;
+}
+
+function constructSVG(tag, html) {
+    var node = document.createElementNS(svgNamespace, tag);
+
+    if (html) {
+        node.innerHTML = html;
+    }
+
+    return node;
+}
 
 const construct = overload(id, {
     comment: function(tag, text) {
@@ -46,25 +67,7 @@ const construct = overload(id, {
     default:  constructHTML
 });
 
-function constructSVG(tag, html) {
-    var node = document.createElementNS(svgNamespace, tag);
 
-    if (html) {
-        node.innerHTML = html;
-    }
-
-    return node;
-}
-
-function constructHTML(tag, html) {
-    var node = document.createElement(tag);
-
-    if (html) {
-        node.innerHTML = html;
-    }
-
-    return node;
-}
 
 
 /**
@@ -96,6 +99,8 @@ function validateTag(tag) {
 }
 
 export default overload(toTypes, {
+    'string': construct,
+
     'string string': construct,
 
     'string object': function(tag, content) {
@@ -117,6 +122,6 @@ export default overload(toTypes, {
     },
 
     default: function() {
-        throw new Error('create(tag, content) does not accept argument types "' + Array.prototype.map.apply(arguments, toType).join(' ') + '"');
+        throw new Error('create(tag, content) does not accept argument types "' + Array.prototype.map.call(arguments, toType).join(' ') + '"');
     }
 });

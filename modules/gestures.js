@@ -26,7 +26,7 @@ gestures({ selector: '.thing', threshold: '0.5rem' }, document)
 ```
 */
 
-import { Stream } from '../../fn/module.js';
+import Stream from '../../fn/modules/stream.js';
 import { parseValue } from './parse-value.js';
 import { isPrimaryButton, on, off } from './events.js';
 

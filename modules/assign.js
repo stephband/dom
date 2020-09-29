@@ -13,7 +13,10 @@ of `'tagName'` (which is ignored, as `node.tagName` is read-only). The
 property `'is'` is also ignored.
 */
 
-import { curry, id, noop, overload } from '../../fn/module.js';
+import curry from '../../fn/modules/curry.js';
+import id from '../../fn/modules/id.js';
+import noop from '../../fn/modules/noop.js';
+import overload from '../../fn/modules/overload.js';
 
 const assignProperty = overload(id, {
 	// Ignore read-only properties or attributes

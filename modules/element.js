@@ -10,7 +10,7 @@ render the API for creating custom elements a little more... sane.
        extends:    Name of tag to extend to make the element a custom built-in
        mode:       'open' or 'closed', defaults to 'closed'
        focusable:  true or false, defaults to true
-       template:   String or template node or id used to create a shadow DOM
+       template:   HTML string or template node or id or function used to a create shadow DOM
        attributes: An object of handler functions for attribute changes
        properties: An object of property definitions for the element prototype
        construct:  Lifecycle handler called during element construction
@@ -155,6 +155,7 @@ function transferProperty(elem, key) {
 
 function createShadow(template, elem, options) {
     if (template === undefined) { return; }
+    elem._initialLoad = true;
 
     // Create a shadow root if there is DOM content. Shadows may be 'open' or
     // 'closed'. Closed shadows are not exposed via element.shadowRoot, and
@@ -175,10 +176,6 @@ function createShadow(template, elem, options) {
     }
     else {
         shadow.appendChild(template.content.cloneNode(true));
-    }
-
-    if (options.load) {
-        elem._initialLoad = true;
     }
 
     return shadow;
@@ -235,6 +232,7 @@ function flushAttributes(elem, attributes, handlers) {
     delete elem._initialAttributes;
     delete elem._n;
 }
+
 
 
 export default function element(name, options) {
@@ -316,7 +314,6 @@ export default function element(name, options) {
 
     if (options.attributes) {
         Element.observedAttributes = Object.keys(options.attributes);
-
         Element.prototype.attributeChangedCallback = function(name, old, value) {
             if (!this._initialAttributes) {
                 return options.attributes[name].call(this, value);
@@ -331,10 +328,6 @@ export default function element(name, options) {
 
 
     // Lifecycle
-
-    Element.prototype.handleEvent = function() {
-        console.log('handleEvent', arguments);
-    }
 
     Element.prototype.connectedCallback = function() {
         const elem      = this;
@@ -358,7 +351,11 @@ export default function element(name, options) {
 
             if (links.length) {
                 let count  = 0;
-                let n      = links.length;
+                let n = links.length;
+
+                // Avoid unstyled content by temporarily hiding elem while
+                // links load
+                elem.style.visibility = 'hidden';
 
                 const load = function load(e) {
                     if (++count >= links.length) {
@@ -366,6 +363,7 @@ export default function element(name, options) {
                         // and added to the DOM again, stylesheets do not load
                         // again
                         delete elem._initialLoad;
+                        elem.style.visibility = 'visible';
                         if (options.load) {
                             options.load.call(elem, elem, shadow);
                         }

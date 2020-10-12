@@ -121,29 +121,33 @@ function mousedown(e, push, options) {
     // Check target matches selector
     if (options.selector && !e.target.closest(options.selector)) { return; }
 
-    // Keep target around as it is redefined on the event
+    // Copy event to keep target around, as it is changed on the event
     // if it passes through a shadow boundary
     var event = {
+        type:          e.type,
         target:        e.target,
         currentTarget: e.currentTarget,
         clientX:       e.clientX,
-        clientY:       e.clientY
+        clientY:       e.clientY,
+        timeStamp:     e.timeStamp
     };
 
+    // If threshold is 0 start gesture immediately
+    if (options.threshold === 0) {
+        push(touches(event.target, [event]));
+        return;
+    }
+
     on(mouseevents.move, mousemove, document, [event], push, options);
-    on(mouseevents.cancel, mouseend, document, [event]);
+    on(mouseevents.cancel, mouseend, document);
 }
 
 function mousemove(e, events, push, options){
     events.push(e);
-    checkThreshold(e, events, e, removeMouse, push, options);
+    checkThreshold(e, events, e, mouseend, push, options);
 }
 
-function mouseend(e, data) {
-    removeMouse();
-}
-
-function removeMouse() {
+function mouseend(e) {
     off(mouseevents.move, mousemove, document);
     off(mouseevents.cancel, mouseend, document);
 }
@@ -219,8 +223,9 @@ function activeMousemove(e, data, push) {
     push(e);
 }
 
-function activeMouseend(e, data, stop) {
+function activeMouseend(e, data, push, stop) {
     removeActiveMouse();
+    activeMousemove(e, data, push);
     stop();
 }
 
@@ -278,8 +283,9 @@ function touches(node, events) {
             // We're dealing with a mouse event.
             // Stop click from propagating at the end of a move
             on(mouseevents.end, preventOneClick, document);
+    
             on(mouseevents.move, activeMousemove, document, data, push);
-            on(mouseevents.cancel, activeMouseend, document, data, stop);
+            on(mouseevents.cancel, activeMouseend, document, data, push, stop);
 
             return {
                 stop: function() {

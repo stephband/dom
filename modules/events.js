@@ -24,28 +24,12 @@ window.addEventListener('click', function(e) {
 });
 
 function listen(source, type) {
-	if (type === 'click') {
-		source.clickUpdate = function click(e) {
-			// Ignore clicks with the same timeStamp as previous clicks –
-			// they are likely simulated by the browser.
-			if (e.timeStamp <= clickTimeStamp) { return; }
-			source.update(e);
-		};
-
-		source.node.addEventListener(type, source.clickUpdate, source.options);
-		return source;
-	}
-
-	source.node.addEventListener(type, source.update, source.options);
+	source.node.addEventListener(type, source, source.options);
 	return source;
 }
 
 function unlisten(source, type) {
-	source.node.removeEventListener(type, type === 'click' ?
-		source.clickUpdate :
-		source.update
-	);
-
+	source.node.removeEventListener(type, source);
 	return source;
 }
 
@@ -96,7 +80,19 @@ assign(Source.prototype, {
 	stop: function stopEvent() {
 		this.types.reduce(unlisten, this);
 		this._stop(this.buffer.length);
-	}
+	},
+
+    /* Make source double as our DOM listener object */
+    handleEvent: function handleEvent(e) {
+        if (e.type === 'click'
+         && e.timeStamp <= clickTimeStamp) {
+            // Ignore clicks with the same timeStamp as previous clicks –
+            // they are likely simulated by the browser.
+            return;
+        }
+
+        this.update(e);
+    }
 });
 
 export default function events(type, node) {

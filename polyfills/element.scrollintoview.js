@@ -1,9 +1,10 @@
-/*
-Element.scrollIntoView()
+/**
+element.scrollIntoView()
 
 Monkey patches Element.scrollIntoView to support smooth scrolling options.
 https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
-*/
+**/
+
 import expOut   from '../../fn/modules/maths/exponential-out.js';
 import noop     from '../../fn/modules/noop.js';
 import animate  from '../modules/animate.js';
@@ -21,20 +22,40 @@ const config = {
 let cancel = noop;
 
 function scrollToNode(target, scrollParent, behavior) {
-    const scrollPaddingTop = parseInt(getComputedStyle(scrollParent).scrollPaddingTop, 10);
-    const coords = offset(scrollParent, target);
-    const scrollHeight = scrollParent.scrollHeight;
+    const style             = getComputedStyle(scrollParent);
+    const scrollPaddingLeft = parseInt(style.scrollPaddingLeft, 10);
+    const scrollPaddingTop  = parseInt(style.scrollPaddingTop, 10);
+    const coords            = offset(scrollParent, target);
+    const scrollWidth       = scrollParent.scrollWidth;
+    const scrollHeight      = scrollParent.scrollHeight;
+
+    const scrollBoxWidth = scrollParent === document.body ?
+        // We cannot guarantee that body height is 100%. Use the window
+        // innerHeight instead.
+        window.innerWidth :
+        rect(scrollParent).width ;
+
     const scrollBoxHeight = scrollParent === document.body ?
-        // We cannot gaurantee that body height is 100%. Use the window
+        // We cannot guarantee that body height is 100%. Use the window
         // innerHeight instead.
         window.innerHeight :
         rect(scrollParent).height ;
+
+    const left = (coords[0] - scrollPaddingLeft) > (scrollWidth - scrollBoxWidth) ?
+            scrollWidth - scrollBoxWidth :
+            (scrollParent.scrollLeft + coords[0] - scrollPaddingLeft) ;
 
     const top = (coords[1] - scrollPaddingTop) > (scrollHeight - scrollBoxHeight) ?
         scrollHeight - scrollBoxHeight :
         (scrollParent.scrollTop + coords[1] - scrollPaddingTop) ;
 
     cancel();
+
+    const scrollLeft = left < 0 ?
+        0 :
+    left > scrollWidth - scrollBoxWidth ?
+        scrollWidth - scrollBoxWidth :
+    left ;
 
     const scrollTop = top < 0 ?
         0 :
@@ -43,15 +64,17 @@ function scrollToNode(target, scrollParent, behavior) {
     top ;
 
     if (behavior === 'smooth') {
-        const scrollDuration = config.scrollDuration
-            + config.scrollDurationPerHeight
-            * Math.abs(scrollTop - scrollParent.scrollTop)
-            / scrollBoxHeight ;
+        //const scrollDuration = config.scrollDuration
+        //    + config.scrollDurationPerHeight
+        //    * Math.abs(scrollTop - scrollParent.scrollTop)
+        //    / scrollBoxHeight ;
 
-        cancel = animate(scrollDuration, config.scrollTransform, 'scrollTop', scrollParent, scrollTop);
+        cancel = animate(0.3, config.scrollTransform, 'scrollLeft', scrollParent, scrollLeft);
+        //cancel = animate(scrollDuration, config.scrollTransform, 'scrollTop', scrollParent, scrollTop);
     }
     else {
-        scrollParent.scrollTop = scrollTop ;
+        scrollParent.scrollLeft = scrollLeft ;
+        scrollParent.scrollTop  = scrollTop ;
     }
 }
 
@@ -73,16 +96,27 @@ if (!features.scrollBehavior) {
                 console.warn('Element.scrollIntoView polyfill does not support options.inline... add support!');
             }
 
-            let scrollParent = this;
+            let scrollParent;
 
-            while((scrollParent = scrollParent.parentNode)) {
-                if (scrollParent === document.body || scrollParent === document.documentElement) {
-                    scrollParent = document.scrollingElement;
-                    break;
-                }
-
-                if (scrollParent.scrollHeight > scrollParent.clientHeight) {
-                    break;
+            // Where this has been slotted into a shadow DOM that acts as a 
+            // scroll parent we won't find it by traversing the DOM up. To 
+            // mitigate pass in a decidedly non-standard  scrollParent option.
+            if (options.scrollParent) {
+                scrollParent = options.scrollParent;
+            }
+            else {
+                scrollParent = this;
+    
+                while((scrollParent = scrollParent.parentNode)) {
+                    if (scrollParent === document.body || scrollParent === document.documentElement) {
+                        scrollParent = document.scrollingElement;
+                        break;
+                    }
+    
+                    if (scrollParent.scrollHeight > scrollParent.clientHeight 
+                     || scrollParent.scrollWidth > scrollParent.clientWidth) {
+                        break;
+                    }
                 }
             }
 

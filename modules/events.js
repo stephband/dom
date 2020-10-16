@@ -38,15 +38,27 @@ events(type, node)
 
 Returns a mappable stream of events heard on `node`:
 
-    var stream = events('click', document.body);
-    .map(get('target'))
-    .each(function(node) {
-        // Do something with nodes
-    });
+```js
+var stream = events('click', document.body);
+.map(get('target'))
+.each(function(node) {
+    // Do something with nodes
+});
+```
 
 Stopping the stream removes the event listeners:
 
-    stream.stop();
+```js
+stream.stop();
+```
+
+The first parameter may also be an options object, which must have a `type`
+property. Other properties, eg. `passive: true` are passed to addEventListener 
+options.
+
+```js
+var stream = events({ type: 'scroll', passive: true }, document.body);
+```
 */
 
 function Source(notify, stop, type, options, node) {

@@ -2,25 +2,26 @@
 /**
 element(name, options)
 
-Registers a custom element and returns its constructor. This function aims to
-render the API for creating custom elements a little more... sane.
+Registers a custom element and returns its constructor.
 
 - name: 'name'     Custom element tag name
 - options: {
        extends:    Name of tag to extend to make the element a custom built-in
        mode:       'open' or 'closed', defaults to 'closed'
        focusable:  true or false, defaults to true
-       template:   HTML string or template node or id or function used to a create shadow DOM
+       template:   HTML string or template node or id or function used to populate the shadow DOM
        attributes: An object of handler functions for attribute changes
        properties: An object of property definitions for the element prototype
-       construct:  Lifecycle handler called during element construction
-       connect:    Lifecycle handler called when element added to DOM
-       load:       Lifecycle handler called when stylesheets load
-       disconnect: Lifecycle handler called when element removed from DOM
-       enable:     Lifecycle handler called when form element enabled
-       disable:    Lifecycle handler called when form element disabled
-       reset:      Lifecycle handler called when form element reset
-       restore:    Lifecycle handler called when form element restored
+
+       // Lifecycle handlers
+       construct:  called during element construction
+       connect:    called when element added to DOM
+       load:       called when stylesheets load
+       disconnect: called when element removed from DOM
+       enable:     called when form element enabled
+       disable:    called when form element disabled
+       reset:      called when form element reset
+       restore:    called when form element restored
   }
 
 The `extends` property can only create customised built-in elements in browsers
@@ -31,7 +32,7 @@ not given a publicly accessible `shadowRoot` property, and events that traverse
 the shadow boundary are retargeted (as they are in 'open' mode) but also have
 their `path` list truncated.
 
-Where the `properties` object contains a definition for a `value` property work
+Where the `properties` object contains a definition for a `value` property, work
 is done to give the element form field behaviour. The constructor is assigned
 the property `formAssociated` which signals to the browser that it constructs
 form fields. Where they are not defined in `properties` the prototype is
@@ -39,7 +40,13 @@ assigned default handlers for the standard properties `type`, `name`, `form`,
 `labels`, `validity`, `validationMessage`, `willValidate`, `checkValidity`
 and `reportValidity`. Form behaviour is also mildly polyfilled in browsers
 without support by inserting a hidden input inside the element but outside the
-shadow DOM. Mileage will vary. Managing focus can be a problem.
+shadow DOM. Mileage will vary. Managing focus can be problematic without browser 
+support.
+
+At the start of initialisation the template, where it exists, is inserted into 
+the shadow DOM. If the `template` option is a function it is responsible for
+manipulating the shadow DOM itself, and its return value is passed on to the 
+other lifecycle functions as the `template` parameter.
 
 At the start of initialisation the `construct` handler is called. Use it to
 set up a shadow root and define event handlers. Children and attributes must
@@ -373,6 +380,10 @@ export default function element(name, options) {
                 // Todo: But do we pick these load events up if the stylesheet is cached??
                 while (n--) {
                     links[n].addEventListener('load', load, onceEvent);
+                    links[n].addEventListener('error', function(e) {
+                        console.log('Failed to load stylesheet', e.target.href);
+                        load(e);
+                    }, onceEvent);
                 }
 
                 if (options.connect) {

@@ -40,6 +40,11 @@ const assignProperty = overload(id, {
 	// SVG points property must be set as string attribute - SVG elements
 	// have a read-only API exposed at .points
 	points: setAttribute,
+    cx:     setAttribute,
+    cy:     setAttribute,
+    r:      setAttribute,
+    preserveAspectRatio: setAttribute,
+    viewBox: setAttribute,
 
 	default: function(name, node, content) {
 		if (name in node) {

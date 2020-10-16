@@ -16,7 +16,8 @@ value     - target value
 ```
 */
 
-import { pipe, set } from '../../fn/module.js';
+import pipe from '../../fn/modules/pipe.js';
+import set  from '../../fn/modules/set.js';
 import { linear as denormaliseLinear } from '../../fn/modules/denormalisers.js';
 import transition from './transition.js';
 

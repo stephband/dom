@@ -16,7 +16,8 @@ events('change', document)
     true: function(ref) {
         const id = ref.slice(1);
         trigger('dom-activate', getById(id));
+        document.activeElement.blur();
     },
 
-    false: set('locstion', window)
+    false: set('location', window)
 }));

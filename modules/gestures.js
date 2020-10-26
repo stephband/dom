@@ -186,7 +186,7 @@ assign(Pointerdown.prototype, {
     // Stop the gestures stream
     stop: function() {
         this.node.removeEventListener('pointerdown', this);
-        this.stopStream();
+        this.stopGesture();
     }
 });
 

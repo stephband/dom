@@ -1,8 +1,8 @@
 /**
-element.scrollIntoView()
+element.scrollTo()
 
-Monkey patches Element.scrollIntoView to support smooth scrolling options.
-https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+Monkey patches `Element.scrollTo()` to support smooth scrolling options.
+https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollTo
 **/
 
 import expOut   from '../../fn/modules/maths/exponential-out.js';
@@ -10,7 +10,6 @@ import noop     from '../../fn/modules/noop.js';
 import animate  from '../modules/animate.js';
 import rect     from '../modules/rect.js';
 import features from '../modules/features.js';
-import offset   from '../modules/offset.js';
 
 // Duration and easing of scroll animation
 const config = {

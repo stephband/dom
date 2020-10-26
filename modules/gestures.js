@@ -4,31 +4,34 @@ gestures(options, node)
 
 Returns a stream of streams of events. Each stream of events represents the
 motion of a single finger. The types of events the stream contains is either
-`'mousedown'` followed by any number of `'mousemove'`s and a `'mouseup'`,
-or the touch objects that go with `'touchstart'`, any number of `'touchmove'`s
-and a `'touchend'`.
+`'pointerdown'` followed by any number of `'pointermove'`s and a `'pointerup'`
+or `'pointercancel'` event.
 
 ```js
 gestures({ selector: '.thing', threshold: '0.5rem' }, document)
 .each(function(events) {
-    // First event is a mousedown or touchstart event
     const e0 = events.shift();
 
     events.each(function(e1) {
-        // Mousemove or touchmove events
         const distance = Math.pow(
             Math.pow(e1.clientX - e0.clientX, 2),
             Math.pow(e1.clientY - e0.clientY, 2),
         0.5);
-        ...
+
+        console.log(distance);
     });
 });
 ```
 */
 
-import Stream from '../../fn/modules/stream.js';
+import get      from '../../fn/modules/get.js';
+import noop     from '../../fn/modules/noop.js';
+import overload from '../../fn/modules/overload.js';
+import Stream   from '../../fn/modules/stream.js';
 import { parseValue } from './parse-value.js';
-import { isPrimaryButton, on, off } from './events.js';
+import events from './events.js';
+
+const assign = Object.assign;
 
 export const config = {
     // Number of pixels, or string CSS length, that a pressed pointer travels
@@ -43,316 +46,163 @@ export const config = {
     }
 };
 
-var mouseevents = {
-    move:   'mousemove',
-    cancel: 'mouseup dragstart',
-    end:    'mouseup'
-};
 
-var touchevents = {
-    // Todo: why do we need passive: false? On iOS scrolling can be blocked with
-    // touch-action: none... do we want to block on any arbitrary thing that we
-    // gesture on or leave it to be explicitly set in CSS?
-    move:   { type: 'touchmove', passive: false },
-    cancel: 'touchend',
-    end:    { type: 'touchend', passive: false }
-};
+/* Pointermove, pointerup and pointercancel handler */
 
-const assign = Object.assign;
+function checkThreshold(threshold, e0, e1) {
+    var distX = e1.clientX - e0.clientX;
+    var distY = e1.clientY - e0.clientY;
+
+    // Return false if the threshold has not been crossed.
+    return !(
+        (distX * distX) + (distY * distY) < (threshold * threshold)
+    );
+}
+
+function Pointermove(push, events, options) {
+    this.pushGesture = push;
+    this.events      = events;
+    this.options     = options;
+    this.pointerId   = events[0].pointerId;
+    this.threshold   = parseValue(options.threshold);
+
+    document.addEventListener('pointermove', this);
+    document.addEventListener('pointerup', this);
+    document.addEventListener('pointercancel', this);
+
+    // If threshold is 0 start gesture immediately
+    if (this.threshold === 0) {
+        this.createGesture();
+    }
+}
+
+assign(Pointermove.prototype, {
+    handleEvent: overload(get('type'), {
+        'pointermove': function(e) {
+            if (this.pointerId !== e.pointerId) {
+                console.log('Not the same pointer');
+                return;                
+            }
+
+            this.push(e);
+        },
+
+        'default': function(e) {
+            if (this.pointerId !== e.pointerId) {
+                console.log('Not the same pointer');
+                return;                
+            }
+
+            this.push(e);
+            this.stop();
+        }
+    }),
+
+    createGesture: function() {
+        const events = this.events;
+
+        this.isGesture = true;
+        this.pushGesture(new Stream((push, stop) => {    
+            // Push in existing events
+            push.apply(null, events);
+    
+            // Override events so that events are pushed directly to the stream
+            this.events = {
+                push: push,
+                stop: stop
+            };
+    
+            return {};
+        }));        
+    },
+
+    push: function(e) {
+        this.events.push(e);
+
+        // Before we cross the threshold we need to check it on each move
+        if (!this.isGesture && checkThreshold(this.threshold, this.events[0], e)) {
+            this.createGesture();
+        }
+
+        // After we want to cancel any default actions
+        else {
+            e.preventDefault();
+        }
+    },
+
+    stop: function() {
+        // Stop the gesture stream
+        this.events.stop && this.events.stop();
+
+        // Remove the listeners
+        document.removeEventListener('pointermove', this);
+        document.removeEventListener('pointerup', this);
+        document.removeEventListener('pointercancel', this);
+    }
+});
+
+
+/* Pointerdown handler */
 
 function isIgnoreTag(e) {
     var tag = e.target.tagName;
     return tag && !!config.ignoreTags[tag.toLowerCase()];
 }
 
-function identifiedTouch(touchList, id) {
-    var i, l;
-
-    if (touchList.identifiedTouch) {
-        return touchList.identifiedTouch(id);
-    }
-
-    // touchList.identifiedTouch() does not exist in
-    // webkit yet… we must do the search ourselves...
-
-    i = -1;
-    l = touchList.length;
-
-    while (++i < l) {
-        if (touchList[i].identifier === id) {
-            return touchList[i];
-        }
-    }
+function Pointerdown(push, stop, node, options) {
+    this.node        = node;
+    this.pushGesture = push;
+    this.stopGesture = stop;
+    this.options     = options;
+    this.node.addEventListener('pointerdown', this);
 }
 
-function changedTouch(e, data) {
-    var touch = identifiedTouch(e.changedTouches, data.identifier);
-
-    // This isn't the touch you're looking for.
-    if (!touch) { return; }
-
-    // Chrome Android (at least) includes touches that have not
-    // changed in e.changedTouches. That's a bit annoying. Check
-    // that this touch has changed.
-    if (touch.clientX === data.clientX && touch.clientY === data.clientY) { return; }
-
-    return touch;
-}
-
-function preventOne(e) {
-    e.preventDefault();
-    e.currentTarget.removeEventListener(e.type, preventOne);
-}
-
-function preventOneClick(e) {
-    e.currentTarget.addEventListener('click', preventOne);
-}
-
-
-// Handlers that decide when the first movestart is triggered
-
-function mousedown(e, push, options) {
-    // Ignore non-primary buttons
-    if (!isPrimaryButton(e)) { return; }
-
-    // Ignore form and interactive elements
-    if (isIgnoreTag(e)) { return; }
-
-    // Check target matches selector
-    if (options.selector && !e.target.closest(options.selector)) { return; }
-
-    // Copy event to keep target around, as it is changed on the event
-    // if it passes through a shadow boundary
-    var event = {
-        type:          e.type,
-        target:        e.target,
-        currentTarget: e.currentTarget,
-        clientX:       e.clientX,
-        clientY:       e.clientY,
-        timeStamp:     e.timeStamp
-    };
-
-    // If threshold is 0 start gesture immediately
-    if (options.threshold === 0) {
-        push(touches(event.target, [event]));
-        return;
-    }
-
-    on(mouseevents.move, mousemove, document, [event], push, options);
-    on(mouseevents.cancel, mouseend, document);
-}
-
-function mousemove(e, events, push, options){
-    events.push(e);
-    checkThreshold(e, events, e, mouseend, push, options);
-}
-
-function mouseend(e) {
-    off(mouseevents.move, mousemove, document);
-    off(mouseevents.cancel, mouseend, document);
-}
-
-function touchstart(e, push, options) {
-    // Ignore form and interactive elements
-    if (isIgnoreTag(e)) { return; }
-
-    // Check target matches selector
-    if (options.selector && !e.target.closest(options.selector)) { return; }
-
-    var touch = e.changedTouches[0];
-
-    // iOS live updates the touch objects whereas Android gives us copies.
-    // That means we can't trust the touchstart object to stay the same,
-    // so we must copy the data. This object acts as a template for
-    // movestart, move and moveend event objects.
-    var event = {
-        target:     touch.target,
-        clientX:    touch.clientX,
-        clientY:    touch.clientY,
-        identifier: touch.identifier,
-
-        // The only way to make handlers individually unbindable is by
-        // making them unique. This is a crap place to put them, but it
-        // will work.
-        touchmove:  function() { touchmove.apply(this, arguments); },
-        touchend:   function() { touchend.apply(this, arguments); }
-    };
-
-    on(touchevents.move, event.touchmove, document, [event], push, options);
-    on(touchevents.cancel, event.touchend, document, [event]);
-}
-
-function touchmove(e, events, push, options) {
-    var touch = changedTouch(e, events[0]);
-    if (!touch) { return; }
-    checkThreshold(e, events, touch, removeTouch, push, options);
-}
-
-function touchend(e, events) {
-    var touch = identifiedTouch(e.changedTouches, events[0].identifier);
-    if (!touch) { return; }
-    removeTouch(events);
-}
-
-function removeTouch(events) {
-    off(touchevents.move, events[0].touchmove, document);
-    off(touchevents.cancel, events[0].touchend, document);
-}
-
-function checkThreshold(e, events, touch, removeHandlers, push, options) {
-    var distX = touch.clientX - events[0].clientX;
-    var distY = touch.clientY - events[0].clientY;
-    var threshold = parseValue(options.threshold);
-
-    // Do nothing if the threshold has not been crossed.
-    if ((distX * distX) + (distY * distY) < (threshold * threshold)) {
-        return;
-    }
-
-    // Unbind handlers that tracked the touch or mouse up till now.
-    removeHandlers(events);
-    push(touches(events[0].target, events));
-}
-
-
-// Handlers that control what happens following a movestart
-
-function activeMousemove(e, data, push) {
-    data.touch = e;
-    data.timeStamp = e.timeStamp;
-    push(e);
-}
-
-function activeMouseend(e, data, push, stop) {
-    removeActiveMouse();
-    activeMousemove(e, data, push);
-    stop();
-}
-
-function removeActiveMouse() {
-    off(mouseevents.end, preventOneClick, document);
-    off(mouseevents.move, activeMousemove, document);
-    off(mouseevents.cancel, activeMouseend, document);
-}
-
-function activeTouchmove(e, data, push) {
-    var touch = changedTouch(e, data);
-
-    if (!touch) { return; }
-
-    // Stop the interface from scrolling
-    e.preventDefault();
-
-    data.touch = touch;
-    data.timeStamp = e.timeStamp;
-    push(touch);
-}
-
-function activeTouchend(e, data, stop) {
-    var touch  = identifiedTouch(e.changedTouches, data.identifier);
-
-    // This isn't the touch you're looking for.
-    if (!touch) { return; }
-
-    // Neuter the resulting click event
-    e.preventDefault();
-
-    removeActiveTouch(data);
-    stop();
-}
-
-function removeActiveTouch(data) {
-    off(touchevents.move, data.activeTouchmove, document);
-    off(touchevents.end, data.activeTouchend, document);
-}
-
-function touches(node, events) {
-    return events[0].identifier === undefined ?
-        Stream(function MouseSource(push, stop) {
-            var data = {
-                target: node,
-                touch: undefined
-            };
-
-            // Todo: Should Stream, perhaps, take { buffer } as a source
-            // property, allowing us to return any old buffer (as long as
-            // it has .shift())? Or are we happy pushing in, which causes
-            // a bit of internal complexity in Stream?
-            push.apply(null, events);
-
-            // We're dealing with a mouse event.
-            // Stop click from propagating at the end of a move
-            on(mouseevents.end, preventOneClick, document);
+assign(Pointerdown.prototype, {
+    handleEvent: function(e) {
+        // Ignore non-primary buttons
+        if (e.button !== 0) { return; };
     
-            on(mouseevents.move, activeMousemove, document, data, push);
-            on(mouseevents.cancel, activeMouseend, document, data, push, stop);
+        // Ignore form and interactive elements
+        if (isIgnoreTag(e)) { return; }
 
-            return {
-                stop: function() {
-                    removeActiveMouse();
-                    stop();
-                }
-            };
-        }):
+        // Check target matches selector
+        if (this.options.selector && !e.target.closest(this.options.selector)) { return; }
+    
+        // Copy event to keep the true target around, as target is mutated on the
+        // event if it passes through a shadow boundary after being handled here
+        var event = {
+            type:          e.type,
+            target:        e.target,
+            currentTarget: e.currentTarget,
+            clientX:       e.clientX,
+            clientY:       e.clientY,
+            timeStamp:     e.timeStamp,
+            pointerId:     e.pointerId
+        };
 
-        Stream(function TouchSource(push, stop) {
-            var data = {
-                target: node,
-                touch: undefined,
-                identifier: events[0].identifier
-            };
+        new Pointermove(this.pushGesture, [event], this.options);
+    },
 
-            push.apply(null, events);
+    // Stop the gestures stream
+    stop: function() {
+        this.node.removeEventListener('pointerdown', this);
+        this.stopStream();
+    }
+});
 
-            // Track a touch
-            // In order to unbind correct handlers they have to be unique
-            data.activeTouchmove = function (e) { activeTouchmove(e, data, push); };
-            data.activeTouchend = function (e) { activeTouchend(e, data, stop); };
 
-            // We're dealing with a touch.
-            on(touchevents.move, data.activeTouchmove, document);
-            on(touchevents.end, data.activeTouchend, document);
-
-            return {
-                stop: function () {
-                    removeActiveTouch(data);
-                    stop();
-                }
-            };
-        });
-}
+/* Gestures */
 
 export default function gestures(options, node) {
-    // Support legacy signature gestures(node)
-    if (!node) {
-        console.trace('Deprecated gestures(node), now gestures(options, node)');
-    }
-
     options = node ?
         options ? assign({}, config, options) : config :
         config ;
+
     node = node ?
         node :
         options ;
 
     return new Stream(function(push, stop) {
-        function mouseHandler(e) {
-            mousedown(e, push, options);
-        }
-
-        function touchHandler(e) {
-            touchstart(e, push, options);
-        }
-
-        on('mousedown', mouseHandler, node);
-        on('touchstart', touchHandler, node);
-
-        return {
-            stop: function() {
-                off('mousedown', mouseHandler, node);
-                off('touchstart', touchHandler, node);
-                stop();
-            }
-        };
+        return new Pointerdown(push, stop, node, options);
     });
 }

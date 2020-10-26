@@ -132,5 +132,8 @@
 
         import * as dom from './module.js';
         Object.assign(window, dom);
+
+        import gestures from './modules/gestures.new.js';
+        gestures({ threshold: 1 }, document).each((events) => events.each(console.log));
     </script>
 </body>

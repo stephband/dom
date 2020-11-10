@@ -54,6 +54,7 @@ export function assign(node, attributes) {
 	while (n--) {
 		assignProperty(names[n], node, attributes[names[n]]);
 	}
+	return node;
 }
 
 export default curry(assign, true);

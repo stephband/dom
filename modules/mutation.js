@@ -11,22 +11,14 @@ export function empty(node) {
 	return node;
 }
 
-/**
+/*
 remove(node)
 
 Removes `node` from the DOM.
 */
 
 export function remove(node) {
-	if (node.remove) {
-		node.remove();
-	}
-	else {
-		console.warn('deprecated: remove() no longer removes lists of nodes.');
-		node.parentNode && node.parentNode.removeChild(node);
-	}
-
-	return node;
+	throw new Error('remove() is no longer at dom/modules/mutation.js - now at dom/modules/remove.js');
 }
 
 /**

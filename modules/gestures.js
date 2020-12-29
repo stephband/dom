@@ -3,7 +3,7 @@
 gestures(options, node)
 
 Returns a stream of streams of events. Each stream of events represents the
-motion of a single finger. The types of events the stream contains is either
+motion of a single finger. The types of events the stream contains is a
 `'pointerdown'` followed by any number of `'pointermove'`s and a `'pointerup'`
 or `'pointercancel'` event.
 
@@ -24,12 +24,10 @@ gestures({ selector: '.thing', threshold: '0.5rem' }, document)
 ```
 */
 
-import get      from '../../fn/modules/get.js';
-import noop     from '../../fn/modules/noop.js';
-import overload from '../../fn/modules/overload.js';
-import Stream   from '../../fn/modules/stream.js';
-import { parseValue } from './parse-value.js';
-import events from './events.js';
+import get        from '../../fn/modules/get.js';
+import overload   from '../../fn/modules/overload.js';
+import Stream     from '../../fn/modules/stream.js';
+import parseValue from './parse-value.js';
 
 const assign = Object.assign;
 

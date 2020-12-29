@@ -22,7 +22,7 @@ export * from './modules/parse.js';
 
 // Inspect
 
-export * from './modules/nodes.js';
+export * from './modules/node.js';
 
 export { default as attribute }  from './modules/attribute.js';
 export { default as contains }   from './modules/contains.js';
@@ -33,7 +33,7 @@ export { default as query }      from './modules/select.js';
 export { default as select }     from './modules/select.js';
 export { default as tag }        from './modules/tag.js';
 
-export * from './modules/traversal.js';
+export * from './modules/traverse.js';
 
 export { default as children } from './modules/children.js';
 
@@ -47,7 +47,8 @@ export { default as clone }    from './modules/clone.js';
 export { default as create }   from './modules/create.js';
 export { default as identify } from './modules/identify.js';
 
-export { empty, remove } from './modules/mutation.js';
+export { empty } from './modules/mutation.js';
+export { default as remove } from './modules/remove.js';
 
 import { after as _after, before as _before, replace as _replace } from './modules/mutation.js';
 export const before  = curry(_before, true);
@@ -56,12 +57,8 @@ export const replace = curry(_replace, true);
 
 // Classes
 
-export { classes } from './modules/classes.js';
+export { default as classes, addClass, removeClass, frameClass } from './modules/classes.js';
 
-import { addClass as _addClass, removeClass as _removeClass, frameClass as _frameClass } from './modules/classes.js';
-export const addClass    = curry(_addClass, true);
-export const removeClass = curry(_removeClass, true);
-export const frameClass  = curry(_frameClass, true);
 
 // Style
 
@@ -71,9 +68,7 @@ export { default as boundingBox } from './modules/bounding-box.js';
 import { default as _offset } from './modules/offset.js';
 export const offset = curry(_offset, true);
 
-
-export * from './modules/parse-value.js';
-
+export { default as parseValue, toRem, toVw, toVh } from './modules/parse-value.js';
 export { default as prefix } from './modules/prefix.js';
 
 import _style from './modules/style.js';
@@ -93,14 +88,9 @@ export { on, off } from './modules/events.js';
 import { default as _events } from './modules/events.js';
 export const events = curry(_events, true);
 
-export { default as gestures } from './modules/gestures.js';
-
-import { default as _trigger } from './modules/trigger.js';
-export const trigger = curry(_trigger, true);
-
-import { default as _delegate } from './modules/delegate.js';
-export const delegate = curry(_delegate, true);
-
+export { default as gestures }  from './modules/gestures.js';
+export { default as trigger }   from './modules/trigger.js';
+export { default as delegate }  from './modules/delegate.js';
 export { default as trapFocus } from './modules/trap-focus.js';
 
 export { default as toKey, toKeyString, toKeyCode } from './modules/to-key.js';

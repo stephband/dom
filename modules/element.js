@@ -405,7 +405,7 @@ export default function element(name, options) {
         }
 
         if (DEBUG) {
-            console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', elem);
+            console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', '<' + elem.tagName.toLowerCase() + '>');
         }
     }
 

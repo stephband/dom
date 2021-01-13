@@ -52,6 +52,7 @@
         "rollup": "^2.21.0",
         "madge": "^3.9.2"
     },
+    "type": "module",
     "module": "module.js",
     "image": "https://stephen.band/images/logo.png",
     "scripts": {

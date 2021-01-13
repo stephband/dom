@@ -1,11 +1,11 @@
 // Units
 
-import id from '../../fn/modules/id.js';
+import id       from '../../fn/modules/id.js';
 import overload from '../../fn/modules/overload.js';
-import toType from '../../fn/modules/to-type.js';
+import toType   from '../../fn/modules/to-type.js';
 import parseVal from '../../fn/modules/parse-value.js';
-import events from './events.js';
-import style from './style.js';
+import events   from './events.js';
+import style    from './style.js';
 
 
 /* Track document font size */
@@ -21,11 +21,12 @@ events('resize', window).each(() => fontSize = undefined);
 
 
 /**
-parseValue(value)`
-Takes a string of the form '10rem', '100vw' or '100vh' and returns a number in pixels.
+parseValue(value)
+Takes a string of the form '10px', '10em', '10rem', '100vw' or '100vh' and 
+returns a number in pixels. If `value` is a number it is returned directly.
 */
 
-export const parseValue = overload(toType, {
+const parseValue = overload(toType, {
     'number': id,
 
     'string': parseVal({
@@ -50,6 +51,8 @@ export const parseValue = overload(toType, {
         }
     })
 });
+
+export default parseValue;
 
 
 /**

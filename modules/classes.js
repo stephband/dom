@@ -68,16 +68,19 @@ classes(node)
 Returns the classList of `node`.
 */
 
-import { get } from '../../fn/module.js';
+import curry from '../../fn/modules/curry.js';
+import get   from '../../fn/modules/get.js';
 
-export const classes = get('classList');
+const classes = get('classList');
+
+export default classes;
 
 /**
 addClass(class, node)
 Adds `'class'` to the classList of `node`.
 */
 
-export function addClass(string, node) {
+function _addClass(string, node) {
 	classes(node).add(string);
 }
 
@@ -86,7 +89,7 @@ removeClass(class, node)
 Removes `'class'` from the classList of `node`.
 */
 
-export function removeClass(string, node) {
+function _removeClass(string, node) {
 	classes(node).remove(string);
 }
 
@@ -99,7 +102,7 @@ function requestFrame(n, fn) {
 	})();
 }
 
-export function frameClass(string, node) {
+function _frameClass(string, node) {
 	var list = classes(node);
 	list.add(string);
 
@@ -107,3 +110,7 @@ export function frameClass(string, node) {
 	// change is painted so we have to wait for the second to undo
 	requestFrame(2, () => list.remove(string));
 }
+
+export const addClass    = curry(_addClass, true);
+export const removeClass = curry(_removeClass, true);
+export const frameClass  = curry(_frameClass, true);

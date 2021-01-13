@@ -22,11 +22,10 @@ trigger({
 ```
 */
 
+import curry from '../../fn/modules/curry.js';
 import Event from './event.js';
 
-const assign = Object.assign;
-
-export default function trigger(type, node) {
+export function trigger(type, node) {
     let properties;
 
     if (typeof type === 'object') {
@@ -41,3 +40,5 @@ export default function trigger(type, node) {
 	node.dispatchEvent(event);
     return node;
 }
+
+export default curry(trigger, true);

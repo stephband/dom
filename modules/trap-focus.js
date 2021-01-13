@@ -1,5 +1,6 @@
-import { noop, requestTick } from '../../fn/module.js';
-import { select } from './select.js';
+import noop        from '../../fn/modules/noop.js';
+import requestTick from '../../fn/modules/request-tick.js';
+import { select }  from './select.js';
 
 let untrapFocus = noop;
 

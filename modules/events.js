@@ -1,7 +1,6 @@
 
 import '../../fn/modules/stream.wait.js';
 import Stream from '../../fn/modules/stream.js';
-import Event from './event.js';
 import features from './features.js';
 
 const assign  = Object.assign;

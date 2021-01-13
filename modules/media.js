@@ -27,9 +27,11 @@ a value with CSS units (eg. `'3rem'`), or a function must return a number
 representing a value in pixels.
 */
 
-import ready from './ready.js';
-import { id, overload, toType } from '../../fn/module.js';
-import { parseValue } from './parse-value.js';
+import ready    from './ready.js';
+import id       from '../../fn/modules/id.js';
+import overload from '../../fn/modules/overload.js';
+import toType   from '../../fn/modules/to-type.js';
+import parseValue from './parse-value.js';
 
 const rules = [];
 

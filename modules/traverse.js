@@ -1,8 +1,4 @@
 
-export function get(id) {
-    return document.getElementById(id) || undefined;
-}
-
 /**
 next(node)
 Returns the next sibling element node, or `undefined`.

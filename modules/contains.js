@@ -1,4 +1,9 @@
-import { curry } from '../../fn/module.js';
+/**
+contains(element, root)
+Returns `true` where `root` contains `element`.
+**/
+
+import curry from '../../fn/modules/curry.js';
 
 export function contains(child, node) {
 	return node.contains ?

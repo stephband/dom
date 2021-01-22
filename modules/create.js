@@ -103,6 +103,8 @@ function validateTag(tag) {
 export default overload(toTypes, {
     'string': construct,
 
+    'string undefined': construct,
+
     'string string': construct,
 
     'string object': function(tag, content) {

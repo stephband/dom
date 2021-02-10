@@ -1,5 +1,5 @@
-import choose from '../../fn/modules/choose.js';
-import id from '../../fn/modules/id.js';
+import choose  from '../../fn/modules/choose.js';
+import id      from '../../fn/modules/id.js';
 import nothing from '../../fn/modules/nothing.js';
 
 const assign = Object.assign;
@@ -226,7 +226,7 @@ export function request(type = 'GET', url, data, mimetype = 'application/json') 
 
 /**
 requestGet(url)
-A shortcut for `request('get', 'application/json', url)`
+A shortcut for `request('get', url, null, 'application/json')`
 **/
 
 export function requestGet(url) {

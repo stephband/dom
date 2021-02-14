@@ -1,3 +1,5 @@
+console.error('Deprecated: Use delegate(), not match().')
+
 export default function match(fn, options) {
 	var key;
 	return function(e) {

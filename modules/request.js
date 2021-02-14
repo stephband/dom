@@ -129,7 +129,7 @@ function urlFromData(url, data) {
 function createOptions(method, data, head, controller) {
     const contentType = 
         typeof head === 'string' ? head :
-        typeof head === 'object' ? head['Content-Type'] :
+        head && head['Content-Type'] ||
         'application/json' ;
 
     const headers = createHeaders(contentType, assign(
@@ -205,7 +205,7 @@ The 4th parameter may be a content type string or a headers object (in which
 case it must have a `'Content-Type'` property).
 **/
 
-export function request(method = 'GET', url, data, contenttype = 'application/json') {
+export default function request(method = 'GET', url, data, contenttype = 'application/json') {
     if (url.startsWith('application/') || url.startsWith('multipart/') || url.startsWith('text/') || url.startsWith('audio/')) {
         console.trace('request(method, url, data, contenttype) parameter order has changed. You passed (method, contenttype, url, data).');
         url      = arguments[1];
@@ -221,11 +221,9 @@ export function request(method = 'GET', url, data, contenttype = 'application/js
     }
 
     // param[4] is an optional abort controller
-    return fetch(url, createOptions(method, data, contenttype, arguments[4]))
-    .then(respond);
+    const options = createOptions(method, data, contenttype, arguments[4]);
+    return fetch(url, options).then(respond);
 }
-
-export default request;
 
 /**
 requestGet(url)

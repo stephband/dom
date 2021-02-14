@@ -127,9 +127,10 @@ function urlFromData(url, data) {
 }
 
 function createOptions(method, data, head, controller) {
-    const contentType = typeof head === 'string' ?
-        head :
-        head['Content-Type'] ;
+    const contentType = 
+        typeof head === 'string' ? head :
+        typeof head === 'object' ? head['Content-Type'] :
+        'application/json' ;
 
     const headers = createHeaders(contentType, assign(
         config.headers && data ? config.headers(data) : {},
@@ -196,7 +197,7 @@ function respond(response) {
 
 
 /**
-request(type, url, data, mimetype | headers)
+request(method, url, data, mimetype | headers)
 
 Uses `fetch()` to send a request to `url`. Where `type` is `"GET"`, `data` is
 serialised and appended to the URL, otherwise it is sent as a request body.
@@ -204,15 +205,15 @@ The 4th parameter may be a content type string or a headers object (in which
 case it must have a `'Content-Type'` property).
 **/
 
-export function request(type = 'GET', url, data, mimetype = 'application/json') {
+export function request(method = 'GET', url, data, contenttype = 'application/json') {
     if (url.startsWith('application/') || url.startsWith('multipart/') || url.startsWith('text/') || url.startsWith('audio/')) {
-        console.trace('request(type, url, data, mimetype) parameter order has changed. You passed (type, mimetype, url, data).');
+        console.trace('request(method, url, data, contenttype) parameter order has changed. You passed (method, contenttype, url, data).');
         url      = arguments[1];
         data     = arguments[2];
-        mimetype = arguments[3];
+        contenttype = arguments[3];
     }
 
-    const method = type.toUpperCase();
+    method = method.toUpperCase();
 
     // If this is a GET and there is data, append data to the URL query string
     if (method === 'GET' && data) {
@@ -220,9 +221,11 @@ export function request(type = 'GET', url, data, mimetype = 'application/json') 
     }
 
     // param[4] is an optional abort controller
-    return fetch(url, createOptions(method, data, mimetype, arguments[4]))
+    return fetch(url, createOptions(method, data, contenttype, arguments[4]))
     .then(respond);
 }
+
+export default request;
 
 /**
 requestGet(url)

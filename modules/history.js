@@ -52,3 +52,10 @@ export default {
         return new URL(location.href);
     }
 };
+
+window.addEventListener('hashchange', function(e) {
+    // Detect navigations to # and silently remove the # from the url
+    if (location.hash === '') {
+        history.replaceState(history.state, document.title, location.href.replace(/#$/, ''));
+    }
+});

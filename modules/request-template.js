@@ -1,7 +1,7 @@
 
 import cache         from '../../fn/modules/cache.js';
 import { parseHTML } from './parse.js';
-import { request }   from './request.js';
+import request   from './request.js';
 
 const requestDocument = cache(function requestDocument(path) {
     return request('GET', path)

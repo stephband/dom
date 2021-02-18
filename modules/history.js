@@ -1,27 +1,24 @@
 
-import get from '../../fn/modules/get.js';
-
 const history  = window.history;
 const location = window.location;
 const nothing  = Object.freeze({});
 
-const popstates = cache(function popstates() {
-    return events('popstate', window)
-    .map((e) => e.state);
-});
+function PopstateHandler(fn, context) {
+    this.context = context || null;
+    this.fn = fn;
+}
+
+PopstateHandler.prototype.handleEvent = function handleEvent(e) {
+    return this.fn.call(this.context, new URL(location.href), e.state);
+};
 
 export default {
-    // .href
+    /** .href **/
     get href() {
         return location.href;
     },
 
-    get navigations() {
-        return events('popstate', window)
-        .map(get('state'));
-    },
-
-    // .state
+    /** .state **/
     get state() {
         return history.state;
     },
@@ -30,29 +27,28 @@ export default {
         history.replaceState(state, document.title);
     },
 
-    // .url
-    get url() {
-        return new URL(location.href);
+    /** .navigations(fn) **/
+    navigations: function(fn) {
+        // Fires fn(url, state) on popstate
+        window.addEventListener('popstate', new PopstateHandler(fn));
     },
 
-    set url(url) {
-        history.replaceState(history.state, document.title, url);
-    },
-
+    /** .push(url, state) **/
     push: function push(url, state) {
         state = state || nothing;
         history.pushState(state, document.title, url);
         return this; 
     },
 
+    /** .replace(url, state) **/
     replace: function replace(url, state) {
         state = state || nothing;
         history.replaceState(state, document.title, url);
         return this;
     },
-    
-    navigations: events('popstate', window).map((e) => e.state);
-    
-    changes: 
-    
+
+    /** .url() **/
+    url: function url() {
+        return new URL(location.href);
+    }
 };

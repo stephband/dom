@@ -35,11 +35,23 @@ const lll = {
     },
 
     set id(id) {
-        // Replace the hash without changing history
-        history.replaceState(history.state, document.title, id ? 
+        // Replacing the hash normally does not update :target styles. It's a
+        // bad oversight on the part of browsers.
+        // https://github.com/whatwg/html/issues/639
+        //
+        // This is close to replacing the hash without changing the history.
+        // Replace the id, then add a new entry with the same id, then go back. 
+        // This appears to update :target without a hashchange event and without 
+        // scrolling in Chrome, although at the expense of creating a forward 
+        // history entry and a popstate.
+
+        const url = id ? 
             '#' + id :
-            location.href.replace(/#.*$/, '')
-        );
+            location.href.replace(/#.*$/, '');
+
+        history.replaceState(history.state, document.title, url);
+        history.pushState(history.state, document.title, url);
+        history.back();
     },
 
     /** .url **/
@@ -72,13 +84,12 @@ const lll = {
         // If we navigate to empty hash, prevent scroll-to-top by navigating to
         // a dummy element with position: fixed, and immediately reset the hash
         // (via replaceState so that it does not cause a second hashchange). 
-        // Conveniently, the hashchange event fires after the replacement and 
-        // the hash has already been emptied.
+        // Conveniently, the hashchange event fires after the replacement, so 
+        // inside handlers window.location.hash is correct.
         if (id === '') {
             // Target dummy to avoid scroll
-            const id = dummyId;
             document.body.appendChild(dummyElem);
-            location.hash = id;
+            location.hash = dummyId;
             history.replaceState(history.state, document.title, location.href.replace(/#.*$/, ''));
             dummyElem.remove();
             return;
@@ -119,10 +130,15 @@ const lll = {
 export default lll;
 
 document.addEventListener('click', delegate({
-    '[href*="#"]': function(link, e) {
-        // Grab links pointing inside this documnebnt
+    '[href="#"], [href="#navigation"]': function(link, e) {
+        console.log(link.origin === window.location.origin, link.hash);
+
+        // Grab links pointing inside this document
         if (link.origin !== window.location.origin) { return; }
-        lll.navigate(link.href);
+
+        // If there is a hash allow it to navigate normally?
+        //if (id) { return; }
+        lll.id = stripHash(link.hash);
         e.preventDefault();
     }
 }));
@@ -136,5 +152,5 @@ window.addEventListener('hashchange', function(e) {
 });
 
 window.addEventListener('scroll', function(e) {
-    console.log('SCROLL', location.href);
+    //console.log('SCROLL', location.href);
 });

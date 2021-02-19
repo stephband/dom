@@ -27,6 +27,10 @@ export default {
         history.replaceState(state, document.title);
     },
 
+    navigateTo: function(url) {
+        console.log('navigateTo', url);
+    },
+
     /** .navigations(fn) **/
     navigations: function(fn) {
         // Fires fn(url, state) on popstate

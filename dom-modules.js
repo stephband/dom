@@ -3,7 +3,7 @@ import './js/draggable.js';
 import './js/droppable.js';
 import './js/focusable.js';
 import './js/fullscreenable.js';
-import './js/locateable.js';
+import './js/targetable.js';
 import './js/popable.js';
 import './js/positionable.js';
 import './js/removeable.js';

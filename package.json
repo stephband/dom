@@ -28,7 +28,7 @@
         "js/swipeable.js",
         "js/focusable.js",
         "js/removeable.js",
-        "js/locateable.js",
+        "js/targetable.js",
         "js/validateable.js"
     ],
     "description": "A library of DOM functions for HTML and SVG, importable as individual ES modules.",

@@ -60,6 +60,14 @@ export function isFragmentNode(node) {
 	return node.nodeType === 11;
 }
 
+/** 
+
+**/
+
+export function isDocumentLink(link) {
+	return link.origin === window.location.origin;
+}
+
 
 // Links
 
@@ -74,6 +82,7 @@ isInternalLink(node)
 Returns `true` if the `href` of `node` points to a resource on the same domain
 as the current document.
 */
+
 
 export function isInternalLink(node) {
 	var location = window.location;

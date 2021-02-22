@@ -231,7 +231,7 @@
             "error",
             "never"
         ],
-        "valid-jsdoc": "error",
+        "valid-jsdoc": "off",
         "vars-on-top": "off",
         "wrap-iife": "off",
         "wrap-regex": "off",

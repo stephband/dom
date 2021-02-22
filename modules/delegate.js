@@ -3,9 +3,9 @@
 delegate(map)
 
 Takes an object map of functions keyed to selectors, and returns a function that
-handles event objects, delegating them to any functions whose selector matches 
-the event target. Functions are passed the target node and the event object plus 
-any other arguments passed to the handler (allowing delegate to be used as a reducer).
+handles event objects, delegating them to the first function whose selector 
+matches the event target. Functions are passed the target node and the event 
+object, plus any other arguments passed to the handler.
 
 ```
 delegate({

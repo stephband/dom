@@ -1,40 +1,96 @@
 
+import EventDistributor from './event-distributor.js';
+import log from './log.js';
+
+
+const DEBUG = window.DEBUG === true;
+
 const history  = window.history;
 const location = window.location;
-const nothing  = Object.freeze({});
 
-import create from './create.js';
-import delegate from './delegate.js';
-
-const dummyId   = 'dummy-target-for-managing-scroll';
-const dummyElem = create('div', {
-    id: 'dummy-target-for-managing-scroll',
-    style: 'position: fixed; top: 0;'
-});
-
-
-//document.body.appendChild(dummy);
-
-function PopstateHandler(fn, context) {
-    this.context = context || null;
-    this.fn = fn;
-}
-
-PopstateHandler.prototype.handleEvent = function handleEvent(e) {
-    return this.fn.call(this.context, new URL(location.href), e.state);
-};
 
 function stripHash(hash) {
     return hash.replace(/^#/, '');
 }
 
-const lll = {
-    /** .id **/
-    get id() {
+function updateTarget() {
+    // Force :target selector to update. Causes a popstate event.
+    history.pushState(history.state, document.title, location.href);
+    history.back();
+}
+
+
+/*
+Popstate distributor
+*/
+
+var pathname, search, hash, state;
+
+const distributor = new EventDistributor(function popstate(e) {
+    /*
+    A `popstate` is received when:
+    - navigation via browser buttons
+    - navigation via typing a new hash in the URL bar
+    - navigation via history.back() and .forward()
+    - location.hash is set to something other than its current value
+    */
+
+    const data = {
+        timeStamp: e.timeStamp
+    };
+
+    var changed = false;
+
+    if (location.pathname !== pathname) {
+        pathname = data.path = location.pathname;
+        changed = true;
+    }
+
+    if (location.search !== search) {
+        search = location.search;
+        data.params = new URLSearchParams(search);
+        changed = true;
+    }
+
+    if (location.hash !== hash) {
+        hash = location.hash;
+        data.identifier = stripHash(hash);
+        changed = true;
+    }
+
+    const json = e.state ? JSON.stringify(e.state) : "null" ;
+
+    if (json !== state) {
+        state = json;
+        data.state = e.state;
+        changed = true;
+    }
+
+    // If nothing changed, make distributor ignore
+    return changed && data;
+});
+
+if (DEBUG) {
+    distributor.on(function(data) {
+        log('navigate', data);
+    });
+}
+
+
+/** 
+location
+
+DOMs `location` object provides an interface that combines the browsers' 
+`location` and `history` APIs.
+**/
+
+export default {
+    /** .identifier **/
+    get identifier() {
         return stripHash(location.hash);
     },
 
-    set id(id) {
+    set identifier(id) {
         // Replacing the hash normally does not update :target styles. It's a
         // bad oversight on the part of browsers.
         // https://github.com/whatwg/html/issues/639
@@ -50,8 +106,18 @@ const lll = {
             location.href.replace(/#.*$/, '');
 
         history.replaceState(history.state, document.title, url);
-        history.pushState(history.state, document.title, url);
-        history.back();
+        updateTarget();
+    },
+
+    /** .params **/
+    get params() {
+        return new URLSearchParams(location.search);
+    },
+
+    set params(params) {
+        const url = this.URL();
+        url.search = new URLSearchParams(params);
+        history.replaceState(history.state, document.title, url);
     },
 
     /** .url **/
@@ -74,50 +140,98 @@ const lll = {
         history.replaceState(state, document.title);
     },
 
-    /** .navigate(url) **/
-    navigate: function(url, scroll = true) {
-        console.log('navigate()', url);
+    /**
+    .navigate(url, state, scroll) 
 
-        const id = (/#(.*)$/.exec(url) || [])[1];
-        if (id === undefined) { return; }
+    Takes a `url` in the form of a string or URL object. Where the origin of
+    `url` is not the same as the current location, the browser is navigated.
+    Otherwise the new `url` and/or `state` is pushed to the browser history,
+    the hash is updated in such a way that the browser updates its `:target`
+    styles
+    
+    **/
+    navigate: function navigate(url, state = null, scroll = false) {
+        // Coerce url string to URL object
+        url = typeof url === 'string' ?
+            /^https?\:\/\//.test(url) ?
+                new URL(url) :
+                new URL(url, location.href) :
+            url ;
 
-        // If we navigate to empty hash, prevent scroll-to-top by navigating to
-        // a dummy element with position: fixed, and immediately reset the hash
-        // (via replaceState so that it does not cause a second hashchange). 
-        // Conveniently, the hashchange event fires after the replacement, so 
-        // inside handlers window.location.hash is correct.
-        if (id === '') {
-            // Target dummy to avoid scroll
-            document.body.appendChild(dummyElem);
-            location.hash = dummyId;
-            history.replaceState(history.state, document.title, location.href.replace(/#.*$/, ''));
-            dummyElem.remove();
-            return;
+        if (url.origin !== location.origin) {
+            // Navigate away from this site
+            window.location.href = url;
+            return this;
         }
 
-        //const target = document.getElementById(id);
-        //target.id = '';
-        location.hash = id;
-        //target.id = id;
+        const hash   = location.hash;
+        const identifier = stripHash(url.hash);
+
+        log('navigate()',
+            (url.pathname !== location.pathname ? 'path: "' + url.pathname + '", ' : '') +
+            (url.search !== location.search ? 'params: "' + url.search + '", ' : '') + 
+            (url.hash !== location.hash ? 'hash: "' + url.hash + '", ' : '') + 
+            (!!state !== !!history.state ? 'state: ' + JSON.stringify(state) : '') 
+        );
+
+        // If only the hash has changed and state is null and scroll is true, 
+        // employ location.hash to navigate, giving us automatic scroll
+        if (
+            url.pathname === location.pathname 
+            && url.search === location.search 
+            && state === null 
+            && identifier
+            && identifier !== this.identifier
+            && scroll
+        ) {
+            location.hash = identifier;
+            return this;
+        }
+
+        history.pushState(state, document.title, url.pathname + url.search + (identifier ? url.hash : ''));
+
+        // Force :target selector to update when there is a new #identifier. This 
+        // also triggers a popstate event, which the distributor picks up and 
+        // handles as a navigation change
+        if (url.hash !== hash) {
+            updateTarget();
+        }
+
+        // Where no popstate is scheduled we nonetheless want to notify 
+        // navigation change so simulate an event and pass to distributor, and 
+        // make it async to echo the behaviour of a real popstate event
+        else {
+            Promise.resolve().then(function() {
+                distributor.handleEvent({
+                    type: 'navigate',
+                    state: state,
+                    timeStamp: window.performance.now()
+                });
+            });
+        }
+
+        return this;
     },
 
-    /** .navigations(fn) **/
-    navigations: function(fn) {
-        // Fires fn(url, state) on popstate
-        window.addEventListener('popstate', new PopstateHandler(fn));
+    /** .on(fn) **/
+    on: function on(fn) {
+        distributor.on(fn);
     },
 
-    /** .push(url, state) **/
-    push: function push(url, state) {
-        state = state || nothing;
-        history.pushState(state, document.title, url);
-        return this; 
+    /** .off(fn) **/
+    off: function off(fn) {
+        distributor.off(fn);
     },
 
-    /** .replace(url, state) **/
-    replace: function replace(url, state) {
-        state = state || nothing;
-        history.replaceState(state, document.title, url);
+    /** .back() **/
+    back: function back() {
+        history.back();
+        return this;
+    },
+
+    /** .forward() **/
+    forward: function forward() {
+        history.forward();
         return this;
     },
 
@@ -127,30 +241,24 @@ const lll = {
     }
 };
 
-export default lll;
 
-document.addEventListener('click', delegate({
-    '[href="#"], [href="#navigation"]': function(link, e) {
-        console.log(link.origin === window.location.origin, link.hash);
+// Listen to load and popstate (and hashchange?) events to notify when 
+// navigation has occured
+window.addEventListener('popstate', distributor);
+window.addEventListener('DOMContentLoaded', distributor);
 
-        // Grab links pointing inside this document
-        if (link.origin !== window.location.origin) { return; }
-
-        // If there is a hash allow it to navigate normally?
-        //if (id) { return; }
-        lll.id = stripHash(link.hash);
-        e.preventDefault();
-    }
-}));
-
+// Clean up empty hash URLs
 window.addEventListener('hashchange', function(e) {
-    console.log('HASHCHANGE', location.href);
+    /*
+    A `hashchange` is received when:
+    - navigation via browser buttons when the hash changes
+    - navigation via typing a new hash in the URL bar
+    - navigation via history.back() and .forward() when the hash changes
+    - location.hash is set to something other than its current value
+    */
+
     // Detect navigations to # and silently remove the # from the url
     if (stripHash(location.hash) === '') {
         history.replaceState(history.state, document.title, location.href.replace(/#$/, ''));
     }
-});
-
-window.addEventListener('scroll', function(e) {
-    //console.log('SCROLL', location.href);
 });

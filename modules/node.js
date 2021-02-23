@@ -61,11 +61,13 @@ export function isFragmentNode(node) {
 }
 
 /** 
-
+isDocumentLink(node)
 **/
 
 export function isDocumentLink(link) {
-	return link.origin === window.location.origin;
+	return link.origin === window.location.origin
+		// IE gives us link.pathname without a leading slash, add one before comparing
+		&& prefixSlash(link.pathname) === window.location.pathname;
 }
 
 

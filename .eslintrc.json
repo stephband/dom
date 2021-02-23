@@ -89,7 +89,7 @@
         "no-bitwise": "error",
         "no-caller": "error",
         "no-catch-shadow": "error",
-        "no-cond-assign": ["error", "except-parens"],
+        "no-cond-assign": "off",
         "no-confusing-arrow": "error",
         "no-console": "warn",
         "no-continue": "off",

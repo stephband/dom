@@ -2,7 +2,6 @@
 import EventDistributor from './event-distributor.js';
 import log from './log.js';
 
-
 const DEBUG = window.DEBUG === true;
 
 const history  = window.history;
@@ -24,7 +23,7 @@ function updateTarget() {
 Popstate distributor
 */
 
-var pathname, search, hash, state;
+var pathname, search = '', hash = '', state = 'null';
 
 const distributor = new EventDistributor(function popstate(e) {
     /*
@@ -36,7 +35,8 @@ const distributor = new EventDistributor(function popstate(e) {
     */
 
     const data = {
-        timeStamp: e.timeStamp
+        time: e.timeStamp / 1000,
+        root: ''
     };
 
     var changed = false;
@@ -66,7 +66,7 @@ const distributor = new EventDistributor(function popstate(e) {
         changed = true;
     }
 
-    // If nothing changed, make distributor ignore
+    // If nothing changed, make distributor ignore by returning false
     return changed && data;
 });
 
@@ -117,6 +117,17 @@ export default {
     set params(params) {
         const url = this.URL();
         url.search = new URLSearchParams(params);
+        history.replaceState(history.state, document.title, url);
+    },
+
+    /** .params **/
+    get path() {
+        return location.pathname;
+    },
+
+    set path(path) {
+        const url = this.URL();
+        url.pathname = path;
         history.replaceState(history.state, document.title, url);
     },
 
@@ -216,11 +227,13 @@ export default {
     /** .on(fn) **/
     on: function on(fn) {
         distributor.on(fn);
+        return this;
     },
 
     /** .off(fn) **/
     off: function off(fn) {
         distributor.off(fn);
+        return this;
     },
 
     /** .back() **/
@@ -259,6 +272,7 @@ window.addEventListener('hashchange', function(e) {
 
     // Detect navigations to # and silently remove the # from the url
     if (stripHash(location.hash) === '') {
+        console.log('Cleaning up hash');
         history.replaceState(history.state, document.title, location.href.replace(/#$/, ''));
     }
 });

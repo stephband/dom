@@ -12,9 +12,15 @@ function stripHash(hash) {
     return hash.replace(/^#/, '');
 }
 
-function updateTarget() {
-    // Force :target selector to update. Causes a popstate event.
-    history.pushState(history.state, document.title, location.href);
+function updateTarget(url) {
+    const href = location.href;
+
+    // Replace the current location with the new one
+    history.replaceState(history.state, document.title, url);
+    
+    // Move forward to the old url and back to the current location, causing  
+    // :target selector to update and a popstate event.
+    history.pushState(history.state, document.title, href);
     history.back();
 }
 
@@ -105,8 +111,7 @@ export default {
             '#' + id :
             location.href.replace(/#.*$/, '');
 
-        history.replaceState(history.state, document.title, url);
-        updateTarget();
+        updateTarget(url);
     },
 
     /** .params **/
@@ -199,19 +204,21 @@ export default {
             return this;
         }
 
-        history.pushState(state, document.title, url.pathname + url.search + (identifier ? url.hash : ''));
+
+        const href = url.pathname + url.search + (identifier ? url.hash : '');
 
         // Force :target selector to update when there is a new #identifier. This 
         // also triggers a popstate event, which the distributor picks up and 
         // handles as a navigation change
         if (url.hash !== hash) {
-            updateTarget();
+            updateTarget(href);
         }
 
         // Where no popstate is scheduled we nonetheless want to notify 
         // navigation change so simulate an event and pass to distributor, and 
         // make it async to echo the behaviour of a real popstate event
         else {
+            history.pushState(state, document.title, href);
             Promise.resolve().then(function() {
                 distributor.handleEvent({
                     type: 'navigate',
@@ -272,7 +279,6 @@ window.addEventListener('hashchange', function(e) {
 
     // Detect navigations to # and silently remove the # from the url
     if (stripHash(location.hash) === '') {
-        console.log('Cleaning up hash');
         history.replaceState(history.state, document.title, location.href.replace(/#$/, ''));
     }
 });

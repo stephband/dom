@@ -179,7 +179,7 @@ export default {
             return this;
         }
 
-        const hash   = location.hash;
+        const hash = location.hash;
         const identifier = stripHash(url.hash);
 
         log('navigate()',
@@ -205,10 +205,10 @@ export default {
 
 
         const href = url.pathname + url.search + (identifier ? url.hash : '');
+        history.pushState(state, document.title, href);
 
         // Force :target selector to update when there is a new #identifier. This 
-        // also triggers a popstate event, which the distributor picks up and 
-        // handles as a navigation change
+        // also triggers a popstate event
         if (url.hash !== hash) {
             updateTarget(href);
         }
@@ -217,7 +217,6 @@ export default {
         // navigation change so simulate an event and pass to distributor, and 
         // make it async to echo the behaviour of a real popstate event
         else {
-            history.pushState(state, document.title, href);
             Promise.resolve().then(function() {
                 distributor.handleEvent({
                     type: 'navigate',

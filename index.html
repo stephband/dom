@@ -18,7 +18,7 @@
     document.documentElement.className += ' js content-loading loading';
     window.addEventListener('DOMContentLoaded', () => document.documentElement.classList.remove('content-loading'));
     // Wait for other load handlers to run first - Bolt does a few things on
-    // load (eg. targetable scrolls) and we want them to run before the loading
+    // load (eg. data-targetable scrolls) and we want them to run before the loading
     // class is removed
     window.addEventListener('load', () => window.requestAnimationFrame(() => document.documentElement.classList.remove('loading')));
     </script>
@@ -47,7 +47,7 @@
 
     </header>
 
-    <section class="x-1 3x @1-6x @2-9x @3-x-2 grid" targetable="" id="functions">
+    <section class="x-1 3x @1-6x @2-9x @3-x-2 grid" data-targetable="" id="functions">
         <header class="x-1 3x @1-4x">
             <h2 class="doctext-02">Functions</h2>
         </header>
@@ -644,7 +644,7 @@ case it must have a <code>'Content-Type'</code> property).</p>
         import '../bolt/modules/device.js';
         import '../bolt/modules/popable.js';
         import '../bolt/modules/toggleable.js';
-        import '../bolt/modules/targetable.js';
+        import '../bolt/modules/data-targetable.js';
         import '../bolt/modules/submittable.js';
         import '../bolt/modules/switchable.js';
         import '../bolt/modules/fullscreenable.js';

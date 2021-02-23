@@ -46,7 +46,7 @@
         <template build-fn="fetch:package.json" build-src="/fn/templates.html#header-template"></template>
     </header>
 
-    <section class="x-1 3x @1-6x @2-9x @3-x-2 grid" targetable id="functions">
+    <section class="x-1 3x @1-6x @2-9x @3-x-2 grid" data-targetable id="functions">
         <header class="x-1 3x @1-4x">
             <h2 class="text-2">Functions</h2>
         </header>
@@ -139,7 +139,7 @@
         </div>
     </section>
 
-    <section class="x-1 3x @1-6x @2-9x @3-x-2 columns-grid grid" targetable id="attributes">
+    <section class="x-1 3x @1-6x @2-9x @3-x-2 columns-grid grid" data-targetable id="attributes">
         <header class="x-1 3x @1-4x block">
             <h2 class="text-2">Attributes</h2>
 
@@ -178,7 +178,7 @@
         <div class="x-1 y-2 3x @2-4x">
             <h3 class="text-4">Navigate</h3>
             <template build-fn="docs:
-                js/targetable.js
+                js/data-targetable.js
                 each" build-src="/fn/templates.html#attribute-template"></template>
 
             <h3 class="text-4">Hijack</h3>
@@ -204,7 +204,7 @@
         </div>
     </section>
 
-    <!--section class="x-1 3x @1-6x @2-9x @3-x-2 columns-grid grid" targetable id="observer">
+    <!--section class="x-1 3x @1-6x @2-9x @3-x-2 columns-grid grid" data-targetable id="observer">
         <header class="x-1 3x @1-4x">
             <h2 class="text-2" style="font-size: 1.875rem;">Events</h2>
         </header>
@@ -232,7 +232,7 @@
         import '../bolt/modules/device.js';
         import '../bolt/modules/popable.js';
         import '../bolt/modules/toggleable.js';
-        import '../bolt/modules/targetable.js';
+        import '../bolt/modules/data-targetable.js';
         import '../bolt/modules/submittable.js';
         import '../bolt/modules/switchable.js';
         import '../bolt/modules/fullscreenable.js';

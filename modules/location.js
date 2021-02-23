@@ -41,8 +41,7 @@ const distributor = new EventDistributor(function popstate(e) {
     */
 
     const data = {
-        time: e.timeStamp / 1000,
-        root: ''
+        time: e.timeStamp / 1000
     };
 
     var changed = false;

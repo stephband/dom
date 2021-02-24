@@ -29,7 +29,7 @@ function updateTarget(url) {
 Popstate distributor
 */
 
-var pathname, search = '', params, hash = '', state = 'null';
+var pathname, search = '', hash = '', state = 'null';
 
 const distributor = new EventDistributor(function popstate(e) {
     /*

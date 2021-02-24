@@ -29,7 +29,7 @@ function updateTarget(url) {
 Popstate distributor
 */
 
-var pathname, search = '', hash = '', state = 'null';
+var pathname, search = '', params, hash = '', state = 'null';
 
 const distributor = new EventDistributor(function popstate(e) {
     /*
@@ -53,7 +53,7 @@ const distributor = new EventDistributor(function popstate(e) {
 
     if (location.search !== search) {
         search = location.search;
-        data.params = new URLSearchParams(search);
+        data.params = Object.fromEntries(new URLSearchParams(search));
         changed = true;
     }
 
@@ -115,7 +115,7 @@ export default {
 
     /** .params **/
     get params() {
-        return new URLSearchParams(location.search);
+        return Object.entries(new URLSearchParams(location.search));
     },
 
     set params(params) {
@@ -182,10 +182,10 @@ export default {
         const hash = location.hash;
         const identifier = stripHash(url.hash);
 
-        log('navigate()',
-            (url.pathname !== location.pathname ? 'path: "' + url.pathname + '", ' : '') +
+        log('navigate()', url,
+            /*(url.pathname !== location.pathname ? 'path: "' + url.pathname + '", ' : '') +
             (url.search !== location.search ? 'params: "' + url.search + '", ' : '') + 
-            (url.hash !== location.hash ? 'hash: "' + url.hash + '", ' : '') + 
+            (url.hash !== location.hash ? 'hash: "' + url.hash + '", ' : '') + */
             (!!state !== !!history.state ? 'state: ' + JSON.stringify(state) : '') 
         );
 

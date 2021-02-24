@@ -147,6 +147,10 @@ export function isTargetEvent(e) {
 	return e.target === e.currentTarget;
 }
 
+export function isNotPrevented(e) {
+	return !e.defaultPrevented;
+}
+
 
 // -----------------
 

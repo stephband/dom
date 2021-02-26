@@ -20,7 +20,6 @@ const config = {
     scrollTransform: expOut(3)
 };
 
-
 if (!features.scrollBehavior) {
     console.log('Polyfilling Element.scrollIntoView(options).');
 
@@ -80,7 +79,7 @@ if (!features.scrollBehavior) {
         top > scrollHeight - scrollBoxHeight ?
             scrollHeight - scrollBoxHeight :
         top ;
-console.log(behavior);
+
         if (behavior === 'smooth') {
             console.log('ANIMATE', config.scrollTransform, 'scrollTop', scrollParent, scrollTop);
 

@@ -5,7 +5,6 @@ import '../polyfills/document.scrollingelement.js';
 import cache    from '../../fn/modules/weak-cache.js';
 import features from '../../dom/modules/features.js';
 import rect     from '../../dom/modules/rect.js';
-import create   from '../../dom/modules/create.js';
 
 const DEBUG = true;
 
@@ -14,30 +13,6 @@ Smooth scroll for browsers that do not have it
 */
 
 if (!features.scrollBehavior) {
-    console.log('SAFARI YOU WANKER');
-    document.querySelectorAll('[data-targetable]').forEach(function(node) {
-        const id = node.id;
-        const anchor = create('a', { id, style: 'position: relative; height: 2px; width: 2px; background-color: limegreen; top: calc(-1 * var(--header-height)); display: block;' });
-        node.id = id + '-(original)';
-        node.before(anchor);
-    });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     const scrollOptions = {
         behavior: 'smooth',
         block: 'start'
@@ -136,7 +111,7 @@ if (!features.scrollBehavior) {
             return;
         }
 
-        console.log('hashchange', window.location.hash.replace(/^#/, ''));
+        //console.log('hashchange', window.location.hash.replace(/^#/, ''));
 
         // In Safari, hashchange is preceeded by scroll jump - restore 
         // previous scrollTop.

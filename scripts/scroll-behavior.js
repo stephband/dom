@@ -135,9 +135,4 @@ else {
             block: 'start'
         });
     });
-    
-
-    window.addEventListener('hashchange', function() {
-        console.log('hashchange', window.location.hash);
-    });
 }

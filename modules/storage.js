@@ -75,8 +75,8 @@ const storage = new Store('store-name')
 const stores = {};
 
 export function Storage(key) {
-    if (!Store.protoype.isPrototypeOf(this)) {
-        return new Store(key);
+    if (!Storage.protoype.isPrototypeOf(this)) {
+        return new Storage(key);
     }
 
     // Only ever create one object per store key

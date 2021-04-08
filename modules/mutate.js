@@ -18,7 +18,7 @@ Removes `node` from the DOM.
 */
 
 export function remove(node) {
-	throw new Error('remove() is no longer at dom/modules/mutation.js - now at dom/modules/remove.js');
+	throw new Error('remove() is no longer at dom/modules/mutate.js - now at dom/modules/remove.js');
 }
 
 /**

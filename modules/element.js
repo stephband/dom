@@ -4,25 +4,24 @@ element(name, options)
 
 Registers a custom element and returns its constructor.
 
-- name: 'name'     Custom element tag name
+- name: 'name' Custom element tag name
 - options: {
-       extends:    Name of tag to extend to make the element a custom built-in
-       mode:       'open' or 'closed', defaults to 'closed'
-       focusable:  true or false, defaults to true
-       template:   HTML string or template node or id or function used to populate the shadow DOM
-       attributes: An object of handler functions for attribute changes
-       properties: An object of property definitions for the element prototype
-
-       // Lifecycle handlers
-       construct:  called during element construction
-       connect:    called when element added to DOM
-       load:       called when stylesheets load
-       disconnect: called when element removed from DOM
-       enable:     called when form element enabled
-       disable:    called when form element disabled
-       reset:      called when form element reset
-       restore:    called when form element restored
-  }
+    extends:    Name of tag to extend to make the element a custom built-in
+    mode:       'open' or 'closed', defaults to 'closed'
+    focusable:  true or false, defaults to true
+    template:   HTML string or template node or id or function used to populate the shadow DOM
+    properties: An object of attribute and property handlers
+    
+    // Lifecycle handlers
+    construct:  called during element construction
+    connect:    called when element added to DOM
+    load:       called when stylesheets load
+    disconnect: called when element removed from DOM
+    enable:     called when form element enabled
+    disable:    called when form element disabled
+    reset:      called when form element reset
+    restore:    called when form element restored
+}
 
 The `extends` property can only create customised built-in elements in browsers
 that support the feature. Safari is a known culprit. Mileage will vary.
@@ -69,7 +68,7 @@ All lifecycle handlers are called with the parameters `(element, shadow)`.
 */
 
 import create from './create.js';
-import requestTemplate from './request-template.js';
+//import requestTemplate from './request-template.js';
 
 const DEBUG = window.DEBUG === true;
 
@@ -109,6 +108,8 @@ const onceEvent = {
     once: true
 };
 
+const shadowParameterIndex = 1;
+
 function getElementConstructor(tag) {
         // Return a constructor from the known list of tag names – not all tags
         // have constructor names that match their tags
@@ -120,7 +121,7 @@ function getElementConstructor(tag) {
             throw new Error('Constructor not found for tag "' + tag + '"');
         })();
 }
-
+/*
 function getTemplateById(id) {
     const template = document.getElementById(id);
 
@@ -130,7 +131,7 @@ function getTemplateById(id) {
 
     return template;
 }
-
+/*
 function getTemplate(template) {
     if (template === undefined) { return; }
 
@@ -149,7 +150,7 @@ function getTemplate(template) {
             throw new Error('element() options.template not a template node, id or string');
         }() ;
 }
-
+*/
 function transferProperty(elem, key) {
     if (elem.hasOwnProperty(key)) {
         const value = elem[key];
@@ -160,8 +161,9 @@ function transferProperty(elem, key) {
     return elem;
 }
 
-function createShadow(template, elem, options) {
-    if (template === undefined) { return; }
+function createShadow(/*template, */elem, options) {
+    /*if (template === undefined) { return; }
+    */
     elem._initialLoad = true;
 
     // Create a shadow root if there is DOM content. Shadows may be 'open' or
@@ -175,6 +177,7 @@ function createShadow(template, elem, options) {
     elem[$shadow] = shadow;
 
     // If template is a string
+    /*
     if (typeof template === 'string') {
         shadow.innerHTML = template;
     }
@@ -184,6 +187,7 @@ function createShadow(template, elem, options) {
     else {
         shadow.appendChild(template.content.cloneNode(true));
     }
+    */
 
     return shadow;
 }
@@ -240,6 +244,14 @@ function flushAttributes(elem, attributes, handlers) {
     delete elem._n;
 }
 
+function hasPropertyAttribute(option) {
+    return !!option.attribute;
+}
+
+function hasPropertyDefinition(option) {
+    return option.set || option.get || option.hasOwnProperty('value');
+}
+
 
 
 export default function element(name, options) {
@@ -249,17 +261,32 @@ export default function element(name, options) {
         getElementConstructor(options.extends) :
         HTMLElement ;
 
+    const [attributes, properties] = Object.entries(options.properties)
+    .reduce((objects, entry) => {
+        if (hasPropertyAttribute(entry[1])) {
+            objects[0][entry[0]] = entry[1].attribute;
+        }
+
+        if (hasPropertyDefinition(entry[1])) {
+            objects[1][entry[0]] = entry[1];
+        }
+
+        return objects;
+    }, [{}, {}]);
+
     let template;
 
     function Element() {
         // Get a template node or HTML string from options.template
-        template = template === undefined ?
-            getTemplate(options.template) :
-            template ;
+        //template = template === undefined ?
+        //    getTemplate(options.template) :
+        //    template ;
 
         // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);
-        const shadow = createShadow(template, elem, options);
+        const shadow = options.construct.length > shadowParameterIndex ?
+            createShadow(/*template, */elem, options) :
+            undefined ;
 
         if (Element.formAssociated) {
             // Get access to the internal form control API
@@ -270,12 +297,12 @@ export default function element(name, options) {
 
         // Preserve initialisation order of attribute initialisation by
         // queueing them
-        if (options.attributes) {
+        if (attributes) {
             primeAttributes(elem);
 
             // Wait a tick to flush attributes
             Promise.resolve(1).then(function() {
-                flushAttributes(elem, Element.observedAttributes, options);
+                flushAttributes(elem, Element.observedAttributes, attributes);
             });
         }
 
@@ -294,8 +321,8 @@ export default function element(name, options) {
         //    them on the instance.
         //
         // Let's go with 3. I'm not happy you have to do this, though.
-        options.properties
-        && Object.keys(options.properties).reduce(transferProperty, elem);
+        properties
+        && Object.keys(properties).reduce(transferProperty, elem);
 
         return elem;
     }
@@ -307,29 +334,30 @@ export default function element(name, options) {
     // why. Where one of the properties is `value`, the element is set up as a
     // form element.
 
-    if (options.properties && options.properties.value) {
+    if (properties && properties.value) {
         // Flag the Element class as formAssociated
         Element.formAssociated = true;
-        Element.prototype = Object.create(constructor.prototype, assign({}, formProperties, options.properties));
+        Element.prototype = Object.create(constructor.prototype, assign({}, formProperties, properties));
     }
     else {
-        Element.prototype = Object.create(constructor.prototype, options.properties || {}) ;
+        Element.prototype = Object.create(constructor.prototype, properties || {}) ;
     }
 
 
     // Attributes
 
-    if (options.attributes) {
-        Element.observedAttributes = Object.keys(options.attributes);
+    if (attributes) {
+        Element.observedAttributes = Object.keys(attributes);
+
         Element.prototype.attributeChangedCallback = function(name, old, value) {
             if (!this._initialAttributes) {
-                return options.attributes[name].call(this, value);
+                return attributes[name].call(this, value) ;
             }
 
             // Keep a record of attribute values to be applied in
             // observedAttributes order
             this._initialAttributes[name] = value;
-            advanceAttributes(this, Element.observedAttributes, options.attributes);
+            advanceAttributes(this, Element.observedAttributes, attributes);
         };
     }
 
@@ -343,7 +371,7 @@ export default function element(name, options) {
 
         // Initialise any attributes that appeared out of order
         if (elem._initialAttributes) {
-            flushAttributes(elem, Element.observedAttributes, options.attributes);
+            flushAttributes(elem, Element.observedAttributes, attributes);
         }
 
         // If we have simulated form internals, append the hidden input now
@@ -441,6 +469,7 @@ export default function element(name, options) {
     // Todo: make this async regardless of external template, for consistency? Does
     // that cause problems? It shouldn't, we should be able to define custom elements 
     // whenever we like.
+    /*
     if (typeof options.template === 'string' && /^(?:\.?\/|https?:\/\/)/.test(options.template)) {
         // Template src begins with ./ or / or http:// or https://
         // preload it before defining custom element
@@ -454,8 +483,11 @@ export default function element(name, options) {
         });
     }
     else {
+    */
         window.customElements.define(name, Element, options);
+    /*
     }
+    */
 
     return Element;
 }

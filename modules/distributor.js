@@ -4,22 +4,27 @@ import remove from '../../fn/modules/remove.js';
 
 const assign = Object.assign;
 
+console.warn('Import "./dom/modules/event-distributor.js" has moved to "./fn/modules/distributor.js". The original will be removed.');
+
 /** 
-EventDistributor(handler)
-Returns an object with a handleEvent method, ready to be used as an event 
+Distributor(handler)
+Returns an object with `.on()`, `.off()` and `.trigger()` methods, ready to be used as an event 
 handler. Incoming event objects are transformed by `handler` (where `handler` is 
 passed in) before being distributed to fns bound via `distributor.on(fn)`.
 **/
 
-export default function EventDistributor(handler) {
+export default function Distributor(fn) {
     this.handlers = [];
 
-    if (handler) {
-        this.handler = handler;
+    if (fn) {
+        const handleEvent = this.handleEvent;
+        this.handleEvent = function(e) {
+            return handleEvent.call(this, fn(e));
+        };
     }
 }
 
-assign(EventDistributor.prototype, {
+assign(Distributor.prototype, {
     on: function(fn) {
         if (this.handlers.indexOf(fn) > -1) {
             throw new Error('Function already bound');
@@ -32,11 +37,15 @@ assign(EventDistributor.prototype, {
         remove(this.handlers, fn);
     },
 
-    handler: id,
+    /*
+    Allow distributor to be used as a DON event handler by aliasing `.trigger()` to
+    `.handleEvent()`
+    element.addEventListener(distributor)
+    */
 
     handleEvent: function(e) {
-        const handler = this.handler;
-        const data = handler(e);
+        const transform = this.transform;
+        const data = transform ? transform(e) : e ;
 
         // If no data do not distribute
         if (!data) { return; }

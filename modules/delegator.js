@@ -2,25 +2,25 @@
 const assign = Object.assign;
 
 /** 
-EventDelegator(handlers)
+Delegator(handlers)
 
 Takes an object map of handler functions keyed to selectors, and returns an 
 object with a `handleEvent()` method ready to be used as an event handler. 
 Functions are passed the target node and the event object.
 
 ```
-const delegator = new EventDelegator({
+const delegator = new Delegator({
     'button': (target, e) => {}
 })
 ```
 **/
 
-export default function EventDelegator(handlers = {}) {
+export default function Delegator(handlers = {}) {
     this.handlers  = handlers;
     this.selectors = Object.keys(handlers);
 }
 
-assign(EventDelegator.prototype, {
+assign(Delegator.prototype, {
     handleEvent: function(e) {
         const target = e.target;
         let n = -1;

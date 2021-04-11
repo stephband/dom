@@ -266,7 +266,7 @@ export default function element(name, options) {
             elem[$internals] = attachInternals(elem);
         }
 
-        options.construct && options.construct.call(null, elem, shadow, elem[$internals]);
+        options.construct && options.construct.call(elem, elem, shadow, elem[$internals]);
 
         // Preserve initialisation order of attribute initialisation by
         // queueing them
@@ -387,31 +387,31 @@ export default function element(name, options) {
                 }
 
                 if (options.connect) {
-                    options.connect.call(null, elem, shadow, internals);
+                    options.connect.call(this, this, shadow, internals);
                 }
             }
             else {
                 if (options.connect) {
-                    options.connect.call(null, elem, shadow, internals);
+                    options.connect.call(this, this, shadow, internals);
                 }
 
                 if (options.load) {
-                    options.load.call(null, elem, shadow, internals);
+                    options.load.call(this, this, shadow, internals);
                 }
             }
         }
         else if (options.connect) {
-            options.connect.call(null, elem, shadow, internals);
+            options.connect.call(this, this, shadow, internals);
         }
 
         if (DEBUG) {
-            console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', '<' + elem.tagName.toLowerCase() + '>');
+            console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', '<' + elem.tagName.toLowerCase() + (elem.getAttribute('is') ? ' is="' + elem.getAttribute('is') + '"' : '') + '>');
         }
     }
 
     if (options.disconnect) {
         Element.prototype.disconnectedCallback = function() {
-            return options.disconnect.call(null, this, this[$shadow], this[$internals]);
+            return options.disconnect.call(this, this, this[$shadow], this[$internals]);
         };
     }
 
@@ -419,20 +419,20 @@ export default function element(name, options) {
         if (options.enable || options.disable) {
             Element.prototype.formDisabledCallback = function(disabled) {
                 return disabled ?
-                    options.disable && options.disable.call(null, this, this[$shadow], this[$internals]) :
-                    options.enable && options.enable.call(null, this, this[$shadow], this[$internals]) ;
+                    options.disable && options.disable.call(this, this, this[$shadow], this[$internals]) :
+                    options.enable && options.enable.call(this, this, this[$shadow], this[$internals]) ;
             };
         }
 
         if (options.reset) {
             Element.prototype.formResetCallback = function() {
-                return options.reset.call(null, this, this[$shadow], this[$internals]);
+                return options.reset.call(this, this, this[$shadow], this[$internals]);
             };
         }
 
         if (options.restore) {
             Element.prototype.formStateRestoreCallback = function() {
-                return options.restore.call(null, this, this[$shadow], this[$internals]);
+                return options.restore.call(this, this, this[$shadow], this[$internals]);
             };
         }
     }

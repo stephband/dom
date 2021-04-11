@@ -47,10 +47,10 @@ export { default as clone }    from './modules/clone.js';
 export { default as create }   from './modules/create.js';
 export { default as identify } from './modules/identify.js';
 
-export { empty } from './modules/mutation.js';
+export { empty } from './modules/mutate.js';
 export { default as remove } from './modules/remove.js';
 
-import { after as _after, before as _before, replace as _replace } from './modules/mutation.js';
+import { after as _after, before as _before, replace as _replace } from './modules/mutate.js';
 export const before  = curry(_before, true);
 export const after   = curry(_after, true);
 export const replace = curry(_replace, true);
@@ -83,7 +83,7 @@ export * from './modules/fragments.js';
 export { default as Event } from './modules/event.js';
 
 export { isPrimaryButton, isTargetEvent, preventDefault } from './modules/events.js';
-export { default as match } from './modules/match.js';
+//export { default as match } from './modules/match.js';
 export { on, off } from './modules/events.js';
 import { default as _events } from './modules/events.js';
 export const events = curry(_events, true);
@@ -120,4 +120,4 @@ export * from './modules/scroll.js';
 
 export { getCookie } from './modules/cookies.js';
 export { config as requestConfig } from './modules/request.js';
-export { request, requestGet, requestPatch, requestPost, requestDelete, throttledRequest } from './modules/request.js';
+export { default as request, requestGet, requestPatch, requestPost, requestDelete, throttledRequest } from './modules/request.js';

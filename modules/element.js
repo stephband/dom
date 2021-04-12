@@ -108,7 +108,7 @@ const onceEvent = {
     once: true
 };
 
-const shadowParameterIndex = 1;
+const shadowParameterIndex = 0;
 
 function getElementConstructor(tag) {
         // Return a constructor from the known list of tag names – not all tags
@@ -293,7 +293,7 @@ export default function element(name, options) {
             elem[$internals] = attachInternals(elem);
         }
 
-        options.construct && options.construct.call(elem, elem, shadow, elem[$internals]);
+        options.construct && options.construct.call(elem, shadow, elem[$internals]);
 
         // Preserve initialisation order of attribute initialisation by
         // queueing them
@@ -400,7 +400,7 @@ export default function element(name, options) {
                         delete elem._initialLoad;
                         elem.style.visibility = 'visible';
                         if (options.load) {
-                            options.load.call(elem, elem, shadow);
+                            options.load.call(elem, shadow);
                         }
                     }
                 };
@@ -415,21 +415,21 @@ export default function element(name, options) {
                 }
 
                 if (options.connect) {
-                    options.connect.call(this, this, shadow, internals);
+                    options.connect.call(this, shadow, internals);
                 }
             }
             else {
                 if (options.connect) {
-                    options.connect.call(this, this, shadow, internals);
+                    options.connect.call(this, shadow, internals);
                 }
 
                 if (options.load) {
-                    options.load.call(this, this, shadow, internals);
+                    options.load.call(this, shadow, internals);
                 }
             }
         }
         else if (options.connect) {
-            options.connect.call(this, this, shadow, internals);
+            options.connect.call(this, shadow, internals);
         }
 
         if (DEBUG) {
@@ -439,7 +439,7 @@ export default function element(name, options) {
 
     if (options.disconnect) {
         Element.prototype.disconnectedCallback = function() {
-            return options.disconnect.call(this, this, this[$shadow], this[$internals]);
+            return options.disconnect.call(this, this[$shadow], this[$internals]);
         };
     }
 
@@ -447,20 +447,20 @@ export default function element(name, options) {
         if (options.enable || options.disable) {
             Element.prototype.formDisabledCallback = function(disabled) {
                 return disabled ?
-                    options.disable && options.disable.call(this, this, this[$shadow], this[$internals]) :
-                    options.enable && options.enable.call(this, this, this[$shadow], this[$internals]) ;
+                    options.disable && options.disable.call(this, this[$shadow], this[$internals]) :
+                    options.enable && options.enable.call(this, this[$shadow], this[$internals]) ;
             };
         }
 
         if (options.reset) {
             Element.prototype.formResetCallback = function() {
-                return options.reset.call(this, this, this[$shadow], this[$internals]);
+                return options.reset.call(this, this[$shadow], this[$internals]);
             };
         }
 
         if (options.restore) {
             Element.prototype.formStateRestoreCallback = function() {
-                return options.restore.call(this, this, this[$shadow], this[$internals]);
+                return options.restore.call(this, this[$shadow], this[$internals]);
             };
         }
     }

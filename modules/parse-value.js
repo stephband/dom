@@ -56,12 +56,12 @@ export default parseValue;
 
 
 /**
-toRem(value)
+rem(value)
 Takes number in pixels or a CSS value as a string and returns a string
 of the form '10.25rem'.
 */
 
-export function toRem(n) {
+export function rem(n) {
     return (parseValue(n) / getFontSize())
         // Chrome needs min 7 digit precision for accurate rendering
         .toFixed(8)
@@ -71,15 +71,21 @@ export function toRem(n) {
         + 'rem';
 }
 
+// Deprecated (name changed)
+export const toRem = rem;
+
 
 /**
 toVw(value)
 Takes number in pixels and returns a string of the form '10vw'.
 */
 
-export function toVw(n) {
+export function vw(n) {
     return (100 * parseValue(n) / window.innerWidth) + 'vw';
 }
+
+// Deprecated (name changed)
+export const toVw = vw;
 
 
 /**
@@ -87,6 +93,9 @@ toVh(value)
 Takes number in pixels and returns a string of the form '10vh'.
 */
 
-export function toVh(n) {
+export function vh(n) {
     return (100 * parseValue(n) / window.innerHeight) + 'vh';
 }
+
+// Deprecated (name changed)
+export const toVh = vh;

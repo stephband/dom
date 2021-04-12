@@ -1,10 +1,7 @@
 
-import id     from '../../fn/modules/id.js';
 import remove from '../../fn/modules/remove.js';
 
 const assign = Object.assign;
-
-console.warn('Import "./dom/modules/event-distributor.js" has moved to "./fn/modules/distributor.js". The original will be removed.');
 
 /** 
 Distributor(handler)
@@ -14,12 +11,19 @@ passed in) before being distributed to fns bound via `distributor.on(fn)`.
 **/
 
 export default function Distributor(fn) {
+    // Support construction without `new` keyword
+    if (!Distributor.prototype.isPrototypeOf(this)) {
+        return new Distributor(fn);
+    }
+
     this.handlers = [];
 
     if (fn) {
-        const handleEvent = this.handleEvent;
         this.handleEvent = function(e) {
-            return handleEvent.call(this, fn(e));
+            const data = fn(e);
+            return data === undefined ?
+                undefined : 
+                this.trigger(data) ;
         };
     }
 }
@@ -31,30 +35,33 @@ assign(Distributor.prototype, {
         }
 
         this.handlers.push(fn);
+        return this;
     },
 
     off: function(fn) {
         remove(this.handlers, fn);
+        return this;
     },
 
-    /*
-    Allow distributor to be used as a DON event handler by aliasing `.trigger()` to
-    `.handleEvent()`
-    element.addEventListener(distributor)
-    */
-
-    handleEvent: function(e) {
-        const transform = this.transform;
-        const data = transform ? transform(e) : e ;
-
-        // If no data do not distribute
-        if (!data) { return; }
-
+    trigger: function(data) {
         var n = -1;
         var fn;
 
         while (fn = this.handlers[++n]) {
-            fn(data);
+            fn.trigger ? fn.trigger(data) : fn.apply(this, arguments);
         }
+
+        return this;
+    },
+
+    /*
+    Allow distributor to be used as a DOM event handler by aliasing `.trigger()` to
+    `.handleEvent()` by default. This is overriden if Distributor() is passed a transform
+    function.
+    element.addEventListener(distributor)
+    */
+
+    handleEvent: function(e) {
+        this.trigger(e);
     }
 });

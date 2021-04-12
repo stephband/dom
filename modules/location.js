@@ -1,5 +1,5 @@
 
-import EventDistributor from './event-distributor.js';
+import Distributor from './distributor.js';
 import log from './log.js';
 
 const DEBUG = window.DEBUG === true;
@@ -31,7 +31,7 @@ Popstate distributor
 
 var pathname, search = '', hash = '', state = 'null';
 
-const distributor = new EventDistributor(function popstate(e) {
+const distributor = new Distributor(function popstate(e) {
     /*
     A `popstate` is received when:
     - navigation via browser buttons

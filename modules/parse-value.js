@@ -54,6 +54,15 @@ const parseValue = overload(toType, {
 
 export default parseValue;
 
+/**
+px(value)
+Takes number in pixels or a CSS value as a string and returns a string
+of the form '10.25px'.
+*/
+
+export function px(n) {
+    return parseValue(n) + 'px';
+}
 
 /**
 rem(value)
@@ -74,7 +83,6 @@ export function rem(n) {
 // Deprecated (name changed)
 export const toRem = rem;
 
-
 /**
 toVw(value)
 Takes number in pixels and returns a string of the form '10vw'.
@@ -86,7 +94,6 @@ export function vw(n) {
 
 // Deprecated (name changed)
 export const toVw = vw;
-
 
 /**
 toVh(value)

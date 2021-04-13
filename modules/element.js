@@ -388,17 +388,12 @@ export default function element(name, options) {
                 let count  = 0;
                 let n = links.length;
 
-                // Avoid unstyled content by temporarily hiding elem while
-                // links load
-                elem.style.visibility = 'hidden';
-
                 const load = function load(e) {
                     if (++count >= links.length) {
                         // Delete _initialLoad. If the element is removed
                         // and added to the DOM again, stylesheets do not load
                         // again
                         delete elem._initialLoad;
-                        elem.style.visibility = 'visible';
                         if (options.load) {
                             options.load.call(elem, shadow);
                         }

@@ -1,14 +1,15 @@
-/** 
+/**
 styles(selectors, node)
 
-Appends a style element to `node` containing rules for each selector in 
-the comma-delineated string `selectors`. Returns an array containing a style 
+Appends a style element to `node` containing rules for each selector in
+the comma-delineated string `selectors`. Returns an array containing a style
 object for each selector.
 
 ```js
 const [host, slot] = styles(':host, slot', shadowRoot);
 ```
 **/
+import create from './create.js';
 
 export default function styles(selectors, node) {
     const rules = selectors.split(/\s*,\s*/);

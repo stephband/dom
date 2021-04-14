@@ -6,10 +6,8 @@ Registers a custom element and returns its constructor.
 
 - name: 'name' Custom element tag name
 - options: {
-    extends:    Name of tag to extend to make the element a custom built-in
     mode:       'open' or 'closed', defaults to 'closed'
     focusable:  true or false, defaults to true
-    template:   HTML string or template node or id or function used to populate the shadow DOM
     properties: An object of attribute and property handlers
     
     // Lifecycle handlers
@@ -42,20 +40,15 @@ without support by inserting a hidden input inside the element but outside the
 shadow DOM. Mileage will vary. Managing focus can be problematic without browser 
 support.
 
-At the start of initialisation the template, where it exists, is inserted into 
-the shadow DOM. If the `template` option is a function it is responsible for
-manipulating the shadow DOM itself, and its return value is passed on to the 
-other lifecycle functions as the `template` parameter.
-
 At the start of initialisation the `construct` handler is called. Use it to
 set up a shadow root and define event handlers. Children and attributes must
 not be inspected or assigned at this point – doing so will throw in some cases,
-eg. construction via `createElement()`.
+eg. construction via `document.createElement()`.
 
 Following that, attribute handlers are called for attributes declared in the
-HTML. The parser normally calls these in source order. This can be problematic
-if you require setup to run in a specific order. Here, they are run in the order
-declared in the `attributes` object.
+HTML. The parser normally calls these in source order, but this can be problematic
+if you require setup to run in a specific order so here they are run in the order
+declared in the `options.properties`.
 
 Then the `connect` handler is called when the element is placed in the DOM
 or if it is already in the DOM and is being upgraded.
@@ -64,7 +57,7 @@ Finally the `load` handler is called after the first connect, and after any
 stylesheet links in the shadow DOM have loaded. If there are no links, it is
 called immediately after `connect`.
 
-All lifecycle handlers are called with the parameters `(element, shadow)`.
+All lifecycle handlers are called with the parameter `(shadow)`.
 */
 
 import create from './create.js';
@@ -293,7 +286,7 @@ export default function element(name, tag, options = tag) {
 
         // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);
-        const shadow = options.construct.length > shadowParameterIndex ?
+        const shadow = options.construct && options.construct.length > shadowParameterIndex ?
             createShadow(/*template, */elem, options) :
             undefined ;
 
@@ -472,6 +465,5 @@ export default function element(name, tag, options = tag) {
     }
 
     window.customElements.define(name, Element, tag && { extends: tag });
-
     return Element;
 }

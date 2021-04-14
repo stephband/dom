@@ -68,22 +68,25 @@ All lifecycle handlers are called with the parameters `(element, shadow)`.
 */
 
 import create from './create.js';
-//import requestTemplate from './request-template.js';
 
 const DEBUG = window.DEBUG === true;
 
 const assign = Object.assign;
-
-const constructors = {
-    'a':        HTMLAnchorElement,
-    'p':        HTMLParagraphElement,
-    'br':       HTMLBRElement,
-    'img':      HTMLImageElement,
-    'template': HTMLTemplateElement
-};
+const define = Object.defineProperties;
 
 const $internals = Symbol('internals');
 const $shadow    = Symbol('shadow');
+
+const constructors = {
+    'a':        HTMLAnchorElement,
+    'div':      HTMLDivElement,
+    'p':        HTMLParagraphElement,
+    'br':       HTMLBRElement,
+    'img':      HTMLImageElement,
+    'ol':       HTMLOListElement,
+    'ul':       HTMLUListElement,
+    'template': HTMLTemplateElement
+};
 
 const formProperties = {
     // These properties echo those provided by native form controls.
@@ -104,10 +107,8 @@ const formProperties = {
     reportValidity:    { value: function() { return this[$internals].reportValidity(); }}
 };
 
-const onceEvent = {
-    once: true
-};
-
+const nothing   = {};
+const onceEvent = { once: true };
 const shadowParameterIndex = 0;
 
 function getElementConstructor(tag) {
@@ -252,27 +253,35 @@ function hasPropertyDefinition(option) {
     return option.set || option.get || option.hasOwnProperty('value');
 }
 
+function groupAttributeProperty(data, entry) {
+    if (hasPropertyAttribute(entry[1])) {
+        data.attributes[entry[0]] = entry[1].attribute;
+    }
 
+    if (hasPropertyDefinition(entry[1])) {
+        data.properties[entry[0]] = entry[1];
+    }
 
-export default function element(name, options) {
+    return data;
+}
+
+export default function element(name, tag, options = tag) {
+    tag = typeof tag === 'string' ?
+        tag :
+        options.extends ;
+
     // Get the element constructor from options.extends, or the
     // base HTMLElement constructor
-    const constructor = options.extends ?
-        getElementConstructor(options.extends) :
+    const constructor = typeof tag === 'string' ?
+        getElementConstructor(tag) :
         HTMLElement ;
 
-    const [attributes, properties] = Object.entries(options.properties)
-    .reduce((objects, entry) => {
-        if (hasPropertyAttribute(entry[1])) {
-            objects[0][entry[0]] = entry[1].attribute;
-        }
-
-        if (hasPropertyDefinition(entry[1])) {
-            objects[1][entry[0]] = entry[1];
-        }
-
-        return objects;
-    }, [{}, {}]);
+    const { attributes, properties } = options.properties ?
+        Object.entries(options.properties).reduce(groupAttributeProperty, {
+            attributes: {}, 
+            properties: {}
+        }) :
+        nothing ;
 
     let template;
 
@@ -334,13 +343,37 @@ export default function element(name, options) {
     // why. Where one of the properties is `value`, the element is set up as a
     // form element.
 
+    const prototype = Element.prototype = Object.create(constructor.prototype, properties) ;
+
+
+    // Form properties
+
     if (properties && properties.value) {
         // Flag the Element class as formAssociated
         Element.formAssociated = true;
-        Element.prototype = Object.create(constructor.prototype, assign({}, formProperties, properties));
-    }
-    else {
-        Element.prototype = Object.create(constructor.prototype, properties || {}) ;
+        
+        // Define standard form properties
+        define(prototype, formProperties);
+    
+        if (options.enable || options.disable) {
+            prototype.formDisabledCallback = function(disabled) {
+                return disabled ?
+                    options.disable && options.disable.call(this, this[$shadow], this[$internals]) :
+                    options.enable && options.enable.call(this, this[$shadow], this[$internals]) ;
+            };
+        }
+        
+        if (options.reset) {
+            prototype.formResetCallback = function() {
+                return options.reset.call(this, this[$shadow], this[$internals]);
+            };
+        }
+        
+        if (options.restore) {
+            prototype.formStateRestoreCallback = function() {
+                return options.restore.call(this, this[$shadow], this[$internals]);
+            };
+        }
     }
 
 
@@ -349,7 +382,7 @@ export default function element(name, options) {
     if (attributes) {
         Element.observedAttributes = Object.keys(attributes);
 
-        Element.prototype.attributeChangedCallback = function(name, old, value) {
+        prototype.attributeChangedCallback = function(name, old, value) {
             if (!this._initialAttributes) {
                 return attributes[name].call(this, value) ;
             }
@@ -364,7 +397,7 @@ export default function element(name, options) {
 
     // Lifecycle
 
-    Element.prototype.connectedCallback = function() {
+    prototype.connectedCallback = function() {
         const elem      = this;
         const shadow    = elem[$shadow];
         const internals = elem[$internals];
@@ -433,56 +466,12 @@ export default function element(name, options) {
     }
 
     if (options.disconnect) {
-        Element.prototype.disconnectedCallback = function() {
+        prototype.disconnectedCallback = function() {
             return options.disconnect.call(this, this[$shadow], this[$internals]);
         };
     }
 
-    if (Element.formAssociated) {
-        if (options.enable || options.disable) {
-            Element.prototype.formDisabledCallback = function(disabled) {
-                return disabled ?
-                    options.disable && options.disable.call(this, this[$shadow], this[$internals]) :
-                    options.enable && options.enable.call(this, this[$shadow], this[$internals]) ;
-            };
-        }
-
-        if (options.reset) {
-            Element.prototype.formResetCallback = function() {
-                return options.reset.call(this, this[$shadow], this[$internals]);
-            };
-        }
-
-        if (options.restore) {
-            Element.prototype.formStateRestoreCallback = function() {
-                return options.restore.call(this, this[$shadow], this[$internals]);
-            };
-        }
-    }
-
-    // Define element
-    // Todo: make this async regardless of external template, for consistency? Does
-    // that cause problems? It shouldn't, we should be able to define custom elements 
-    // whenever we like.
-    /*
-    if (typeof options.template === 'string' && /^(?:\.?\/|https?:\/\/)/.test(options.template)) {
-        // Template src begins with ./ or / or http:// or https://
-        // preload it before defining custom element
-        requestTemplate(options.template)
-        .then(function(node) {
-            if (DEBUG) {
-                console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', 'template "' + options.template + '" imported');
-            }
-            template = node;
-            window.customElements.define(name, Element, options);
-        });
-    }
-    else {
-    */
-        window.customElements.define(name, Element, options);
-    /*
-    }
-    */
+    window.customElements.define(name, Element, tag && { extends: tag });
 
     return Element;
 }

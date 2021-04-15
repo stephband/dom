@@ -4,10 +4,12 @@ import remove from '../../fn/modules/remove.js';
 const assign = Object.assign;
 
 /** 
-Distributor(handler)
-Returns an object with `.on()`, `.off()` and `.trigger()` methods, ready to be used as an event 
-handler. Incoming event objects are transformed by `handler` (where `handler` is 
-passed in) before being distributed to fns bound via `distributor.on(fn)`.
+Distributor(handle)
+
+Returns an object with `.on()`, `.off()` and `.push()` methods, and also 
+`.handleEvent()` so that it may be used directly as a DOM event handler. 
+Incoming event objects are transformed by `handle` (where `handle` is 
+passed in) before being distributed to listeners bound via `distributor.on(fn)`.
 **/
 
 export default function Distributor(fn) {
@@ -23,7 +25,7 @@ export default function Distributor(fn) {
             const data = fn(e);
             return data === undefined ?
                 undefined : 
-                this.trigger(data) ;
+                this.push(data) ;
         };
     }
 }
@@ -43,25 +45,22 @@ assign(Distributor.prototype, {
         return this;
     },
 
-    trigger: function(data) {
+    push: function(data) {
         var n = -1;
         var fn;
 
         while (fn = this.handlers[++n]) {
-            fn.trigger ? fn.trigger(data) : fn.apply(this, arguments);
+            typeof fn === 'function' ?
+                // Functions are called with this as context
+                fn.apply(this, arguments) :
+                // Methods are invoked normally
+                fn.push.apply(fn, arguments) ;
         }
 
         return this;
     },
 
-    /*
-    Allow distributor to be used as a DOM event handler by aliasing `.trigger()` to
-    `.handleEvent()` by default. This is overriden if Distributor() is passed a transform
-    function.
-    element.addEventListener(distributor)
-    */
-
     handleEvent: function(e) {
-        this.trigger(e);
+        this.push(e);
     }
 });

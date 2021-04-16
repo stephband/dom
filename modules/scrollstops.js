@@ -12,7 +12,7 @@ Config
 
 export const config = {
     minScrollEventInterval: 0.0375,
-    maxScrollEventInterval: 0.32
+    maxScrollEventInterval: 0.18
 };
 
 const captureOptions = {
@@ -47,9 +47,9 @@ function update(times, push, e) {
         config.minScrollEventInterval : 
         interval ;
 
-    trackingInterval =  1.6 * interval > config.maxScrollEventInterval ?
+    trackingInterval =  (1.4 * interval) > config.maxScrollEventInterval ?
         config.maxScrollEventInterval :
-        1.6 * interval;
+        (1.4 * interval);
 
     push(e);
 }

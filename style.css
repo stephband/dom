@@ -18,8 +18,8 @@
 @import "../bolt/css/modifiers.css";
 @import "../bolt/css/respond.css";
 @import "../bolt/css/grid.css";
-@import "../bolt/components/toggle-block.css";
-@import "../bolt/components/toggle-button.css";
+@import "../bolt/classes/toggle-block.css";
+@import "../bolt/classes/toggle-button.css";
 @import "../bolt/css/device.css";
 @import "../bolt/css/var.css";
 @import "../dom/css/dom.css";

@@ -70,28 +70,3 @@ assign(Distributor.prototype, {
         this.push(e);
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const view = {
-    activate: function() {
-        
-    }
-};
-
-activates.on('activate', view);
-
-
-

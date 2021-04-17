@@ -1,5 +1,5 @@
 
-import remove from '../../fn/modules/remove.js';
+import matches  from '../../fn/modules/matches.js';
 
 const assign = Object.assign;
 
@@ -32,29 +32,35 @@ export default function Distributor(fn) {
 
 assign(Distributor.prototype, {
     on: function(fn) {
-        if (this.handlers.indexOf(fn) > -1) {
-            throw new Error('Function already bound');
+        if (this.handlers.find(matches(arguments))) {
+            throw new Error(arguments.length === 1 ?
+                'Distributor: function ' + arguments[0].name + '() already bound' :
+                'Distributor: object.' + arguments[0] + '() already bound'
+            );
         }
 
-        this.handlers.push(fn);
+        this.handlers.push(arguments);
         return this;
     },
 
     off: function(fn) {
-        remove(this.handlers, fn);
+        const i = this.handlers.findIndex(matches(arguments));
+        if (i === -1) { return this; }
+
+        this.handlers.splice(i, 1);
         return this;
     },
 
     push: function(data) {
         var n = -1;
-        var fn;
+        var handler;
 
-        while (fn = this.handlers[++n]) {
-            typeof fn === 'function' ?
+        while (handler = this.handlers[++n]) {
+            handler.length === 1 ?
                 // Functions are called with this as context
-                fn.apply(this, arguments) :
+                handler[0].apply(this, arguments) :
                 // Methods are invoked normally
-                fn.push.apply(fn, arguments) ;
+                handler[1][handler[0]].apply(handler[1], arguments) ;
         }
 
         return this;
@@ -64,3 +70,28 @@ assign(Distributor.prototype, {
         this.push(e);
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const view = {
+    activate: function() {
+        
+    }
+};
+
+activates.on('activate', view);
+
+
+

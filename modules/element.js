@@ -276,7 +276,7 @@ export default function element(name, tag, options = tag) {
         }) :
         nothing ;
 
-    let template;
+    //let template;
 
     function Element() {
         // Get a template node or HTML string from options.template

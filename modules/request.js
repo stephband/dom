@@ -166,7 +166,9 @@ function respondBlob(response) {
 }
 
 function respondJSON(response) {
-    return response.json();
+    return response.json().catch((e) => {
+        throw new Error('Cannot parse JSON ' + response.url + '. ' + e.message + '');
+    });
 }
 
 function respondForm(response) {

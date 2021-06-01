@@ -4,7 +4,7 @@ element(name, options)
 
 Registers a custom element and returns its constructor.
 
-- name: 'name' Custom element tag name
+- name: `'element-name'` or `'tag is="element-name"'`
 - options: {
     mode:       'open' or 'closed', defaults to 'closed'
     focusable:  true or false, defaults to true
@@ -21,8 +21,8 @@ Registers a custom element and returns its constructor.
     restore:    called when form element restored
 }
 
-The `extends` property can only create customised built-in elements in browsers
-that support the feature. Safari is a known culprit. Mileage will vary.
+The name form `'tag is="element-name"'` creates customised built-in elements in 
+browsers that support the feature. Safari is a known culprit. Mileage will vary.
 
 The effects of the `mode` option are subtle. In 'closed' mode, the element is
 not given a publicly accessible `shadowRoot` property, and events that traverse
@@ -61,14 +61,15 @@ All lifecycle handlers are called with the parameter `(shadow)`.
 */
 
 import create from './create.js';
+import capture from '../../fn/modules/capture.js';
 
 const DEBUG = window.DEBUG === true;
 
-const assign = Object.assign;
-const define = Object.defineProperties;
-
 const $internals = Symbol('internals');
 const $shadow    = Symbol('shadow');
+
+const assign = Object.assign;
+const define = Object.defineProperties;
 
 const constructors = {
     'a':        HTMLAnchorElement,
@@ -104,6 +105,8 @@ const nothing   = {};
 const onceEvent = { once: true };
 const shadowParameterIndex = 0;
 
+let supportsCustomisedBuiltIn = false;
+
 function getElementConstructor(tag) {
         // Return a constructor from the known list of tag names – not all tags
         // have constructor names that match their tags
@@ -115,6 +118,24 @@ function getElementConstructor(tag) {
             throw new Error('Constructor not found for tag "' + tag + '"');
         })();
 }
+
+// Capture name and tag from <element-name> or <tag is="element-name">, syntax
+// brackets and quotes optional
+const captureNameTag = capture(/^\s*<?([a-z][\w]*-[\w]+)>?\s*$|^\s*<?([a-z][\w]*)\s+is=["']?([a-z][\w]*-[\w]+)["']?>?\s*$/, {
+    1: (data, captures) => ({
+        name: captures[1]
+    }),
+    
+    2: (data, captures) => ({
+        name: captures[3],
+        tag:  captures[2]
+    }),
+
+    catch: function(data, name) {
+        throw new Error('Element name must be of the form \'element-name\' or \'tag is="element-name"\' (' + name + ')')
+    }
+}, null);
+
 /*
 function getTemplateById(id) {
     const template = document.getElementById(id);
@@ -258,10 +279,18 @@ function groupAttributeProperty(data, entry) {
     return data;
 }
 
-export default function element(name, tag, options = tag) {
+export default function element(definition, options) {
+    if (typeof options === 'string') {
+        throw new Error('we dont support element(name, tag, options) anymore.');
+    }
+
+    /*
     tag = typeof tag === 'string' ?
         tag :
         options.extends ;
+    */
+
+    const { name, tag } = captureNameTag(definition);
 
     // Get the element constructor from options.extends, or the
     // base HTMLElement constructor
@@ -279,20 +308,19 @@ export default function element(name, tag, options = tag) {
     //let template;
 
     function Element() {
-        // Get a template node or HTML string from options.template
-        //template = template === undefined ?
-        //    getTemplate(options.template) :
-        //    template ;
-
         // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);
         const shadow = options.construct && options.construct.length > shadowParameterIndex ?
-            createShadow(/*template, */elem, options) :
+            createShadow(elem, options) :
             undefined ;
 
         if (Element.formAssociated) {
             // Get access to the internal form control API
             elem[$internals] = attachInternals(elem);
+        }
+
+        if (tag) {
+            supportsCustomisedBuiltIn = true;
         }
 
         options.construct && options.construct.call(elem, shadow, elem[$internals]);
@@ -452,10 +480,6 @@ export default function element(name, tag, options = tag) {
         else if (options.connect) {
             options.connect.call(this, shadow, internals);
         }
-
-        if (DEBUG) {
-            console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', '<' + elem.tagName.toLowerCase() + (elem.getAttribute('is') ? ' is="' + elem.getAttribute('is') + '"' : '') + '>');
-        }
     }
 
     if (options.disconnect) {
@@ -464,6 +488,27 @@ export default function element(name, tag, options = tag) {
         };
     }
 
+    if (DEBUG) {
+        console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', '<' + (tag ? tag + ' is=' + name + '' : name) + '>');
+    }
+
     window.customElements.define(name, Element, tag && { extends: tag });
+
+    // Where tag is supplied, element should have been registered as a customised 
+    // built-in and the constructor would have run if any were in the DOM already.
+    // However, Safari does not support customised built-ins. Here we attempt to 
+    // go some way towards filling in support by searching for elements and 
+    // assigning their intended APIs to them.
+    if (tag && !supportsCustomisedBuiltIn) {
+        if (DEBUG) {
+            console.warn('Browser does not support customised built-in elements. Attempting to (partially) polyfill those elements already in the DOM, with some caveats.');
+        }
+
+        document.querySelectorAll('[is="' + name + '"]').forEach((element) => {
+            define(element, properties);
+            options.construct.apply(element);
+        });
+    }
+
     return Element;
 }

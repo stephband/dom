@@ -115,7 +115,7 @@ export default function events(type, node) {
 	}
 
 	return new Stream(function(notify, stop) {
-		return new Source(notify, stop, type, options, node)
+		return new Source(notify, stop, type, options, node);
 	});
 }
 

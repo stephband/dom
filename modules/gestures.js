@@ -8,7 +8,7 @@ motion of a single finger. The types of events the stream contains is a
 or `'pointercancel'` event.
 
 ```js
-gestures({ selector: '.thing', threshold: '0.5rem' }, document)
+gestures({ selector: '.thing', threshold: '0.5rem', device: 'mouse pen touch' }, document)
 .each(function(events) {
     const e0 = events.shift();
 
@@ -21,6 +21,25 @@ gestures({ selector: '.thing', threshold: '0.5rem' }, document)
         console.log(distance);
     });
 });
+```
+
+The `options` object may optionally contain any of:
+
+```js
+{
+    // Listen to getures on a given device type. Internally the pointer events' 
+    // e.pointerType is matched against this string: it may contain any of the 
+    // types 'pen', 'mouse' and 'touch'. Where not defined, all pointer types
+    // trigger a gesture
+    device: 'mouse pen',
+
+    // Listen to gestures inside a selected element or elements
+    selector: '.class'
+
+    // Determine a minimum distance a finger must travel before a gesture is 
+    // considered to have started
+    threshold: '0.25rem'
+}
 ```
 */
 
@@ -159,7 +178,10 @@ assign(Pointerdown.prototype, {
     handleEvent: function(e) {
         // Ignore non-primary buttons
         if (e.button !== 0) { return; };
-    
+
+        // Check pointer type is in options
+        if (this.options.device && !this.options.device.includes(e.pointerType)) { return; }
+
         // Ignore form and interactive elements
         if (isIgnoreTag(e)) { return; }
 

@@ -29,7 +29,7 @@ const captureOptions = {
 
 var trackingInterval = config.maxScrollEventInterval;
 
-function update(times, push, e) {    
+function update(times, push, e) { 
     if (times.length < 2) {
         times.length = 0;
         return;
@@ -87,7 +87,7 @@ export default function scrollstops(element) {
         
                 hashtime = undefined;
             }*/
-        
+
             times.push(time);
 
             // Update only when there is a maxScrollEventInterval second pause in scrolling

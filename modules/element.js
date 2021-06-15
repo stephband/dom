@@ -68,18 +68,28 @@ const DEBUG = window.DEBUG === true;
 const $internals = Symbol('internals');
 const $shadow    = Symbol('shadow');
 
-const assign = Object.assign;
 const define = Object.defineProperties;
 
 const constructors = {
     'a':        HTMLAnchorElement,
-    'div':      HTMLDivElement,
+    'dl':       HTMLDListElement,
     'p':        HTMLParagraphElement,
     'br':       HTMLBRElement,
+    'fieldset': HTMLFieldSetElement,
+    'hr':       HTMLHRElement,
     'img':      HTMLImageElement,
+    'li':       HTMLLIElement,
     'ol':       HTMLOListElement,
-    'ul':       HTMLUListElement,
-    'template': HTMLTemplateElement
+    'optgroup': HTMLOptGroupElement,
+    'q':        HTMLQuoteElement,
+    'textarea': HTMLTextAreaElement,
+    'td':       HTMLTableCellElement,
+    'th':       HTMLTableCellElement,
+    'tr':       HTMLTableRowElement,
+    'tbody':    HTMLTableSectionElement,
+    'thead':    HTMLTableSectionElement,
+    'tfoot':    HTMLTableSectionElement,
+    'ul':       HTMLUListElement
 };
 
 const formProperties = {
@@ -180,7 +190,7 @@ function createShadow(/*template, */elem, options) {
     /*if (template === undefined) { return; }
     */
     elem._initialLoad = true;
-
+console.log(elem);
     // Create a shadow root if there is DOM content. Shadows may be 'open' or
     // 'closed'. Closed shadows are not exposed via element.shadowRoot, and
     // events propagating from inside of them report the element as target.
@@ -488,9 +498,9 @@ export default function element(definition, options) {
         };
     }
 
-    if (DEBUG) {
+    //if (DEBUG) {
         console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', '<' + (tag ? tag + ' is=' + name + '' : name) + '>');
-    }
+    //}
 
     window.customElements.define(name, Element, tag && { extends: tag });
 
@@ -501,12 +511,26 @@ export default function element(definition, options) {
     // assigning their intended APIs to them.
     if (tag && !supportsCustomisedBuiltIn) {
         if (DEBUG) {
-            console.warn('Browser does not support customised built-in elements. Attempting to (partially) polyfill those elements already in the DOM, with some caveats.');
+            console.warn('Browser does not support customised built-in elements.\nAttempting to (partially) polyfill instances of <' + tag + ' is="' + name + '"> already in the DOM./nMileage will vary.');
         }
 
         document.querySelectorAll('[is="' + name + '"]').forEach((element) => {
+            // Define properties on element
             define(element, properties);
+
+            // Run constructor
             options.construct.apply(element);
+
+            // Detect and run attributes
+            let name;
+            for (name in attributes) {
+                const attribute = element.attributes[name];
+                if (attribute) {
+                    attributes[name].call(element, attribute.value);
+                }
+            }
+
+            options.connect.apply(element);
         });
     }
 

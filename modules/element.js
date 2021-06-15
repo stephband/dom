@@ -190,7 +190,7 @@ function createShadow(/*template, */elem, options) {
     /*if (template === undefined) { return; }
     */
     elem._initialLoad = true;
-console.log(elem);
+
     // Create a shadow root if there is DOM content. Shadows may be 'open' or
     // 'closed'. Closed shadows are not exposed via element.shadowRoot, and
     // events propagating from inside of them report the element as target.

@@ -58,8 +58,7 @@ export const config = {
     ignoreTags: {
         textarea: true,
         input: true,
-        select: true,
-        button: true
+        select: true
     }
 };
 
@@ -163,7 +162,7 @@ assign(Pointermove.prototype, {
 
 function isIgnoreTag(e) {
     var tag = e.target.tagName;
-    return tag && !!config.ignoreTags[tag.toLowerCase()];
+    return tag && (!!config.ignoreTags[tag.toLowerCase()] || e.target.draggable);
 }
 
 function Pointerdown(push, stop, node, options) {

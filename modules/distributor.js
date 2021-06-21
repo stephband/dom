@@ -32,6 +32,10 @@ export default function Distributor(fn) {
 
 assign(Distributor.prototype, {
     on: function(fn) {
+        if (!arguments.length) {
+            throw new Error('Cannot pass `' + fn + '` to distributor.on()');
+        }
+
         if (this.handlers.find(matches(arguments))) {
             throw new Error(arguments.length === 1 ?
                 'Distributor: function ' + arguments[0].name + '() already bound' :

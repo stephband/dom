@@ -53,9 +53,9 @@
         import arg  from '../fn/modules/arg.js';
 
         location.on(route({
-            '^dom/state.html': function arse(location) {
+            '^dom\/state.html': function arse(location) {
                 console.log(location.base + location.path, 'dom/state.html', location.route, location.state);
-                
+
                 location.on({
                     params: function(location) {
                         console.log('PARAMS', location);

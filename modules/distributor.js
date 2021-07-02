@@ -57,20 +57,25 @@ assign(Distributor.prototype, {
 
     push: function(data) {
         var n = -1;
-        var handler;
+        var handled, handler, output;
 
         while (handler = this.handlers[++n]) {
-            handler.length === 1 ?
+            output = handler.length === 1 ?
                 // Functions are called with this as context
                 handler[0].apply(this, arguments) :
                 // Methods are invoked normally
                 handler[1][handler[0]].apply(handler[1], arguments) ;
+
+            handled = handled === undefined ?
+                output :
+                output === undefined ? handled :
+                handled + output ;
         }
 
-        return this;
+        return handled;
     },
 
     handleEvent: function(e) {
-        this.push(e);
+        return this.push(e);
     }
 });

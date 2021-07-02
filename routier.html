@@ -1,0 +1,658 @@
+<!DOCTYPE html><html lang="en" class=" js content-loading loading"><head>
+    
+    <meta charset="utf-8">
+    <meta name="author" content="stephband">
+    <meta name="description" content="Documentation for dom. A library of DOM functions for HTML and SVG, importable as individual ES modules.">
+    <meta name="viewport" content="width=device-width">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@stephband">
+    <meta property="og:url" content="http://stephen.band/dom/">
+    <meta property="og:title" content="dom">
+    <meta property="og:description" content="A library of DOM functions for HTML and SVG, importable as individual ES modules.">
+    <meta property="og:image" content="https://stephen.band/images/logo.png">
+
+    <title>dom</title>
+
+    <script title="load">
+    document.documentElement.className += ' js content-loading loading';
+    window.addEventListener('DOMContentLoaded', () => document.documentElement.classList.remove('content-loading'));
+    // Wait for other load handlers to run first - Bolt does a few things on
+    // load (eg. data-targetable scrolls) and we want them to run before the loading
+    // class is removed
+    window.addEventListener('load', () => window.requestAnimationFrame(() => document.documentElement.classList.remove('loading')));
+    </script>
+
+    <link rel="shortcut icon" href="images/logo-64x64.ico">
+    <link rel="icon" type="image/png" href="images/logo-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="images/logo-64x64.png" sizes="64x64">
+    <link rel="icon" type="image/png" href="images/logo-128x128.png" sizes="128x128">
+
+
+    
+
+    <link rel="stylesheet" href="style.min.css">
+    <!--link rel="stylesheet" href="style.css" /-->
+</head>
+
+<body class="@3-12-grid grid">
+    <header class="x-1 3x @1-6x @2-9x @3-x-2 @3-9x" id="header">
+        
+    <h1 class="doctext-01">dom <span class="doctext-06">1.3.1</span></h1>
+    <p class="doctext-08">A library of DOM functions for HTML and SVG, importable as individual ES modules.</p>
+    <ul class="link-index index">
+        <li><strong>repo:</strong> <a href="https://github.com/stephband/dom.git">github.com/stephband/dom.git</a></li>
+        <li><strong>bugs:</strong> <a href="https://github.com/stephband/dom/issues">github.com/stephband/dom/issues</a></li>
+    </ul>
+
+    </header>
+
+    <section class="x-1 3x @1-6x @2-9x @3-x-2 grid" data-targetable="" id="functions">
+        <header class="x-1 3x @1-4x">
+            <h2 class="doctext-02">Functions</h2>
+        </header>
+
+        <div class="x-1 3x @2-4x">
+            <p>Import functions:</p>
+            <pre class=" language-js"><code class=" language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> closest<span class="token punctuation">,</span> matches <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'/dom/module.js'</span><span class="token punctuation">;</span></code></pre>
+            <p>All functions that take more than one parameter are partially applicable.</p>
+        </div>
+
+        <div class="x-1 3x column-grid grid">
+            <div class="x-1">
+                <h4 class="doctext-03">select.</h4>
+                <!--template-->
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-closest-selector-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-closest-selector-node">
+                <code class="function language-js"><span class="token function">closest</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns the node itself or the closest ancestor that matches <code>selector</code>.
+If no match is found, returns <code>undefined</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-children-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-children-node">
+                <code class="function language-js"><span class="token function">children</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns an array of child elements of <code>node</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-matches-selector-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-matches-selector-node">
+                <code class="function language-js"><span class="token function">matches</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if <code>node</code> matches <code>selector</code>, otherwise <code>false</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-select-selector-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-select-selector-node">
+                <code class="function language-js"><span class="token function">select</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns an array of all descendants of <code>node</code> that match <code>selector</code>.</p>
+</article>
+
+            </div>
+
+            <div class="x-1">
+                <h4 class="doctext-03">inspect.</h4>
+                <!--template-->
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-attribute-name-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-attribute-name-node">
+                <code class="function language-js"><span class="token function">attribute</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns the string contents of attribute <code>name</code>. If the attribute is not set,
+returns <code>undefined</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-identify-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-identify-node">
+                <code class="function language-js"><span class="token function">identify</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns the id of <code>node</code>, or where <code>node</code> has no id, a random id is generated,
+checked against the DOM for uniqueness, set on <code>node</code> and returned:</p>
+<pre><code><span class="token comment">// Get ids of all buttons in document</span>
+<span class="token function">select</span><span class="token punctuation">(</span><span class="token string">'button'</span><span class="token punctuation">,</span> document<span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>identify<span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token operator">...</span><span class="token punctuation">)</span></code></pre></article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-media-query-enterfn-exitfn">
+        <h3 class="doctext-05 ">
+            <a href="#function-media-query-enterfn-exitfn">
+                <code class="function language-js"><span class="token function">media</span><span class="token punctuation">(</span>query<span class="token punctuation">,</span> enterFn<span class="token punctuation">,</span> exitFn<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Evaluates <code>query</code> object, which is an object describing a media and scroll
+query, against the document, and calls <code>enterFn</code> when all conditions in
+the selector object become true, and <code>exitFn</code> when at least one of them becomes
+false.</p>
+<p>A query object may contain any combination of the properties:</p>
+<pre><code class="language-js"><span class="token punctuation">{</span>
+    minWidth<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    maxWidth<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    minHeight<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    maxHeight<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    minScrollTop<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    maxScrollTop<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    minScrollBottom<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn<span class="token punctuation">,</span>
+    maxScrollBottom<span class="token punctuation">:</span> number <span class="token operator">|</span> string <span class="token operator">|</span> fn
+<span class="token punctuation">}</span></code></pre>
+<p>For each property a number represents a value in pixels, a string must be
+a value with CSS units (eg. <code>'3rem'</code>), or a function must return a number
+representing a value in pixels.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-tag-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-tag-node">
+                <code class="function language-js"><span class="token function">tag</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns the tag name of <code>node</code>, in lowercase.</p>
+<pre><code><span class="token keyword">const</span> li <span class="token operator">=</span> <span class="token function">create</span><span class="token punctuation">(</span><span class="token string">'li'</span><span class="token punctuation">,</span> <span class="token string">'Salt and vinegar'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">tag</span><span class="token punctuation">(</span>li<span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 'li'</span></code></pre></article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-type-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-type-node">
+                <code class="function language-js"><span class="token function">type</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns one of <code>'element'</code>, <code>'text'</code>, <code>'comment'</code>, <code>'document'</code>,
+<code>'doctype'</code> or <code>'fragment'</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-iselementnode-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-iselementnode-node">
+                <code class="function language-js"><span class="token function">isElementNode</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if <code>node</code> is an element node.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-istextnode-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-istextnode-node">
+                <code class="function language-js"><span class="token function">isTextNode</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if <code>node</code> is a text node.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-iscommentnode-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-iscommentnode-node">
+                <code class="function language-js"><span class="token function">isCommentNode</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if <code>node</code> is a comment.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-isfragmentnode-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-isfragmentnode-node">
+                <code class="function language-js"><span class="token function">isFragmentNode</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if <code>node</code> is a fragment.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-isinternallink-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-isinternallink-node">
+                <code class="function language-js"><span class="token function">isInternalLink</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if the <code>href</code> of <code>node</code> points to a resource on the same domain
+as the current document.</p>
+</article>
+
+            </div>
+
+            <div class="x-1">
+                <h4 class="doctext-03">mutate.</h4>
+                <!--template-->
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-append-target-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-append-target-node">
+                <code class="function language-js"><span class="token function">append</span><span class="token punctuation">(</span>target<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Appends <code>node</code>, which may be a string or DOM node, to <code>target</code>. Returns <code>node</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-assign-node-properties">
+        <h3 class="doctext-05 ">
+            <a href="#function-assign-node-properties">
+                <code class="function language-js"><span class="token function">assign</span><span class="token punctuation">(</span>node<span class="token punctuation">,</span> properties<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Assigns each property of <code>properties</code> to <code>node</code>, as a property where that
+property exists in <code>node</code>, otherwise as an attribute.</p>
+<p>If <code>properties</code> has a property <code>'children'</code> it must be an array of nodes;
+they are appended to ‘node’.</p>
+<p>The property <code>'html'</code> is treated as an alias of <code>'innerHTML'</code>. The property
+<code>'tag'</code> is treated as an alias of <code>'tagName'</code> (which is ignored, as
+<code>node.tagName</code> is read-only). The property <code>'is'</code> is also ignored.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-create-tag-content">
+        <h3 class="doctext-05 ">
+            <a href="#function-create-tag-content">
+                <code class="function language-js"><span class="token function">create</span><span class="token punctuation">(</span>tag<span class="token punctuation">,</span> content<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Constructs and returns a new DOM node.</p>
+<ul>
+<li>If <code>tag</code> is <code>"text"</code> a text node is created.</li>
+<li>If <code>tag</code> is <code>"fragment"</code> a fragment is created.</li>
+<li>If <code>tag</code> is <code>"comment"</code> a comment is created.</li>
+<li>If <code>tag</code> is any other string the element <code>&lt;tag&gt;&lt;/tag&gt;</code> is created.</li>
+<li>Where <code>tag</code> is an object, it must have a <code>"tag"</code> or <code>"tagName"</code> property.
+A node is created according to the above rules for tag strings, and other
+properties of the object are assigned with dom’s <code>assign(node, object)</code> function.</li>
+</ul>
+<p>If <code>content</code> is a string it is set as text content on a text or comment node,
+or as inner HTML on an element or fragment. It may also be an object of
+properties which are assigned with dom’s <code>assign(node, properties)</code> function.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-clone-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-clone-node">
+                <code class="function language-js"><span class="token function">clone</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns a deep copy of <code>node</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-prepend-target-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-prepend-target-node">
+                <code class="function language-js"><span class="token function">prepend</span><span class="token punctuation">(</span>target<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Prepends <code>node</code>, which may be a string or DOM node, to <code>target</code>. Returns <code>node</code>.</p>
+</article>
+
+            </div>
+        </div>
+
+        <div class="x-1 3x @1-x-4 column-grid grid">
+            <div class="x-1">
+                <h4 class="doctext-03">events.</h4>
+                <!--template-->
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-events-type-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-events-type-node">
+                <code class="function language-js"><span class="token function">events</span><span class="token punctuation">(</span>type<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns a mappable stream of events heard on <code>node</code>:</p>
+<pre><code><span class="token keyword">var</span> stream <span class="token operator">=</span> <span class="token function">events</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> document<span class="token punctuation">.</span>body<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'target'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">each</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Do something with nodes</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>Stopping the stream removes the event listeners:</p>
+<pre><code>stream<span class="token punctuation">.</span><span class="token function">stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-isprimarybutton-e">
+        <h3 class="doctext-05 ">
+            <a href="#function-isprimarybutton-e">
+                <code class="function language-js"><span class="token function">isPrimaryButton</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns <code>true</code> if user event is from the primary (normally the left or only)
+button of an input device. Use this to avoid listening to right-clicks.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-preventdefault-e">
+        <h3 class="doctext-05 ">
+            <a href="#function-preventdefault-e">
+                <code class="function language-js"><span class="token function">preventDefault</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Calls <code>e.preventDefault()</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-trigger-type-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-trigger-type-node">
+                <code class="function language-js"><span class="token function">trigger</span><span class="token punctuation">(</span>type<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Triggers event of <code>type</code> on <code>node</code>.</p>
+<pre><code><span class="token function">trigger</span><span class="token punctuation">(</span><span class="token string">'dom-activate'</span><span class="token punctuation">,</span> node<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-gestures-options-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-gestures-options-node">
+                <code class="function language-js"><span class="token function">gestures</span><span class="token punctuation">(</span>options<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns a stream of streams of events. Each stream of events represents the
+motion of a single finger. The types of events the stream contains is either
+<code>'mousedown'</code> followed by any number of <code>'mousemove'</code>s and a <code>'mouseup'</code>,
+or the touch objects that go with <code>'touchstart'</code>, any number of <code>'touchmove'</code>s
+and a <code>'touchend'</code>.</p>
+<pre><code class="language-js"><span class="token function">gestures</span><span class="token punctuation">(</span><span class="token punctuation">{</span> selector<span class="token punctuation">:</span> <span class="token string">'.thing'</span><span class="token punctuation">,</span> threshold<span class="token punctuation">:</span> <span class="token string">'0.5rem'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> document<span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">each</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>events<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// First event is a mousedown or touchstart event</span>
+    <span class="token keyword">const</span> e0 <span class="token operator">=</span> events<span class="token punctuation">.</span><span class="token function">shift</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    events<span class="token punctuation">.</span><span class="token function">each</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>e1<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Mousemove or touchmove events</span>
+        <span class="token keyword">const</span> distance <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>
+            Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>e1<span class="token punctuation">.</span>clientX <span class="token operator">-</span> e0<span class="token punctuation">.</span>clientX<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>e1<span class="token punctuation">.</span>clientY <span class="token operator">-</span> e0<span class="token punctuation">.</span>clientY<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token operator">...</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-trapfocus-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-trapfocus-node">
+                <code class="function language-js"><span class="token function">trapFocus</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Constrains focus to focusable elements inside <code>node</code>.
+Returns a function that removes the trap.
+Calling <code>trapFocus(node)</code> again also removes the existing trap.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-tokey-e">
+        <h3 class="doctext-05 ">
+            <a href="#function-tokey-e">
+                <code class="function language-js"><span class="token function">toKey</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns key string corresponding to <code>e.keyCode</code>, or <code>undefined</code>.</p>
+</article>
+
+            </div>
+
+            <div class="x-1">
+                <h4 class="doctext-03">style.</h4>
+                <!--template-->
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-classes-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-classes-node">
+                <code class="function language-js"><span class="token function">classes</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns the classList of <code>node</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-addclass-class-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-addclass-class-node">
+                <code class="function language-js"><span class="token function">addClass</span><span class="token punctuation">(</span><span class="token keyword">class</span><span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Adds <code>'class'</code> to the classList of <code>node</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-removeclass-class-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-removeclass-class-node">
+                <code class="function language-js"><span class="token function">removeClass</span><span class="token punctuation">(</span><span class="token keyword">class</span><span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Removes <code>'class'</code> from the classList of <code>node</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-offset-node1-node2">
+        <h3 class="doctext-05 ">
+            <a href="#function-offset-node1-node2">
+                <code class="function language-js"><span class="token function">offset</span><span class="token punctuation">(</span>node1<span class="token punctuation">,</span> node2<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns array <code>[x, y]</code> representing the vector from <code>node1</code> to <code>node2</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-prefix-string">
+        <h3 class="doctext-05 ">
+            <a href="#function-prefix-string">
+                <code class="function language-js"><span class="token function">prefix</span><span class="token punctuation">(</span>string<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns a prefixed CSS property name where a prefix is required in the current
+browser.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-rect-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-rect-node">
+                <code class="function language-js"><span class="token function">rect</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns a <code>DOMRect</code> object describing the draw rectangle of <code>node</code>.
+(If <code>node</code> is <code>window</code> a preudo-DOMRect object is returned).</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-scrollratio-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-scrollratio-node">
+                <code class="function language-js"><span class="token function">scrollRatio</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Return the ratio of scrollTop to scrollHeight - clientHeight.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-disablescroll-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-disablescroll-node">
+                <code class="function language-js"><span class="token function">disableScroll</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Disables scrolling by setting <code>overflow: hidden</code> on <code>node</code> while maintaining
+the current scrollTop, effectively causing the node to ‘freeze’ in position.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-enablescroll-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-enablescroll-node">
+                <code class="function language-js"><span class="token function">enableScroll</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Enables scrolling by removing <code>overflow: hidden</code> on <code>node</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-style-property-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-style-property-node">
+                <code class="function language-js"><span class="token function">style</span><span class="token punctuation">(</span>property<span class="token punctuation">,</span> node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns the computed style <code>property</code> of <code>node</code>.</p>
+<pre><code><span class="token function">style</span><span class="token punctuation">(</span><span class="token string">'transform'</span><span class="token punctuation">,</span> node<span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token comment">// returns transform</span></code></pre><p>If <code>property</code> is of the form <code>"property:name"</code>, a named aspect of the property
+is returned.</p>
+<pre><code><span class="token function">style</span><span class="token punctuation">(</span><span class="token string">'transform:rotate'</span><span class="token punctuation">,</span> node<span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment">// returns rotation, as a number, in radians</span>
+<span class="token function">style</span><span class="token punctuation">(</span><span class="token string">'transform:scale'</span><span class="token punctuation">,</span> node<span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// returns scale, as a number</span>
+<span class="token function">style</span><span class="token punctuation">(</span><span class="token string">'transform:translateX'</span><span class="token punctuation">,</span> node<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// returns translation, as a number, in px</span>
+<span class="token function">style</span><span class="token punctuation">(</span><span class="token string">'transform:translateY'</span><span class="token punctuation">,</span> node<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// returns translation, as a number, in px</span></code></pre></article>
+
+            </div>
+        </div>
+
+        <div class="x-1 3x @2-x-7 column-grid grid">
+            <div class="x-1">
+                <h4 class="doctext-03">animate.</h4>
+                <!--template-->
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-animate-duration-transform-name-object-value">
+        <h3 class="doctext-05 ">
+            <a href="#function-animate-duration-transform-name-object-value">
+                <code class="function language-js"><span class="token function">animate</span><span class="token punctuation">(</span>duration<span class="token punctuation">,</span> transform<span class="token punctuation">,</span> name<span class="token punctuation">,</span> object<span class="token punctuation">,</span> value<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Animates property <code>name</code> of <code>object</code> to <code>value</code> over <code>duration</code> seconds, using
+the <code>transform</code> function as an easing function, and updates the object on
+animation frames.</p>
+<pre><code>duration  <span class="token operator">-</span> number <span class="token keyword">in</span> seconds
+transform <span class="token operator">-</span> <span class="token keyword">function</span> that maps <span class="token function">x</span> <span class="token punctuation">(</span><span class="token number">0</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> to <span class="token function">y</span> <span class="token punctuation">(</span><span class="token number">0</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+name      <span class="token operator">-</span> string name <span class="token keyword">of</span> property to animate
+object    <span class="token operator">-</span> object to animate
+value     <span class="token operator">-</span> target value</code></pre></article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-transition-duration-fn">
+        <h3 class="doctext-05 ">
+            <a href="#function-transition-duration-fn">
+                <code class="function language-js"><span class="token function">transition</span><span class="token punctuation">(</span>duration<span class="token punctuation">,</span> fn<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Calls <code>fn</code> on each animation frame until <code>duration</code> seconds has elapsed. <code>fn</code>
+is passed a single argument <code>progress</code>, a number that ramps from <code>0</code> to <code>1</code> over
+the duration of the transition. Returns a function that cancels the transition.</p>
+<pre><code><span class="token function">transition</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span>progress<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Called every frame for 3 seconds</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article>
+
+            </div>
+
+            <div class="x-1">
+                <h4 class="doctext-03">HTML.</h4>
+                <!--template-->
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-escape-string">
+        <h3 class="doctext-05 ">
+            <a href="#function-escape-string">
+                <code class="function language-js"><span class="token function">escape</span><span class="token punctuation">(</span>string<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Escapes <code>string</code> for setting safely as HTML.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-fragmentfromhtml-string">
+        <h3 class="doctext-05 ">
+            <a href="#function-fragmentfromhtml-string">
+                <code class="function language-js"><span class="token function">fragmentFromHTML</span><span class="token punctuation">(</span>string<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns a DOM fragment of the parsed html <code>string</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-fragmentfromtemplate-node">
+        <h3 class="doctext-05 ">
+            <a href="#function-fragmentfromtemplate-node">
+                <code class="function language-js"><span class="token function">fragmentFromTemplate</span><span class="token punctuation">(</span>node<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns a DOM fragment containing the content of the template <code>node</code>.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-parsehtml-string">
+        <h3 class="doctext-05 ">
+            <a href="#function-parsehtml-string">
+                <code class="function language-js"><span class="token function">parseHTML</span><span class="token punctuation">(</span>string<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns an HTML document parsed from <code>string</code>, or undefined.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-parsesvg-string">
+        <h3 class="doctext-05 ">
+            <a href="#function-parsesvg-string">
+                <code class="function language-js"><span class="token function">parseSVG</span><span class="token punctuation">(</span>string<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns an SVG document parsed from <code>string</code>, or undefined.</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-parsexml-string">
+        <h3 class="doctext-05 ">
+            <a href="#function-parsexml-string">
+                <code class="function language-js"><span class="token function">parseXML</span><span class="token punctuation">(</span>string<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Returns an XML document parsed from <code>string</code>, or undefined.</p>
+</article>
+
+            </div>
+
+            <div class="x-1">
+                <h4 class="doctext-03">communicate.</h4>
+                <!--template-->
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-request-type-url-data-mimetype-headers">
+        <h3 class="doctext-05 ">
+            <a href="#function-request-type-url-data-mimetype-headers">
+                <code class="function language-js"><span class="token function">request</span><span class="token punctuation">(</span>type<span class="token punctuation">,</span> url<span class="token punctuation">,</span> data<span class="token punctuation">,</span> mimetype <span class="token operator">|</span> headers<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>Uses <code>fetch()</code> to send a request to <code>url</code>. Where <code>type</code> is <code>"GET"</code>, <code>data</code> is
+serialised and appended to the URL, otherwise it is sent as a request body.
+The 4th parameter may be a content type string or a headers object (in which
+case it must have a <code>'Content-Type'</code> property).</p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-requestget-url">
+        <h3 class="doctext-05 ">
+            <a href="#function-requestget-url">
+                <code class="function language-js"><span class="token function">requestGet</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>A shortcut for <code>request('get', 'application/json', url)</code></p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-requestpatch-url-data">
+        <h3 class="doctext-05 ">
+            <a href="#function-requestpatch-url-data">
+                <code class="function language-js"><span class="token function">requestPatch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> data<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>A shortcut for <code>request('patch', 'application/json', url, data)</code></p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-requestpost-url-data">
+        <h3 class="doctext-05 ">
+            <a href="#function-requestpost-url-data">
+                <code class="function language-js"><span class="token function">requestPost</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> data<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>A shortcut for <code>request('post', 'application/json', url, data)</code></p>
+</article>
+
+    <article class="function-doc-toggle-block doc-toggle-block toggle-block block" toggleable="" id="function-requestdelete-url-data">
+        <h3 class="doctext-05 ">
+            <a href="#function-requestdelete-url-data">
+                <code class="function language-js"><span class="token function">requestDelete</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> data<span class="token punctuation">)</span></code>
+            </a>
+        </h3>
+    <p>A shortcut for <code>request('delete', 'application/json', url, data)</code></p>
+</article>
+
+            </div>
+        </div>
+    </section>
+
+    
+
+    <!-- Document interactivity -->
+    <script type="module">
+        import '../bolt/modules/device.js';
+        import '../bolt/attributes/data-popable.js';
+        import '../bolt/attributes/data-toggleable.js';
+        import '../bolt/modules/data-targetable.js';
+        import '../bolt/attributes/data-submittable.js';
+        import '../bolt/attributes/data-switchable.js';
+        import '../bolt/attributes/data-fullscreenable.js';
+        import '../bolt/attributes/data-validateable.js';
+        import '../bolt/classes/toggle-block.js';
+
+        import * as dom from './module.js';
+        Object.assign(window, dom);
+    </script>
+
+</body></html>

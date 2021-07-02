@@ -41,15 +41,18 @@ const distributor = new Distributor(function popstate(e) {
     */
 
     const data = {
-        time: e.timeStamp / 1000
+        time: e.timeStamp / 1000,
+        timeStamp: e.timeStamp / 1000
     };
 
     var changed = false;
 
     if (location.pathname !== pathname) {
-        pathname = data.path = location.pathname;
+        pathname = location.pathname;
         changed = true;
     }
+
+    data.pathname = location.pathname;
 
     if (location.search !== search) {
         search = location.search;
@@ -72,14 +75,9 @@ const distributor = new Distributor(function popstate(e) {
     }
 
     // If nothing changed, make distributor ignore by returning false
+    //return changed && data;
     return changed && data;
 });
-
-if (DEBUG) {
-    distributor.on(function(data) {
-        log('navigate', data);
-    });
-}
 
 
 /** 
@@ -125,11 +123,11 @@ export default {
     },
 
     /** .params **/
-    get path() {
+    get pathname() {
         return location.pathname;
     },
 
-    set path(path) {
+    set pathname(path) {
         const url = this.URL();
         url.pathname = path;
         history.replaceState(history.state, document.title, url);
@@ -179,6 +177,10 @@ export default {
             return this;
         }
 
+        if (url.href === location.href) {
+            return;
+        }
+
         const hash = location.hash;
         const identifier = stripHash(url.hash);
 
@@ -203,14 +205,16 @@ export default {
             return this;
         }
 
-
+        const oldhref = location.href;
         const href = url.pathname + url.search + (identifier ? url.hash : '');
         history.pushState(state, document.title, href);
 
-        // Force :target selector to update when there is a new #identifier. This 
-        // also triggers a popstate event
+        // Force :target selector to update when there is a new #identifier
         if (url.hash !== hash) {
-            updateTarget(href);
+            // Move forward to the old url and back to the current location, causing  
+            // :target selector to update and a popstate event.
+            history.pushState(state, document.title, oldhref);
+            history.back();
         }
 
         // Where no popstate is scheduled we nonetheless want to notify 
@@ -218,11 +222,17 @@ export default {
         // make it async to echo the behaviour of a real popstate event
         else {
             Promise.resolve().then(function() {
-                distributor.handleEvent({
+                const result = distributor.handleEvent({
                     type: 'navigate',
                     state: state,
                     timeStamp: window.performance.now()
                 });
+
+                // If a handler has returned false that's a signal that we don't
+                // want the navigate to be handled by history
+                if (result !== undefined && !result) {
+                    window.location.href = url;
+                }
             });
         }
 

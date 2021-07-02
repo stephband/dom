@@ -55,6 +55,12 @@
         location.on(route({
             '^dom/state.html': function arse(location) {
                 console.log(location.base + location.path, 'dom/state.html', location.route, location.state);
+                
+                location.on({
+                    params: function(location) {
+                        console.log('PARAMS', location);
+                    }
+                });
             },
 
             '^n-(\\d+)/': route({
@@ -72,15 +78,15 @@
                     });
                 },
 
-                '^external': function(location, $1) {
-                    console.log('VIEW', location.base + location.path, location.route, location.state);
+                '^external': function(location) {
+                    console.log(location.base + location.path, 'FORCE EXTERNAL', location.route, location.state);
 
                     // Return false to signal unhandled
                     return false;
                 },
 
-                '^': function(location, $1) {
-                    console.log('VIEW', location.base + location.path, location.route, location.state);
+                '^': function(location) {
+                    console.log(location.base + location.path, 'CATCH ALL', location.route, location.state);
                 }
             })
         }));

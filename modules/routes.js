@@ -49,7 +49,7 @@ passed in) before being distributed to listeners bound via `distributor.on(fn)`.
 function distribute(handlers, name, value) {
     var n = -1;
     var handled, handler, output;
-
+console.log('DIST', name, value, handlers);
     while (handler = handlers[++n]) {
         if (!(name in handler) && !('*' in handler)) { continue; }
 
@@ -196,12 +196,14 @@ console.log('LOCATION', location.base + location.path, 'PARENT DONE');
                     //names.push('state');
                     location.state = parent.state;
                     console.log('LOCATION', location.base + location.path, 'STATE');
+                    names = 'state';
                 }
 
                 if (location.params !== parent.params) {
                     //names.push('params');
                     location.params = parent.params;
                     console.log('LOCATION', location.base + location.path, 'PARAMS');
+                    names = 'params';
                 }
 
                 if (location.route !== route) {

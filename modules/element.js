@@ -519,7 +519,7 @@ export default function element(definition, options) {
             define(element, properties);
 
             // Run constructor
-            options.construct.apply(element);
+            options.construct && options.construct.apply(element);
 
             // Detect and run attributes
             let name;
@@ -530,7 +530,7 @@ export default function element(definition, options) {
                 }
             }
 
-            options.connect.apply(element);
+            options.connect && options.connect.apply(element);
         });
     }
 

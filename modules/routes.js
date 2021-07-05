@@ -7,137 +7,87 @@ a function that takes a string and tests the regexes against it until a match is
 found. The matching function is called with a location object.
 
 ```js
-location.on(route({
-    '^path\/to\/([a-z])\/([0-9])\/': function(location) {
-        // Properties of location object
-        location.pathname // Full pathname from root route
-        location.base     // Slice of pathname preceding current path
-        location.path     // Matching slice of pathname - the current route
-        location.route    // Remaining slice of pathname
-        location.params   // Current URL params
-        location.state    // Current history state object
+const route = routes({
+    '^path\/to\/([a-z])\/([0-9])\/': function(route) {
+        // Properties of route object
+        route.base       // Slice of pathname preceding current path
+        route.path       // Matching slice of pathname - the current route
+        route.route      // Remaining slice of pathname
+        route.params     // Current URL params as on object
+        route.identifier // Current fragment identifier (without a hash)
+        route.state      // Current history state object
 
-        // Teardown view when location expires
-        location.done(function teardown() {
-            // Teardown
+        // Get notified when route, params or state changes
+        route.on({
+            route:  () => ..., 
+            params: () => ..., 
+            identifier: () => ..., 
+            state:  () => ...,
+            stop:   () => ...
         });
     }
 }));
+
+route(window.location);
 ```
 **/
 
-import is      from '../../fn/modules/is.js';
-import matches from '../../fn/modules/matches.js';
-import noop    from '../../fn/modules/noop.js';
-import nothing from '../../fn/modules/nothing.js';
+import overload from '../../fn/modules/overload.js';
+import Distributor from './distributor-2.js';
 
-const assign = Object.assign;
+const DEBUG = true;
 
-
-
+const assign  = Object.assign;
+const trigger = Distributor.trigger;
 
 
 /** 
-Distributor(handle)
-
-Returns an object with `.on()`, `.off()` and `.push()` methods, and also 
-`.handleEvent()` so that it may be used directly as a DOM event handler. 
-Incoming event objects are transformed by `handle` (where `handle` is 
-passed in) before being distributed to listeners bound via `distributor.on(fn)`.
+Route(base, path, setup)
 **/
 
-function distribute(handlers, name, value) {
+const defaults = {
+    search: '',
+    params: null,
+    hash:   '',
+    identifier: '',
+    json:   'null',
+    state:  null
+};
+
+function stop(route) {
+    //console.trace('stop', distributor);
+    const handlers = route.handlers;
     var n = -1;
-    var handled, handler, output;
-console.log('DIST', name, value, handlers);
+    var handler;
+
     while (handler = handlers[++n]) {
-        if (!(name in handler) && !('*' in handler)) { continue; }
-
-        output = name in handler ?
-            handler[name](value) :
-            handler['*'](value) ;
-
-        handled = handled === undefined ?
-            output :
-            output === undefined ? handled :
-            handled + output ;
+        handler.stop && handler.stop();
     }
 
-    return handled;
+    // Throw away references to all handlers
+    handlers.length = 0;
+
+    // End of route group ***
+    if (DEBUG) { console.groupEnd(); }
 }
 
-function Distributor(setup) {
-    this.handlers = [];
-    this.dones = [];
-    setup.call(this, (name, value) => distribute(this.handlers, name, value));
-}
+function Route(base, path, route, captures) {
+    this.base       = base;
+    this.path       = path;
+    this.route      = route;
 
-assign(Distributor.prototype, {
-    on: function(name, fn) {
-        if (!arguments.length) {
-            throw new Error('Cannot pass `' + fn + '` to distributor.on()');
-        }
-
-        const listener = typeof name === 'string' ?
-            { [name]: fn } :
-            name ;
-
-        this.handlers.push(listener);
-        return this;
-    },
-
-    off: function(name, fn) {
-        const i = typeof name === 'string' ?
-            this.handlers.findIndex(matches({ [name]: fn })) :
-            this.handlers.findIndex(is(name)) ;
-
-        if (i === -1) { return this; }
-
-        this.handlers.splice(i, 1);
-        return this;
-    },
-
-    done: function(fn) {
-        this.dones.push(fn);
-    },
-
-    stop: function() {
-        // Throw away references to all handlers
-        this.handlers.length = 0;
-
-console.log('STOP', this.dones.length);
-
-        // Call done handlers, remove references
-        if (this.dones) {
-            this.dones.forEach((fn) => fn());
-            this.dones.length = 0;
-        }
-    }
-});
-
-
-/** 
-Location(base, path, setup)
-**/
-
-function Location(base, path, route, setup, parent) {
-    this.base     = base;
-    this.path     = path;
-    this.route    = route;
-    this.pathname = parent.pathname || '';
-    this.params   = parent.params;
-    this.state    = parent.state;
-
-    // Push done fns to top level location (old)
-    if (parent.done) {
-        this.done = parent.done;
+    var n = -1;
+    while(captures[++n] !== undefined) {
+        this['$' + n] = captures[n];
     }
 
-    Distributor.call(this, setup);
+    Distributor.call(this);
 }
 
-assign(Location.prototype, Distributor.prototype, {
-
+assign(Route.prototype, Distributor.prototype, {
+    params:     defaults.params,
+    identifier: defaults.identifier,
+    state:      defaults.state
 });
 
 
@@ -145,104 +95,243 @@ assign(Location.prototype, Distributor.prototype, {
 routes()
 **/
 
+const names = [];
+
+const nostate = {
+    json:     'null',
+    state:    null
+};
+
+function parseParam(string) {
+    var value;
+    return string === 'null' ? null :
+        string === 'true' ? true :
+        string === 'false' ? false :
+        // Number string to number
+        ((value = Number(string)) || value === 0) ? value :
+        // Comma delimited string to array
+        ((value = string.split(/\s*,\s*/)) && value.length > 1) ? value.map(parseParam) :
+        // Yer basic string
+        string ;
+}
+
+function fromEntries(entries) {
+    const object = {};
+    var key, value;
+
+    for([key, value] of entries) {
+        object[key] = parseParam(value);
+    }
+
+    return object;
+}
+
+function updateDataFromLocation(location, history, data) {
+    names.length = 0;
+
+    if (location.pathname !== data.pathname) {
+        data.pathname = location.pathname;
+        data.base = '';
+        data.path = '/';
+        data.route = location.pathname.slice(1);
+        names.push('route');
+    }
+
+    if (location.search !== data.search) {
+        data.search = location.search;
+        data.params = location.search ?
+            fromEntries(new URLSearchParams(location.search)) :
+            defaults.params ;
+        names.push('params');
+    }
+
+    if (location.hash !== data.hash) {
+        data.hash = location.hash;
+console.log('hash', location);
+        data.identifier = location.hash.replace(/^#/, '') || defaults.identifier;
+        names.push('identifier');
+    }
+
+    const json = JSON.stringify(history.state);
+    if (json !== data.json) {
+        data.json  = json;
+        data.state = history.state;
+        names.push('state');
+    }
+
+    return names;
+}
+
+function updateData(location, data) {
+    return typeof location === 'string' ?
+        updateDataFromLocation({
+            pathname: location.replace(/(?:\?|#).*$/, ''),
+            search:   location.replace(/^[^?]*/, '').replace(/#.*$/, ''),
+            hash:     location.replace(/^[^#]*/, '')
+        }, nostate, data) :
+
+    // Or the global location object
+    location === window.location ?
+        updateDataFromLocation(location, window.history, data) :
+    
+    // Or another URL object
+        updateDataFromLocation(location, nostate, data) ;
+}
+
+function updateRoute(location, route) {
+    names.length = 0;
+
+    if (location.params !== route.params) {
+        route.params = location.params;
+        names.push('params');
+    }
+
+    if (location.identifier !== route.identifier) {
+        route.identifier = location.identifier;
+        names.push('identifier');
+    }
+
+    if (location.state !== route.state) {
+        route.state = location.state;
+        names.push('state');
+    }
+
+    return names;
+}
+
+function toLocationType(location) {
+    return location instanceof Route ? 'route' : 'url';
+}
+
 export default function routes(patterns) {
-    const regexps = Object.keys(patterns).map((pattern) => RegExp(pattern));
-    var location = nothing;
-    var distribute = noop;
+    const keys    = Object.keys(patterns);
+    const regexps = keys.map((pattern) => RegExp(pattern));
 
-    return function route(parent) {
-        const string =
-            // Path is a string
-            typeof path === 'string' ? parent :
-            // Path is a route path object
-            ('route' in parent) ? parent.route :
-            // Path is a new URL()
-            parent.pathname ? parent.pathname.slice(1) :
-            // There is no path change
-            '' ;
+    var route;
 
-        if (parent.done) {
-            parent.done(() => {
-console.log('LOCATION', location.base + location.path, 'PARENT DONE');
-                location.stop();
-            });
+    function router(location) {
+        const base   = location.base + location.path;
+        const string = location.route;
+
+        // Loop through regexes until a match is captured
+        var regexp, captures, n = -1;
+
+        while(
+            (regexp = regexps[++n]) && 
+            !(captures = regexp.exec(string))
+        ); // Semicolon important here, don't remove
+
+        // Ignore unmatching handlers
+        if (!captures) {
+            // No matches found, stop old route
+            route && stop(route);
+            route = undefined;
+
+            // Signal to route distributor that nothing was handled
+            return false;
         }
 
-        // Where a path has not been found do not update routes
-        if (!string) { return; }
+        const key  = keys[n];
+        const path = captures.input.slice(0, captures.index + captures[0].length);
+        const name = captures.input.slice(captures.index + captures[0].length);
 
-        // Call any registered teardown function
-        //var d = -1;
-        //while (dones[++d]) { dones[d](); }
-        //dones.length = 0;
+        // Where .base and .path have not changed, .route must have changed
+        // and params, identifier and state may have changed, so we update the 
+        // existing route and notify as route
+        if (route && route.base === base && route.path === path) {
+            route.route       = name;
+            route.params      = location.params;
+            route.indentifier = location.identifier;
+            route.state       = location.state;
+            return trigger(['route'], route, route);
+        }
 
-        const base = parent.route ? parent.base + parent.path : '/';
-        var n = -1, regexp, names = '';
+        // Stop old route and create a new one
+        route && stop(route);
 
-        while(regexp = regexps[++n]) {
-            const captures = regexp.exec(string);
+        // Start of route group ***
+        if (DEBUG) { console.group('route ' + path); }
 
-            // Ignore unmatching handlers
-            if (!captures) { continue; }
+        // Create a new route object
+        route = new Route(base, path, name, captures);
 
-            const path  = captures.input.slice(0, captures.index + captures[0].length);
-            const route = captures.input.slice(captures.index + captures[0].length);
+        // Update params, identifier, state
+        const changed = updateRoute(location, route);
 
-            // Where path and base have not changed mutate existing location
-            if (location.path === path && location.base === base) {
-                //names.length = 0;
+        // Call route handler with (route, $1, $2, ...)
+        captures[0] = route;
+        const output = patterns[key].apply(this, captures);
 
-                if (location.state !== parent.state) {
-                    //names.push('state');
-                    location.state = parent.state;
-                    console.log('LOCATION', location.base + location.path, 'STATE');
-                    names = 'state';
+        // Notify changes to params, identifier, state
+        changed.length && trigger(names, route, route);
+
+        return output;
+    }
+
+    var data;
+
+    return overload(toLocationType, {
+        // Location is a Route object
+        route: function(location) {
+            location.on({
+                route: () => router(location),
+
+                params: () => {
+                    if (!route) { return; }
+                    if (location.params === route.params) { return; }
+                    route.params = location.params;
+                    return trigger(['params'], route, route);
+                },
+
+                identifier: () => {
+                    if (!route) { return; }
+                    if (location.identifier === route.identifier) { return; }
+                    route.identifier = location.identifier;
+                    return trigger(['identifier'], route, route);
+                },
+
+                state: () => {
+                    if (!route) { return; }
+                    if (location.state === route.state) { return; }
+                    route.state = location.state;
+                    return trigger(['state'], route, route);
+                },
+
+                stop: () => {
+                    route && stop(route);
+                    route = undefined;
                 }
+            });
 
-                if (location.params !== parent.params) {
-                    //names.push('params');
-                    location.params = parent.params;
-                    console.log('LOCATION', location.base + location.path, 'PARAMS');
-                    names = 'params';
-                }
+            return router(location);
+        },
 
-                if (location.route !== route) {
-                    //names.push('route');
-                    location.route = parent.route;
-                    console.log('LOCATION', location.base + location.path, 'ROUTE');
-                }
+        // Location is a URL
+        url: function(location) {
+            // Keep a cache of values at root level
+            data = data || Object.assign({}, defaults);
 
-                distribute(names, location);
+            // Is it a URL string?
+            const changed = updateData(location, data);
+
+            // Handle changes to route
+            if (changed[0] === 'route') {
+                // Handle changes to root
+                return router(data);
+            }
+
+            if (!route) {
+                console.log('NO ROUTE!! Is this right? Can this happen?');
                 return;
             }
 
-            // Stop old location and create a new one
-            location.stop();
+            // Update params, identifier, state
+            route.params      = data.params;
+            route.indentifier = data.identifier;
+            route.state       = data.state;
 
-            location = new Location(base, path, route, function(push, stop) {
-                distribute = push;
-                distribute(names, location);
-            }, parent);
-
-            location.done(() => {
-console.log('LOCATION', location.base + location.path, 'DONE');
-                location = nothing;
-                distribute = noop;
-            });
-
-            // Make the first parameter the location
-console.log('LOCATION', location.base + location.path, 'NEW');
-            const output = patterns[regexp.source.replace('\\/', '/')](location);
-
-            // If there was output, pass it on, otherwise default to true
-            // since a handler was called and we assume it is handled
-            return output === undefined ? true : output ;
+            // Notify changes to params, identifier, state
+            changed.length && trigger(changed, route, route);
         }
-
-        // No matches found, stop old location
-        location.stop();
-
-        // Signal to location distributor that nothing was handled
-        return false;
-    };
+    });
 }

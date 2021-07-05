@@ -33,60 +33,80 @@
 </head>
 
 <body class="@3-12-grid grid">
-    <a href="/dom/state.html" data-arse="true">State</a>
-    <a href="/dom/state.html?param=5" data-arse="true">State param=5</a>
-    <a href="/n-400/route.html">Route</a>
+    <a href="/dom/index.html">Index</a>
+    <a href="/dom/index.html" data-arse="true">Index <code>{ arse: true }</code></a>
+    <a href="/dom/index.html?param=5" data-arse="false">Index <code>?param=5 { arse: false }</code></a>
+    <a href="/n-400/route-1.html">Route 1</a>
+    <a href="/n-400/route-2.html">Route 2</a>
     <a href="/n-400/catch-all">Route catch all</a>
-    <a href="/n-400/catch-all?name=value&number=9">Route catch all with params</a>
-    <a href="/n-400/external">Route flag unhandled</a>
-    <a href="/outside.html">Outside</a>
+    <a href="/n-400/catch-all?name=value&number=9, 10">Route catch all <code>?name=value&number=9</code></a>
+    <a href="/n-400/external">Force page refresh</a>
+    <a href="/outside.html">Unhandled page</a>
 
     <!-- Document interactivity -->
     <script type="module">
         import delegate from '../dom/modules/delegate.js';
         import events   from '../dom/modules/events.js';
-
-        import route from './modules/routes.js';
+        import arg      from '../fn/modules/arg.js';
+        import routes   from './modules/routes.js';
         import location from './modules/location.js';
 
-        import pattern  from '../fn/modules/pattern.js';
-        import arg  from '../fn/modules/arg.js';
+        location.on(routes({
+            '^dom/index.html': function arse(route) {
+                route.on({
+                    // Test `this` is the current object (in logs)
+                    id: 8,
 
-        location.on(route({
-            '^dom\/state.html': function arse(location) {
-                console.log(location.base + location.path, 'dom/state.html', location.route, location.state);
+                    params: function params() {
+                        console.log('params', route.base + route.path, route.params, this.id);
+                    },
 
-                location.on({
-                    params: function(location) {
-                        console.log('PARAMS', location);
+                    state: function statechange() {
+                        console.log('state ', route.base + route.path, route.state, this.id);
+                    },
+
+                    stop: function() {
+                        console.log('stop  ', route.base + route.path);
                     }
                 });
             },
 
-            '^n-(\\d+)/': route({
-                '^([a-z]+).html': function bugger(location) {
-                    console.log(location.base + location.path, 'n-*/*.html', location.route, location.state);
+            '^n-(\\d+)/': routes({
+                '^([a-z-\\d]+)\\.html': function(route, $1) {
+                    route.on({
+                        params: function() {
+                            console.log('params', route.base + route.path, route.params);
+                        },
 
-                    location.on({
-                        params: function(location) {
-                            console.log(location.params);
+                        state: function() {
+                            console.log('state ', route.base + route.path, route.state);
+                        },
+
+                        stop: function() {
+                            console.log('stop  ', route.base + route.path);
                         }
-                    });
-
-                    location.done(function() {
-                        console.log(location.base + location.path, 'DONE');
                     });
                 },
 
-                '^external': function(location) {
-                    console.log(location.base + location.path, 'FORCE EXTERNAL', location.route, location.state);
-
+                '^external': function(route) {
                     // Return false to signal unhandled
                     return false;
                 },
 
-                '^': function(location) {
-                    console.log(location.base + location.path, 'CATCH ALL', location.route, location.state);
+                '^.*$': function(route) {
+                    route.on({
+                        params: function() {
+                            console.log('params', route.base + route.path, route.params);
+                        },
+
+                        state: function() {
+                            console.log('state ', route.base + route.path, route.state);
+                        },
+
+                        stop: function() {
+                            console.log('stop  ', route.base + route.path);
+                        }
+                    });
                 }
             })
         }));
@@ -94,7 +114,11 @@
         events('click', document)
         .each(delegate({
             'a[href]': function(a, e) {
-                location.navigate(a, Object.assign({}, a.dataset));
+                const state = Object.keys(a.dataset).length ?
+                    Object.assign({}, a.dataset) :
+                    null ;
+
+                location.navigate(a, state);
                 e.preventDefault();
             }
         }));

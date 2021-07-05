@@ -29,54 +29,8 @@ function updateTarget(url) {
 Popstate distributor
 */
 
-var pathname, search = '', hash = '', state = 'null';
-
-const distributor = new Distributor(function popstate(e) {
-    /*
-    A `popstate` is received when:
-    - navigation via browser buttons
-    - navigation via typing a new hash in the URL bar
-    - navigation via history.back() and .forward()
-    - location.hash is set to something other than its current value
-    */
-
-    const data = {
-        time: e.timeStamp / 1000,
-        timeStamp: e.timeStamp / 1000
-    };
-
-    var changed = false;
-
-    if (location.pathname !== pathname) {
-        pathname = location.pathname;
-        changed = true;
-    }
-
-    data.pathname = location.pathname;
-
-    if (location.search !== search) {
-        search = location.search;
-        data.params = Object.fromEntries(new URLSearchParams(search));
-        changed = true;
-    }
-
-    if (location.hash !== hash) {
-        hash = location.hash;
-        data.identifier = stripHash(hash);
-        changed = true;
-    }
-
-    const json = e.state ? JSON.stringify(e.state) : "null" ;
-
-    if (json !== state) {
-        state = json;
-        data.state = e.state;
-        changed = true;
-    }
-
-    // If nothing changed, make distributor ignore by returning false
-    //return changed && data;
-    return changed && data;
+const distributor = new Distributor(function(e) {
+    return window.location;
 });
 
 
@@ -113,7 +67,7 @@ export default {
 
     /** .params **/
     get params() {
-        return Object.entries(new URLSearchParams(location.search));
+        return Object.fromEntries(new URLSearchParams(location.search));
     },
 
     set params(params) {
@@ -171,24 +125,30 @@ export default {
                 new URL(url, location.href) :
             url ;
 
+        // If not same origin navigate away from this site
         if (url.origin !== location.origin) {
-            // Navigate away from this site
             window.location.href = url;
             return this;
         }
 
-        if (url.href === location.href) {
+        // Make state conform to JSON serialisation - allows state to be set
+        // from objects that contain functions
+        const json = JSON.stringify(state);
+        const statechange = json !== JSON.stringify(history.state);
+
+        // If nothing has changed get on oor bike
+        if (url.href === location.href && !statechange) {
             return;
         }
 
         const hash = location.hash;
-        const identifier = stripHash(url.hash);
+        const id = stripHash(url.hash);
 
         log('navigate()', url,
             /*(url.pathname !== location.pathname ? 'path: "' + url.pathname + '", ' : '') +
             (url.search !== location.search ? 'params: "' + url.search + '", ' : '') + 
             (url.hash !== location.hash ? 'hash: "' + url.hash + '", ' : '') + */
-            (!!state !== !!history.state ? 'state: ' + JSON.stringify(state) : '') 
+            (state ? 'state: ' + json : '') 
         );
 
         // If only the hash has changed and state is null and scroll is true, 
@@ -196,17 +156,18 @@ export default {
         if (
             url.pathname === location.pathname 
             && url.search === location.search 
-            && state === null 
-            && identifier
-            && identifier !== this.identifier
+            && !statechange
+            && id
+            && id !== this.identifier
             && scroll
         ) {
-            location.hash = identifier;
+            location.hash = id;
             return this;
         }
 
         const oldhref = location.href;
-        const href = url.pathname + url.search + (identifier ? url.hash : '');
+        const href = url.pathname + url.search + (id ? url.hash : '');
+        state = json ? JSON.parse(json) : state ;
         history.pushState(state, document.title, href);
 
         // Force :target selector to update when there is a new #identifier
@@ -218,13 +179,12 @@ export default {
         }
 
         // Where no popstate is scheduled we nonetheless want to notify 
-        // navigation change so simulate an event and pass to distributor, and 
-        // make it async to echo the behaviour of a real popstate event
+        // navigation change so simulate an event and pass to distributor, (and 
+        // make it async to echo the behaviour of a real popstate event)
         else {
-            Promise.resolve().then(function() {
+            //Promise.resolve().then(function() {
                 const result = distributor.handleEvent({
                     type: 'navigate',
-                    state: state,
                     timeStamp: window.performance.now()
                 });
 
@@ -233,7 +193,7 @@ export default {
                 if (result !== undefined && !result) {
                     window.location.href = url;
                 }
-            });
+            //});
         }
 
         return this;

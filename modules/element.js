@@ -63,7 +63,7 @@ All lifecycle handlers are called with the parameter `(shadow)`.
 import create from './create.js';
 import capture from '../../fn/modules/capture.js';
 
-const DEBUG = window.DEBUG === true;
+const DEBUG = window.DEBUG && (window.DEBUG === true || window.DEBUG.includes('element'));
 
 const $internals = Symbol('internals');
 const $shadow    = Symbol('shadow');
@@ -146,36 +146,6 @@ const captureNameTag = capture(/^\s*<?([a-z][\w]*-[\w]+)>?\s*$|^\s*<?([a-z][\w]*
     }
 }, null);
 
-/*
-function getTemplateById(id) {
-    const template = document.getElementById(id);
-
-    if (!template || !template.content) {
-        throw new Error('Template id="' + id + '" not found in document');
-    }
-
-    return template;
-}
-/*
-function getTemplate(template) {
-    if (template === undefined) { return; }
-
-    return typeof template === 'string' ?
-        // If template is an #id search for <template id="id">
-        template[0] === '#' ? getTemplateById(template.slice(1)) :
-        // It must be a string of HTML
-        template :        
-    template.content ?
-        // It must be a template node
-        template :
-    typeof template === 'function' ?
-        template :
-        // Whatever it is, we don't support it
-        function(){
-            throw new Error('element() options.template not a template node, id or string');
-        }() ;
-}
-*/
 function transferProperty(elem, key) {
     if (elem.hasOwnProperty(key)) {
         const value = elem[key];
@@ -187,8 +157,6 @@ function transferProperty(elem, key) {
 }
 
 function createShadow(/*template, */elem, options) {
-    /*if (template === undefined) { return; }
-    */
     elem._initialLoad = true;
 
     // Create a shadow root if there is DOM content. Shadows may be 'open' or
@@ -200,19 +168,6 @@ function createShadow(/*template, */elem, options) {
     });
 
     elem[$shadow] = shadow;
-
-    // If template is a string
-    /*
-    if (typeof template === 'string') {
-        shadow.innerHTML = template;
-    }
-    else if (typeof template === 'function') {
-        template(elem, shadow);
-    }
-    else {
-        shadow.appendChild(template.content.cloneNode(true));
-    }
-    */
 
     return shadow;
 }
@@ -289,39 +244,32 @@ function groupAttributeProperty(data, entry) {
     return data;
 }
 
-export default function element(definition, options) {
-    if (typeof options === 'string') {
-        throw new Error('we dont support element(name, tag, options) anymore.');
-    }
-
-    /*
-    tag = typeof tag === 'string' ?
-        tag :
-        options.extends ;
-    */
-
+export default function element(definition, lifecycle, api) {
     const { name, tag } = captureNameTag(definition);
 
-    // Get the element constructor from options.extends, or the
-    // base HTMLElement constructor
+    // Get the element constructor or the base HTMLElement constructor
     const constructor = typeof tag === 'string' ?
         getElementConstructor(tag) :
         HTMLElement ;
 
-    const { attributes, properties } = options.properties ?
-        Object.entries(options.properties).reduce(groupAttributeProperty, {
-            attributes: {}, 
-            properties: {}
-        }) :
+    const { attributes, properties } = api ?
+            Object.entries(api).reduce(groupAttributeProperty, {
+                attributes: {}, 
+                properties: {}
+            }) :
+        // Support the old way, a single options object with props and lifecycle included
+        lifecycle.properties ?
+            Object.entries(lifecycle.properties).reduce(groupAttributeProperty, {
+                attributes: {}, 
+                properties: {}
+            }) :
         nothing ;
-
-    //let template;
 
     function Element() {
         // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);
-        const shadow = options.construct && options.construct.length > shadowParameterIndex ?
-            createShadow(elem, options) :
+        const shadow = lifecycle.construct && lifecycle.construct.length > shadowParameterIndex ?
+            createShadow(elem, lifecycle) :
             undefined ;
 
         if (Element.formAssociated) {
@@ -333,7 +281,7 @@ export default function element(definition, options) {
             supportsCustomisedBuiltIn = true;
         }
 
-        options.construct && options.construct.call(elem, shadow, elem[$internals]);
+        lifecycle.construct && lifecycle.construct.call(elem, shadow, elem[$internals]);
 
         // Preserve initialisation order of attribute initialisation by
         // queueing them
@@ -386,23 +334,23 @@ export default function element(definition, options) {
         // Define standard form properties
         define(prototype, formProperties);
     
-        if (options.enable || options.disable) {
+        if (lifecycle.enable || lifecycle.disable) {
             prototype.formDisabledCallback = function(disabled) {
                 return disabled ?
-                    options.disable && options.disable.call(this, this[$shadow], this[$internals]) :
-                    options.enable && options.enable.call(this, this[$shadow], this[$internals]) ;
+                    lifecycle.disable && lifecycle.disable.call(this, this[$shadow], this[$internals]) :
+                    lifecycle.enable && lifecycle.enable.call(this, this[$shadow], this[$internals]) ;
             };
         }
         
-        if (options.reset) {
+        if (lifecycle.reset) {
             prototype.formResetCallback = function() {
-                return options.reset.call(this, this[$shadow], this[$internals]);
+                return lifecycle.reset.call(this, this[$shadow], this[$internals]);
             };
         }
         
-        if (options.restore) {
+        if (lifecycle.restore) {
             prototype.formStateRestoreCallback = function() {
-                return options.restore.call(this, this[$shadow], this[$internals]);
+                return lifecycle.restore.call(this, this[$shadow], this[$internals]);
             };
         }
     }
@@ -443,7 +391,7 @@ export default function element(definition, options) {
             elem.appendChild(elem[$internals]);
         }
 
-        // If this is the first connect and there is an options.load fn,
+        // If this is the first connect and there is an lifecycle.load fn,
         // _initialLoad is true
         if (elem._initialLoad) {
             const links = shadow.querySelectorAll('link[rel="stylesheet"]');
@@ -458,8 +406,8 @@ export default function element(definition, options) {
                         // and added to the DOM again, stylesheets do not load
                         // again
                         delete elem._initialLoad;
-                        if (options.load) {
-                            options.load.call(elem, shadow);
+                        if (lifecycle.load) {
+                            lifecycle.load.call(elem, shadow);
                         }
                     }
                 };
@@ -473,28 +421,28 @@ export default function element(definition, options) {
                     }, onceEvent);
                 }
 
-                if (options.connect) {
-                    options.connect.call(this, shadow, internals);
+                if (lifecycle.connect) {
+                    lifecycle.connect.call(this, shadow, internals);
                 }
             }
             else {
-                if (options.connect) {
-                    options.connect.call(this, shadow, internals);
+                if (lifecycle.connect) {
+                    lifecycle.connect.call(this, shadow, internals);
                 }
 
-                if (options.load) {
-                    options.load.call(this, shadow, internals);
+                if (lifecycle.load) {
+                    lifecycle.load.call(this, shadow, internals);
                 }
             }
         }
-        else if (options.connect) {
-            options.connect.call(this, shadow, internals);
+        else if (lifecycle.connect) {
+            lifecycle.connect.call(this, shadow, internals);
         }
     }
 
-    if (options.disconnect) {
+    if (lifecycle.disconnect) {
         prototype.disconnectedCallback = function() {
-            return options.disconnect.call(this, this[$shadow], this[$internals]);
+            return lifecycle.disconnect.call(this, this[$shadow], this[$internals]);
         };
     }
 
@@ -511,7 +459,7 @@ export default function element(definition, options) {
     // assigning their intended APIs to them.
     if (tag && !supportsCustomisedBuiltIn) {
         if (DEBUG) {
-            console.warn('Browser does not support customised built-in elements.\nAttempting to (partially) polyfill instances of <' + tag + ' is="' + name + '"> already in the DOM./nMileage will vary.');
+            console.warn('Browser does not support customised built-in elements.\nAttempting to partially polyfill instances of <' + tag + ' is="' + name + '"> found in the DOM.');
         }
 
         document.querySelectorAll('[is="' + name + '"]').forEach((element) => {
@@ -519,7 +467,7 @@ export default function element(definition, options) {
             define(element, properties);
 
             // Run constructor
-            options.construct && options.construct.apply(element);
+            lifecycle.construct && lifecycle.construct.apply(element);
 
             // Detect and run attributes
             let name;
@@ -530,7 +478,7 @@ export default function element(definition, options) {
                 }
             }
 
-            options.connect && options.connect.apply(element);
+            lifecycle.connect && lifecycle.connect.apply(element);
         });
     }
 

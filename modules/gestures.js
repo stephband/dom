@@ -27,7 +27,7 @@ The `options` object may optionally contain any of:
 
 ```js
 {
-    // Listen to getures on a given device type. Internally the pointer events' 
+    // Listen to gestures on a given device type. Internally the pointer events' 
     // e.pointerType is matched against this string: it may contain any of the 
     // types 'pen', 'mouse' and 'touch'. Where not defined, all pointer types
     // trigger a gesture

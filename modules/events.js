@@ -52,11 +52,12 @@ stream.stop();
 ```
 
 The first parameter may also be an options object, which must have a `type`
-property. Other properties, eg. `passive: true` are passed to addEventListener 
-options.
+property. The `select: '...'` property allows for delegation of an event from 
+the selected target. Other properties, eg. `passive: true` are passed to 
+addEventListener options.
 
 ```js
-var stream = events({ type: 'scroll', passive: true }, document.body);
+var stream = events({ type: 'scroll', passive: true, select: '' }, document.body);
 ```
 */
 
@@ -75,6 +76,7 @@ function Source(notify, stop, type, options, node) {
 	this.buffer  = buffer;
 	this.update  = update;
 	this.options = options;
+    this.select  = options && options.select;
 
 	// Potential hard-to-find error here if type has repeats, ie 'click click'.
 	// Lets assume nobody is dumb enough to do this, I dont want to have to
@@ -95,11 +97,18 @@ assign(Source.prototype, {
 
     /* Make source double as our DOM listener object */
     handleEvent: function handleEvent(e) {
-        if (e.type === 'click'
-         && e.timeStamp <= clickTimeStamp) {
-            // Ignore clicks with the same timeStamp as previous clicks –
-            // they are likely simulated by the browser.
+        // Ignore clicks with the same timeStamp as previous clicks –
+        // they are likely simulated by the browser.
+        if (e.type === 'click' && e.timeStamp <= clickTimeStamp) {
             return;
+        }
+
+        // If there is a selector and the target doesn't match, shoofty 
+        // outta here
+        if (this.select) {
+            const selectedTarget = e.target.closest(this.select);
+            if (!selectedTarget) { return; }
+            e.selectedTarget = selectedTarget;
         }
 
         this.update(e);

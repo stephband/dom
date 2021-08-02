@@ -134,7 +134,7 @@ function createOptions(method, data, head, controller) {
 
     const headers = createHeaders(contentType, assign(
         config.headers && data ? config.headers(data) : {},
-        typeof head === 'string' ? nothing : head
+        typeof head === 'string' ? {} : head
     ));
 
     const options = {

@@ -80,7 +80,7 @@ function update(e) {
     while (l--) {
         rule = rules[l];
 
-        if (rule.state && !test(rule.query)) {
+        if (rule.state === undefined || (rule.state && !test(rule.query))) {
             rule.state = false;
             rule.exit && rule.exit(e);
         }
@@ -92,7 +92,7 @@ function update(e) {
     while (l--) {
         rule = rules[l];
 
-        if (!rule.state && test(rule.query)) {
+        if (rule.state === undefined || (!rule.state && test(rule.query))) {
             rule.state = true;
             rule.enter && rule.enter(e);
         }

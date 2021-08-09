@@ -447,7 +447,7 @@ export default function element(definition, lifecycle, api) {
     }
 
     //if (DEBUG) {
-        console.log('%cElement', 'color: #3a8ab0; font-weight: 600;', '<' + (tag ? tag + ' is=' + name + '' : name) + '>');
+        console.log('%celement', 'color: #3a8ab0; font-weight: 600;', '<' + (tag ? tag + ' is=' + name + '' : name) + '>');
     //}
 
     window.customElements.define(name, Element, tag && { extends: tag });

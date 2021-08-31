@@ -37,8 +37,7 @@ export function trigger(type, node) {
     // Don't cache events. It prevents you from triggering an event of a
 	// given type from inside the handler of another event of that type.
 	var event = Event(type, properties);
-	node.dispatchEvent(event);
-    return node;
+    return node.dispatchEvent(event);
 }
 
 export default curry(trigger, true);

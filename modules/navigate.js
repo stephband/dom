@@ -5,7 +5,7 @@ import log from './log.js';
 const location = window.location;
 
 function triggerNavigate() {
-    trigger('dom-navigate', window);
+    return trigger('dom-navigate', window);
 }
 
 function stripHash(hash) {
@@ -64,28 +64,27 @@ export default function navigate(url, state = null, scroll = false) {
     state = json ? JSON.parse(json) : state ;
     history.pushState(state, document.title, href);
 
-    // Force :target selector to update when there is a new #identifier
+    // Force CSS :target selector to update when there is a new #hash.
+    // (Hackaround, CSS :target does not follow the a state of the 
+    // #hash without this)
     if (url.hash !== hash) {
         // Move forward to the old url and back to the current location, causing  
         // :target selector to update and a popstate event.
         history.pushState(state, document.title, oldhref);
         history.back();
+        return true;
     }
 
-    // Where no popstate is scheduled we nonetheless want to notify 
-    // navigation change so simulate an event and pass to distributor, (and 
-    // mebbe make it async to echo the behaviour of a real popstate event?)
-    else {
-        //Promise.resolve().then(function() {
-        const result = triggerNavigate();
+    const defaulted = triggerNavigate();
 
-        // If a handler has returned false that's a signal that we don't
-        // want the navigate to be handled by history
-        if (result !== undefined && !result) {
-            window.location.href = url;
-        }
-        //});
+    // If a handler has called .preventDefault() defaulted is false. That's 
+    // a signal that we don't want the navigate to be handled by history.
+    if (defaulted) {
+        console.log('WOOWOO', defaulted);
+        window.location.href = url;
     }
+
+    return !defaulted;
 }
 
 // Listen to load and popstate (and hashchange?) events to notify when 

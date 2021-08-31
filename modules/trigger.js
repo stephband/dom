@@ -20,6 +20,9 @@ trigger({
     details: {...}
 }, node);
 ```
+
+Returns the result of `node.dispatchEvent()` - `false` if the event was 
+prevented, else `true`.
 */
 
 import curry from '../../fn/modules/curry.js';

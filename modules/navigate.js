@@ -76,7 +76,7 @@ export default function navigate(url, state = null, scroll = false) {
     // If a handler has called .preventDefault() defaulted is false. That's 
     // a signal that we don't want the navigate to be handled by history.
     if (defaulted) {
-        console.log('WOOWOO', defaulted);
+        //console.log('WOOWOO', defaulted);
         window.location.href = url;
     }
 

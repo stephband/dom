@@ -38,12 +38,8 @@ export default function navigate(url, state = null, scroll = false) {
     const hash = location.hash;
     const id = stripHash(url.hash);
 
-    log('navigate()', url,
-        /*(url.pathname !== location.pathname ? 'path: "' + url.pathname + '", ' : '') +
-        (url.search !== location.search ? 'params: "' + url.search + '", ' : '') + 
-        (url.hash !== location.hash ? 'hash: "' + url.hash + '", ' : '') + */
-        (state ? 'state: ' + json : '') 
-    );
+    const path = (url.pathname + url.search + url.hash).slice(0, 96);
+    log('navigate()', (path.length === 96 ? path + ' …' : path) + (state ? ', ' + json : ''));
 
     // If only the hash has changed and state is null and scroll is true, 
     // employ location.hash to navigate, giving us automatic scroll

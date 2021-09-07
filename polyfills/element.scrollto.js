@@ -22,7 +22,7 @@ let cancel = noop;
 
 function scrollToPosition(scrollParent, options) {
     if (options.behavior === 'smooth') {
-        if (options.left) {
+        if (options.left !== undefined) {
             const scrollBoxWidth = scrollParent === document.body ?
                 // We cannot guarantee that body width is 100%. Use the window
                 // innerHeight instead.
@@ -45,10 +45,10 @@ function scrollToPosition(scrollParent, options) {
 
             const scrollDuration = config.scrollDuration
                 + config.scrollDurationPerHeight
-                * Math.abs(scrollTop - scrollParent.scrollTop)
+                * Math.abs(options.top - scrollParent.scrollTop)
                 / scrollBoxHeight ;
 
-            cancel = animate(scrollDuration, config.scrollTransform, 'scrollTop', scrollParent, scrollTop);
+            cancel = animate(scrollDuration, config.scrollTransform, 'scrollTop', scrollParent, options.top);
         }
     }
     else {

@@ -2,7 +2,8 @@
 /**
 trigger(type, node)
 
-Triggers event of `type` on `node`.
+Triggers event of `type` on `node`. Returns `false` if the event default was 
+prevented, otherwise `true`.
 
 ```
 trigger('dom-activate', node);
@@ -12,7 +13,8 @@ trigger('dom-activate', node);
 /**
 trigger(data, node)
 
-Triggers event described by `data` on `node`.
+Triggers an event described by `data` on `node`. The `data` object must have a 
+`type` property. Use the `details` property to carry a data payload.
 
 ```
 trigger({
@@ -21,8 +23,7 @@ trigger({
 }, node);
 ```
 
-Returns the result of `node.dispatchEvent()` - `false` if the event was 
-prevented, else `true`.
+Returns `false` if the event default was prevented, otherwise `true`.
 */
 
 import curry from '../../fn/modules/curry.js';
@@ -39,7 +40,7 @@ export function trigger(type, node) {
 
     // Don't cache events. It prevents you from triggering an event of a
 	// given type from inside the handler of another event of that type.
-	var event = Event(type, properties);
+	const event = Event(type, properties);
     return node.dispatchEvent(event);
 }
 

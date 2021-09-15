@@ -1,5 +1,6 @@
 .testswarm
 archive/
+build/
 node_modules/*
 .DS_Store
 temp/*

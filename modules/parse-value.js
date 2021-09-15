@@ -1,3 +1,6 @@
+
+console.warn('dom/modules/parse-value.js is deprecated in favour of parse-length.js (which returns numbers not strings, so watch out.)');
+
 // Units
 
 import id       from '../../fn/modules/id.js';

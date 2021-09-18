@@ -20,9 +20,8 @@ window.addEventListener('resize', () => fontSize = undefined);
 
 /**
 px(value)
-Takes a string of the form '10px', '10em', '10rem', '100vw' or '100vh' and 
-returns a numeric value in pixels. If `value` is a number it is returned 
-directly.
+Takes a number in pixels or a string of the form `'10px'`, `'10em'`, `'10rem'`, 
+`'100vw'` or `'100vh'`, and returns a numeric value in pixels.
 */
 
 export const px = overload(toType, {

@@ -51,6 +51,8 @@ export const px = overload(toType, {
     })
 });
 
+export default px;
+
 /**
 em(value)
 Takes numeric value in px, or CSS length of the form `'10px'`, and returns 

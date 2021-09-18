@@ -43,10 +43,10 @@ The `options` object may optionally contain any of:
 ```
 */
 
-import get        from '../../fn/modules/get.js';
-import overload   from '../../fn/modules/overload.js';
-import Stream     from '../../fn/modules/stream.js';
-import parseValue from './parse-value.js';
+import get      from '../../fn/modules/get.js';
+import overload from '../../fn/modules/overload.js';
+import Stream   from '../../fn/modules/stream.js';
+import px       from './parse-length.js';
 
 const assign = Object.assign;
 
@@ -80,7 +80,7 @@ function Pointermove(push, events, options) {
     this.events      = events;
     this.options     = options;
     this.pointerId   = events[0].pointerId;
-    this.threshold   = parseValue(options.threshold);
+    this.threshold   = px(options.threshold);
 
     document.addEventListener('pointermove', this);
     document.addEventListener('pointerup', this);

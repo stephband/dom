@@ -31,13 +31,13 @@ import ready    from './ready.js';
 import id       from '../../fn/modules/id.js';
 import overload from '../../fn/modules/overload.js';
 import toType   from '../../fn/modules/to-type.js';
-import parseValue from './parse-value.js';
+import px       from './parse-length.js';
 
 const rules = [];
 
 const types = overload(toType, {
     'number':   id,
-    'string':   parseValue,
+    'string':   px,
     'function': function(fn) { return fn(); }
 });
 
@@ -104,7 +104,7 @@ export default function media(query, fn1, fn2) {
 
     rule.query = query;
     rule.enter = fn1;
-    rule.exit = fn2;
+    rule.exit  = fn2;
     rules.push(rule);
 
     return query;

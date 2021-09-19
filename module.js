@@ -68,7 +68,7 @@ export { default as boundingBox } from './modules/bounding-box.js';
 import { default as _offset } from './modules/offset.js';
 export const offset = curry(_offset, true);
 
-export { default as parseValue, toRem, toVw, toVh } from './modules/parse-value.js';
+export { default as parseLength, px, em, rem, vw, vh } from './modules/parse-length.js';
 export { default as prefix } from './modules/prefix.js';
 
 import _style from './modules/style.js';

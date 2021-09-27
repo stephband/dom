@@ -11,9 +11,10 @@ Registers a custom element and returns its constructor.
     properties: An object of attribute and property handlers
     
     // Lifecycle handlers
+    stylesheet: optional string path to stylesheet for shadow DOM
     construct:  called during element construction
     connect:    called when element added to DOM
-    load:       called when stylesheets load
+    load:       called when stylesheet loaded
     disconnect: called when element removed from DOM
     enable:     called when form element enabled
     disable:    called when form element disabled
@@ -60,7 +61,7 @@ called immediately after `connect`.
 All lifecycle handlers are called with the parameter `(shadow)`.
 */
 
-import create from './create.js';
+import create  from './create.js';
 import capture from '../../fn/modules/capture.js';
 
 const DEBUG = window.DEBUG && (window.DEBUG === true || window.DEBUG.includes('element'));
@@ -166,6 +167,11 @@ function createShadow(/*template, */elem, options) {
         mode:           options.mode || 'closed',
         delegatesFocus: options.focusable || false
     });
+
+    if (options.stylesheet) {
+        const link = create('link', { rel: 'stylesheet', href: options.stylesheet });
+        shadow.append(link);
+    }
 
     elem[$shadow] = shadow;
 

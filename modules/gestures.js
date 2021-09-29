@@ -176,7 +176,7 @@ function Pointerdown(push, stop, node, options) {
 assign(Pointerdown.prototype, {
     handleEvent: function(e) {
         // Ignore non-primary buttons
-        if (e.button !== 0) { return; };
+        if (e.button !== 0) { return; }
 
         // Check pointer type is in options
         if (this.options.device && !this.options.device.includes(e.pointerType)) { return; }

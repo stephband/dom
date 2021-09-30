@@ -63,6 +63,7 @@ All lifecycle handlers are called with the parameter `(shadow)`.
 
 import create  from './create.js';
 import capture from '../../fn/modules/capture.js';
+import log     from './log.js';
 
 const DEBUG = window.DEBUG && (window.DEBUG === true || window.DEBUG.includes('element'));
 
@@ -143,7 +144,7 @@ const captureNameTag = capture(/^\s*<?([a-z][\w]*-[\w]+)>?\s*$|^\s*<?([a-z][\w]*
     }),
 
     catch: function(data, name) {
-        throw new Error('Element name must be of the form \'element-name\' or \'tag is="element-name"\' (' + name + ')')
+        throw new SyntaxError('dom element() – name must be of the form \'element-name\' or \'tag is="element-name"\' (' + name + ')')
     }
 }, null);
 
@@ -418,7 +419,8 @@ export default function element(definition, lifecycle, api) {
                     }
                 };
 
-                // Todo: But do we pick these load events up if the stylesheet is cached??
+                // Todo: But do we pick these load events up if the stylesheet 
+                // is cached??
                 while (n--) {
                     links[n].addEventListener('load', load, onceEvent);
                     links[n].addEventListener('error', function(e) {
@@ -453,7 +455,7 @@ export default function element(definition, lifecycle, api) {
     }
 
     //if (DEBUG) {
-        console.log('%celement', 'color: #3a8ab0; font-weight: 600;', '<' + (tag ? tag + ' is=' + name + '' : name) + '>');
+        log('element()', '<' + (tag ? tag + ' is=' + name + '' : name) + '>');
     //}
 
     window.customElements.define(name, Element, tag && { extends: tag });

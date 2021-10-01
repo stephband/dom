@@ -1,5 +1,4 @@
 
-import '../../fn/modules/stream.wait.js';
 import Stream from '../../fn/stream/stream.js';
 import features from './features.js';
 

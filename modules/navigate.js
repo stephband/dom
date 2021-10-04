@@ -58,6 +58,8 @@ export default function navigate(url, state = null, scroll = false) {
     const oldhref = location.href;
     const href = url.pathname + url.search + (id ? url.hash : '');
     state = json ? JSON.parse(json) : state ;
+
+    // Any call to replaceState or pushState in iOS opens the URL bar.
     history.pushState(state, document.title, href);
 
     // Force CSS :target selector to update when there is a new #hash.
@@ -98,7 +100,8 @@ window.addEventListener('hashchange', function(e) {
     - location.hash is set to something other than its current value
     */
 
-    // Detect navigations to # and silently remove the # from the url
+    // Detect navigations to # and silently remove the # from the url.
+    // Any call to replaceState or pushState in iOS opens the URL bar.
     if (stripHash(location.hash) === '') {
         history.replaceState(history.state, document.title, location.href.replace(/#$/, ''));
     }

@@ -11,7 +11,6 @@ import animate  from '../modules/animate.js';
 import rect     from '../modules/rect.js';
 import features from '../modules/features.js';
 
-const DEBUG = true;
 
 // Duration and easing of scroll animation
 const config = {
@@ -32,7 +31,7 @@ if (!features.scrollBehavior) {
     const scrollToNode   = function scrollToNode(target, scrollParent, behavior) {
         // If element does not scroll with content
         if (getComputedStyle(target).position === 'fixed') {
-            if (DEBUG) { console.log('Target is position: fixed, cannot scroll to.') }
+            if (window.DEBUG) { console.log('Target is position: fixed, cannot scroll to.') }
             return;
         }
 

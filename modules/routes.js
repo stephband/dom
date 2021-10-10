@@ -35,8 +35,6 @@ route(window.location);
 import overload from '../../fn/modules/overload.js';
 import Distributor from './distributor-2.js';
 
-const DEBUG = true;
-
 const assign  = Object.assign;
 const trigger = Distributor.trigger;
 
@@ -68,7 +66,7 @@ function stop(route) {
     handlers.length = 0;
 
     // End of route group ***
-    if (DEBUG) { console.groupEnd(); }
+    if (window.DEBUG) { console.groupEnd(); }
 }
 
 function Route(base, path, route, captures) {
@@ -250,7 +248,7 @@ export default function routes(patterns) {
         route && stop(route);
 
         // Start of route group ***
-        if (DEBUG) { console.group('route ' + path); }
+        if (window.DEBUG) { console.group('route ' + path); }
 
         // Create a new route object
         route = new Route(base, path, name, captures);

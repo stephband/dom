@@ -2,8 +2,6 @@
 import Distributor from './distributor.js';
 import log from './log.js';
 
-const DEBUG = window.DEBUG === true;
-
 const history  = window.history;
 const location = window.location;
 

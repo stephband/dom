@@ -6,7 +6,6 @@ import cache    from '../../fn/modules/weak-cache.js';
 import features from '../../dom/modules/features.js';
 import rect     from '../../dom/modules/rect.js';
 
-const DEBUG = true;
 
 /* 
 Smooth scroll for browsers that do not have it
@@ -68,7 +67,7 @@ if (!features.scrollBehavior) {
 
         // If element does not scroll with content do not try to scroll to it
         if (getComputedStyle(target).position === 'fixed') {
-            if (DEBUG) { console.log('hashchange: Target is position: fixed, do not attempt scroll to.') }
+            if (window.DEBUG) { console.log('hashchange: Target is position: fixed, do not attempt scroll to.') }
             return;
         }
 
@@ -83,7 +82,7 @@ if (!features.scrollBehavior) {
         const data = store(element);
 
         if (data.time > time - 0.3) {
-            if (DEBUG) { console.log('hashchange: Scrolling was recent, do not attempt scroll to'); }
+            if (window.DEBUG) { console.log('hashchange: Scrolling was recent, do not attempt scroll to'); }
             return;
         }
 
@@ -107,7 +106,7 @@ if (!features.scrollBehavior) {
             && targetBox.left >= scrollPaddingLeft
             && targetBox.left < 0.8 * window.innerWidth
         ) {
-            if (DEBUG) { console.log('hashchange: Target is already substantially inside the viewport, do not attempt scroll to') }
+            if (window.DEBUG) { console.log('hashchange: Target is already substantially inside the viewport, do not attempt scroll to') }
             return;
         }
 

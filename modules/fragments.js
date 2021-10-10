@@ -4,7 +4,7 @@ import attribute from './attribute.js';
 import features from './features.js';
 import tag from './tag.js';
 
-if (!NodeList.prototype.forEach) {
+if (window.DEBUG && !NodeList.prototype.forEach) {
     console.warn('A polyfill for NodeList.forEach() is needed (https://developer.mozilla.org/en-US/docs/Web/API/NodeList/forEach)');
 }
 

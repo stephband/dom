@@ -108,7 +108,7 @@ export default function media(query, fn1, fn2) {
     rules.push(rule);
 
     rule.state = test(query);
-console.log('TEST', query, rule.state);
+
     return rule.state ?
         rule.enter && rule.enter() :
         rule.exit  && rule.exit() ;

@@ -65,8 +65,6 @@ import create  from './create.js';
 import capture from '../../fn/modules/capture.js';
 import log     from './log.js';
 
-const DEBUG = window.DEBUG && (window.DEBUG === true || window.DEBUG.includes('element'));
-
 const $internals = Symbol('internals');
 const $shadow    = Symbol('shadow');
 
@@ -424,7 +422,10 @@ export default function element(definition, lifecycle, api) {
                 while (n--) {
                     links[n].addEventListener('load', load, onceEvent);
                     links[n].addEventListener('error', function(e) {
-                        console.log('Failed to load stylesheet', e.target.href);
+                        if (window.DEBUG) {
+                            console.log('Failed to load stylesheet', e.target.href);
+                        }
+
                         load(e);
                     }, onceEvent);
                 }
@@ -454,9 +455,7 @@ export default function element(definition, lifecycle, api) {
         };
     }
 
-    //if (DEBUG) {
-        log('element()', '<' + (tag ? tag + ' is=' + name + '' : name) + '>');
-    //}
+    log('element()', '<' + (tag ? tag + ' is=' + name + '' : name) + '>');
 
     window.customElements.define(name, Element, tag && { extends: tag });
 
@@ -466,7 +465,7 @@ export default function element(definition, lifecycle, api) {
     // go some way towards filling in support by searching for elements and 
     // assigning their intended APIs to them.
     if (tag && !supportsCustomisedBuiltIn) {
-        if (DEBUG) {
+        if (window.DEBUG) {
             console.warn('Browser does not support customised built-in elements.\nAttempting to partially polyfill instances of <' + tag + ' is="' + name + '"> found in the DOM.');
         }
 

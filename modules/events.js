@@ -58,7 +58,7 @@ function unlisten(producer, type) {
 
 function Producer(controller, type, options, node) {
 	this.controller = controller;
-    this.types = type.split(rspaces).map(prefixType);
+    this.types   = type.split(rspaces).map(prefixType);
 	this.options = options;
     this.node    = node;
     this.select  = options && options.select;

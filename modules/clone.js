@@ -1,17 +1,16 @@
-import features from './features.js';
-import { select } from './select.js';
+//import features from './features.js';
+//import { select } from './select.js';
 
 /**
 clone(node)
 Returns a deep copy of `node`.
 */
 
-export default features.textareaPlaceholderSet ?
+export default function clone(node) {
+	return node.cloneNode(true);
+}
 
-	function clone(node) {
-		return node.cloneNode(true);
-	} :
-
+/*
 	function cloneWithHTML(node) {
 		// IE sets textarea innerHTML to the placeholder when cloning.
 		// Reset the resulting value.
@@ -30,4 +29,5 @@ export default features.textareaPlaceholderSet ?
 		}
 
 		return clone;
-	} ;
+	}
+*/

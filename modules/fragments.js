@@ -1,8 +1,8 @@
-import append from './append.js';
-import create from './create.js';
+import append    from './append.js';
+import create    from './create.js';
 import attribute from './attribute.js';
-import features from './features.js';
-import tag from './tag.js';
+//import features  from './features.js';
+import tag       from './tag.js';
 
 if (window.DEBUG && !NodeList.prototype.forEach) {
     console.warn('A polyfill for NodeList.forEach() is needed (https://developer.mozilla.org/en-US/docs/Web/API/NodeList/forEach)');
@@ -20,23 +20,6 @@ export function fragmentFromChildren(node) {
 	return fragment;
 }
 
-
-/**
-fragmentFromHTML(string)
-Returns a DOM fragment of the parsed html `string`.
-*/
-
-export function fragmentFromHTML(html, contextTag) {
-    if (contextTag) {
-        const node = document.createElement(contextTag);
-        node.innerHTML = html;
-        return fragmentFromChildren(node);
-    }
-
-    return document
-    .createRange()
-    .createContextualFragment(html);
-}
 
 /**
 fragmentFromTemplate(node)
@@ -59,9 +42,9 @@ export function fragmentFromId(id) {
 	// In browsers where templates are not inert their content can clash
 	// with content in the DOM - ids, for example. Remove the template as
 	// a precaution.
-	if (t === 'template' && !features.template) {
-		node.remove();
-	}
+	//if (t === 'template' && !features.template) {
+	//	node.remove();
+	//}
 
 	return t === 'template' ? fragmentFromTemplate(node) :
 		t === 'script' ? fragmentFromHTML(node.innerHTML, attribute('data-parent-tag', node)) :

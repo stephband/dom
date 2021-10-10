@@ -45,7 +45,7 @@ The `options` object may optionally contain any of:
 
 import get      from '../../fn/modules/get.js';
 import overload from '../../fn/modules/overload.js';
-import Stream   from '../../fn/modules/stream.js';
+import Stream   from '../../fn/stream/stream.js';
 import px       from './parse-length.js';
 
 const assign = Object.assign;
@@ -75,12 +75,12 @@ function checkThreshold(threshold, e0, e1) {
     );
 }
 
-function Pointermove(push, events, options) {
-    this.pushGesture = push;
-    this.events      = events;
-    this.options     = options;
-    this.pointerId   = events[0].pointerId;
-    this.threshold   = px(options.threshold);
+function Pointermove(stream, events, options) {
+    this.stream    = stream;
+    this.events    = events;
+    this.options   = options;
+    this.pointerId = events[0].pointerId;
+    this.threshold = px(options.threshold);
 
     document.addEventListener('pointermove', this);
     document.addEventListener('pointerup', this);
@@ -100,7 +100,17 @@ assign(Pointermove.prototype, {
                 return;                
             }
 
-            this.push(e);
+            this.events.push(e);
+    
+            // Before we cross the threshold we need to check it on each move
+            if (!this.isGesture && checkThreshold(this.threshold, this.events[0], e)) {
+                this.createGesture();
+            }
+    
+            // After we want to cancel any default actions
+            else {
+                e.preventDefault();
+            }
         },
 
         'default': function(e) {
@@ -109,41 +119,21 @@ assign(Pointermove.prototype, {
                 return;                
             }
 
-            this.push(e);
+            this.events.push(e);
             this.stop();
         }
     }),
 
     createGesture: function() {
-        const events = this.events;
-
         this.isGesture = true;
-        this.pushGesture(new Stream((push, stop) => {    
+
+        this.stream.push(new Stream((stream) => {  
             // Push in existing events
-            push.apply(null, events);
-    
-            // Override events so that events are pushed directly to the stream
-            this.events = {
-                push: push,
-                stop: stop
-            };
-    
-            return {};
-        }));        
-    },
+            stream.push.apply(stream, this.events);
 
-    push: function(e) {
-        this.events.push(e);
-
-        // Before we cross the threshold we need to check it on each move
-        if (!this.isGesture && checkThreshold(this.threshold, this.events[0], e)) {
-            this.createGesture();
-        }
-
-        // After we want to cancel any default actions
-        else {
-            e.preventDefault();
-        }
+            // Have the stream controller take over as the events buffer
+            this.events = stream;
+        }));
     },
 
     stop: function() {
@@ -165,11 +155,10 @@ function isIgnoreTag(e) {
     return tag && (!!config.ignoreTags[tag.toLowerCase()] || e.target.draggable);
 }
 
-function Pointerdown(push, stop, node, options) {
-    this.node        = node;
-    this.pushGesture = push;
-    this.stopGesture = stop;
-    this.options     = options;
+function Pointerdown(stream, node, options) {
+    this.stream  = stream;
+    this.node    = node;
+    this.options = options;
     this.node.addEventListener('pointerdown', this);
 }
 
@@ -187,8 +176,9 @@ assign(Pointerdown.prototype, {
         // Check target matches selector
         if (this.options.selector && !e.target.closest(this.options.selector)) { return; }
     
-        // Copy event to keep the true target around, as target is mutated on the
-        // event if it passes through a shadow boundary after being handled here
+        // Copy event to keep the true target around, as target is mutated on 
+        // the event if it passes through a shadow boundary after being handled 
+        // here, resulting in a rare but gnarly bug hunt.
         var event = {
             type:          e.type,
             target:        e.target,
@@ -199,13 +189,13 @@ assign(Pointerdown.prototype, {
             pointerId:     e.pointerId
         };
 
-        new Pointermove(this.pushGesture, [event], this.options);
+        new Pointermove(this.stream, [event], this.options);
     },
 
     // Stop the gestures stream
     stop: function() {
         this.node.removeEventListener('pointerdown', this);
-        this.stopGesture();
+        this.stream.stop();
     }
 });
 
@@ -221,7 +211,5 @@ export default function gestures(options, node) {
         node :
         options ;
 
-    return new Stream(function(push, stop) {
-        return new Pointerdown(push, stop, node, options);
-    });
+    return new Stream((stream) => new Pointerdown(stream, node, options));
 }

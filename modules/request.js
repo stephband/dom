@@ -1,6 +1,5 @@
 import choose  from '../../fn/modules/choose.js';
 import id      from '../../fn/modules/id.js';
-import nothing from '../../fn/modules/nothing.js';
 
 const assign = Object.assign;
 

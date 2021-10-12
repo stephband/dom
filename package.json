@@ -34,5 +34,6 @@
         "move"
     ],
     "homepage": "http://stephen.band/dom/",
-    "image": "https://stephen.band/images/logo.png"
+    "image": "https://stephen.band/images/logo.png",
+    "type": "module"
 }

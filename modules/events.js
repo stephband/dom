@@ -89,6 +89,7 @@ assign(Producer.prototype, {
             e.selectedTarget = selectedTarget;
         }
 
+        
         this.controller.push(e);
     }
 });

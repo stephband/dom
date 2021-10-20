@@ -12,23 +12,23 @@
 </head>
 
 <body class="@3-12-grid grid">
-    <header class="x-1 3x @1-6x @2-9x @3-x-2 @3-9x" id="header">
+    <header class="x1 3x @1-6x @2-9x @3-x2 @3-9x" id="header">
         <template build-fn="fetch:package.json" build-src="/fn/templates.html#header-template"></template>
     </header>
 
-    <section class="x-1 3x @1-6x @2-9x @3-x-2 grid" data-targetable id="functions">
-        <header class="x-1 3x @1-4x">
+    <section class="x1 3x @1-6x @2-9x @3-x2 grid" data-targetable id="functions">
+        <header class="x1 3x @1-4x">
             <h2 class="doctext-02">Functions</h2>
         </header>
 
-        <div class="x-1 3x @2-4x">
+        <div class="x1 3x @2-4x">
             <p>Import functions:</p>
             <pre><code class="language-js">import { closest, matches } from '/dom/module.js';</code></pre>
             <p>All functions that take more than one parameter are partially applicable.</p>
         </div>
 
-        <div class="x-1 3x column-grid grid">
-            <div class="x-1">
+        <div class="x1 3x column-grid grid">
+            <div class="x1">
                 <h4 class="doctext-03">select.</h4>
                 <template build-fn="docs:
                 modules/closest.js,
@@ -39,7 +39,7 @@
                 filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
 
-            <div class="x-1">
+            <div class="x1">
                 <h4 class="doctext-03">inspect.</h4>
                 <template build-fn="docs:
                 modules/attribute.js,
@@ -50,7 +50,7 @@
                 filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
 
-            <div class="x-1">
+            <div class="x1">
                 <h4 class="doctext-03">mutate.</h4>
                 <template build-fn="docs:
                 modules/append.js,
@@ -62,8 +62,8 @@
             </div>
         </div>
 
-        <div class="x-1 3x @1-x-4 column-grid grid">
-            <div class="x-1">
+        <div class="x1 3x @1-x4 column-grid grid">
+            <div class="x1">
                 <h4 class="doctext-03">events.</h4>
                 <template build-fn="docs:
                 modules/events.js,
@@ -75,7 +75,7 @@
                 filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
 
-            <div class="x-1">
+            <div class="x1">
                 <h4 class="doctext-03">style.</h4>
                 <template build-fn="docs:
                 modules/classes.js,
@@ -89,8 +89,8 @@
             </div>
         </div>
 
-        <div class="x-1 3x @2-x-7 column-grid grid">
-            <div class="x-1">
+        <div class="x1 3x @2-x7 column-grid grid">
+            <div class="x1">
                 <h4 class="doctext-03">animate.</h4>
                 <template build-fn="docs:
                 modules/animate.js,
@@ -98,7 +98,7 @@
                 filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
 
-            <div class="x-1">
+            <div class="x1">
                 <h4 class="doctext-03">HTML.</h4>
                 <template build-fn="docs:
                 modules/escape.js,
@@ -107,7 +107,7 @@
                 filter-function each" build-src="/fn/templates.html#{[type]}-template"></template>
             </div>
 
-            <div class="x-1">
+            <div class="x1">
                 <h4 class="doctext-03">communicate.</h4>
                 <template build-fn="docs:
                 modules/request.js

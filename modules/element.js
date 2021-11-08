@@ -410,7 +410,6 @@ export default function element(definition, lifecycle, api) {
             const links = shadow.querySelectorAll('link[rel="stylesheet"]');
 
             if (links.length) {
-console.log('SRylesheets');
                 let count  = 0;
                 let n = links.length;
 
@@ -421,22 +420,23 @@ console.log('SRylesheets');
                         // again
                         delete elem._initialLoad;
                         if (lifecycle.load) {
+                            console.log('Loaded', Array.from(links).map((link) => link.href).join('\n'));
                             lifecycle.load.call(elem, shadow);
                         }
                     }
                 };
 
+                const error = window.DEBUG ? function error(e) {
+                    console.error('Failed to load stylesheet', e.target.href);
+                    load(e);
+                } :
+                load ;
+
                 // Todo: But do we pick these load events up if the stylesheet 
                 // is cached??
                 while (n--) {
                     links[n].addEventListener('load', load, onceEvent);
-                    links[n].addEventListener('error', function(e) {
-                        if (window.DEBUG) {
-                            console.log('Failed to load stylesheet', e.target.href);
-                        }
-
-                        load(e);
-                    }, onceEvent);
+                    links[n].addEventListener('error', error, onceEvent);
                 }
 
                 if (lifecycle.connect) {

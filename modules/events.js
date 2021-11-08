@@ -102,8 +102,8 @@ export default function events(type, node) {
 		type    = options.type;
 	}
 
-	return new Stream((controller) => 
-        new Producer(controller, type, options, node)
+	return new Stream((controller) =>
+        controller.done(new Producer(controller, type, options, node))
     );
 }
 

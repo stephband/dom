@@ -195,7 +195,9 @@ assign(Pointerdown.prototype, {
     // Stop the gestures stream
     stop: function() {
         this.node.removeEventListener('pointerdown', this);
-        this.stream.stop();
+        
+        // Dont do this, we are responding to source (thi.stream) here already
+        //this.stream.stop();
     }
 });
 
@@ -211,5 +213,5 @@ export default function gestures(options, node) {
         node :
         options ;
 
-    return new Stream((stream) => new Pointerdown(stream, node, options));
+    return new Stream((source) => source.done(new Pointerdown(source, node, options)));
 }

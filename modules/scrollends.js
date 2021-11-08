@@ -102,5 +102,5 @@ assign(Scrolls.prototype, {
 });
 
 export default function scrollends(element) {
-    return new Stream((stream) => new Scrolls(stream, element));
+    return new Stream((source) => source.done(new Scrolls(source, element)));
 }

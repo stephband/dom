@@ -20,5 +20,7 @@ function windowBox() {
 export default function rect(node) {
 	return node === window ?
 		windowBox() :
-		node.getClientRects()[0] ;
+        // In Safari SVG shapes dont get a .getClientRects()[0] so fallback to 
+        // .getBoundingClientRect()
+		node.getClientRects()[0] || node.getBoundingClientRect() ;
 }

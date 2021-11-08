@@ -95,7 +95,7 @@ const constructors = {
 const formProperties = {
     // These properties echo those provided by native form controls.
     // They are not strictly required, but provided for consistency.
-    type: { value: 'text' },
+    //type: { value: 'text' },
 
     name: {
         set: function(name) { return this.setAttribute('name', name); },
@@ -178,9 +178,19 @@ function createShadow(/*template, */elem, options) {
 }
 
 function attachInternals(elem) {
+    var internals;
+
     // Use native attachInternals where it exists
     if (elem.attachInternals) {
-        return elem.attachInternals();
+        internals = elem.attachInternals();
+        if (internals.setFormValue) {
+            return internals;
+        }
+    }
+    else {
+        internals = {
+            shadowRoot: elem.shadowRoot
+        };
     }
 
     // Otherwise polyfill it with a pseudo internals object, actually a hidden
@@ -188,14 +198,15 @@ function attachInternals(elem) {
     // not yet put this in the DOM however – it violates the spec to give a
     // custom element children before it's contents are parsed. Instead we
     // wait until connectCallback.
-    const hidden = create('input', { type: 'hidden', name: elem.name });
+    internals.input = create('input', { type: 'hidden', name: elem.name });
+    elem.appendChild(internals.input);
 
     // Polyfill internals object setFormValue
-    hidden.setFormValue = function(value) {
-        this.value = value;
+    internals.setFormValue = function(value) {
+        this.input.value = value;
     };
 
-    return hidden;
+    return internals;
 }
 
 function primeAttributes(elem) {
@@ -277,16 +288,14 @@ export default function element(definition, lifecycle, api) {
             createShadow(elem, lifecycle) :
             undefined ;
 
-        if (Element.formAssociated) {
-            // Get access to the internal form control API
-            elem[$internals] = attachInternals(elem);
-        }
+        // Get access to the internal form control API
+        const internals = Element.formAssociated && attachInternals(elem) ;
 
         if (tag) {
             supportsCustomisedBuiltIn = true;
         }
 
-        lifecycle.construct && lifecycle.construct.call(elem, shadow, elem[$internals]);
+        lifecycle.construct && lifecycle.construct.call(elem, shadow, internals);
 
         // Preserve initialisation order of attribute initialisation by
         // queueing them
@@ -326,8 +335,7 @@ export default function element(definition, lifecycle, api) {
     // Must be defined before attributeChangedCallback, but I cannot figure out
     // why. Where one of the properties is `value`, the element is set up as a
     // form element.
-
-    const prototype = Element.prototype = Object.create(constructor.prototype, properties) ;
+    Element.prototype = Object.create(constructor.prototype, properties) ;
 
 
     // Form properties
@@ -337,10 +345,10 @@ export default function element(definition, lifecycle, api) {
         Element.formAssociated = true;
         
         // Define standard form properties
-        define(prototype, formProperties);
+        define(Element.prototype, formProperties);
     
         if (lifecycle.enable || lifecycle.disable) {
-            prototype.formDisabledCallback = function(disabled) {
+            Element.prototype.formDisabledCallback = function(disabled) {
                 return disabled ?
                     lifecycle.disable && lifecycle.disable.call(this, this[$shadow], this[$internals]) :
                     lifecycle.enable && lifecycle.enable.call(this, this[$shadow], this[$internals]) ;
@@ -348,13 +356,13 @@ export default function element(definition, lifecycle, api) {
         }
         
         if (lifecycle.reset) {
-            prototype.formResetCallback = function() {
+            Element.prototype.formResetCallback = function() {
                 return lifecycle.reset.call(this, this[$shadow], this[$internals]);
             };
         }
         
         if (lifecycle.restore) {
-            prototype.formStateRestoreCallback = function() {
+            Element.prototype.formStateRestoreCallback = function() {
                 return lifecycle.restore.call(this, this[$shadow], this[$internals]);
             };
         }
@@ -366,7 +374,7 @@ export default function element(definition, lifecycle, api) {
     if (attributes) {
         Element.observedAttributes = Object.keys(attributes);
 
-        prototype.attributeChangedCallback = function(name, old, value) {
+        Element.prototype.attributeChangedCallback = function(name, old, value) {
             if (!this._initialAttributes) {
                 return attributes[name].call(this, value) ;
             }
@@ -381,7 +389,7 @@ export default function element(definition, lifecycle, api) {
 
     // Lifecycle
 
-    prototype.connectedCallback = function() {
+    Element.prototype.connectedCallback = function() {
         const elem      = this;
         const shadow    = elem[$shadow];
         const internals = elem[$internals];
@@ -392,9 +400,9 @@ export default function element(definition, lifecycle, api) {
         }
 
         // If we have simulated form internals, append the hidden input now
-        if (elem[$internals] && !elem.attachInternals) {
-            elem.appendChild(elem[$internals]);
-        }
+        //if (elem[$internals] && !elem.attachInternals) {
+        //    elem.appendChild(elem[$internals].input);
+        //}
 
         // If this is the first connect and there is an lifecycle.load fn,
         // _initialLoad is true
@@ -402,6 +410,7 @@ export default function element(definition, lifecycle, api) {
             const links = shadow.querySelectorAll('link[rel="stylesheet"]');
 
             if (links.length) {
+console.log('SRylesheets');
                 let count  = 0;
                 let n = links.length;
 
@@ -450,7 +459,7 @@ export default function element(definition, lifecycle, api) {
     }
 
     if (lifecycle.disconnect) {
-        prototype.disconnectedCallback = function() {
+        Element.prototype.disconnectedCallback = function() {
             return lifecycle.disconnect.call(this, this[$shadow], this[$internals]);
         };
     }

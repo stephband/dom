@@ -1,13 +1,15 @@
 
 import Stream from '../../fn/stream/stream.js';
-import features from './features.js';
+//import features from './features.js';
 
 const assign  = Object.assign;
 const rspaces = /\s+/;
 
+/*
 function prefixType(type) {
 	return features.events[type] || type ;
 }
+*/
 
 /**
 events(type, node)
@@ -46,19 +48,19 @@ var clickTimeStamp = 0;
 
 window.addEventListener('click', (e) => clickTimeStamp = e.timeStamp);
 
-function listen(producer, type) {
-    producer.node.addEventListener(type, producer, producer.options);
-    return producer;
+function listen(listener, type) {
+    listener.node.addEventListener(type, listener, listener.options);
+    return listener;
 }
 
-function unlisten(producer, type) {
-    producer.node.removeEventListener(type, producer);
-    return producer;
+function unlisten(listener, type) {
+    listener.node.removeEventListener(type, listener);
+    return listener;
 }
 
-function Producer(controller, type, options, node) {
+function Listener(controller, type, options, node) {
 	this.controller = controller;
-    this.types   = type.split(rspaces).map(prefixType);
+    this.types   = type.split(rspaces);//.map(prefixType);
 	this.options = options;
     this.node    = node;
     this.select  = options && options.select;
@@ -69,7 +71,7 @@ function Producer(controller, type, options, node) {
 	this.types.reduce(listen, this);
 }
 
-assign(Producer.prototype, {
+assign(Listener.prototype, {
 	stop: function() {
 		this.types.reduce(unlisten, this);
 	},
@@ -89,7 +91,6 @@ assign(Producer.prototype, {
             e.selectedTarget = selectedTarget;
         }
 
-        
         this.controller.push(e);
     }
 });
@@ -103,7 +104,7 @@ export default function events(type, node) {
 	}
 
 	return new Stream((controller) =>
-        controller.done(new Producer(controller, type, options, node))
+        controller.done(new Listener(controller, type, options, node))
     );
 }
 

@@ -420,7 +420,7 @@ export default function element(definition, lifecycle, api) {
                         // again
                         delete elem._initialLoad;
                         if (lifecycle.load) {
-                            console.log('Loaded', Array.from(links).map((link) => link.href).join('\n'));
+                            log('element()', 'loaded', Array.from(links).map((link) => link.href).join('\n'));
                             lifecycle.load.call(elem, shadow);
                         }
                     }

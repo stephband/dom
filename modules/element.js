@@ -71,6 +71,7 @@ const $shadow    = Symbol('shadow');
 const define = Object.defineProperties;
 
 const constructors = {
+    // We need list only those whose constructor names do not match their tag
     'a':        HTMLAnchorElement,
     'dl':       HTMLDListElement,
     'p':        HTMLParagraphElement,
@@ -432,29 +433,20 @@ export default function element(definition, lifecycle, api) {
                 } :
                 load ;
 
-                // Todo: But do we pick these load events up if the stylesheet 
-                // is cached??
                 while (n--) {
                     links[n].addEventListener('load', load, onceEvent);
                     links[n].addEventListener('error', error, onceEvent);
                 }
 
-                if (lifecycle.connect) {
-                    lifecycle.connect.call(this, shadow, internals);
-                }
+                lifecycle.connect && lifecycle.connect.call(this, shadow, internals);
             }
             else {
-                if (lifecycle.connect) {
-                    lifecycle.connect.call(this, shadow, internals);
-                }
-
-                if (lifecycle.load) {
-                    lifecycle.load.call(this, shadow, internals);
-                }
+                lifecycle.connect && lifecycle.connect.call(this, shadow, internals);
+                lifecycle.load    && lifecycle.load.call(this, shadow, internals);
             }
         }
-        else if (lifecycle.connect) {
-            lifecycle.connect.call(this, shadow, internals);
+        else {
+            lifecycle.connect && lifecycle.connect.call(this, shadow, internals);
         }
     }
 

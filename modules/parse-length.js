@@ -9,18 +9,40 @@ import style      from './style.js';
 
 /* Track document font size */
 
-let fontSize;
+let emSize;
+let remSize;
 
-function getFontSize() {
-    return fontSize ||
-        (fontSize = style("font-size", document.documentElement));
+function getEmSize() {
+    if (!emSize) {
+        if (window.DEBUG) {
+            console.warn('Calculating root em value may cause reflow as user font-size cannot be known without setting <html style="font-size: 100%;">');
+        }
+
+        const styledFontSize = document.documentElement.style.fontSize;
+        document.documentElement.style.fontSize = '100%';
+        emSize = style("font-size", document.documentElement);
+        document.documentElement.style.fontSize = styledFontSize || '';
+    }
+
+    return emSize;
 }
 
-window.addEventListener('resize', () => fontSize = undefined);
+function getRemSize() {
+    if (!remSize) {
+        remSize = style("font-size", document.documentElement);
+    }
+
+    return remSize;
+}
+
+window.addEventListener('resize', () => {
+    emSize  = undefined;
+    remSize = undefined;
+});
 
 /**
 px(value)
-Takes a number in pixels or a string of the form `'10px'`, `'10em'`, `'10rem'`, 
+Takes a number in pixels or a string of the form `'10px'`, `'10em'`, `'10rem'`,
 `'100vw'` or `'100vh'`, and returns a numeric value in pixels.
 */
 
@@ -29,7 +51,7 @@ export const px = overload(toType, {
 
     'string': parseValue({
         em: function(n) {
-            return getFontSize() * n;
+            return getEmSize() * n;
         },
 
         px: function(n) {
@@ -37,7 +59,7 @@ export const px = overload(toType, {
         },
 
         rem: function(n) {
-            return getFontSize() * n;
+            return getRemSize() * n;
         },
 
         vw: function(n) {
@@ -54,28 +76,30 @@ export default px;
 
 /**
 em(value)
-Takes numeric value in px, or CSS length of the form `'10px'`, and returns 
-a numeric value in `em`, eg. `0.625`. Depends on the `font-size` of the document 
-root at render time.
+Takes numeric value in px, or CSS length of the form `'10px'`, and returns
+a numeric value in `em`, eg. `0.625`. Depends on the user defined browser
+`font-size`.
 */
+
+export function em(n) {
+    return px(n) / getEmSize();
+}
 
 /**
 rem(value)
-Takes numeric value in px, or CSS length of the form `'10px'`, and returns 
-a numeric value in `rem`, eg. `0.625`. Depends on the `font-size` of the 
-document root at render time.
+Takes numeric value in px, or CSS length of the form `'10px'`, and returns
+a numeric value in `rem`, eg. `0.625`. Depends on the `font-size` of the
+documentElement.
 */
 
 export function rem(n) {
-    return px(n) / getFontSize();
+    return px(n) / getRemSize();
 }
-
-export const em = rem;
 
 /**
 vw(value)
-Takes number in pixels or CSS length of the form `'10em'` and returns a 
-numeric value in `vw`, eg. `120`. Depends on the width of the viewport at 
+Takes number in pixels or CSS length of the form `'10em'` and returns a
+numeric value in `vw`, eg. `120`. Depends on the width of the viewport at
 render time.
 */
 
@@ -85,8 +109,8 @@ export function vw(n) {
 
 /**
 vh(value)
-Takes number in pixels or CSS length of the form `'10em'` and returns a 
-numeric value in `vh`, eg. `120`. Depends on the height of the viewport at 
+Takes number in pixels or CSS length of the form `'10em'` and returns a
+numeric value in `vh`, eg. `120`. Depends on the height of the viewport at
 render time.
 */
 

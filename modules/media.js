@@ -27,7 +27,7 @@ a value with CSS units (eg. `'3rem'`), or a function must return a number
 representing a value in pixels.
 */
 
-import ready    from './ready.js';
+//import ready    from './ready.js';
 import id       from '../../fn/modules/id.js';
 import overload from '../../fn/modules/overload.js';
 import toType   from '../../fn/modules/to-type.js';
@@ -129,5 +129,5 @@ function resize(e) {
 window.addEventListener('scroll', scroll)
 window.addEventListener('resize', resize);
 
-ready(update)
+//ready(update)
 document.addEventListener('DOMContentLoaded', update);

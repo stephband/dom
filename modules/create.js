@@ -1,26 +1,23 @@
 
-import id from '../../fn/modules/id.js';
+import id       from '../../fn/modules/id.js';
 import overload from '../../fn/modules/overload.js';
-import toType from '../../fn/modules/to-type.js';
-import assign from './assign.js';
+import assign   from './assign.js';
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
-const div = document.createElement('div');
 
+const div           = document.createElement('div');
+const typeofTag     = (tag, content)  => (tag && typeof tag);
+const typeofContent = (type, content) => (content && typeof content);
 
 // Constructors
 
-function constructHTML(tag, html) {
-    var node = document.createElement(tag);
-
-    if (html) {
-        node.innerHTML = html;
-    }
-
-    return node;
+function createContextFragment(context, html) {
+    const range = document.createRange();
+    range.selectNode(context);
+    return range.createContextualFragment(html);
 }
 
-function constructSVG(tag, html) {
+function createSVG(tag, html) {
     var node = document.createElementNS(svgNamespace, tag);
 
     if (html) {
@@ -29,48 +26,6 @@ function constructSVG(tag, html) {
 
     return node;
 }
-
-const construct = overload(id, {
-    comment: function(tag, text) {
-        return document.createComment(text || '');
-    },
-
-    fragment: function(tag, html) {
-        var fragment = document.createDocumentFragment();
-
-        if (html) {
-            div.innerHTML = html;
-            const nodes = div.childNodes;
-            while (nodes[0]) {
-                fragment.appendChild(nodes[0]);
-            }
-        }
-
-        return fragment;
-    },
-
-    text: function (tag, text) {
-        return document.createTextNode(text || '');
-    },
-
-    circle:   constructSVG,
-    ellipse:  constructSVG,
-    g:        constructSVG,
-    glyph:    constructSVG,
-    image:    constructSVG,
-    line:     constructSVG,
-    rect:     constructSVG,
-    use:      constructSVG,
-    path:     constructSVG,
-    pattern:  constructSVG,
-    polygon:  constructSVG,
-    polyline: constructSVG,
-    svg:      constructSVG,
-    default:  constructHTML
-});
-
-
-
 
 /**
 create(tag, content)
@@ -81,51 +36,142 @@ Constructs and returns a new DOM node.
 - If `tag` is `"fragment"` a fragment is created.
 - If `tag` is `"comment"` a comment is created.
 - If `tag` is any other string the element `<tag></tag>` is created.
-- Where `tag` is an object, it must have a `"tag"` or `"tagName"` property.
-A node is created according to the above rules for tag strings, and other
-properties of the object are assigned with dom's `assign(node, object)` function.
 
-If `content` is a string it is set as text content on a text or comment node,
-or as inner HTML on an element or fragment. It may also be an object of
-properties which are assigned with dom's `assign(node, properties)` function.
-*/
+Where a comment or text node is created `content` must be a string, as is set as
+textContent. For fragments and other nodes:
 
-function toTypes() {
-    return Array.prototype.map.call(arguments, toType).join(' ');
-}
+- If `content` is a string it is set as innerHTML on an element or fragment.
+- If `content` is array-like its items are appended to node. Note that where
+`content` is a NodeList, this removes nodes from whatever the NodeList belongs
+to.
+- If `content` is an object its properties are assigned as node properties or
+attributes.
 
-function validateTag(tag) {
-    if (typeof tag !== 'string') {
-        throw new Error('create(object, content) object must have string property .tag or .tagName');
-    }
-}
+Where node is a fragment there is an optional third parameter `context`, which
+must be an element. The fragment parser is run in the context of the element:
 
-export default overload(toTypes, {
-    'string': construct,
+```
+create('fragment', '<li>', document.querySelector('ul'));
+```
+**/
 
-    'string undefined': construct,
-
-    'string string': construct,
-
-    'string object': function(tag, content) {
-        return assign(construct(tag, ''), content);
+export default overload(id, {
+    comment: function(tag, text) {
+        return document.createComment(text || '');
     },
 
-    'object string': function(properties, text) {
+    fragment: overload(typeofContent, {
+        string: function(tag, html, context) {
+            if (context) {
+                return createContextFragment(context, html);
+            }
+
+            const fragment = document.createDocumentFragment();
+            div.innerHTML = html;
+            const nodes = div.childNodes;
+            while (nodes[0]) { fragment.appendChild(nodes[0]); }
+            return fragment;
+        },
+
+        object: function(tag, object, context) {
+            // If there is context, create a context-aware fragment
+            const fragment = context ?
+                createContextFragment(context) :
+                document.createDocumentFragment() ;
+
+            // Is object array-like?
+            if (typeof object.length === 'number') {
+                // Be careful here in case object is a live NodeList, which will
+                // mutate as you iterate over it. Applying object to .append()
+                // appears to not have this problem, and will work on arrays.
+                fragment.append.apply(fragment, object);
+            }
+            else {
+                assign(fragment, object);
+            }
+
+            return fragment;
+        },
+
+        default: () => document.createDocumentFragment()
+    }),
+
+    text: function (tag, text) {
+        return document.createTextNode(text || '');
+    },
+
+    circle:   createSVG,
+    ellipse:  createSVG,
+    g:        createSVG,
+    glyph:    createSVG,
+    image:    createSVG,
+    line:     createSVG,
+    rect:     createSVG,
+    use:      createSVG,
+    path:     createSVG,
+    pattern:  createSVG,
+    polygon:  createSVG,
+    polyline: createSVG,
+    svg:      createSVG,
+
+    default: overload(typeofContent, {
+        string: function(tag, html) {
+            const node = document.createElement(tag);
+            node.innerHTML = html;
+            return node;
+        },
+
+        object: function(tag, object) {
+            const node = document.createElement(tag);
+
+            // Is it array-like?
+            if (typeof object.length === 'number') {
+                // Be careful here in case object is a live NodeList, which will
+                // mutate as you iterate over it. Applying object to .append()
+                // appears to not have this problem, and will work on arrays.
+                node.append.apply(node, object);
+            }
+            else {
+                assign(node, object);
+            }
+
+            return node;
+        },
+
+        default: (tag) => {
+            if (typeof tag !== 'string') {
+                // We used to support object as first argument. Deprecated.
+                // Todo: remove this message when we dont see any more errors
+                throw new Error('create(tag, content) accepts only a string as tag "' + (typeof tag) + '"')
+            }
+
+            return document.createElement(tag);
+        }
+    }),
+});
+
+
+/*
+I believe this is redundant. Was it in Sparky that we created nodes with an
+object as first argument? */
+/*
+export default overload(typeofTag, {
+    string: create,
+
+    object: function(properties, content) {
         const tag = properties.tag || properties.tagName;
-        validateTag(tag);
-        // Warning: text is set before properties, but text should override
-        // html or innerHTML property, ie, be set after.
-        return assign(construct(tag, text), properties);
+
+        if (window.DEBUG && typeof tag !== 'string') {
+            throw new Error('create(object, content) object must have string property .tag or .tagName');
+        }
+
+        return typeof content === 'string' ?
+            assign(create(tag, properties), { innerHTML: content }) :
+            assign(create(tag, properties), content) ;
     },
 
-    'object object': function(properties, content) {
-        const tag = properties.tag || properties.tagName;
-        validateTag(tag);
-        return assign(assign(construct(tag, ''), properties), content);
-    },
-
-    default: function() {
-        throw new Error('create(tag, content) does not accept argument types "' + Array.prototype.map.call(arguments, toType).join(' ') + '"');
+    default: window.DEBUG && function(tag) {
+        throw new Error('create(tag, content) does not accept tag type "' + (typeof tag) + '"');
     }
 });
+*/

@@ -1,17 +1,14 @@
-/**
+/*
 fragmentFromHTML(html)
 Returns a DOM fragment of the parsed html `string`.
 */
 
+import create from './create.js';
+
 export default function fragmentFromHTML(html, tag) {
-    const range = document.createRange();
+    console.warn('fragmentFromHTML() deprecated in favour of create("fragment", html) or create("fragment", { parentNode: context, html })');
 
-    if (tag) {
-        const element = document.getElementsByTagName(tag).item(0);
-        // TODO: this will fail if there is no tag of this type already 
-        // in the DOM
-        range.selectNode(element);
-    }
-
-    return range.createContextualFragment(html);
+    return tag ?
+        create('fragment', { parentTag: tag, html: html }) :
+        create('fragment', html) ;
 }

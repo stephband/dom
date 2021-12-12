@@ -11,28 +11,26 @@ if (window.DEBUG && !NodeList.prototype.forEach) {
 // DOM Fragments and Templates
 
 export function fragmentFromChildren(node) {
-	var fragment = create('fragment');
-
-	while (node.firstChild) {
-		append(fragment, node.firstChild);
-	}
-
-	return fragment;
+	console.warn('fragmentFromChildren() deprecated in favour of create("fragment", node.childNodes). Remove call.')
+	return create('fragment', node.childNodes);
 }
 
 
-/**
+/*
 fragmentFromTemplate(node)
 Returns a DOM fragment containing the content of the template `node`.
 */
 
 export function fragmentFromTemplate(node) {
+	console.warn('fragmentFromTemplate() deprecated in favour of create("fragment", node.content || childNodes). Remove call.')
 	// A template tag has a content property that gives us a document
 	// fragment. If that doesn't exist we must make a document fragment.
 	return node.content || fragmentFromChildren(node);
 }
 
 export function fragmentFromId(id) {
+	console.warn('fragmentFromId() deprecated. Remove call.')
+
 	var node = document.getElementById(id);
 
 	if (!node) { throw new Error('DOM: element id="' + id + '" is not in the DOM.') }

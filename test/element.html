@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="stephband" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@@stephband" />
+    <meta property="og:url" content="http://stephen.band/literal/" />
+    <meta property="og:title" content="Literal" />
+    <meta property="og:description" content="" />
+    <meta property="og:image" content="" />
+
+    <title>Literal</title>
+
+    <link rel="icon" type="image/png" href="./images/logo-32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="./images/logo-64.png" sizes="64x64">
+    <link rel="icon" type="image/png" href="./images/logo-128.png" sizes="128x128">
+
+    <script title="load">
+    document.documentElement.className += ' js content-loading loading';
+    window.addEventListener('DOMContentLoaded', () => document.documentElement.classList.remove('content-loading'));
+    // Wait for other load handlers to run first - Literal does a few things on
+    // load (eg. data-targetable scrolls) and we want them to run before the loading
+    // class is removed
+    window.addEventListener('load', () => window.requestAnimationFrame(() => document.documentElement.classList.remove('loading')));
+    window.DEBUG = true;
+    </script>
+
+    <link rel="stylesheet" href="../../bolt/elements/html.css" />
+    <link rel="stylesheet" href="../../bolt/elements/input.css" />
+    <link rel="stylesheet" href="../../bolt/elements/label.css" />
+    <link rel="stylesheet" href="../../bolt/classes/text.css" />
+    <link rel="stylesheet" href="../../bolt/classes/grid.css" />
+    <link rel="stylesheet" href="../../bolt/classes/block.css" />
+    <link rel="stylesheet" href="../../bolt/debug.css" />
+    <link rel="stylesheet" href="../module.css" />
+
+    <style>
+        body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 1.5rem;
+            padding: 3rem 1.5rem 4.5rem;
+        }
+
+        body > header {
+            grid-column: 1 / span 2;
+        }
+
+        body > section {
+
+        }
+
+        code {
+            font-size: 0.9375em;
+            font-family: 'Fira Mono', 'Andale Mono', courier, monospace;
+            line-height: 1em;
+        }
+
+        .test-count {
+            font-size: 0.875em;
+        }
+
+        p {
+            padding-left: 1rem;
+            text-indent: -1rem;
+        }
+
+        pre {
+            padding: 0.375rem;
+            background-color: #eeeeee;
+            border-radius: 0.1875rem;
+        }
+
+        dl > dd {
+            margin: 0;
+        }
+
+        .blue-fg {
+            color: blue;
+        }
+
+        .text-03 {
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input + hr,
+        select + hr {
+            margin-top: 0.75rem;
+        }
+
+        [data-before]:before {
+            content: attr(data-before);
+        }
+
+        [data-after]:after {
+            content: attr(data-after);
+        }
+
+        .text-07 {
+            font-size: 0.625rem;
+            font-family: FiraMono, courier, monospace;
+        }
+    </style>
+</head>
+
+<body class="2x-grid grid">
+    <header>
+        <h1 class="doctext-01">Literal <span class="doctext-06">0.5.2</span></h1>
+
+        <template id="window-time">
+            <time>${
+                // Set local variables on `this`, the renderer
+                this.n = window.performance.now() / 1000,
+                // Schedule next render in a second
+                setTimeout(() => { this.push() }, (Math.ceil(this.n) - this.n) * 1000),
+                // Output current time in seconds
+                Math.round(this.n) + 's'
+            }</time>
+        </template>
+
+        <include-literal src="#window-time"></include-literal>
+    </header>
+
+    <section title="">
+        <test-element></test-element>
+    </section>
+
+    <script type="module">
+        import element from "../modules/element.js";
+
+        element('test-element', {
+            connect: function() {
+                console.log('CONNECT');
+            },
+
+            disconnect: function() {
+                console.log('DISCONNECT');
+            }
+        }, {
+        });
+    </script>
+</body>

@@ -15,7 +15,8 @@
 @import "../bolt/css/block.css";
 @import "../bolt/css/color.css";
 @import "../bolt/css/text.css";
-@import "../bolt/css/modifiers.css";
+@import "../bolt/css/active.css";
+@import "../bolt/css/states.css";
 @import "../bolt/css/respond.css";
 @import "../bolt/css/grid.css";
 @import "../bolt/classes/toggle-block.css";

@@ -31,8 +31,8 @@ stream.stop();
 ```
 
 The first parameter may also be an options object, which must have a `type`
-property. The `select: '...'` property allows for delegation of an event from 
-the selected target. Other properties, eg. `passive: true` are passed to 
+property. The `select: '...'` property allows for delegation of an event from
+the selected target. Other properties, eg. `passive: true` are passed to
 addEventListener options.
 
 ```js
@@ -83,7 +83,7 @@ assign(Listener.prototype, {
             return;
         }
 
-        // If there is a selector and the target doesn't match, shoofty 
+        // If there is a selector and the target doesn't match, shoofty
         // outta here
         if (this.select) {
             const selectedTarget = e.target.closest(this.select);
@@ -130,9 +130,9 @@ export function preventDefault(e) {
 	e.preventDefault();
 }
 
-/** 
+/**
 isTargetEvent(e)
-Tests whether `e.target === e.currentTarget`.  
+Tests whether `e.target === e.currentTarget`.
 **/
 export function isTargetEvent(e) {
 	return e.target === e.currentTarget;

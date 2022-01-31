@@ -1,11 +1,17 @@
 
 /**
-mutations()
-See here for options:
-https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe
+mutations(type, element)
+Creates a stream of mutations (powered by a `MutationObserver`), where `type` is
+one of `'all'`, `'attributes'`, `'children'`, `'tree'`, `'text'`, or an object
+of options for the `MutationObserver`.
 **/
 
-import Stream from '../../fn/stream/stream.js';
+import Stream, { Source } from '../../fn/stream/stream.js';
+
+
+/*
+Types of `options` shortcuts
+*/
 
 const types = {
     all: {
@@ -23,7 +29,7 @@ const types = {
         childList: true
     },
 
-    descendents: {
+    tree: {
         childList: true,
         subtree: true
     },
@@ -33,16 +39,35 @@ const types = {
     }
 };
 
-function mutations(type, element) {
-    return new Stream((stream) => {
-        const options = types[type];
-        const observer = new MutationObserver((mutations) => stream.push(mutations));
-        observer.observe(element, options);
+/*
+MutationSource(element, options)
+*/
 
-        const stop = stream.stop;
-        stream.stop = () => {
-            observer.disconnect()
-            stop.apply(stream);
-        };
-    });
+function MutationSource(element, options) {
+    this.element = element;
+    this.options = options;
+}
+
+assign(MutationSource.prototype, Source.prototype, {
+    /* Inherited from Source .pipe(), .done() */
+
+    start: function(stream) {
+        const options = typeof type === 'string' ? types[type] : type ;
+        this.observer = new MutationObserver((mutations) => this.target.push(mutations));
+        this.observer.observe(element, options);
+    },
+
+    stop: function() {
+        this.observer.disconnect();
+        Source.prototype.stop.apply(this);
+    }
+});
+
+/*
+mutations(type, element)
+*/
+
+export function mutations(type, element) {
+    const options = typeof type === 'string' ? types[type] : type ;
+    return new Stream(new MutationSource(element, options));
 }

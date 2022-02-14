@@ -126,7 +126,7 @@ function urlFromData(url, data) {
 }
 
 function createOptions(method, data, head, controller) {
-    const contentType = 
+    const contentType =
         typeof head === 'string' ? head :
         head && head['Content-Type'] ||
         'application/json' ;

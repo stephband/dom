@@ -40,7 +40,7 @@ Constructs and returns a new DOM node.
 Where a comment or text node is created `content` must be a string, as is set as
 textContent. For fragments and other nodes:
 
-- If `content` is a string it is set as innerHTML on an element or fragment.
+- If `content` is a string it is set as innerHTML.
 - If `content` is array-like its items are appended to node. Note that where
 `content` is a NodeList, this removes nodes from whatever the NodeList belongs
 to.

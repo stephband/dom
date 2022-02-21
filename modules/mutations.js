@@ -36,7 +36,8 @@ const types = {
     },
 
     text: {
-        characterData: true
+        characterData: true,
+        subtree: true
     }
 };
 

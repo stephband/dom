@@ -13,3 +13,7 @@ export function select(selector, node) {
 }
 
 export default curry(select, true)
+
+if (window.DEBUG) {
+	window.select = select;
+}

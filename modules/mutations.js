@@ -41,6 +41,11 @@ const types = {
     }
 };
 
+function pushReducer(target, value) {
+    target.push(value);
+    return target;
+}
+
 /*
 MutationSource(element, options)
 */
@@ -54,7 +59,7 @@ assign(MutationSource.prototype, Source.prototype, {
     /* Inherited from Source .pipe(), .done() */
 
     start: function(stream) {
-        this.observer = new MutationObserver((mutations) => this.target.push(mutations));
+        this.observer = new MutationObserver((mutations) => mutations.reduce(pushReducer, this.target));
         this.observer.observe(this.element, this.options);
     },
 

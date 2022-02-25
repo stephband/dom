@@ -2,7 +2,7 @@
 /**
 trigger(type, node)
 
-Triggers event of `type` on `node`. Returns `false` if the event default was 
+Triggers event of `type` on `node`. Returns `false` if the event default was
 prevented, otherwise `true`.
 
 ```
@@ -13,7 +13,7 @@ trigger('dom-activate', node);
 /**
 trigger(data, node)
 
-Triggers an event described by `data` on `node`. The `data` object must have a 
+Triggers an event described by `data` on `node`. The `data` object must have a
 `type` property. Use the `details` property to carry a data payload.
 
 ```
@@ -45,3 +45,7 @@ export function trigger(type, node) {
 }
 
 export default curry(trigger, true);
+
+if (window.DEBUG) {
+    window.trigger = trigger;
+}

@@ -55,7 +55,7 @@ create('fragment', '<li>', document.querySelector('ul'));
 ```
 **/
 
-export default overload(id, {
+const create = overload(id, {
     comment: function(tag, text) {
         return document.createComment(text || '');
     },
@@ -150,28 +150,10 @@ export default overload(id, {
     }),
 });
 
+export default create;
 
-/*
-I believe this is redundant. Was it in Sparky that we created nodes with an
-object as first argument? */
-/*
-export default overload(typeofTag, {
-    string: create,
 
-    object: function(properties, content) {
-        const tag = properties.tag || properties.tagName;
-
-        if (window.DEBUG && typeof tag !== 'string') {
-            throw new Error('create(object, content) object must have string property .tag or .tagName');
-        }
-
-        return typeof content === 'string' ?
-            assign(create(tag, properties), { innerHTML: content }) :
-            assign(create(tag, properties), content) ;
-    },
-
-    default: window.DEBUG && function(tag) {
-        throw new Error('create(tag, content) does not accept tag type "' + (typeof tag) + '"');
-    }
-});
-*/
+// Expose to console in DEBUG mode
+if (window.DEBUG) {
+    Object.assign(window.dom || (window.dom = {}), { create });
+}

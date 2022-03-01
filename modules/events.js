@@ -142,6 +142,8 @@ export function isNotPrevented(e) {
 	return !e.defaultPrevented;
 }
 
+// Expose to console in DEBUG mode
 if (window.DEBUG) {
-    window.events = events;
+	window.dom ? (window.dom.events = events) : (window.dom = { events });
 }
+

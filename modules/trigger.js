@@ -46,6 +46,7 @@ export function trigger(type, node) {
 
 export default curry(trigger, true);
 
+// Expose to console in DEBUG mode
 if (window.DEBUG) {
-    window.trigger = trigger;
+    Object.assign(window.dom || (window.dom = {}), { trigger });
 }

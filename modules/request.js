@@ -315,3 +315,8 @@ export function throttledRequest(type, mimetype, url) {
         .catch(ignoreAbortError);
     };
 }
+
+// Expose to console in DEBUG mode
+if (window.DEBUG) {
+	window.dom ? (window.dom.request = request) : (window.dom = { request });
+}

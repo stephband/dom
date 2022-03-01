@@ -23,3 +23,8 @@ export default function identify(node) {
 
 	return id;
 }
+
+// Expose to console in DEBUG mode
+if (window.DEBUG) {
+    Object.assign(window.dom || (window.dom = {}), { identify });
+}

@@ -14,6 +14,7 @@ export function select(selector, node) {
 
 export default curry(select, true)
 
+// Expose to console in DEBUG mode
 if (window.DEBUG) {
-	window.select = select;
+	window.dom ? (window.dom.select = select) : (window.dom = { select });
 }

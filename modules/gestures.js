@@ -27,8 +27,8 @@ The `options` object may optionally contain any of:
 
 ```js
 {
-    // Listen to gestures on a given device type. Internally the pointer events' 
-    // e.pointerType is matched against this string: it may contain any of the 
+    // Listen to gestures on a given device type. Internally the pointer events'
+    // e.pointerType is matched against this string: it may contain any of the
     // types 'pen', 'mouse' and 'touch'. Where not defined, all pointer types
     // trigger a gesture
     device: 'mouse pen',
@@ -36,7 +36,7 @@ The `options` object may optionally contain any of:
     // Listen to gestures inside a selected element or elements
     selector: '.class'
 
-    // Determine a minimum distance a finger must travel before a gesture is 
+    // Determine a minimum distance a finger must travel before a gesture is
     // considered to have started
     threshold: '0.25rem'
 }
@@ -97,16 +97,16 @@ assign(Pointermove.prototype, {
         'pointermove': function(e) {
             if (this.pointerId !== e.pointerId) {
                 console.log('Not the same pointer');
-                return;                
+                return;
             }
 
             this.events.push(e);
-    
+
             // Before we cross the threshold we need to check it on each move
             if (!this.isGesture && checkThreshold(this.threshold, this.events[0], e)) {
                 this.createGesture();
             }
-    
+
             // After we want to cancel any default actions
             else {
                 e.preventDefault();
@@ -116,7 +116,7 @@ assign(Pointermove.prototype, {
         'default': function(e) {
             if (this.pointerId !== e.pointerId) {
                 console.log('Not the same pointer');
-                return;                
+                return;
             }
 
             this.events.push(e);
@@ -127,7 +127,7 @@ assign(Pointermove.prototype, {
     createGesture: function() {
         this.isGesture = true;
 
-        this.stream.push(new Stream((stream) => {  
+        this.stream.push(new Stream((stream) => {
             // Push in existing events
             stream.push.apply(stream, this.events);
 
@@ -175,9 +175,9 @@ assign(Pointerdown.prototype, {
 
         // Check target matches selector
         if (this.options.selector && !e.target.closest(this.options.selector)) { return; }
-    
-        // Copy event to keep the true target around, as target is mutated on 
-        // the event if it passes through a shadow boundary after being handled 
+
+        // Copy event to keep the true target around, as target is mutated on
+        // the event if it passes through a shadow boundary after being handled
         // here, resulting in a rare but gnarly bug hunt.
         var event = {
             type:          e.type,
@@ -195,7 +195,7 @@ assign(Pointerdown.prototype, {
     // Stop the gestures stream
     stop: function() {
         this.node.removeEventListener('pointerdown', this);
-        
+
         // Dont do this, we are responding to source (thi.stream) here already
         //this.stream.stop();
     }
@@ -214,4 +214,9 @@ export default function gestures(options, node) {
         options ;
 
     return new Stream((source) => source.done(new Pointerdown(source, node, options)));
+}
+
+// Expose to console in DEBUG mode
+if (window.DEBUG) {
+    Object.assign(window.dom || (window.dom = {}), { gestures });
 }

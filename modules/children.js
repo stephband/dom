@@ -13,3 +13,8 @@ export default function children(node) {
 	// TOIDO: BUg in selector!!!
 	return toArray(node.children || node.querySelectorAll('*'));
 }
+
+// Expose to console in DEBUG mode
+if (window.DEBUG) {
+    Object.assign(window.dom || (window.dom = {}), { children });
+}

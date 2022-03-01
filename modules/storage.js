@@ -2,7 +2,7 @@
 var store = {};
 
 
-/** 
+/**
 get(key)
 **/
 
@@ -10,12 +10,12 @@ export function get(key) {
     if (store[key]) { return store[key]; }
     const data = window.localStorage.getItem(key);
     return data ?
-        (store[key] = JSON.parse(data)) : 
+        (store[key] = JSON.parse(data)) :
         undefined ;
 }
 
 
-/** 
+/**
 set(key, data)
 **/
 
@@ -25,7 +25,7 @@ export function set(key, data) {
 }
 
 
-/** 
+/**
 remove(key, value)
 **/
 
@@ -40,7 +40,7 @@ export function remove(key, data) {
 }
 
 
-/** 
+/**
 push(key, value)
 **/
 
@@ -54,7 +54,7 @@ export function push(key, value) {
 }
 
 
-/** 
+/**
 contains(key, value)
 **/
 
@@ -103,3 +103,8 @@ Object.assign(Storage.prototype, {
         return contains(this.key, value);
     }
 });
+
+// Expose to console in DEBUG mode
+if (window.DEBUG) {
+    Object.assign(window.dom || (window.dom = {}), { Storage });
+}

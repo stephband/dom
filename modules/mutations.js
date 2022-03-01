@@ -82,6 +82,7 @@ export function mutations(type, element) {
 Expose to console in DEBUG mode
 */
 
+// Expose to console in DEBUG mode
 if (window.DEBUG) {
-    window.mutations = mutations;
+    Object.assign(window.dom || (window.dom = {}), { mutations });
 }

@@ -17,3 +17,8 @@ export function getCookie(key) {
         catch (e) {}
 	}
 }
+
+// Expose to console in DEBUG mode
+if (window.DEBUG) {
+    Object.assign(window.dom || (window.dom = {}), { getCookie });
+}

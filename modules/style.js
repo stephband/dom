@@ -72,3 +72,8 @@ export default function style(name, node) {
         parseFloat(value) :
         value ;
 }
+
+// Expose to console in DEBUG mode
+if (window.DEBUG) {
+    Object.assign(window.dom || (window.dom = {}), { style });
+}

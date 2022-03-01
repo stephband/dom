@@ -117,3 +117,8 @@ render time.
 export function vh(n) {
     return (100 * px(n) / window.innerHeight);
 }
+
+// Expose to console in DEBUG mode
+if (window.DEBUG) {
+    Object.assign(window.dom || (window.dom = {}), { px, em, rem, vw, vh });
+}

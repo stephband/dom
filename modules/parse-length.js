@@ -43,7 +43,8 @@ window.addEventListener('resize', () => {
 /**
 px(value)
 Takes a number in pixels or a string of the form `'10px'`, `'10em'`, `'10rem'`,
-`'100vw'` or `'100vh'`, and returns a numeric value in pixels.
+`'100vw'`, `'100vh'`, `'100vmin'` or `'100vmax'`, and returns a numeric value
+in pixels.
 */
 
 export const px = overload(toType, {
@@ -68,6 +69,18 @@ export const px = overload(toType, {
 
         vh: function(n) {
             return window.innerHeight * n / 100;
+        },
+
+        vmin: function(n) {
+            return window.innerWidth < window.innerHeight ?
+                window.innerWidth * n / 100 :
+                window.innerHeight * n / 100 ;
+        },
+
+        vmax: function(n) {
+            return window.innerWidth < window.innerHeight ?
+                window.innerHeight * n / 100 :
+                window.innerWidth * n / 100 ;
         }
     })
 });
@@ -104,7 +117,7 @@ render time.
 */
 
 export function vw(n) {
-    return (100 * px(n) / window.innerWidth);
+    return 100 * px(n) / window.innerWidth;
 }
 
 /**
@@ -115,10 +128,41 @@ render time.
 */
 
 export function vh(n) {
-    return (100 * px(n) / window.innerHeight);
+    return 100 * px(n) / window.innerHeight;
 }
+
+/**
+vmin(value)
+Takes number in pixels or CSS length of the form `'10em'` and returns a
+numeric value in `vmin`, eg. `120`. Depends on the minimum dimension of the
+viewport at render time.
+*/
+
+export function vmin(n) {
+    return 100 * px(n) / (
+        window.innerWidth < window.innerHeight ?
+            window.innerWidth :
+            window.innerHeight
+    );
+}
+
+/**
+vmax(value)
+Takes number in pixels or CSS length of the form `'10em'` and returns a
+numeric value in `vmax`, eg. `120`. Depends on the maximum dimension of the
+viewport at render time.
+*/
+
+export function vmax(n) {
+    return 100 * px(n) / (
+        window.innerWidth < window.innerHeight ?
+            window.innerHeight :
+            window.innerWidth
+    );
+}
+
 
 // Expose to console in DEBUG mode
 if (window.DEBUG) {
-    Object.assign(window.dom || (window.dom = {}), { px, em, rem, vw, vh });
+    Object.assign(window.dom || (window.dom = {}), { px, em, rem, vw, vh, vmin, vmax });
 }

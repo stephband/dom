@@ -46,7 +46,7 @@ function update(source, e) {
 
     trackingInterval =  (1.4 * interval) > config.maxScrollEventInterval ?
         config.maxScrollEventInterval :
-        (1.4 * interval);
+        (1.4 * interval) ;
 
     source.value.stop();
     source.value = undefined;

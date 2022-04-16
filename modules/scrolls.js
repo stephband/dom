@@ -25,16 +25,13 @@ export const config = {
 
 var trackingInterval = config.maxScrollEventInterval;
 
-function update(source, e) {
-    const { times } = source;
-    if (times.length < 2) {
-        times.length = 0;
-        return;
-    }
-
+function adjustTrackingInterval(times) {
     // Dynamically adjust maxScrollEventInterval to tighten it up,
     // imposing a baseline of 60ms (0.0375s * 1.6)
-    let n = times.length, interval = 0;
+
+    let n = times.length;
+    let interval = 0;
+
     while (--n) {
         const t = times[n] - times[n - 1];
         interval = t > interval ? t : interval;
@@ -47,9 +44,19 @@ function update(source, e) {
     trackingInterval =  (1.4 * interval) > config.maxScrollEventInterval ?
         config.maxScrollEventInterval :
         (1.4 * interval) ;
+}
+
+function update(source, e) {
+    const { times } = source;
 
     source.value.stop();
     source.value = undefined;
+
+    if (times.length > 1) {
+        adjustTrackingInterval(times);
+    }
+
+    times.length = 0;
 }
 
 function Scrolls(element) {
@@ -99,7 +106,6 @@ assign(Scrolls.prototype, Source.prototype, {
         this.times.push(time);
 
         if (this.value) {
-            // Update only when there is a trackingInterval second pause in scrolling
             clearTimeout(this.timer);
             this.value.push(e);
         }
@@ -108,6 +114,7 @@ assign(Scrolls.prototype, Source.prototype, {
             this.target.push(this.value);
         }
 
+        // Update only when there is a trackingInterval second pause in scrolling
         this.timer = setTimeout(update, trackingInterval * 1000, this, e);
     },
 

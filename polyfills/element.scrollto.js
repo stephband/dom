@@ -9,7 +9,6 @@ import expOut   from '../../fn/modules/maths/exponential-out.js';
 import noop     from '../../fn/modules/noop.js';
 import animate  from '../modules/animate.js';
 import rect     from '../modules/rect.js';
-import features from '../modules/features.js';
 
 // Duration and easing of scroll animation
 const config = {
@@ -22,6 +21,11 @@ let cancel = noop;
 
 function scrollToPosition(scrollParent, options) {
     if (options.behavior === 'smooth') {
+        // Switch off scroll snap
+        const scrollSnapType = scrollParent.style.getPropertyValue('scroll-snap-type');
+        const undoScrollSnap = () => (scrollParent.style.setProperty('scroll-snap-type', scrollSnapType));
+        scrollParent.style.setProperty('scroll-snap-type', 'none');
+
         if (options.left !== undefined) {
             const scrollBoxWidth = scrollParent === document.body ?
                 // We cannot guarantee that body width is 100%. Use the window
@@ -34,7 +38,8 @@ function scrollToPosition(scrollParent, options) {
                 * Math.abs(options.left - scrollParent.scrollLeft)
                 / scrollBoxWidth ;
 
-            cancel = animate(scrollDuration, config.scrollTransform, 'scrollLeft', scrollParent, options.left);
+            // duration, transform, name, object, value, endFn
+            cancel = animate(scrollDuration, config.scrollTransform, 'scrollLeft', scrollParent, options.left, undoScrollSnap);
         }
         else {
             const scrollBoxHeight = scrollParent === document.body ?
@@ -48,7 +53,7 @@ function scrollToPosition(scrollParent, options) {
                 * Math.abs(options.top - scrollParent.scrollTop)
                 / scrollBoxHeight ;
 
-            cancel = animate(scrollDuration, config.scrollTransform, 'scrollTop', scrollParent, options.top);
+            cancel = animate(scrollDuration, config.scrollTransform, 'scrollTop', scrollParent, options.top, undoScrollSnap);
         }
     }
     else {
@@ -57,7 +62,7 @@ function scrollToPosition(scrollParent, options) {
     }
 }
 
-if (!features.scrollBehavior) {
+if (!('scrollBehavior' in document.documentElement.style)) {
     console.log('Polyfilling Element.scrollTo(options).');
 
     // Get the method from HTMLElement - in some browsers it is here rather

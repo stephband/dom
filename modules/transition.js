@@ -18,7 +18,7 @@ const performance           = window.performance;
 const requestAnimationFrame = window.requestAnimationFrame;
 const cancelAnimationFrame  = window.cancelAnimationFrame;
 
-export default function transition(duration, fn) {
+export default function transition(duration, fn, end) {
 	var t0 = performance.now();
 
 	function frame(t1) {
@@ -33,6 +33,7 @@ export default function transition(duration, fn) {
 		}
 		else {
 			fn(1);
+			end && end();
 		}
 	}
 

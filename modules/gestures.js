@@ -45,7 +45,7 @@ The `options` object may optionally contain any of:
 
 import get      from '../../fn/modules/get.js';
 import overload from '../../fn/modules/overload.js';
-import Stream   from '../../fn/stream/stream.js';
+import Stream   from '../../fn/modules/stream.js';
 import px       from './parse-length.js';
 
 const assign = Object.assign;

@@ -1,5 +1,5 @@
 
-import Stream from '../../fn/stream/stream.js';
+import Stream from '../../fn/modules/stream.js';
 //import features from './features.js';
 
 const assign  = Object.assign;

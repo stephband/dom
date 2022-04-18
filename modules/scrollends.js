@@ -1,7 +1,8 @@
 
-// Much of this code has been purloined from targetable.js – do we need the 
+// Much of this code has been purloined from targetable.js – do we need the
 // hashchange tracking here? I have commented it
 
+console.warn('scrollends() deprecated in favour of scrolls()');
 
 import Stream from '../../fn/stream/stream.js';
 
@@ -26,7 +27,7 @@ const captureOptions = {
 
 var trackingInterval = config.maxScrollEventInterval;
 
-function update(times, stream, e) { 
+function update(times, stream, e) {
     if (times.length < 2) {
         times.length = 0;
         return;
@@ -41,7 +42,7 @@ function update(times, stream, e) {
     }
 
     interval = interval < config.minScrollEventInterval ?
-        config.minScrollEventInterval : 
+        config.minScrollEventInterval :
         interval ;
 
     trackingInterval =  (1.4 * interval) > config.maxScrollEventInterval ?
@@ -55,7 +56,7 @@ function Scrolls(stream, element) {
     this.stream  = stream;
     this.element = element;
     this.times   = [];
-    
+
     /*
     window.addEventListener('hashchange', function hashchange(e) {
         hashtime = e.timeStamp / 1000;
@@ -68,8 +69,8 @@ function Scrolls(stream, element) {
 
 assign(Scrolls.prototype, {
     handleEvent: function(e) {
-        // Ignore the first scroll event following a hashchange. The browser sends a 
-        // scroll event even where a target cannot be scrolled to, such as a 
+        // Ignore the first scroll event following a hashchange. The browser sends a
+        // scroll event even where a target cannot be scrolled to, such as a
         // navigation with position: fixed, for example. This can cause targetable
         // to recalculate again, and shift the target back to one fo the targetables,
         // where it should stay on the navigation element.
@@ -84,7 +85,7 @@ assign(Scrolls.prototype, {
                 hashtime = undefined;
                 return;
             }
-    
+
             hashtime = undefined;
         }*/
 

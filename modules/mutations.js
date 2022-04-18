@@ -6,7 +6,7 @@ one of `'all'`, `'attributes'`, `'children'`, `'tree'`, `'text'`, or an object
 of options for the `MutationObserver`.
 **/
 
-import Stream, { Source } from '../../fn/stream/stream.js';
+import Stream, { Source } from '../../fn/modules/stream.js';
 
 const assign = Object.assign;
 

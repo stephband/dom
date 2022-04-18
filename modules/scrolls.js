@@ -2,7 +2,8 @@
 // Much of this code has been purloined from targetable.js – do we need the
 // hashchange tracking here? I have commented it
 
-import Stream, { Source } from '../../fn/stream/stream.js';
+import Stream     from '../../fn/modules/stream.js';
+import { Source } from '../../fn/modules/stream/stream.js';
 
 const assign = Object.assign;
 

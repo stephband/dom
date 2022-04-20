@@ -2,8 +2,8 @@
 // Much of this code has been purloined from targetable.js – do we need the
 // hashchange tracking here? I have commented it
 
-import Stream     from '../../fn/modules/stream.js';
-import { Source } from '../../fn/modules/stream/stream.js';
+import Stream   from '../../fn/modules/stream.js';
+import Producer from '../../fn/modules/stream/producer.js';
 
 const assign = Object.assign;
 
@@ -60,13 +60,15 @@ function update(source, e) {
     times.length = 0;
 }
 
-function Scrolls(element) {
+function ScrollsProducer(element) {
     this.element = element;
     this.times   = [];
 }
 
-assign(Scrolls.prototype, Source.prototype, {
-    start: function() {
+assign(ScrollsProducer.prototype, Producer.prototype, {
+    pipe: function(stream) {
+        this.stream = stream;
+
         // Method may be used once only
         //if (window.DEBUG) { this.start = startError; }
 
@@ -78,9 +80,6 @@ assign(Scrolls.prototype, Source.prototype, {
         */
 
         this.element.addEventListener('scroll', this, captureOptions);
-
-        // Update count of running streams
-        ++Stream.count;
     },
 
     handleEvent: function(e) {
@@ -112,7 +111,7 @@ assign(Scrolls.prototype, Source.prototype, {
         }
         else {
             this.value = Stream.of(e);
-            this.target.push(this.value);
+            this.stream.push(this.value);
         }
 
         // Update only when there is a trackingInterval second pause in scrolling
@@ -120,11 +119,11 @@ assign(Scrolls.prototype, Source.prototype, {
     },
 
     stop: function() {
-        this.element.removeEventListener('scroll', scroll);
-        Source.prototype.stop.apply(this, arguments);
+        this.element.removeEventListener('scroll', this);
+        Producer.prototype.stop.apply(this, arguments);
     }
 });
 
 export default function scrolls(element) {
-    return new Stream(new Scrolls(element));
+    return new Stream(new ScrollsProducer(element));
 }

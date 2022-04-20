@@ -46,6 +46,7 @@ The `options` object may optionally contain any of:
 import get      from '../../fn/modules/get.js';
 import overload from '../../fn/modules/overload.js';
 import Stream   from '../../fn/modules/stream.js';
+import Producer from '../../fn/modules/stream/producer.js';
 import px       from './parse-length.js';
 
 const assign = Object.assign;
@@ -155,14 +156,13 @@ function isIgnoreTag(e) {
     return tag && (!!config.ignoreTags[tag.toLowerCase()] || e.target.draggable);
 }
 
-function Pointerdown(stream, node, options) {
-    this.stream  = stream;
+function PointerProducer(node, options) {
     this.node    = node;
     this.options = options;
     this.node.addEventListener('pointerdown', this);
 }
 
-assign(Pointerdown.prototype, {
+assign(PointerProducer.prototype, Producer.prototype, {
     handleEvent: function(e) {
         // Ignore non-primary buttons
         if (e.button !== 0) { return; }
@@ -189,15 +189,13 @@ assign(Pointerdown.prototype, {
             pointerId:     e.pointerId
         };
 
-        new Pointermove(this.stream, [event], this.options);
+        new Pointermove(this[0], [event], this.options);
     },
 
     // Stop the gestures stream
     stop: function() {
         this.node.removeEventListener('pointerdown', this);
-
-        // Dont do this, we are responding to source (thi.stream) here already
-        //this.stream.stop();
+        Producer.prototype.stop.apply(this, arguments);
     }
 });
 
@@ -213,7 +211,7 @@ export default function gestures(options, node) {
         node :
         options ;
 
-    return new Stream((source) => source.done(new Pointerdown(source, node, options)));
+    return new Stream(new PointerProducer(node, options));
 }
 
 // Expose to console in DEBUG mode

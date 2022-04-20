@@ -6,7 +6,8 @@ one of `'all'`, `'attributes'`, `'children'`, `'tree'`, `'text'`, or an object
 of options for the `MutationObserver`.
 **/
 
-import Stream, { Source } from '../../fn/modules/stream.js';
+import Producer from '../../fn/modules/stream/producer.js';
+import Stream   from '../../fn/modules/stream.js';
 
 const assign = Object.assign;
 
@@ -47,25 +48,24 @@ function pushReducer(target, value) {
 }
 
 /*
-MutationSource(element, options)
+MutationsProducer(element, options)
 */
 
-function MutationSource(element, options) {
+function MutationsProducer(element, options) {
     this.element = element;
     this.options = options;
 }
 
-assign(MutationSource.prototype, Source.prototype, {
-    /* Inherited from Source .pipe(), .done() */
-
-    start: function(stream) {
+assign(MutationsProducer.prototype, Producer.prototype, {
+    pipe: function(stream) {
+        this[0] = stream;
         this.observer = new MutationObserver((mutations) => mutations.reduce(pushReducer, this.target));
         this.observer.observe(this.element, this.options);
     },
 
     stop: function() {
         this.observer.disconnect();
-        Source.prototype.stop.apply(this);
+        Producer.prototype.stop.apply(this);
     }
 });
 
@@ -75,7 +75,7 @@ mutations(type, element)
 
 export function mutations(type, element) {
     const options = typeof type === 'string' ? types[type] : type ;
-    return new Stream(new MutationSource(element, options));
+    return new Stream(new MutationsProducer(element, options));
 }
 
 /*

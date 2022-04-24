@@ -128,13 +128,12 @@ assign(Pointermove.prototype, {
     createGesture: function() {
         this.isGesture = true;
 
-        this.stream.push(new Stream((stream) => {
-            // Push in existing events
-            stream.push.apply(stream, this.events);
-
-            // Have the stream controller take over as the events buffer
-            this.events = stream;
-        }));
+        // Have a buffer stream take over as the events buffer
+        // TODO! There's a bug here - buffer stream does not use .push() to fill its buffer!!
+        // TODO! Also, you can't .stop() this.events, things still get pushed to it. Clearly we
+        // need a proper producer!
+        this.events = Stream.from(this.events);
+        this.stream.push(this.events);
     },
 
     stop: function() {

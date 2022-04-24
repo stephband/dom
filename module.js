@@ -80,8 +80,6 @@ export * from './modules/fragments.js';
 
 // Events
 
-export { default as Event } from './modules/event.js';
-
 export { isPrimaryButton, isTargetEvent, preventDefault } from './modules/events.js';
 //export { default as match } from './modules/match.js';
 export { on, off } from './modules/events.js';

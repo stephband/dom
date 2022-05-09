@@ -9,7 +9,7 @@ Registers a custom element and returns its constructor.
     mode:       'open' or 'closed', defaults to 'closed'
     focusable:  true or false, defaults to true
     properties: An object of attribute and property handlers
-    
+
     // Lifecycle handlers
     stylesheet: optional string path to stylesheet for shadow DOM
     construct:  called during element construction
@@ -22,7 +22,7 @@ Registers a custom element and returns its constructor.
     restore:    called when form element restored
 }
 
-The name form `'tag is="element-name"'` creates customised built-in elements in 
+The name form `'tag is="element-name"'` creates customised built-in elements in
 browsers that support the feature. Safari is a known culprit. Mileage will vary.
 
 The effects of the `mode` option are subtle. In 'closed' mode, the element is
@@ -38,7 +38,7 @@ assigned default handlers for the standard properties `type`, `name`, `form`,
 `labels`, `validity`, `validationMessage`, `willValidate`, `checkValidity`
 and `reportValidity`. Form behaviour is also mildly polyfilled in browsers
 without support by inserting a hidden input inside the element but outside the
-shadow DOM. Mileage will vary. Managing focus can be problematic without browser 
+shadow DOM. Mileage will vary. Managing focus can be problematic without browser
 support.
 
 At the start of initialisation the `construct` handler is called. Use it to
@@ -136,7 +136,7 @@ const captureNameTag = capture(/^\s*<?([a-z][\w]*-[\w]+)>?\s*$|^\s*<?([a-z][\w]*
     1: (data, captures) => ({
         name: captures[1]
     }),
-    
+
     2: (data, captures) => ({
         name: captures[3],
         tag:  captures[2]
@@ -157,7 +157,7 @@ function transferProperty(elem, key) {
     return elem;
 }
 
-function createShadow(/*template, */elem, options) {
+function createShadow(elem, options, stylesheet) {
     elem._initialLoad = true;
 
     // Create a shadow root if there is DOM content. Shadows may be 'open' or
@@ -168,8 +168,8 @@ function createShadow(/*template, */elem, options) {
         delegatesFocus: options.focusable || false
     });
 
-    if (options.stylesheet) {
-        const link = create('link', { rel: 'stylesheet', href: options.stylesheet });
+    if (stylesheet) {
+        const link = create('link', { rel: 'stylesheet', href: stylesheet });
         shadow.append(link);
     }
 
@@ -261,7 +261,7 @@ function groupAttributeProperty(data, entry) {
     return data;
 }
 
-export default function element(definition, lifecycle, api) {
+export default function element(definition, lifecycle, api, stylesheet) {
     const { name, tag } = captureNameTag(definition);
 
     // Get the element constructor or the base HTMLElement constructor
@@ -271,13 +271,13 @@ export default function element(definition, lifecycle, api) {
 
     const { attributes, properties } = api ?
             Object.entries(api).reduce(groupAttributeProperty, {
-                attributes: {}, 
+                attributes: {},
                 properties: {}
             }) :
         // Support the old way, a single options object with props and lifecycle included
         lifecycle.properties ?
             Object.entries(lifecycle.properties).reduce(groupAttributeProperty, {
-                attributes: {}, 
+                attributes: {},
                 properties: {}
             }) :
         nothing ;
@@ -286,7 +286,7 @@ export default function element(definition, lifecycle, api) {
         // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);
         const shadow = lifecycle.construct && lifecycle.construct.length > shadowParameterIndex ?
-            createShadow(elem, lifecycle) :
+            createShadow(elem, lifecycle, stylesheet || lifecycle.stylesheet) :
             undefined ;
 
         // Get access to the internal form control API
@@ -344,10 +344,10 @@ export default function element(definition, lifecycle, api) {
     if (properties && properties.value) {
         // Flag the Element class as formAssociated
         Element.formAssociated = true;
-        
+
         // Define standard form properties
         define(Element.prototype, formProperties);
-    
+
         if (lifecycle.enable || lifecycle.disable) {
             Element.prototype.formDisabledCallback = function(disabled) {
                 return disabled ?
@@ -355,13 +355,13 @@ export default function element(definition, lifecycle, api) {
                     lifecycle.enable && lifecycle.enable.call(this, this[$shadow], this[$internals]) ;
             };
         }
-        
+
         if (lifecycle.reset) {
             Element.prototype.formResetCallback = function() {
                 return lifecycle.reset.call(this, this[$shadow], this[$internals]);
             };
         }
-        
+
         if (lifecycle.restore) {
             Element.prototype.formStateRestoreCallback = function() {
                 return lifecycle.restore.call(this, this[$shadow], this[$internals]);
@@ -460,10 +460,10 @@ export default function element(definition, lifecycle, api) {
 
     window.customElements.define(name, Element, tag && { extends: tag });
 
-    // Where tag is supplied, element should have been registered as a customised 
+    // Where tag is supplied, element should have been registered as a customised
     // built-in and the constructor would have run if any were in the DOM already.
-    // However, Safari does not support customised built-ins. Here we attempt to 
-    // go some way towards filling in support by searching for elements and 
+    // However, Safari does not support customised built-ins. Here we attempt to
+    // go some way towards filling in support by searching for elements and
     // assigning their intended APIs to them.
     if (tag && !supportsCustomisedBuiltIn) {
         if (window.DEBUG) {

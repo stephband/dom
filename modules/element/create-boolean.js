@@ -13,7 +13,7 @@ Creates an boolean attribute/property definition for element(), where
 ```
 **/
 
-export default function createBoolean(definition) {
+export default function createBoolean(definition, name) {
     function update(element, state) {
         if (definition.getState(element) === state) { return; }
         return definition[state ? 'enable' : 'disable'](element);

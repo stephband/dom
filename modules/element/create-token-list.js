@@ -1,8 +1,7 @@
 
-import { remove } from '../../../fn/modules/remove.js';
+import TokenList from './token-list.js';
 
-const A      = Array.prototype;
-const assign = Object.assign;
+const A = Array.prototype;
 
 
 /*
@@ -28,75 +27,34 @@ function updateList(list, tokens) {
 }
 
 
-/*
-TokenList(element, definitions)
-The definitions object is a map of accepted tokens, each one represented by an
-object with the functions `enable()` and `disable()`.
-*/
-
-function TokenList(element, definitions) {
-    this.element     = element;
-    this.definitions = definitions;
-    this.tokens      = [];
-}
-
-assign(TokenList.prototype, {
-    add: function() {
-        let n = arguments.length;
-        while (n--) {
-            const token = arguments[n];
-            if (!this.tokens.includes(token) && this.definitions[token]) {
-                // Call the definition.add() with element as context
-                this.definitions[token].enable(this.element);
-                this.tokens.push(token);
-            }
-        }
-    },
-
-    remove: function() {
-        let n = arguments.length;
-        while (n--) {
-            const token = arguments[n];
-            if (this.tokens.includes(token)) {
-                // Call the definition.remove() with element as context
-                this.definitions[token].disable(this.element);
-                remove(this.tokens, token);
-            }
-        }
-    },
-
-    supports: function(token) {
-        return !!this.definitions[token];
-    }
-});
-
-
 /**
 createTokenList(definitions)
 Creates a token list attribute/property definition ready for element(), where
 `definitions` is an object of named token definitions of the form:
 
 ```js
-{
-    tokenName: {
+createTokenList({
+    token: {
         enable: fn,
-        disable: fn,
-        getState: fn
+        disable: fn
     },
 
     ...
-}
+})
 ```
 **/
 
 export default function createTokenList(definitions) {
     // We lazily create a TokenList as needed, not so much for efficacy, but
     // because we don't have a reference to element until the attribute or
-    // property is accessed.
-    var list;
+    // property is accessed. We have to store that TokenList somewhere unique -
+    // this definition may be shared across many elements - so lets make a
+    // symbol property that identifies this definition. I know. It's a little
+    // bit meh, but this is a problem with the custom elements API, really.
+    const $tokenlist = Symbol('TokenList');
 
     function update(element, string) {
-        list = list || new TokenList(element, definitions);
+        const list = element[$tokenlist] || (element[$tokenlist] = new TokenList(element, definitions));
         updateList(list, string.trim().split(/\s+/));
     }
 
@@ -110,8 +68,7 @@ export default function createTokenList(definitions) {
         },
 
         get: function() {
-            list = list || new TokenList(this, definitions);
-            return list;
+            return this[$tokenlist] || (this[$tokenlist] = new TokenList(this, definitions));
         }
     };
 }

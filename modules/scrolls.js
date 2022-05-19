@@ -42,7 +42,7 @@ function adjustTrackingInterval(times) {
         config.minScrollEventInterval :
         interval ;
 
-    trackingInterval =  (1.4 * interval) > config.maxScrollEventInterval ?
+    trackingInterval = (1.4 * interval) > config.maxScrollEventInterval ?
         config.maxScrollEventInterval :
         (1.4 * interval) ;
 }

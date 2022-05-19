@@ -6,11 +6,12 @@ import Producer from '../../fn/modules/stream/producer.js';
 const assign  = Object.assign;
 const rspaces = /\s+/;
 
-/*
-function prefixType(type) {
-	return features.events[type] || type ;
-}
-*/
+const eventTypes = {
+    // Prefer standard name where both exist (Chrome)
+    fullscreenchange: ('fullscreenElement' in document) ? 'fullscreenchange' :
+        ('webkitFullscreenElement' in document) ? 'webkitfullscreenchange' :
+        'fullscreenchange'
+};
 
 /**
 isPrimaryButton(e)
@@ -84,17 +85,17 @@ var clickTimeStamp = 0;
 window.addEventListener('click', (e) => clickTimeStamp = e.timeStamp);
 
 function listen(listener, type) {
-    listener.node.addEventListener(type, listener, listener.options);
+    listener.node.addEventListener(eventTypes[type] || type, listener, listener.options);
     return listener;
 }
 
 function unlisten(listener, type) {
-    listener.node.removeEventListener(type, listener);
+    listener.node.removeEventListener(eventTypes[type] || type, listener);
     return listener;
 }
 
 function EventsProducer(type, options, node) {
-    this.types   = type.split(rspaces);//.map(prefixType);
+    this.types   = type.split(rspaces);
     this.options = options;
     this.node    = node;
     this.select  = options && options.select;

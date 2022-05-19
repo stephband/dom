@@ -23,7 +23,16 @@ function scrollToPosition(scrollParent, options) {
     if (options.behavior === 'smooth') {
         // Switch off scroll snap
         const scrollSnapType = scrollParent.style.getPropertyValue('scroll-snap-type');
-        const undoScrollSnap = () => (scrollParent.style.setProperty('scroll-snap-type', scrollSnapType));
+        const undoScrollSnap = () => {
+            // Undoing scroll-snap has a nasty habit of resetting scroll position
+            // in Safari 13. Make sure we can rereset it.
+            const scrollLeft = scrollParent.scrollLeft;
+            const scrollTop  = scrollParent.scrollTop;
+            scrollParent.style.setProperty('scroll-snap-type', scrollSnapType);
+            scrollParent.scrollLeft = scrollLeft;
+            scrollParent.scrollTop  = scrollTop;
+        };
+
         scrollParent.style.setProperty('scroll-snap-type', 'none');
 
         if (options.left !== undefined) {
@@ -63,7 +72,7 @@ function scrollToPosition(scrollParent, options) {
 }
 
 if (!('scrollBehavior' in document.documentElement.style)) {
-    console.log('Polyfilling Element.scrollTo(options).');
+    window.console && console.log('Polyfilling Element.scrollTo(options)');
 
     // Get the method from HTMLElement - in some browsers it is here rather
     // than on Element

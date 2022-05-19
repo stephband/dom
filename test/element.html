@@ -6,14 +6,7 @@
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width" />
 
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@@stephband" />
-    <meta property="og:url" content="http://stephen.band/literal/" />
-    <meta property="og:title" content="Literal" />
-    <meta property="og:description" content="" />
-    <meta property="og:image" content="" />
-
-    <title>Literal</title>
+    <title>Test element()</title>
 
     <link rel="icon" type="image/png" href="./images/logo-32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="./images/logo-64.png" sizes="64x64">
@@ -29,119 +22,72 @@
     window.DEBUG = true;
     </script>
 
-    <link rel="stylesheet" href="../../bolt/elements/html.css" />
-    <link rel="stylesheet" href="../../bolt/elements/input.css" />
-    <link rel="stylesheet" href="../../bolt/elements/label.css" />
-    <link rel="stylesheet" href="../../bolt/classes/text.css" />
-    <link rel="stylesheet" href="../../bolt/classes/grid.css" />
-    <link rel="stylesheet" href="../../bolt/classes/block.css" />
-    <link rel="stylesheet" href="../../bolt/debug.css" />
-    <link rel="stylesheet" href="../module.css" />
-
-    <style>
-        body {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            column-gap: 1.5rem;
-            padding: 3rem 1.5rem 4.5rem;
-        }
-
-        body > header {
-            grid-column: 1 / span 2;
-        }
-
-        body > section {
-
-        }
-
-        code {
-            font-size: 0.9375em;
-            font-family: 'Fira Mono', 'Andale Mono', courier, monospace;
-            line-height: 1em;
-        }
-
-        .test-count {
-            font-size: 0.875em;
-        }
-
-        p {
-            padding-left: 1rem;
-            text-indent: -1rem;
-        }
-
-        pre {
-            padding: 0.375rem;
-            background-color: #eeeeee;
-            border-radius: 0.1875rem;
-        }
-
-        dl > dd {
-            margin: 0;
-        }
-
-        .blue-fg {
-            color: blue;
-        }
-
-        .text-03 {
-            margin-top: 3rem;
-            margin-bottom: 1.5rem;
-        }
-
-        input + hr,
-        select + hr {
-            margin-top: 0.75rem;
-        }
-
-        [data-before]:before {
-            content: attr(data-before);
-        }
-
-        [data-after]:after {
-            content: attr(data-after);
-        }
-
-        .text-07 {
-            font-size: 0.625rem;
-            font-family: FiraMono, courier, monospace;
-        }
-    </style>
+    <style></style>
 </head>
 
 <body class="2x-grid grid">
     <header>
-        <h1 class="doctext-01">Literal <span class="doctext-06">0.5.2</span></h1>
-
-        <template id="window-time">
-            <time>${
-                // Set local variables on `this`, the renderer
-                this.n = window.performance.now() / 1000,
-                // Schedule next render in a second
-                setTimeout(() => { this.push() }, (Math.ceil(this.n) - this.n) * 1000),
-                // Output current time in seconds
-                Math.round(this.n) + 's'
-            }</time>
-        </template>
-
-        <include-literal src="#window-time"></include-literal>
+        <h1 class="doctext-01">Element</h1>
     </header>
 
-    <section title="">
-        <test-element></test-element>
+    <section title="Test" id="test">
+        <test-element attr="1">
+            <p>Slotted content</p>
+        </test-element>
     </section>
+
+    <pre id="results"></pre>
 
     <script type="module">
         import element from "../modules/element.js";
 
+        console.log('Test 1 -----');
+
         element('test-element', {
-            connect: function() {
-                console.log('CONNECT');
+            construct: function(shadow) {
+                console.log('element', 'construct');
+
+                const slot = document.createElement('slot');
+                shadow.append(slot);
+
+                slot.addEventListener('slotchange', function(e) {
+                    console.log('element', 'slotchange', e.target, slot.assignedElements());
+                });
             },
 
-            disconnect: function() {
-                console.log('DISCONNECT');
+            connect: function() {
+                console.log('element', 'connect');
+            },
+
+            load: function() {
+                console.log('element', 'load');
             }
         }, {
-        });
+            attr: {
+                attribute: function(value) {
+                    console.log('element', 'setAttribute("attr", ' + value + ')');
+                    this.attr = value;
+                },
+
+                set: function() {
+                    console.log(this.children[0]);
+                }
+            }
+        }, '../../bolt/elements/html.css');
+
+        setTimeout(function() {
+            console.log('Test 2 -----');
+
+            const elem    = document.createElement('test-element');
+            const slotted = document.createElement('p');
+            slotted.innerHTML = 'Slotted content';
+            elem.append(slotted);
+            console.log('---');
+            elem.setAttribute('attr', '2');
+            console.log('----');
+            document.getElementById('test').append(elem);
+            console.log('-----');
+        }, 1000);
+
     </script>
 </body>

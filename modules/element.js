@@ -1,14 +1,14 @@
 
 /**
-element(name, options)
+element(name, lifecycle, properties, stylesheet)
 
-Registers a custom element and returns its constructor.
+Registers a custom element tag `name` and returns its constructor.
 
-- name: `'element-name'` or `'tag is="element-name"'`
-- options: {
+- name: A string in the form `'custom-name'`, `'<custom-name>'`,
+`'tag is="custom-name"'` or `'<tag is="custom-name">'`
+- lifecycle: {
     mode:       'open' or 'closed', defaults to 'closed'
     focusable:  true or false, defaults to true
-    properties: An object of attribute and property handlers
 
     // Lifecycle handlers
     stylesheet: optional string path to stylesheet for shadow DOM
@@ -16,19 +16,64 @@ Registers a custom element and returns its constructor.
     connect:    called when element added to DOM
     load:       called when stylesheet loaded
     disconnect: called when element removed from DOM
+
+    // Form elements
     enable:     called when form element enabled
     disable:    called when form element disabled
     reset:      called when form element reset
     restore:    called when form element restored
 }
+- properties: {
+    name: {
+        attribute: fn called on `element.setAttribute('name', ...)`
+        set:       fn called on setting property 'name'
+        get:       fn called on getting property 'name'
+    }
+}
+- stylesheet: url of a stylesheet to load in to the shadow DOM
 
 The name form `'tag is="element-name"'` creates customised built-in elements in
-browsers that support the feature. Safari is a known culprit. Mileage will vary.
+browsers that support the feature. Safari does not, but support is somewhat
+polyfilled. Mileage will vary.
+
+#### Lifecycle
+
+All lifecycle handlers are called with the context `this` set to the host
+element and with the first parameter `shadow`.
+
+On initialisation the `construct` handler is called. Set up the shadow root and
+define event handlers here. Children and attributes must not be inspected or
+assigned at this point: doing so will throw an error when constructed via
+`document.createElement()`.
+
+Following that, attribute handlers in `properties` are called for attributes
+declared in the HTML. The HTML parser normally calls these in source order, but
+this can be problematic if you require setup to run in a specific order so
+`element()` forces them to be run in the order declared in the `properties`.
+This may change if it proves not to be a useful feature.
+
+Then the `connect` handler is called when the element is placed in the DOM, or
+if it is already in the DOM and is being upgraded.
+
+Things get a little tricky here. The order of `load` and `'slotchange'`
+listeners cannot be guaranteed. If there are no stylesheet links to load,
+`load` is called immediately after `connect`. If slots have content, any
+listeners for `'slotchange'` events are then called (asynchronously on the next
+tick).
+
+Where there is a stylesheet loading, most browsers call `'slotchange'` listeners
+(asynchronously) before `load` – except Safari, where if the stylesheet is
+already cached `load` is called before `'slotchange'` listeners.
+
+Finally, `connect` and `disconnect` are called whenever the element is inserted
+into or removed from the DOM.
 
 The effects of the `mode` option are subtle. In 'closed' mode, the element is
 not given a publicly accessible `shadowRoot` property, and events that traverse
 the shadow boundary are retargeted (as they are in 'open' mode) but also have
 their `path` list truncated.
+
+### Properties
 
 Where the `properties` object contains a definition for a `value` property, work
 is done to give the element form field behaviour. The constructor is assigned
@@ -40,25 +85,6 @@ and `reportValidity`. Form behaviour is also mildly polyfilled in browsers
 without support by inserting a hidden input inside the element but outside the
 shadow DOM. Mileage will vary. Managing focus can be problematic without browser
 support.
-
-At the start of initialisation the `construct` handler is called. Use it to
-set up a shadow root and define event handlers. Children and attributes must
-not be inspected or assigned at this point – doing so will throw in some cases,
-eg. construction via `document.createElement()`.
-
-Following that, attribute handlers are called for attributes declared in the
-HTML. The parser normally calls these in source order, but this can be problematic
-if you require setup to run in a specific order so here they are run in the order
-declared in the `options.properties`.
-
-Then the `connect` handler is called when the element is placed in the DOM
-or if it is already in the DOM and is being upgraded.
-
-Finally the `load` handler is called after the first connect, and after any
-stylesheet links in the shadow DOM have loaded. If there are no links, it is
-called immediately after `connect`.
-
-All lifecycle handlers are called with the parameter `(shadow)`.
 */
 
 import create  from './create.js';
@@ -103,11 +129,11 @@ const formProperties = {
         get: function() { return this.getAttribute('name') || ''; }
     },
 
-    form:              { get: function() { return this[$internals].form; }},
-    labels:            { get: function() { return this[$internals].labels; }},
-    validity:          { get: function() { return this[$internals].validity; }},
-    validationMessage: { get: function() { return this[$internals].validationMessage; }},
-    willValidate:      { get: function() { return this[$internals].willValidate; }},
+    form:              { get:   function() { return this[$internals].form; }},
+    labels:            { get:   function() { return this[$internals].labels; }},
+    validity:          { get:   function() { return this[$internals].validity; }},
+    validationMessage: { get:   function() { return this[$internals].validationMessage; }},
+    willValidate:      { get:   function() { return this[$internals].willValidate; }},
     checkValidity:     { value: function() { return this[$internals].checkValidity(); }},
     reportValidity:    { value: function() { return this[$internals].reportValidity(); }}
 };

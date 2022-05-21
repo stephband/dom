@@ -6,7 +6,6 @@ import assign   from './assign.js';
 const svgNamespace = 'http://www.w3.org/2000/svg';
 
 const div           = document.createElement('div');
-const typeofTag     = (tag, content)  => (tag && typeof tag);
 const typeofContent = (type, content) => (content && typeof content);
 
 // Constructors
@@ -17,15 +16,59 @@ function createContextFragment(context, html) {
     return range.createContextualFragment(html);
 }
 
-function createSVG(tag, html) {
-    var node = document.createElementNS(svgNamespace, tag);
-
-    if (html) {
+const createSVG = overload(typeofContent, {
+    string: function(tag, html) {
+        const node = document.createElementNS(svgNamespace, tag);
         node.innerHTML = html;
-    }
+        return node;
+    },
 
-    return node;
-}
+    object: function(tag, object) {
+        const node = document.createElementNS(svgNamespace, tag);
+
+        // Is it array-like?
+        if (typeof object.length === 'number') {
+            // Be careful here in case object is a live NodeList, which will
+            // mutate as you iterate over it. Applying object to .append()
+            // appears to not have this problem, and will work on arrays.
+            node.append.apply(node, object);
+        }
+        else {
+            assign(node, object);
+        }
+
+        return node;
+    },
+
+    default: (tag) => document.createElementNS(svgNamespace, tag)
+});
+
+const createHTML = overload(typeofContent, {
+    string: function(tag, html) {
+        const node = document.createElement(tag);
+        node.innerHTML = html;
+        return node;
+    },
+
+    object: function(tag, object) {
+        const node = document.createElement(tag);
+
+        // Is it array-like?
+        if (typeof object.length === 'number') {
+            // Be careful here in case object is a live NodeList, which will
+            // mutate as you iterate over it. Applying object to .append()
+            // appears to not have this problem, and will work on arrays.
+            node.append.apply(node, object);
+        }
+        else {
+            assign(node, object);
+        }
+
+        return node;
+    },
+
+    default: (tag) => document.createElement(tag)
+});
 
 /**
 create(tag, content)
@@ -114,40 +157,7 @@ const create = overload(id, {
     polyline: createSVG,
     svg:      createSVG,
 
-    default: overload(typeofContent, {
-        string: function(tag, html) {
-            const node = document.createElement(tag);
-            node.innerHTML = html;
-            return node;
-        },
-
-        object: function(tag, object) {
-            const node = document.createElement(tag);
-
-            // Is it array-like?
-            if (typeof object.length === 'number') {
-                // Be careful here in case object is a live NodeList, which will
-                // mutate as you iterate over it. Applying object to .append()
-                // appears to not have this problem, and will work on arrays.
-                node.append.apply(node, object);
-            }
-            else {
-                assign(node, object);
-            }
-
-            return node;
-        },
-
-        default: (tag) => {
-            if (typeof tag !== 'string') {
-                // We used to support object as first argument. Deprecated.
-                // Todo: remove this message when we dont see any more errors
-                throw new Error('create(tag, content) accepts only a string as tag "' + (typeof tag) + '"')
-            }
-
-            return document.createElement(tag);
-        }
-    }),
+    default:  createHTML
 });
 
 export default create;

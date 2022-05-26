@@ -7,9 +7,9 @@ property exists in `node`, otherwise as an attribute.
 If `properties` has a property `'children'` it must be an array of nodes;
 they are appended to 'node'.
 
-The property `'html'` is aliased to `'innerHTML'`. The property `'text'` 
-is aliased to `'textContent'`. The property `'tag'` is treated as an alias 
-of `'tagName'` (which is ignored, as `node.tagName` is read-only). The 
+The property `'html'` is aliased to `'innerHTML'`. The property `'text'`
+is aliased to `'textContent'`. The property `'tag'` is treated as an alias
+of `'tagName'` (which is ignored, as `node.tagName` is read-only). The
 property `'is'` is also ignored.
 */
 
@@ -34,7 +34,7 @@ const assignProperty = overload(id, {
 	children: function(name, node, content) {
 		// Empty the node and append children
 		node.innerHTML = '';
-		content.forEach((child) => { node.appendChild(child) });
+		node.append.apply(node, content);
 	},
 
 	// SVG points property must be set as string attribute - SVG elements

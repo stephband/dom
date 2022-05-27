@@ -51,37 +51,23 @@ export const px = overload(toType, {
     'number': id,
 
     'string': parseValue({
-        em: function(n) {
-            return getEmSize() * n;
-        },
+        px:   id,
+        em:   (n) => getEmSize() * n,
+        rem:  (n) => getRemSize() * n,
+        vw:   (n) => window.innerWidth * n / 100,
+        vh:   (n) => window.innerHeight * n / 100,
 
-        px: function(n) {
-            return n;
-        },
-
-        rem: function(n) {
-            return getRemSize() * n;
-        },
-
-        vw: function(n) {
-            return window.innerWidth * n / 100;
-        },
-
-        vh: function(n) {
-            return window.innerHeight * n / 100;
-        },
-
-        vmin: function(n) {
-            return window.innerWidth < window.innerHeight ?
+        vmin: (n) => (
+            window.innerWidth < window.innerHeight ?
                 window.innerWidth * n / 100 :
-                window.innerHeight * n / 100 ;
-        },
+                window.innerHeight * n / 100
+        ),
 
-        vmax: function(n) {
-            return window.innerWidth < window.innerHeight ?
+        vmax: (n) => (
+            window.innerWidth < window.innerHeight ?
                 window.innerHeight * n / 100 :
-                window.innerWidth * n / 100 ;
-        }
+                window.innerWidth * n / 100
+        )
     })
 });
 

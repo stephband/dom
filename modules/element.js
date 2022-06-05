@@ -498,7 +498,9 @@ export default function element(definition, lifecycle, api, stylesheet) {
 
         document.querySelectorAll('[is="' + name + '"]').forEach((element) => {
             // Define properties on element
-            define(element, properties);
+            if (api) {
+                define(element, api);
+            }
 
             // Run constructor
             lifecycle.construct && lifecycle.construct.apply(element);

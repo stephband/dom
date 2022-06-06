@@ -8,7 +8,7 @@ motion of a single finger. The types of events the stream contains is a
 or `'pointercancel'` event.
 
 ```js
-gestures({ selector: '.thing', threshold: '0.5rem', device: 'mouse pen touch' }, document)
+gestures({ select: '.thing', threshold: '0.5rem', device: 'mouse pen touch' }, document)
 .each(function(events) {
     const e0 = events.shift();
 
@@ -34,7 +34,7 @@ The `options` object may optionally contain any of:
     device: 'mouse pen',
 
     // Listen to gestures inside a selected element or elements
-    selector: '.class'
+    select: '.class'
 
     // Determine a minimum distance a finger must travel before a gesture is
     // considered to have started
@@ -50,6 +50,10 @@ import Producer from '../../fn/modules/stream/producer.js';
 import px       from './parse-length.js';
 
 const assign = Object.assign;
+
+const userSelect = 'webkitUserSelect' in document.body.style ?
+    'webkitUserSelect' :
+    'userSelect' ;
 
 export const config = {
     // Number of pixels, or string CSS length, that a pressed pointer travels
@@ -107,11 +111,6 @@ assign(Pointermove.prototype, {
             if (!this.isGesture && checkThreshold(this.threshold, this.events[0], e)) {
                 this.createGesture();
             }
-
-            // After we want to cancel any default actions
-            else {
-                e.preventDefault();
-            }
         },
 
         'default': function(e) {
@@ -120,6 +119,7 @@ assign(Pointermove.prototype, {
                 return;
             }
 
+            document.body.style[userSelect] = this.userSelectState;
             this.events.push(e);
             this.stop();
         }
@@ -134,6 +134,11 @@ assign(Pointermove.prototype, {
         // need a proper producer!
         this.events = Stream.from(this.events);
         this.stream.push(this.events);
+
+        // For the duration of us dragging the pointer around we need to
+        // prevent text selection on the whole document
+        this.userSelectState = document.body.style[userSelect];
+        document.body.style[userSelect] = 'none';
     },
 
     stop: function() {
@@ -173,7 +178,7 @@ assign(PointerProducer.prototype, Producer.prototype, {
         if (isIgnoreTag(e)) { return; }
 
         // Check target matches selector
-        if (this.options.selector && !e.target.closest(this.options.selector)) { return; }
+        if (this.options.select && !e.target.closest(this.options.select)) { return; }
 
         // Copy event to keep the true target around, as target is mutated on
         // the event if it passes through a shadow boundary after being handled
@@ -209,6 +214,10 @@ export default function gestures(options, node) {
     node = node ?
         node :
         options ;
+
+    if (window.DEBUG && options.selector) {
+        console.warn('gestures(options) options.selector is now options.select');
+    }
 
     return new Stream(new PointerProducer(node, options));
 }

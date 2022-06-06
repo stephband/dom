@@ -129,14 +129,14 @@ assign(Pointermove.prototype, {
         this.isGesture = true;
 
         // Have a buffer stream take over as the events buffer
-        // TODO! There's a bug here - buffer stream does not use .push() to fill its buffer!!
-        // TODO! Also, you can't .stop() this.events, things still get pushed to it. Clearly we
+        // TODO! You can't .stop() this.events, things still get pushed to it. Clearly we
         // need a proper producer!
         this.events = Stream.from(this.events);
         this.stream.push(this.events);
 
         // For the duration of us dragging the pointer around we need to
-        // prevent text selection on the whole document
+        // prevent text selection on the whole document. Note that this does
+        // not deselect any text that has already been selected.
         this.userSelectState = document.body.style[userSelect];
         document.body.style[userSelect] = 'none';
     },

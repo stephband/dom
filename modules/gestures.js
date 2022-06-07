@@ -45,10 +45,11 @@ The `options` object may optionally contain any of:
 
 import get      from '../../fn/modules/get.js';
 import overload from '../../fn/modules/overload.js';
-import Stream   from '../../fn/modules/stream.js';
-import Producer from '../../fn/modules/stream/producer.js';
+import Stream, { pipe, unpipe, push, stop } from '../../fn/modules/stream/stream.js';
+//import Producer from '../../fn/modules/stream/producer.js';
 import px       from './parse-length.js';
 
+const A      = Array.prototype;
 const assign = Object.assign;
 
 const userSelect = 'webkitUserSelect' in document.body.style ?
@@ -70,14 +71,8 @@ export const config = {
 
 /* Pointermove, pointerup and pointercancel handler */
 
-function checkThreshold(threshold, e0, e1) {
-    var distX = e1.clientX - e0.clientX;
-    var distY = e1.clientY - e0.clientY;
-
-    // Return false if the threshold has not been crossed.
-    return !(
-        (distX * distX) + (distY * distY) < (threshold * threshold)
-    );
+function distanceThreshold(distance, x, y) {
+    return (x * x + y * y) >= (distance * distance);
 }
 
 function Pointermove(stream, events, options) {
@@ -85,16 +80,20 @@ function Pointermove(stream, events, options) {
     this.events    = events;
     this.options   = options;
     this.pointerId = events[0].pointerId;
-    this.threshold = px(options.threshold);
+
+    if (typeof options.threshold === 'function') {
+        // options.threshold is a function
+        this.checkThreshold = options.threshold;
+    }
+    else {
+        // options.threshold is a string or number
+        const distance = px(options.threshold);
+        this.checkThreshold = (x, y) => distanceThreshold(distance, x, y);
+    }
 
     document.addEventListener('pointermove', this);
     document.addEventListener('pointerup', this);
     document.addEventListener('pointercancel', this);
-
-    // If threshold is 0 start gesture immediately
-    if (this.threshold === 0) {
-        this.createGesture();
-    }
 }
 
 assign(Pointermove.prototype, {
@@ -107,9 +106,17 @@ assign(Pointermove.prototype, {
 
             this.events.push(e);
 
-            // Before we cross the threshold we need to check it on each move
-            if (!this.isGesture && checkThreshold(this.threshold, this.events[0], e)) {
-                this.createGesture();
+            if (!this.isGesture) {
+                // Check to see if we have satisfied the threshold check for
+                // x, y and time, if so start the gesture
+                const e0 = this.events[0];
+                const x  = e.clientX - e0.clientX;
+                const y  = e.clientY - e0.clientY;
+                const t  = (e.timeStamp - e0.timeStamp) / 1000;
+
+                if (this.checkThreshold(x, y, t)) {
+                    this.createGesture();
+                }
             }
         },
 
@@ -119,36 +126,57 @@ assign(Pointermove.prototype, {
                 return;
             }
 
-            document.body.style[userSelect] = this.userSelectState;
             this.events.push(e);
             this.stop();
         }
     }),
 
     createGesture: function() {
+        // We are gesturing! Let's go
         this.isGesture = true;
 
-        // Have a buffer stream take over as the events buffer
-        // TODO! You can't .stop() this.events, things still get pushed to it. Clearly we
-        // need a proper producer!
-        this.events = Stream.from(this.events);
-        this.stream.push(this.events);
-
         // For the duration of us dragging the pointer around we need to
-        // prevent text selection on the whole document. Note that this does
-        // not deselect any text that has already been selected.
+        // prevent text selection on the document. Note doing this does not
+        // deselect any text that has already been selected.
         this.userSelectState = document.body.style[userSelect];
         document.body.style[userSelect] = 'none';
+
+        // Push a new gesture stream that uses this as producer
+        this.stream.push(new Stream(this));
+    },
+
+    pipe: function(output) {
+        // Sets this[0] and listens to stops on output
+        pipe(this, output);
+
+        // Empty buffer into stream
+        while(this.events.length) {
+            // Stream may be stopped during this loop so push to `this[0]`
+            // rather than to `output`
+            push(this[0], A.shift.apply(this.events));
+        }
+
+        // Have the output stream take over as the events buffer
+        this.events = output;
     },
 
     stop: function() {
-        // Stop the gesture stream
-        this.events.stop && this.events.stop();
-
         // Remove the listeners
         document.removeEventListener('pointermove', this);
         document.removeEventListener('pointerup', this);
         document.removeEventListener('pointercancel', this);
+
+        // Is it already stopped?
+        if (this.isGesture) {
+            // Reset text selectability
+            document.body.style[userSelect] = this.userSelectState;
+        }
+
+        if (this[0]) {
+            const output = this[0];
+            unpipe(this, 0);
+            stop(output);
+        }
     }
 });
 
@@ -163,10 +191,15 @@ function isIgnoreTag(e) {
 function PointerProducer(node, options) {
     this.node    = node;
     this.options = options;
-    this.node.addEventListener('pointerdown', this);
 }
 
-assign(PointerProducer.prototype, Producer.prototype, {
+assign(PointerProducer.prototype, /*Producer.prototype, */ {
+    pipe: function(output) {
+        this[0] = output;
+        this.node.addEventListener('pointerdown', this);
+        return output;
+    },
+
     handleEvent: function(e) {
         // Ignore non-primary buttons
         if (e.button !== 0) { return; }
@@ -198,8 +231,12 @@ assign(PointerProducer.prototype, Producer.prototype, {
 
     // Stop the gestures stream
     stop: function() {
-        this.node.removeEventListener('pointerdown', this);
-        Producer.prototype.stop.apply(this, arguments);
+        if (this[0]) {
+            this.node.removeEventListener('pointerdown', this);
+            stop(this[0]);
+        }
+
+        return this;
     }
 });
 

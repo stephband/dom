@@ -1,5 +1,5 @@
 
-import Stream   from '../../fn/modules/stream.js';
+import Stream, { pipe, push, stop } from '../../fn/modules/stream.js';
 import Producer from '../../fn/modules/stream/producer.js';
 //import features from './features.js';
 
@@ -106,8 +106,8 @@ function EventsProducer(type, options, node) {
 }
 
 assign(EventsProducer.prototype, Producer.prototype, {
-    pipe: function(stream) {
-        this[0] = stream;
+    pipe: function(output) {
+        pipe(this, output);
         this.types.reduce(listen, this);
     },
 
@@ -126,12 +126,12 @@ assign(EventsProducer.prototype, Producer.prototype, {
             e.selectedTarget = selectedTarget;
         }
 
-        this[0].push(e);
+        push(this[0], e);
     },
 
     stop: function() {
         this.types.reduce(unlisten, this);
-        Producer.prototype.stop.apply(this, arguments);
+        stop(this[0]);
     }
 });
 

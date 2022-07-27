@@ -99,6 +99,7 @@ const define = Object.defineProperties;
 const constructors = {
     // We need list only those whose constructor names do not match their tag
     'a':        HTMLAnchorElement,
+    'article':  HTMLElement,
     'dl':       HTMLDListElement,
     'p':        HTMLParagraphElement,
     'br':       HTMLBRElement,
@@ -109,6 +110,7 @@ const constructors = {
     'ol':       HTMLOListElement,
     'optgroup': HTMLOptGroupElement,
     'q':        HTMLQuoteElement,
+    'section':  HTMLElement,
     'textarea': HTMLTextAreaElement,
     'td':       HTMLTableCellElement,
     'th':       HTMLTableCellElement,

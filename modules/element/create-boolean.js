@@ -30,6 +30,8 @@ export default function createBoolean(definition, name) {
 
         get: function() {
             return definition.getState(this);
-        }
+        },
+
+        enumerable: true
     };
 }

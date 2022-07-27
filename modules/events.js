@@ -1,7 +1,5 @@
 
-import Stream, { pipe, push, stop } from '../../fn/modules/stream.js';
-import Producer from '../../fn/modules/stream/producer.js';
-//import features from './features.js';
+import Stream, { pipe, push, stop } from '../../fn/modules/stream/stream.js';
 
 const assign  = Object.assign;
 const rspaces = /\s+/;
@@ -105,7 +103,7 @@ function EventsProducer(type, options, node) {
     // check for that every time.
 }
 
-assign(EventsProducer.prototype, Producer.prototype, {
+assign(EventsProducer.prototype, {
     pipe: function(output) {
         pipe(this, output);
         this.types.reduce(listen, this);

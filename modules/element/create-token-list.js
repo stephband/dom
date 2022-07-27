@@ -69,6 +69,8 @@ export default function createTokenList(definitions) {
 
         get: function() {
             return this[$tokenlist] || (this[$tokenlist] = new TokenList(this, definitions));
-        }
+        },
+
+        enumerable: true
     };
 }

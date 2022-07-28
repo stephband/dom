@@ -1,7 +1,7 @@
 
 /**
 createBoolean(definition)
-Creates an boolean attribute/property definition for element(), where
+Creates a boolean attribute/property definition for element(), where
 `definition` is an object with the functions:
 
 ```js

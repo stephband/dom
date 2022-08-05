@@ -23,6 +23,10 @@ const assignProperty = overload(id, {
 	is: noop,
 	tag: noop,
 
+	data: function(name, node, object) {
+		Object.assign(node.dataset, object);
+	},
+
 	html: function(name, node, content) {
 		node.innerHTML = content;
 	},

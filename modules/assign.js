@@ -41,14 +41,16 @@ const assignProperty = overload(id, {
 		node.append.apply(node, content);
 	},
 
-	// SVG points property must be set as string attribute - SVG elements
-	// have a read-only API exposed at .points
-	points: setAttribute,
-    cx:     setAttribute,
-    cy:     setAttribute,
-    r:      setAttribute,
+	// SVG elements have a read-only properties, and must be set as string
+	// attributes. Todo: explore the SVG property API to make these take
+	// advantage of it
+	points:    setAttribute,
+    cx:        setAttribute,
+    cy:        setAttribute,
+    r:         setAttribute,
+	transform: setAttribute,
     preserveAspectRatio: setAttribute,
-    viewBox: setAttribute,
+    viewBox:   setAttribute,
 
 	default: function(name, node, content) {
 		if (name in node) {

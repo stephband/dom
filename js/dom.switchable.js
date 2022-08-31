@@ -9,7 +9,7 @@ import { matchers } from './dom-activate.js';
 
 // Define
 
-var match   = matches('.switchable, [switchable]');
+var match   = matches('.switchable, [switchable], [data-switchable]');
 var on      = events.on;
 var triggerDeactivate = trigger('dom-deactivate');
 

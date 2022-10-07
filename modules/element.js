@@ -160,7 +160,7 @@ function getElementConstructor(tag) {
 
 // Capture name and tag from <element-name> or <tag is="element-name">, syntax
 // brackets and quotes optional
-const captureNameTag = capture(/^\s*<?([a-z][\w]*-[\w]+)>?\s*$|^\s*<?([a-z][\w]*)\s+is=["']?([a-z][\w]*-[\w]+)["']?>?\s*$/, {
+const captureNameTag = capture(/^\s*<?([a-z][\w]*-[\w-]+)>?\s*$|^\s*<?([a-z][\w]*)\s+is=["']?([a-z][\w]*-[\w]+)["']?>?\s*$/, {
     1: (data, captures) => ({
         name: captures[1]
     }),
@@ -298,16 +298,10 @@ export default function element(definition, lifecycle, api, stylesheet) {
         HTMLElement ;
 
     const { attributes, properties } = api ?
-            Object.entries(api).reduce(groupAttributeProperty, {
-                attributes: {},
-                properties: {}
-            }) :
-        // Support the old way, a single options object with props and lifecycle included
-        lifecycle.properties ?
-            Object.entries(lifecycle.properties).reduce(groupAttributeProperty, {
-                attributes: {},
-                properties: {}
-            }) :
+        Object.entries(api).reduce(groupAttributeProperty, {
+            attributes: {},
+            properties: {}
+        }) :
         nothing ;
 
     function Element() {
@@ -504,8 +498,13 @@ export default function element(definition, lifecycle, api, stylesheet) {
                 define(element, api);
             }
 
+            // Construct an instance from Constructor using the Element prototype
+            const shadow = lifecycle.construct && lifecycle.construct.length > shadowParameterIndex ?
+                createShadow(element, lifecycle, stylesheet || lifecycle.stylesheet) :
+                undefined ;
+
             // Run constructor
-            lifecycle.construct && lifecycle.construct.apply(element);
+            lifecycle.construct && lifecycle.construct.call(element, shadow);
 
             // Detect and run attributes
             let name;

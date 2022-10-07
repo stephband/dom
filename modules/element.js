@@ -8,7 +8,7 @@ Registers a custom element tag `name` and returns its constructor.
 `'tag is="custom-name"'` or `'<tag is="custom-name">'`
 - lifecycle: {
     mode:       'open' or 'closed', defaults to 'closed'
-    focusable:  true or false, defaults to true
+    focusable:  true or false, defaults to false
 
     // Lifecycle handlers
     stylesheet: optional string path to stylesheet for shadow DOM
@@ -449,7 +449,7 @@ export default function element(definition, lifecycle, api, stylesheet) {
                         // again
                         delete elem._initialLoad;
                         if (lifecycle.load) {
-                            log('element()', 'loaded', Array.from(links).map((link) => link.href).join('\n'));
+                            //log('element()', 'loaded', Array.from(links).map((link) => link.href).join('\n'));
                             lifecycle.load.call(elem, shadow);
                         }
                     }

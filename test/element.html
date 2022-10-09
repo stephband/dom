@@ -6,88 +6,170 @@
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width" />
 
-    <title>Test element()</title>
+    <title>Custom Element Test</title>
 
-    <link rel="icon" type="image/png" href="./images/logo-32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="./images/logo-64.png" sizes="64x64">
-    <link rel="icon" type="image/png" href="./images/logo-128.png" sizes="128x128">
-
-    <script title="load">
-    document.documentElement.className += ' js content-loading loading';
-    window.addEventListener('DOMContentLoaded', () => document.documentElement.classList.remove('content-loading'));
-    // Wait for other load handlers to run first - Literal does a few things on
-    // load (eg. data-targetable scrolls) and we want them to run before the loading
-    // class is removed
-    window.addEventListener('load', () => window.requestAnimationFrame(() => document.documentElement.classList.remove('loading')));
+    <script title="debug">
     window.DEBUG = true;
     </script>
-
-    <style></style>
 </head>
 
-<body class="2x-grid grid">
+<body>
     <header>
-        <h1 class="doctext-01">Element</h1>
+        <h1>Custom Element Test</h1>
     </header>
 
-    <section title="Test" id="test">
-        <test-element attr="1">
+    <section title="Before registration" id="before-test">
+        <h2>HTML before element registration</h2>
+
+        <test-element count="1">
             <p>Slotted content</p>
         </test-element>
     </section>
 
-    <pre id="results"></pre>
-
     <script type="module">
-        import element from "../modules/element.js";
+    import test    from "../../fn/modules/test.js";
+    import element from "../modules/element.js";
 
-        console.log('Test 1 -----');
+    test("Create element", [
+        // Before registration
+        'construct',
+        'attribute-1',
+        'connect-1',
 
-        element('test-element', {
+        // After registration
+        'construct',
+        'attribute-2',
+        'connect-2',
+
+        // Asynchronous
+        // We cannot guarantee the order of these. Ça me vexe un peu.
+        'slotchange-1',
+        'slotchange-2',
+        'load-1',
+        'load-2',
+
+        // document.createElement()
+        'construct',
+        'attribute-3',
+        'connect-3',
+        'slotchange-3',
+        'load-3',
+
+        // element.cloneNode()
+        'construct',
+        'attribute-3',
+        // .setAttribute()
+        'attribute-4',
+        'connect-4',
+        // .setAttribute()
+        'attribute-5',
+        'slotchange-5',
+        'load-5',
+
+        // template.cloneNode()
+        'construct',
+        'attribute-6',
+        'connect-6',
+        'slotchange-6',
+        'load-6',
+    ], (expects, done) => {
+        // Register the element.
+        const TestElement = element('test-element', {
             construct: function(shadow) {
-                console.log('element', 'construct');
+                expects('construct');
 
                 const slot = document.createElement('slot');
                 shadow.append(slot);
 
-                slot.addEventListener('slotchange', function(e) {
-                    console.log('element', 'slotchange', e.target, slot.assignedElements());
+                slot.addEventListener('slotchange', (e) => {
+                    expects('slotchange-' + this.count, 'Cannot guarantee order of load and slotchange - try running again with an empty cache');
                 });
             },
 
             connect: function() {
-                console.log('element', 'connect');
+                expects('connect-' + this.count);
             },
 
             load: function() {
-                console.log('element', 'load');
+                expects('load-' + this.count, 'Cannot guarantee order of load and slotchange - try running again with an empty cache');
+
+                if (this.count === '6') {
+                    done();
+                }
             }
         }, {
-            attr: {
+            count: {
                 attribute: function(value) {
-                    console.log('element', 'setAttribute("attr", ' + value + ')');
-                    this.attr = value;
-                },
-
-                set: function() {
-                    console.log(this.children[0]);
+                    this.count = value;
+                    expects('attribute-' + this.count);
                 }
             }
         }, '../../bolt/elements/html.css');
 
-        setTimeout(function() {
-            console.log('Test 2 -----');
+        function isTestElement(element) {
+            return TestElement.prototype.isPrototypeOf(element);
+        }
 
-            const elem    = document.createElement('test-element');
+        setTimeout(function() {
+            // Construct
+            const elem1   = document.createElement('test-element');
             const slotted = document.createElement('p');
             slotted.innerHTML = 'Slotted content';
-            elem.append(slotted);
-            console.log('---');
-            elem.setAttribute('attr', '2');
-            console.log('----');
-            document.getElementById('test').append(elem);
-            console.log('-----');
-        }, 1000);
+            elem1.append(slotted);
+            elem1.setAttribute('count', '3');
 
+            // Add to DOM
+            document.getElementById('create-test').append(elem1);
+
+            // Clone
+            setTimeout(function() {
+                const elem2 = elem1.cloneNode(true);
+                // TODO: This is failing to update elem2.count, and I have no
+                // idea why. Are we not upgraded yet? I suspect something wrong
+                // with my assumptions in element() ... TODO!
+                elem2.setAttribute('count', '4');
+
+                document.getElementById('clone-test').append(elem2);
+
+                // This DOES update elem2.count
+                elem2.setAttribute('count', '5');
+            }, 300);
+        }, 300);
+
+        setTimeout(function() {
+            // Construct
+            const template = document.getElementById('element-template');
+            const fragment = template.content.cloneNode(true);
+
+            // Add to DOM
+            template.after(fragment);
+        }, 900);
+    });
     </script>
+
+    <section title="After registration" id="after-test">
+        <h2>HTML after element registration</h2>
+
+        <test-element count="2">
+            <p>Slotted content</p>
+        </test-element>
+    </section>
+
+    <section title="document.createElement()" id="create-test">
+        <h2>Created by document.createElement()</h2>
+    </section>
+
+    <section title="element.cloneNode()" id="clone-test">
+        <h2>Created by element.cloneNode()</h2>
+    </section>
+
+    <section title="template.content.cloneNode()" id="template-test">
+        <h2>Created by template.content.cloneNode()</h2>
+
+        <template id="element-template">
+            <test-element count="6">
+                <p>Slotted content</p>
+            </test-element>
+        </template>
+    </section>
 </body>

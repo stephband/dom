@@ -47,19 +47,15 @@ assigned at this point: doing so will throw an error when constructed via
 `document.createElement()`.
 
 Following that, attribute handlers in `properties` are called for attributes
-declared in the HTML. The HTML parser normally calls these in source order, but
-this can be problematic if you require setup to run in a specific order so
-`element()` forces them to be run in the order declared in the `properties`.
-This may change if it proves not to be a useful feature.
+declared in the HTML. The HTML parser normally calls these in source order.
 
 Then the `connect` handler is called when the element is placed in the DOM, or
 if it is already in the DOM and is being upgraded.
 
-Things get a little tricky here. The order of `load` and `'slotchange'`
-listeners cannot be guaranteed. If there are no stylesheet links to load,
-`load` is called immediately after `connect`. If slots have content, any
-listeners for `'slotchange'` events are then called (asynchronously on the next
-tick).
+Both `load` and `slotchange` are asynchronous. Things get a little tricky here.
+The order of `load` callbacks and `'slotchange'` listeners cannot be guaranteed
+in Safari. When there is an empty cache `slotchange` comes first, as it always
+does in other browsers, otherwise `load` happens first.
 
 Where there is a stylesheet loading, most browsers call `'slotchange'` listeners
 (asynchronously) before `load` – except Safari, where if the stylesheet is
@@ -238,35 +234,8 @@ function attachInternals(elem) {
     return internals;
 }
 
-function primeAttributes(elem) {
-    elem._initialAttributes = {};
-    elem._n = 0;
-}
-
-function advanceAttributes(elem, attributes, handlers) {
-    const values = elem._initialAttributes;
-
-    while(elem._n < attributes.length && values[attributes[elem._n]] !== undefined) {
-        //console.log('ADVANCE ATTR', attributes[elem._n]);
-        handlers[attributes[elem._n]].call(elem, values[attributes[elem._n]]);
-        ++elem._n;
-    }
-}
-
-function flushAttributes(elem, attributes, handlers) {
-    if (!elem._initialAttributes) { return; }
-
-    const values = elem._initialAttributes;
-
-    while(elem._n < attributes.length) {
-        if (values[attributes[elem._n]] !== undefined && handlers[attributes[elem._n]]) {
-            handlers[attributes[elem._n]].call(elem, values[attributes[elem._n]]);
-        }
-        ++elem._n;
-    }
-
-    delete elem._initialAttributes;
-    delete elem._n;
+export function State(element) {
+    return element[$internals] = element[$internals] || {};
 }
 
 function hasPropertyAttribute(option) {
@@ -307,6 +276,8 @@ export default function element(definition, lifecycle, api, stylesheet) {
     function Element() {
         // Construct an instance from Constructor using the Element prototype
         const elem   = Reflect.construct(constructor, arguments, Element);
+
+        // Inject shadow if .construct() asks for it
         const shadow = lifecycle.construct && lifecycle.construct.length > shadowParameterIndex ?
             createShadow(elem, lifecycle, stylesheet || lifecycle.stylesheet) :
             undefined ;
@@ -319,17 +290,6 @@ export default function element(definition, lifecycle, api, stylesheet) {
         }
 
         lifecycle.construct && lifecycle.construct.call(elem, shadow, internals);
-
-        // Preserve initialisation order of attribute initialisation by
-        // queueing them
-        if (attributes) {
-            primeAttributes(elem);
-
-            // Wait a tick to flush attributes
-            Promise.resolve(1).then(function() {
-                flushAttributes(elem, Element.observedAttributes, attributes);
-            });
-        }
 
         // At this point, if properties have already been set before the
         // element was upgraded, they exist on the elem itself, where we have
@@ -346,22 +306,18 @@ export default function element(definition, lifecycle, api, stylesheet) {
         //    them on the instance.
         //
         // Let's go with 3. I'm not happy you have to do this, though.
-        properties
-        && Object.keys(properties).reduce(transferProperty, elem);
+        properties && Object.keys(properties).reduce(transferProperty, elem);
 
         return elem;
     }
 
 
     // Properties
-    //
+
     // Must be defined before attributeChangedCallback, but I cannot figure out
     // why. Where one of the properties is `value`, the element is set up as a
     // form element.
     Element.prototype = Object.create(constructor.prototype, properties) ;
-
-
-    // Form properties
 
     if (properties && properties.value) {
         // Flag the Element class as formAssociated
@@ -398,14 +354,7 @@ export default function element(definition, lifecycle, api, stylesheet) {
         Element.observedAttributes = Object.keys(attributes);
 
         Element.prototype.attributeChangedCallback = function(name, old, value) {
-            if (!this._initialAttributes) {
-                return attributes[name].call(this, value) ;
-            }
-
-            // Keep a record of attribute values to be applied in
-            // observedAttributes order
-            this._initialAttributes[name] = value;
-            advanceAttributes(this, Element.observedAttributes, attributes);
+            return attributes[name].call(this, value) ;
         };
     }
 
@@ -417,12 +366,8 @@ export default function element(definition, lifecycle, api, stylesheet) {
         const shadow    = elem[$shadow];
         const internals = elem[$internals];
 
-        // Initialise any attributes that appeared out of order
-        if (elem._initialAttributes) {
-            flushAttributes(elem, Element.observedAttributes, attributes);
-        }
-
-        // If we have simulated form internals, append the hidden input now
+        // If we have simulated form internals for Safari, append the hidden
+        // input now
         //if (elem[$internals] && !elem.attachInternals) {
         //    elem.appendChild(elem[$internals].input);
         //}
@@ -449,27 +394,27 @@ export default function element(definition, lifecycle, api, stylesheet) {
                     }
                 };
 
-                const error = window.DEBUG ? function error(e) {
-                    console.error('Failed to load stylesheet', e.target.href);
-                    load(e);
-                } :
-                load ;
+                const loadError = window.DEBUG ?
+                    (e) => {
+                        console.error('Failed to load stylesheet', e.target.href);
+                        load(e);
+                    } :
+                    load ;
 
                 while (n--) {
                     links[n].addEventListener('load', load, onceEvent);
-                    links[n].addEventListener('error', error, onceEvent);
+                    links[n].addEventListener('error', loadError, onceEvent);
                 }
-
-                lifecycle.connect && lifecycle.connect.call(this, shadow, internals);
             }
             else {
-                lifecycle.connect && lifecycle.connect.call(this, shadow, internals);
-                lifecycle.load    && lifecycle.load.call(this, shadow, internals);
+                // Guarantee that lifecycle load is called asynchronously
+                lifecycle.load && Promise.resolve(1).then(() =>
+                    lifecycle.load.call(this, shadow, internals)
+                );
             }
         }
-        else {
-            lifecycle.connect && lifecycle.connect.call(this, shadow, internals);
-        }
+
+        lifecycle.connect && lifecycle.connect.call(this, shadow, internals);
     }
 
     if (lifecycle.disconnect) {

@@ -3,10 +3,14 @@ import { remove } from '../../../fn/modules/remove.js';
 
 const assign = Object.assign;
 
+
 /*
 TokenList(element, definitions)
-The definitions object is a map of accepted tokens, each one represented by an
-object with the functions `enable()` and `disable()`:
+
+Create a TokenList-like object.
+
+The optional `definitions` object is a map of accepted tokens, each one
+represented by an object with the functions `enable()` and `disable()`:
 
 ```js
 new TokenList(element, {
@@ -31,29 +35,39 @@ assign(TokenList.prototype, {
 
     add: function() {
         let n = arguments.length;
+
         while (n--) {
             const token = arguments[n];
-            if (!this.tokens.includes(token) && this.definitions[token]) {
-                // Call the definition.add() with element as context
-                this.definitions[token].enable(this.element);
+
+            if (!this.tokens.includes(token)) {
                 this.tokens.push(token);
+
+                // Call definition.enable() with element as context
+                if (this.supports(token)) {
+                    this.definitions[token].enable(this.element);
+                }
             }
         }
     },
 
     remove: function() {
         let n = arguments.length;
+
         while (n--) {
             const token = arguments[n];
+
             if (this.tokens.includes(token)) {
-                // Call the definition.remove() with element as context
-                this.definitions[token].disable(this.element);
                 remove(this.tokens, token);
+
+                // Call the definition.disable() with element as context
+                if (this.supports(token)) {
+                    this.definitions[token].disable(this.element);
+                }
             }
         }
     },
 
     supports: function(token) {
-        return !!this.definitions[token];
+        return !!this.definitions && !!this.definitions[token];
     }
 });

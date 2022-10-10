@@ -1,30 +1,6 @@
 
-import TokenList from './token-list.js';
-
-const A = Array.prototype;
-
-
-/*
-updateList(list, tokens)
-The missing update function for TokenLists. Compares existing tokens with
-a new list of tokens, removes those that are not in the new list, and adds
-those that do not exist.
-*/
-
-function updateList(list, tokens) {
-    const removes = list.tokens.slice();
-    const adds    = A.slice.apply(tokens);
-
-    let n = removes.length;
-    while (n--) {
-        if (adds.includes(removes[n])) {
-            removes.splice(n, 1);
-        }
-    }
-
-    list.remove.apply(list, removes);
-    list.add.apply(list, adds);
-}
+import TokenList       from './token-list.js';
+import updateTokenList from './update-token-list.js';
 
 
 /**
@@ -55,7 +31,7 @@ export default function createTokenList(definitions) {
 
     function update(element, string) {
         const list = element[$tokenlist] || (element[$tokenlist] = new TokenList(element, definitions));
-        updateList(list, string.trim().split(/\s+/));
+        updateTokenList(list, string.trim().split(/\s+/));
     }
 
     return {

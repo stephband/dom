@@ -59,7 +59,9 @@ does in other browsers, otherwise `load` happens first.
 
 Where there is a stylesheet loading, most browsers call `'slotchange'` listeners
 (asynchronously) before `load` – except Safari, where if the stylesheet is
-already cached `load` is called before `'slotchange'` listeners.
+already cached `load` is called before `'slotchange'` listeners. (TODO: I would
+like to guarantee `slotchange` before `load`, but it is not clear how to delay
+`load`... if there is no slotted content, `slotchange` may not be called at all...)
 
 Finally, `connect` and `disconnect` are called whenever the element is inserted
 into or removed from the DOM.

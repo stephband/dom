@@ -41,6 +41,8 @@
         'attribute-2',
         'connect-2',
 
+        'promise-1',
+
         // Asynchronous
         // We cannot guarantee the order of these. Ça me vexe un peu.
         'slotchange-1',
@@ -52,6 +54,7 @@
         'construct',
         'attribute-3',
         'connect-3',
+        'promise-3',
         'slotchange-3',
         'load-3',
 
@@ -63,6 +66,7 @@
         'connect-4',
         // .setAttribute()
         'attribute-5',
+        'promise-4',
         'slotchange-5',
         'load-5',
 
@@ -70,9 +74,23 @@
         'construct',
         'attribute-6',
         'connect-6',
+        'promise-6',
         'slotchange-6',
         'load-6',
+
+        // element 7 is not upgraded,
+        // it calls no methods
+
+        // upgraded.cloneNode()
+        'construct',
+        'attribute-6',
+        'attribute-8',
+        'promise-8',
+        'slotchange-8'
+        // We don't put it in the DOM, so no connect or load expected
     ], (expects, done) => {
+        Promise.resolve('promise-1').then(expects);
+
         // Register the element.
         const TestElement = element('test-element', {
             construct: function(shadow) {
@@ -82,7 +100,11 @@
                 shadow.append(slot);
 
                 slot.addEventListener('slotchange', (e) => {
-                    expects('slotchange-' + this.count, 'Cannot guarantee order of load and slotchange - try running again with an empty cache');
+                    expects('slotchange-' + this.count, 'This may not be bad. We cannot guarantee order of load and slotchange.\n  Try running again with an empty cache.');
+
+                    if (this.count === '8') {
+                        done();
+                    }
                 });
             },
 
@@ -91,11 +113,7 @@
             },
 
             load: function() {
-                expects('load-' + this.count, 'Cannot guarantee order of load and slotchange - try running again with an empty cache');
-
-                if (this.count === '6') {
-                    done();
-                }
+                expects('load-' + this.count, 'This may not be bad. We cannot guarantee order of load and slotchange.\n  Try running again with an empty cache.');
             }
         }, {
             count: {
@@ -111,38 +129,66 @@
         }
 
         setTimeout(function() {
-            // Construct
+            Promise.resolve('promise-3').then(expects);
+
+            // Creating a node calls construct
             const elem1   = document.createElement('test-element');
+
+            // Appending slotted content calls slotchange asynchronously
             const slotted = document.createElement('p');
             slotted.innerHTML = 'Slotted content';
             elem1.append(slotted);
+
+            // Setting attribute calls attribute
             elem1.setAttribute('count', '3');
 
-            // Add to DOM
+            // Appending node calls connect (and load asynchronously)
             document.getElementById('create-test').append(elem1);
 
-            // Clone
+            // Now slotchange and load arrive asynchronously
+
             setTimeout(function() {
+                Promise.resolve('promise-4').then(expects);
+
+                // Cloning an upgraded node calls construct, attribute (and slotchange, asynchronously)
                 const elem2 = elem1.cloneNode(true);
-                // TODO: This is failing to update elem2.count, and I have no
-                // idea why. Are we not upgraded yet? I suspect something wrong
-                // with my assumptions in element() ... TODO!
                 elem2.setAttribute('count', '4');
 
+                // Appending it calls connect, load
                 document.getElementById('clone-test').append(elem2);
 
-                // This DOES update elem2.count
+                // setAttribute calls attribute
                 elem2.setAttribute('count', '5');
+
+                // Now slotchange and load arrive asynchronously
             }, 300);
         }, 300);
 
         setTimeout(function() {
-            // Construct
-            const template = document.getElementById('element-template');
-            const fragment = template.content.cloneNode(true);
+            Promise.resolve('promise-6').then(expects);
 
-            // Add to DOM
+            // Cloning a template does nothing
+            const template = document.getElementById('element-template');
+            const elem1    = template.content.querySelector('test-element');
+            const fragment = template.content.cloneNode(true);
+            const elem2    = fragment.querySelector('test-element');
+
+            // Appending to the DOM calls construct, connect, attribute (and slotchange, load asynchronously).
             template.after(fragment);
+
+            // slotchange, load arrive asynchronously
+
+            setTimeout(function() {
+                Promise.resolve('promise-8').then(expects);
+
+                // Cloning an unupgraded node does nothing
+                const elem3 = elem1.cloneNode(true);
+                elem3.setAttribute('count', '7');
+
+                // slotchange, load arrive asynchronously
+                const elem4 = elem2.cloneNode(true);
+                elem4.setAttribute('count', '8');
+            }, 300);
         }, 900);
     });
     </script>

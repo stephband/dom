@@ -87,7 +87,6 @@ support.
 
 import create  from './create.js';
 import capture from '../../fn/modules/capture.js';
-import log     from './log.js';
 
 const $internals = Symbol('internals');
 const $shadow    = Symbol('shadow');
@@ -260,7 +259,7 @@ export function getInternals(element) {
     return element[$internals] = element[$internals] || {};
 }
 
-export default function element(definition, lifecycle, api, stylesheet) {
+export default function element(definition, lifecycle, api, stylesheet, log) {
     const { name, tag } = captureNameTag(definition);
 
     // Get the element constructor or the base HTMLElement constructor
@@ -427,7 +426,10 @@ export default function element(definition, lifecycle, api, stylesheet) {
         };
     }
 
-    log('element()', '<' + (tag ? tag + ' is=' + name + '' : name) + '>');
+    // Log registration to console
+    window.console &&
+    window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c' + log, 'color: #3a8ab0; font-weight: 600;', 'color: #888888; font-weight: 400;');
+
 
     window.customElements.define(name, Element, tag && { extends: tag });
 

@@ -207,10 +207,6 @@ case it must have a `'Content-Type'` property).
 **/
 
 export default function request(method = 'GET', url, data, contenttype = 'application/json') {
-    if (url.startsWith('application/') || url.startsWith('multipart/') || url.startsWith('text/') || url.startsWith('audio/')) {
-        throw new Error('request(method, url, data, contenttype) parameter order has changed. You passed (method, contenttype, url, data).');
-    }
-
     method = method.toUpperCase();
 
     // If this is a GET and there is data, append data to the URL query string

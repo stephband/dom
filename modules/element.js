@@ -1,10 +1,10 @@
 
 /**
-element(name, lifecycle, properties, stylesheet)
+element(tag, lifecycle, properties, stylesheet)
 
-Registers a custom element tag `name` and returns its constructor.
+Registers a custom element `tag` and returns its constructor.
 
-- name: A string in the form `'custom-name'`, `'<custom-name>'`,
+- tag: A string in the form `'custom-name'`, `'<custom-name>'`,
 `'tag is="custom-name"'` or `'<tag is="custom-name">'`
 - lifecycle: {
     mode:       'open' or 'closed', defaults to 'closed'
@@ -236,10 +236,6 @@ function attachInternals(elem) {
     return internals;
 }
 
-export function State(element) {
-    return element[$internals] = element[$internals] || {};
-}
-
 function hasPropertyAttribute(option) {
     return !!option.attribute;
 }
@@ -260,6 +256,10 @@ function groupAttributeProperty(data, entry) {
     return data;
 }
 
+export function getInternals(element) {
+    return element[$internals] = element[$internals] || {};
+}
+
 export default function element(definition, lifecycle, api, stylesheet) {
     const { name, tag } = captureNameTag(definition);
 
@@ -277,7 +277,7 @@ export default function element(definition, lifecycle, api, stylesheet) {
 
     function Element() {
         // Construct an instance from Constructor using the Element prototype
-        const elem   = Reflect.construct(constructor, arguments, Element);
+        const elem = Reflect.construct(constructor, arguments, Element);
 
         // Inject shadow if .construct() asks for it
         const shadow = lifecycle.construct && lifecycle.construct.length > shadowParameterIndex ?
@@ -285,7 +285,9 @@ export default function element(definition, lifecycle, api, stylesheet) {
             undefined ;
 
         // Get access to the internal form control API
-        const internals = Element.formAssociated && attachInternals(elem) ;
+        const internals = Element.formAssociated ?
+            attachInternals(elem) :
+            {} ;
 
         if (tag) {
             supportsCustomisedBuiltIn = true;
@@ -321,7 +323,7 @@ export default function element(definition, lifecycle, api, stylesheet) {
     // form element.
     Element.prototype = Object.create(constructor.prototype, properties) ;
 
-    if (properties && properties.value) {
+    if (properties.value) {
         // Flag the Element class as formAssociated
         Element.formAssociated = true;
 

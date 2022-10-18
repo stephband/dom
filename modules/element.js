@@ -430,7 +430,7 @@ export default function element(definition, lifecycle, api, stylesheet, log) {
     window.console &&
     window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c' + log, 'color: #3a8ab0; font-weight: 600;', 'color: #888888; font-weight: 400;');
 
-
+    // Define the element
     window.customElements.define(name, Element, tag && { extends: tag });
 
     // Where tag is supplied, element should have been registered as a customised

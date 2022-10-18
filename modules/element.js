@@ -259,7 +259,7 @@ export function getInternals(element) {
     return element[$internals] = element[$internals] || {};
 }
 
-export default function element(definition, lifecycle, api, stylesheet, log) {
+export default function element(definition, lifecycle, api, stylesheet, log = '') {
     const { name, tag } = captureNameTag(definition);
 
     // Get the element constructor or the base HTMLElement constructor
@@ -391,7 +391,6 @@ export default function element(definition, lifecycle, api, stylesheet, log) {
                         // again
                         delete elem._initialLoad;
                         if (lifecycle.load) {
-                            //log('element()', 'loaded', Array.from(links).map((link) => link.href).join('\n'));
                             lifecycle.load.call(elem, shadow);
                         }
                     }
@@ -428,7 +427,7 @@ export default function element(definition, lifecycle, api, stylesheet, log) {
 
     // Log registration to console
     window.console &&
-    window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c' + log, 'color: #3a8ab0; font-weight: 600;', 'color: #888888; font-weight: 400;');
+    window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c ' + log, 'color: #3a8ab0; font-weight: 600;', 'color: #888888; font-weight: 400;');
 
     // Define the element
     window.customElements.define(name, Element, tag && { extends: tag });

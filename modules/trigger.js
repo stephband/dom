@@ -8,7 +8,7 @@ prevented, otherwise `true`.
 ```
 trigger('dom-activate', node);
 ```
-*/
+**/
 
 /**
 trigger(event, node)
@@ -29,7 +29,7 @@ trigger({
 ```
 
 Returns `false` if the event default was prevented, otherwise `true`.
-*/
+**/
 
 import curry from '../../fn/modules/curry.js';
 

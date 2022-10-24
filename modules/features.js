@@ -28,7 +28,6 @@ export default define({
     events: define({}, {
         fullscreenchange: {
             get: cache(function() {
-                // TODO: untested event names
                 return ('fullscreenElement' in document) ? 'fullscreenchange' :
                 ('webkitFullscreenElement' in document) ? 'webkitfullscreenchange' :
                 ('mozFullScreenElement' in document) ? 'mozfullscreenchange' :
@@ -139,19 +138,19 @@ export default define({
 
             /*
             let scrollBarWidth;
-                        
+
             function testScrollBarWidth() {
                 if (scrollBarWidth) { return scrollBarWidth; }
-            
+
                 const inner = create('div', {
                     style: 'display: block; width: auto; height: 60px; background: transparent;'
                 });
-            
+
                 const test = create('div', {
                     style: 'overflow: scroll; width: 30px; height: 30px; position: absolute; bottom: 0; right: 0; background: transparent; z-index: -1;',
                     children: [inner]
                 });
-            
+
                 document.body.appendChild(test);
                 scrollBarWidth = test.offsetWidth - inner.offsetWidth;
                 test.remove();

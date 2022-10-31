@@ -192,7 +192,6 @@ function respondDOM(response) {
 
 function respond(response) {
     if (config.onresponse) {
-debugger
         response = config.onresponse(response);
     }
 

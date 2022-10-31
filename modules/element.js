@@ -1,6 +1,6 @@
 
 /**
-element(tag, lifecycle, properties, stylesheet)
+element(tag, lifecycle, properties, stylesheet, message)
 
 Registers a custom element `tag` and returns its constructor.
 
@@ -31,6 +31,7 @@ Registers a custom element `tag` and returns its constructor.
     }
 }
 - stylesheet: url of a stylesheet to load in to the shadow DOM
+- message: optional message logged to console when element is registered
 
 The name form `'tag is="element-name"'` creates customised built-in elements in
 browsers that support the feature. Safari does not, but support is somewhat

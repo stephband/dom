@@ -157,7 +157,7 @@ function getElementConstructor(tag) {
 
 // Capture name and tag from <element-name> or <tag is="element-name">, syntax
 // brackets and quotes optional
-const captureNameTag = capture(/^\s*<?([a-z][\w]*-[\w-]+)>?\s*$|^\s*<?([a-z][\w]*)\s+is=["']?([a-z][\w]*-[\w]+)["']?>?\s*$/, {
+const captureNameTag = capture(/^\s*<?([a-z][\w]*-[\w-]+)>?\s*$|^\s*<?([a-z][\w]*)\s+is[=\s]*["']?([a-z][\w]*-[\w]+)["']?>?\s*$/, {
     1: (data, captures) => ({
         name: captures[1]
     }),

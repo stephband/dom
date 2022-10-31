@@ -6,29 +6,22 @@ Triggers event of `type` on `node`. Returns `false` if the event default was
 prevented, otherwise `true`.
 
 ```
-trigger('dom-activate', node);
+trigger('activate', node);
 ```
-**/
 
-/**
-trigger(event, node)
-
-Triggers an event described by `event` on `node`. The `event` object must have a
-`type` property. The `details` property can be used to carry a payload. The
-options `bubbles`, `cancelable` and `composed` determine the behaviour of the
-event. All other properties are assigned as properties on the event.
+Alternatively the first argument may be an object with a `type` property, and
+optionally `details`, which must be an object, and `bubbles`, `cancelable` and
+`composed`, which determine the behaviour of the event.
 
 ```
 trigger({
-    type: 'dom-activate',
-    detail: {...},
+    type:       'activate',
+    detail:     {...},
     bubbles:    true,
     cancelable: true,
     composed:   false
 }, node);
 ```
-
-Returns `false` if the event default was prevented, otherwise `true`.
 **/
 
 import curry from '../../fn/modules/curry.js';

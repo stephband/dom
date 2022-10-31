@@ -5,7 +5,7 @@ import assign   from './assign.js';
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
 
-const div           = document.createElement('div');
+const template      = document.createElement('template');
 const typeofContent = (type, content) => (content && typeof content);
 
 // Constructors
@@ -109,11 +109,8 @@ const create = overload(id, {
                 return createContextFragment(context, html);
             }
 
-            const fragment = document.createDocumentFragment();
-            div.innerHTML = html;
-            const nodes = div.childNodes;
-            while (nodes[0]) { fragment.appendChild(nodes[0]); }
-            return fragment;
+            template.innerHTML = html;
+            return template.content.cloneNode(true);
         },
 
         object: function(tag, object, context) {

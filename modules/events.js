@@ -1,15 +1,24 @@
 
+import cache  from '../../fn/modules/cache.js';
 import Stream from '../../fn/stream/stream.js';
-//import features from './features.js';
 
 const assign  = Object.assign;
 const rspaces = /\s+/;
 
-/*
+const types = {
+    fullscreenchange: cache(() => (
+        'fullscreenElement' in document ? 'fullscreenchange' :
+        'webkitFullscreenElement' in document ? 'webkitfullscreenchange' :
+        'mozFullScreenElement' in document ? 'mozfullscreenchange' :
+        'msFullscreenElement' in document ? 'MSFullscreenChange' :
+        'fullscreenchange'
+    ))
+};
+
 function prefixType(type) {
-	return features.events[type] || type ;
+	return types[type] ? types[type]() : type ;
 }
-*/
+
 
 /**
 events(type, node)
@@ -49,18 +58,18 @@ var clickTimeStamp = 0;
 window.addEventListener('click', (e) => clickTimeStamp = e.timeStamp);
 
 function listen(listener, type) {
-    listener.node.addEventListener(type, listener, listener.options);
+    listener.node.addEventListener(prefixType(type), listener, listener.options);
     return listener;
 }
 
 function unlisten(listener, type) {
-    listener.node.removeEventListener(type, listener);
+    listener.node.removeEventListener(prefixType(type), listener);
     return listener;
 }
 
 function Listener(controller, type, options, node) {
 	this.controller = controller;
-    this.types   = type.split(rspaces);//.map(prefixType);
+    this.types   = type.split(rspaces);
 	this.options = options;
     this.node    = node;
     this.select  = options && options.select;

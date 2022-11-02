@@ -1,6 +1,9 @@
 import choose  from '../../fn/modules/choose.js';
 import id      from '../../fn/modules/id.js';
 
+import create        from './create.js';
+import { parseHTML } from './parse.js';
+
 const assign = Object.assign;
 
 /*
@@ -151,13 +154,14 @@ function createOptions(method, data, head, controller) {
 }
 
 const responders = {
-    'text/html': respondText,
+    'text/plain': respondText,
+    'text/html':  respondDOM,
     'application/json': respondJSON,
     'multipart/form-data': respondForm,
     'application/x-www-form-urlencoded': respondForm,
-    'audio': respondBlob,
-    'audio/wav': respondBlob,
-    'audio/m4a': respondBlob
+    'audio':      respondBlob,
+    'audio/wav':  respondBlob,
+    'audio/m4a':  respondBlob
 };
 
 function respondBlob(response) {
@@ -176,6 +180,14 @@ function respondForm(response) {
 
 function respondText(response) {
     return response.text();
+}
+
+function respondDOM(response) {
+    return response.text().then((text) => (
+        /^\s*<!DOCTYPE html>/.test(text) ?
+            parseHTML(text) :
+            create('fragment', text)
+    ));
 }
 
 function respond(response) {

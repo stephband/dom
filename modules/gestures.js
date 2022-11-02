@@ -56,6 +56,8 @@ const userSelect = 'webkitUserSelect' in document.body.style ?
     'webkitUserSelect' :
     'userSelect' ;
 
+const store = {};
+
 export const config = {
     // Number of pixels, or string CSS length, that a pressed pointer travels
     // before gesture is started.
@@ -75,11 +77,11 @@ function distanceThreshold(distance, x, y) {
     return (x * x + y * y) >= (distance * distance);
 }
 
-function Pointermove(stream, events, options) {
+function Pointermove(stream, e, options) {
     this.stream    = stream;
-    this.events    = events;
+    this.events    = [e];
     this.options   = options;
-    this.pointerId = events[0].pointerId;
+    this.pointerId = e.pointerId;
 
     if (typeof options.threshold === 'function') {
         // options.threshold is a function
@@ -99,8 +101,14 @@ function Pointermove(stream, events, options) {
 assign(Pointermove.prototype, {
     handleEvent: overload(get('type'), {
         'pointermove': function(e) {
+            // If it's not a move from this gesture's pointer we're not interested
             if (this.pointerId !== e.pointerId) {
-                console.log('Not the same pointer');
+                return;
+            }
+
+            // If pointer is already gesturing don't allow it to start another
+            if (this.pointerId in store && this !== store[this.pointerId]) {
+                this.stop();
                 return;
             }
 
@@ -141,6 +149,10 @@ assign(Pointermove.prototype, {
         this.userSelectState = document.body.style[userSelect];
         document.body.style[userSelect] = 'none';
 
+        // Keep a record of which pointers are currently responsible for
+        // gestures - we only want one per pointer, max
+        store[this.pointerId] = this;
+
         // Push a new gesture stream that uses this as producer
         this.stream.push(new Stream(this));
     },
@@ -170,6 +182,9 @@ assign(Pointermove.prototype, {
         if (this.isGesture) {
             // Reset text selectability
             document.body.style[userSelect] = this.userSelectState;
+
+            // Remove record that keeps this pointerId bound to this gesture
+            delete store[this.pointerId];
         }
 
         if (this[0]) {
@@ -215,7 +230,7 @@ assign(PointerProducer.prototype, /*Producer.prototype, */ {
 
         // Copy event to keep the true target around, as target is mutated on
         // the event if it passes through a shadow boundary after being handled
-        // here, resulting in a rare but gnarly bug hunt.
+        // here, resulting in a rare but very gnarly bug hunt.
         var event = {
             type:          e.type,
             target:        e.target,
@@ -226,7 +241,7 @@ assign(PointerProducer.prototype, /*Producer.prototype, */ {
             pointerId:     e.pointerId
         };
 
-        new Pointermove(this[0], [event], this.options);
+        new Pointermove(this[0], event, this.options);
     },
 
     // Stop the gestures stream

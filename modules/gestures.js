@@ -88,7 +88,7 @@ function Pointermove(stream, events, options) {
     else {
         // options.threshold is a string or number
         const distance = px(options.threshold);
-        this.checkThreshold = (x, y) => distanceThreshold(distance, x, y);
+        this.checkThreshold = (x, y, t) => distanceThreshold(distance, x, y, t);
     }
 
     document.addEventListener('pointermove', this);

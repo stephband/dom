@@ -1,10 +1,10 @@
 
-/** 
+/**
 delegate(map)
 
 Takes an object map of functions keyed to selectors, and returns a function that
-handles event objects, delegating them to the first function whose selector 
-matches the event target. Functions are passed the target node and the event 
+handles event objects, delegating them to the first function whose selector
+matches the event target. Functions are passed the target node and the event
 object, plus any other arguments passed to the handler.
 
 ```
@@ -21,16 +21,13 @@ export default function delegate(object) {
 
 	// Create an event handler that looks up the ancestor tree
 	// to find selector.
-	const selectors = Object.keys(object);
-
 	return function handle(e) {
 		const target = e.target;
-		let n = -1;
-
-		while (selectors[++n]) {
-			const node = target.closest(selectors[n]);
+		let selector;
+		for (selector in object) {
+			const node = target.closest(selector);
 			if (node) {
-				return object[selectors[n]](node, ...arguments);
+				return object[selector](node, ...arguments);
 			}
 		}
 	};

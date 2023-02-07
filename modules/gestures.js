@@ -37,7 +37,7 @@ The `options` object may optionally contain any of:
     select: '.class'
 
     // Determine a minimum distance a finger must travel before a gesture is
-    // considered to have started
+    // considered to have started. Defaults to 4px.
     threshold: '0.25rem'
 }
 ```

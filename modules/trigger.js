@@ -10,8 +10,8 @@ trigger('activate', node);
 ```
 
 Alternatively the first argument may be an object with a `type` property, and
-optionally `details`, which must be an object, and `bubbles`, `cancelable` and
-`composed`, which determine the behaviour of the event.
+optionally `detail`, which must be an object, and `bubbles`, `cancelable` and
+`composed` options, which determine the behaviour of the event.
 
 ```
 trigger({
@@ -49,12 +49,12 @@ export function trigger(type, node) {
     if (typeof type === 'object') {
         ({ type, detail, bubbles, cancelable, composed, ...properties } = type);
 
+        // https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
         // Options accepted by CustomEvent:
         // detail:     any
         // bubbles:    true | false
         // cancelable: true | false
         // composed:   true | false
-        // https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent
         event = assign(new CustomEvent(type, {
             detail,
             bubbles:    bubbles    || defaults.bubbles,

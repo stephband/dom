@@ -43,10 +43,10 @@ The `options` object may optionally contain any of:
 ```
 */
 
-import get      from '../../fn/modules/get.js';
-import overload from '../../fn/modules/overload.js';
+import get             from '../../fn/modules/get.js';
+import overload        from '../../fn/modules/overload.js';
 import Stream, { pipe, unpipe, push, stop } from '../../fn/modules/stream/stream.js';
-import px       from './parse-length.js';
+import px              from './parse-length.js';
 import stopPropagation from './stop-propagation.js';
 
 const A      = Array.prototype;
@@ -137,10 +137,12 @@ assign(Pointermove.prototype, {
             this.stop();
 
             // Suppress click event that follows pointerup
-            document.addEventListener('click', stopPropagation, {
-                capture: true,
-                once: true
-            });
+            if (this.isGesture) {
+                document.addEventListener('click', stopPropagation, {
+                    capture: true,
+                    once: true
+                });
+            }
         },
 
         'default': function(e) {

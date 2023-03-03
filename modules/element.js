@@ -445,8 +445,8 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 
         document.querySelectorAll('[is="' + name + '"]').forEach((element) => {
             // Define properties on element
-            if (api) {
-                define(element, api);
+            if (properties) {
+                define(element, properties);
             }
 
             // Construct an instance from Constructor using the Element prototype
@@ -459,8 +459,10 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 
             // Detect and run attributes
             let name;
+
             for (name in attributes) {
-                const attribute = element.attributes[name];
+                // elements.attributes is sometimes undefined... why?
+                const attribute = element.attributes && element.attributes[name];
                 if (attribute) {
                     attributes[name].call(element, attribute.value);
                 }

@@ -41,6 +41,11 @@ The `options` object may optionally contain any of:
     threshold: '0.25rem'
 }
 ```
+
+It is a Very Good Idea to style whatever element is being gestured with
+`touch-action` to avoid the browser sending `pointercancel` events when it
+thinks you are trying to perform some native pan or scroll
+([MDN touch-action](https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action))
 */
 
 import get             from '../../fn/modules/get.js';

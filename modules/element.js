@@ -462,7 +462,7 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 
             for (name in attributes) {
                 // elements.attributes is sometimes undefined... why?
-                const attribute = element.attributes && element.attributes[name];
+                const attribute = element.attributes[name];
                 if (attribute) {
                     attributes[name].call(element, attribute.value);
                 }

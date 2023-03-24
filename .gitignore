@@ -5,3 +5,4 @@ node_modules/*
 .DS_Store
 temp/*
 npm-debug.logtest/styles.js
+.nova/

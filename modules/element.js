@@ -440,7 +440,7 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
     // assigning their intended APIs to them.
     if (tag && !supportsCustomisedBuiltIn) {
         if (window.DEBUG) {
-            console.warn('Browser does not support customised built-in elements.\nAttempting to polyfill <' + tag + ' is="' + name + '"> currently in the DOM.');
+            console.warn('Browser does not support customised built-in elements, polyfilling <' + tag + ' is="' + name + '">');
         }
 
         document.querySelectorAll('[is="' + name + '"]').forEach((element) => {

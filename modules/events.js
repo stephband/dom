@@ -5,28 +5,35 @@ events(type, node)
 Returns a mappable stream of events heard on `node`:
 
 ```js
-var stream = events('click', document.body);
+events('click', document);
 .map(get('target'))
-.each(function(node) {
-    // Do something with nodes
-});
+.each((target) => ...);
 ```
 
-Stopping the stream removes the event listeners:
+The first parameter may also be an object with a `type` property. If the object
+has a `select` property that is a CSS selector, events are delegated from
+matching targets:
 
 ```js
+events({ type: 'click', select: '[name="button"]' }, document)
+.each((e) => ...)
+```
+
+Other properties are passed to addEventListener options, for passive and capture
+phase event binding:
+
+```js
+events({ type: 'scroll', passive: true, capture true }, window)
+.each((e) => ...);
+```
+
+Stopping an event stream removes event listeners:
+
+```js
+const stream = events('click', document).each((e) => ...);
 stream.stop();
 ```
-
-The first parameter may also be an options object, which must have a `type`
-property. The `select: '...'` property allows for delegation of an event from
-the selected target. Other properties, eg. `passive: true` are passed to
-addEventListener options.
-
-```js
-var stream = events({ type: 'scroll', passive: true, select: '' }, document.body);
-```
-*/
+**/
 
 import cache  from '../../fn/modules/cache.js';
 import Stream, { pipe, push, stop } from '../../fn/modules/stream/stream.js';

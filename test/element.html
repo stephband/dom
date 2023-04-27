@@ -168,7 +168,7 @@
             Promise.resolve('promise-6').then(expects);
 
             // Cloning a template does nothing
-            const template = document.getElementById('element-template');
+            const template = document.getElementById('literal-element');
             const elem1    = template.content.querySelector('test-element');
             const fragment = template.content.cloneNode(true);
             const elem2    = fragment.querySelector('test-element');
@@ -212,7 +212,7 @@
     <section title="template.content.cloneNode()" id="template-test">
         <h2>Created by template.content.cloneNode()</h2>
 
-        <template id="element-template">
+        <template id="literal-element">
             <test-element count="6">
                 <p>Slotted content</p>
             </test-element>

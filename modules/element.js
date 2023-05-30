@@ -4,14 +4,16 @@ element(tag, lifecycle, properties, stylesheet, message)
 
 Registers a custom element `tag` and returns its constructor.
 
-- tag: A string in the form `'custom-name'`, `'<custom-name>'`,
+- `tag`: A string in the form `'custom-name'`, `'<custom-name>'`,
 `'tag is="custom-name"'` or `'<tag is="custom-name">'`
-- lifecycle: {
-    mode:       'open' or 'closed', defaults to 'closed'
-    focusable:  true or false, defaults to false
+- `lifecycle`: {
+    mode:       'open' or 'closed'
+    focusable:  true or false
+
+    // Styleheet
+    stylesheet: optional string path to stylesheet for shadow DOM
 
     // Lifecycle handlers
-    stylesheet: optional string path to stylesheet for shadow DOM
     construct:  called during element construction
     connect:    called when element added to DOM
     load:       called when stylesheet loaded
@@ -23,15 +25,15 @@ Registers a custom element `tag` and returns its constructor.
     reset:      called when form element reset
     restore:    called when form element restored
 }
-- properties: {
+- `properties`: {
     name: {
         attribute: fn called on `element.setAttribute('name', ...)`
         set:       fn called on setting property 'name'
         get:       fn called on getting property 'name'
     }
 }
-- stylesheet: url of a stylesheet to load in to the shadow DOM
-- message: optional message logged to console when element is registered
+- `stylesheet`: url of a stylesheet to load in to the shadow DOM
+- `message`: optional debug message to logged when element is registered
 
 The name form `'tag is="element-name"'` creates customised built-in elements in
 browsers that support the feature. Safari does not, but support is somewhat
@@ -39,8 +41,8 @@ polyfilled. Mileage will vary.
 
 #### Lifecycle
 
-All lifecycle handlers are called with the context `this` set to the host
-element and with the first parameter `shadow`.
+Lifecycle handlers are called with the element as `this` and with the parameters
+`shadow` and `internals`.
 
 On initialisation the `construct` handler is called. Set up the shadow root and
 define event handlers here. Children and attributes must not be inspected or
@@ -277,31 +279,31 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 
     function Element() {
         // Construct an instance from Constructor using the Element prototype
-        const elem = Reflect.construct(constructor, arguments, Element);
+        const element = Reflect.construct(constructor, arguments, Element);
 
         // Inject shadow if .construct() asks for it
         const shadow = lifecycle.construct && lifecycle.construct.length > shadowParameterIndex ?
-            createShadow(elem, lifecycle, stylesheet || lifecycle.stylesheet) :
+            createShadow(element, lifecycle, stylesheet || lifecycle.stylesheet) :
             undefined ;
 
         // Get access to the internal form control API
         const internals = Element.formAssociated ?
-            attachInternals(elem) :
+            attachInternals(element) :
             {} ;
 
         if (tag) {
             supportsCustomisedBuiltIn = true;
         }
 
-        lifecycle.construct && lifecycle.construct.call(elem, shadow, internals);
+        lifecycle.construct && lifecycle.construct.call(element, shadow, internals);
 
         // At this point, if properties have already been set before the
-        // element was upgraded, they exist on the elem itself, where we have
+        // element was upgraded, they exist on the element itself, where we have
         // just upgraded it's protytype to define those properties those
         // definitions will never be reached. Either:
         //
         // 1. Define properties on the instance instead of the prototype
-        //    Object.defineProperties(elem, properties);
+        //    Object.defineProperties(element, properties);
         //
         // 2. Take a great deal of care not to set properties before an element
         //    is upgraded. I can't impose a restriction like that.
@@ -310,9 +312,9 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         //    them on the instance.
         //
         // Let's go with 3. I'm not happy you have to do this, though.
-        properties && Object.keys(properties).reduce(transferProperty, elem);
+        properties && Object.keys(properties).reduce(transferProperty, element);
 
-        return elem;
+        return element;
     }
 
 

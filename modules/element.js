@@ -238,6 +238,19 @@ function attachInternals(elem) {
     return internals;
 }
 
+function toLoadPromise(asset) {
+    return new Promise((resolve, reject) => {
+        asset.addEventListener('load', resolve, onceEvent);
+        asset.addEventListener('error', reject, onceEvent);
+    });
+}
+
+function onload(loadables, fn) {
+    Promise
+    .all(Array.from(loadables, toLoadPromise))
+    .finally(fn);
+}
+
 function hasPropertyAttribute(option) {
     return !!option.attribute;
 }
@@ -314,6 +327,22 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         // Let's go with 3. I'm not happy you have to do this, though.
         properties && Object.keys(properties).reduce(transferProperty, element);
 
+        // Avoid flash of unstyled content in shadow DOMs that must load assets
+        // by hiding all content other than the default slot until assets have
+        // loaded
+        if (shadow) {
+            const assets = shadow.querySelectorAll('link[rel="stylesheet"]');
+
+            if (assets.length) {
+                const style = create('style', '*:not(:has(slot:not([name]))) { display: none !important; }');
+                shadow.append(style);
+
+                internals.loadPromise = Promise
+                .all(Array.from(assets, toLoadPromise))
+                .finally(() => style.remove());
+            }
+        }
+
         return element;
     }
 
@@ -381,6 +410,15 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         // If this is the first connect and there is an lifecycle.load fn,
         // _initialLoad is true
         if (elem._initialLoad) {
+            if (internals.loadPromise) {
+                internals.loadPromise.then(() => {
+                    delete elem._initialLoad;
+                    if (lifecycle.load) {
+                        lifecycle.load.call(elem, shadow);
+                    }
+                });
+            }
+/*
             const links = shadow.querySelectorAll('link[rel="stylesheet"]');
 
             if (links.length) {
@@ -411,9 +449,10 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
                     links[n].addEventListener('error', loadError, onceEvent);
                 }
             }
-            else {
+*/
+            else if (lifecycle.load) {
                 // Guarantee that lifecycle load is called asynchronously
-                lifecycle.load && Promise.resolve(1).then(() =>
+                Promise.resolve(1).then(() =>
                     lifecycle.load.call(this, shadow, internals)
                 );
             }

@@ -325,7 +325,7 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
     // form element.
     Element.prototype = Object.create(constructor.prototype, properties) ;
 
-    if (properties.value) {
+    if (properties && properties.value) {
         // Flag the Element class as formAssociated
         Element.formAssociated = true;
 

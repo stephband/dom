@@ -88,13 +88,15 @@ shadow DOM. Mileage will vary. Managing focus can be problematic without browser
 support.
 */
 
-import create  from './create.js';
-import capture from '../../fn/modules/capture.js';
+import capture           from '../../fn/modules/capture.js';
+import create            from './create.js';
+import toLoadPromise     from './element/to-load-promise.js';
+import toPrefetchPromise from './element/to-prefetch-promise.js';
 
 const $internals = Symbol('internals');
-const $shadow    = Symbol('shadow');
 
-const define = Object.defineProperties;
+const define  = Object.defineProperties;
+const nothing = {};
 
 const constructors = {
     // We need list only those whose constructor names do not match their tag
@@ -140,8 +142,6 @@ const formProperties = {
     reportValidity:    { value: function() { return this[$internals].reportValidity(); }}
 };
 
-const nothing   = {};
-const onceEvent = { once: true };
 const shadowParameterIndex = 0;
 
 let supportsCustomisedBuiltIn = false;
@@ -160,7 +160,7 @@ function getElementConstructor(tag) {
 
 // Capture name and tag from <element-name> or <tag is="element-name">, syntax
 // brackets and quotes optional
-const captureNameTag = capture(/^\s*<?([a-z][\w]*-[\w-]+)>?\s*$|^\s*<?([a-z][\w]*)\s+is[=\s]*["']?([a-z][\w]*-[\w-]+)["']?>?\s*$/, {
+const parseNameTag = capture(/^\s*<?([a-z][\w]*-[\w-]+)>?\s*$|^\s*<?([a-z][\w]*)\s+is[=\s]*["']?([a-z][\w]*-[\w-]+)["']?>?\s*$/, {
     1: (data, captures) => ({
         name: captures[1]
     }),
@@ -186,11 +186,9 @@ function transferProperty(elem, key) {
 }
 
 function createShadow(elem, options, stylesheet) {
-    elem._initialLoad = true;
-
-    // Create a shadow root if there is DOM content. Shadows may be 'open' or
-    // 'closed'. Closed shadows are not exposed via element.shadowRoot, and
-    // events propagating from inside of them report the element as target.
+    // Create a shadow root. Shadows may be 'open' or 'closed'. Closed shadows
+    // are not exposed via element.shadowRoot, and events propagating from
+    // inside of them report the element as target.
     const shadow = elem.attachShadow({
         mode:           options.mode || 'closed',
         delegatesFocus: options.focusable || false
@@ -201,17 +199,15 @@ function createShadow(elem, options, stylesheet) {
         shadow.append(link);
     }
 
-    elem[$shadow] = shadow;
-
     return shadow;
 }
 
-function attachInternals(elem) {
+function attachInternals(element) {
     var internals;
 
     // Use native attachInternals where it exists
-    if (elem.attachInternals) {
-        internals = elem.attachInternals();
+    if (element.attachInternals) {
+        internals = element.attachInternals();
         if (internals.setFormValue) {
             return internals;
         }
@@ -227,8 +223,8 @@ function attachInternals(elem) {
     // not yet put this in the DOM however – it violates the spec to give a
     // custom element children before it's contents are parsed. Instead we
     // wait until connectCallback.
-    internals.input = create('input', { type: 'hidden', name: elem.name });
-    elem.appendChild(internals.input);
+    internals.polyfillInput = create('input', { type: 'hidden', name: elem.name });
+    elem.appendChild(internals.polyfillInput);
 
     // Polyfill internals object setFormValue
     internals.setFormValue = function(value) {
@@ -236,19 +232,6 @@ function attachInternals(elem) {
     };
 
     return internals;
-}
-
-function toLoadPromise(asset) {
-    return new Promise((resolve, reject) => {
-        asset.addEventListener('load', resolve, onceEvent);
-        asset.addEventListener('error', reject, onceEvent);
-    });
-}
-
-function onload(loadables, fn) {
-    Promise
-    .all(Array.from(loadables, toLoadPromise))
-    .finally(fn);
 }
 
 function hasPropertyAttribute(option) {
@@ -276,7 +259,7 @@ export function getInternals(element) {
 }
 
 export default function element(definition, lifecycle, api, stylesheet, log = '') {
-    const { name, tag } = captureNameTag(definition);
+    const { name, tag } = parseNameTag(definition);
 
     // Get the element constructor or the base HTMLElement constructor
     const constructor = typeof tag === 'string' ?
@@ -302,43 +285,51 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         // Get access to the internal form control API
         const internals = Element.formAssociated ?
             attachInternals(element) :
-            {} ;
+            { shadowRoot: shadow } ;
 
+        // Flag unconnected until first connect
+        internals.unconnected = true;
+        element[$internals] = internals;
+
+        // Flag support for custom built-ins. We know this when tag exists and
+        // Element constructor is called
         if (tag) {
             supportsCustomisedBuiltIn = true;
         }
 
         lifecycle.construct && lifecycle.construct.call(element, shadow, internals);
 
-        // At this point, if properties have already been set before the
-        // element was upgraded, they exist on the element itself, where we have
-        // just upgraded it's protytype to define those properties those
+        // At this point, if properties have been set before the element was
+        // upgraded they already exist on the element itself, where we have
+        // just upgraded it's protytype to define those properties. Those
         // definitions will never be reached. Either:
         //
-        // 1. Define properties on the instance instead of the prototype
+        // 1. Define properties on the instance instead of the prototype, as in
         //    Object.defineProperties(element, properties);
         //
-        // 2. Take a great deal of care not to set properties before an element
-        //    is upgraded. I can't impose a restriction like that.
+        // 2. Take a great deal of care when authoring not to set properties
+        //    before an element is upgraded. We can't impose a restriction like that.
         //
         // 3. Copy defined properties to their prototype handlers and delete
         //    them on the instance.
         //
-        // Let's go with 3. I'm not happy you have to do this, though.
+        // Let's go with 3. I'm not happy we have to do this, though.
         properties && Object.keys(properties).reduce(transferProperty, element);
 
-        // Avoid flash of unstyled content in shadow DOMs that must load assets
-        // by hiding all content other than the default slot until assets have
-        // loaded
+        // Avoid flash of unstyled content in shadow DOMs that must load assets.
         if (shadow) {
-            const assets = shadow.querySelectorAll('link[rel="stylesheet"]');
+            const links = shadow.querySelectorAll('link[rel="stylesheet"]');
 
-            if (assets.length) {
+            if (links.length) {
+                // Hide all content other than the default slot until stylesheets
+                // have loaded. We keep the default slot visible as that content
+                // was visible before upgrade and we do not want it to momentarily
+                // disappear.
                 const style = create('style', '*:not(:has(slot:not([name]))) { display: none !important; }');
                 shadow.append(style);
 
-                internals.loadPromise = Promise
-                .all(Array.from(assets, toLoadPromise))
+                internals.stylesheetsLoadPromise = Promise
+                .all(Array.from(links, toLoadPromise))
                 .finally(() => style.remove());
             }
         }
@@ -346,6 +337,14 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         return element;
     }
 
+    // Prefetch stylesheet
+    if (stylesheet) {
+        toPrefetchPromise(stylesheet);
+
+        log = window.DEBUG ?
+            '\n  Prefetches\n  ' + stylesheet + '\n  ' + log :
+            log ;
+    }
 
     // Properties
 
@@ -363,21 +362,27 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 
         if (lifecycle.enable || lifecycle.disable) {
             Element.prototype.formDisabledCallback = function(disabled) {
+                const internals = getInternals(this);
+                const shadow    = internals.shadowRoot;
                 return disabled ?
-                    lifecycle.disable && lifecycle.disable.call(this, this[$shadow], this[$internals]) :
-                    lifecycle.enable && lifecycle.enable.call(this, this[$shadow], this[$internals]) ;
+                    lifecycle.disable && lifecycle.disable.call(this, shadow, internals) :
+                    lifecycle.enable && lifecycle.enable.call(this, shadow, internals) ;
             };
         }
 
         if (lifecycle.reset) {
             Element.prototype.formResetCallback = function() {
-                return lifecycle.reset.call(this, this[$shadow], this[$internals]);
+                const internals = getInternals(this);
+                const shadow    = internals.shadowRoot;
+                return lifecycle.reset.call(this, shadow, internals);
             };
         }
 
         if (lifecycle.restore) {
             Element.prototype.formStateRestoreCallback = function() {
-                return lifecycle.restore.call(this, this[$shadow], this[$internals]);
+                const internals = getInternals(this);
+                const shadow    = internals.shadowRoot;
+                return lifecycle.restore.call(this, shadow, internals);
             };
         }
     }
@@ -397,65 +402,32 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
     // Lifecycle
 
     Element.prototype.connectedCallback = function() {
-        const elem      = this;
-        const shadow    = elem[$shadow];
-        const internals = elem[$internals];
+        const internals = getInternals(this);
+        const shadow    = internals.shadowRoot;
 
-        // If we have simulated form internals for Safari, append the hidden
+        // If we have simulated form internals (for Safari), append the hidden
         // input now
-        //if (elem[$internals] && !elem.attachInternals) {
-        //    elem.appendChild(elem[$internals].input);
-        //}
+        if (internals.polyfillInput) {
+            elem.appendChild(internals.polyfillInput);
+        }
 
-        // If this is the first connect and there is an lifecycle.load fn,
-        // _initialLoad is true
-        if (elem._initialLoad) {
-            if (internals.loadPromise) {
-                internals.loadPromise.then(() => {
-                    delete elem._initialLoad;
-                    if (lifecycle.load) {
-                        lifecycle.load.call(elem, shadow);
-                    }
-                });
-            }
-/*
-            const links = shadow.querySelectorAll('link[rel="stylesheet"]');
-
-            if (links.length) {
-                let count  = 0;
-                let n = links.length;
-
-                const load = function load(e) {
-                    if (++count >= links.length) {
-                        // Delete _initialLoad. If the element is removed
-                        // and added to the DOM again, stylesheets do not load
-                        // again
-                        delete elem._initialLoad;
-                        if (lifecycle.load) {
-                            lifecycle.load.call(elem, shadow);
-                        }
-                    }
-                };
-
-                const loadError = window.DEBUG ?
-                    (e) => {
-                        console.error('Failed to load stylesheet', e.target.href);
-                        load(e);
-                    } :
-                    load ;
-
-                while (n--) {
-                    links[n].addEventListener('load', load, onceEvent);
-                    links[n].addEventListener('error', loadError, onceEvent);
-                }
-            }
-*/
-            else if (lifecycle.load) {
-                // Guarantee that lifecycle load is called asynchronously
-                Promise.resolve(1).then(() =>
+        // If this is the first connect and there is a lifecycle.load fn,
+        // unconnected is true
+        if (internals.unconnected) {
+            if (lifecycle.load && internals.stylesheetsLoadPromise) {
+                internals.stylesheetsLoadPromise.then(() =>
                     lifecycle.load.call(this, shadow, internals)
                 );
             }
+            else if (lifecycle.load) {
+                // Guarantee that lifecycle load is called asynchronously in
+                // cases where there is nothing to load
+                Promise.resolve().then(() =>
+                    lifecycle.load.call(this, shadow, internals)
+                );
+            }
+
+            delete internals.unconnected;
         }
 
         lifecycle.connect && lifecycle.connect.call(this, shadow, internals);
@@ -463,7 +435,9 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 
     if (lifecycle.disconnect) {
         Element.prototype.disconnectedCallback = function() {
-            return lifecycle.disconnect.call(this, this[$shadow], this[$internals]);
+            const internals = getInternals(this);
+            const shadow    = internals.shadowRoot;
+            return lifecycle.disconnect.call(this, shadow, internals);
         };
     }
 
@@ -471,9 +445,11 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
     window.console &&
     window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c ' + log, 'color: #3a8ab0; font-weight: 600;', 'color: #888888; font-weight: 400;');
 
+
     // Define the element
     window.customElements.define(name, Element, tag && { extends: tag });
 
+    // Safari partial polyfill.
     // Where tag is supplied, element should have been registered as a customised
     // built-in and the constructor would have run if any were in the DOM already.
     // However, Safari does not support customised built-ins. Here we attempt to

@@ -41,11 +41,11 @@ export default function navigate(url, state = null, scroll = false) {
     const path = (url.pathname + url.search + url.hash).slice(0, 96);
     log('navigate()', (path.length === 96 ? path + ' …' : path) + (state ? ', ' + json : ''));
 
-    // If only the hash has changed and state is null and scroll is true, 
+    // If only the hash has changed and state is null and scroll is true,
     // employ location.hash to navigate, giving us automatic scroll
     if (
-        url.pathname === location.pathname 
-        && url.search === location.search 
+        url.pathname === location.pathname
+        && url.search === location.search
         && !statechange
         && id
         && url.hash !== hash
@@ -63,10 +63,10 @@ export default function navigate(url, state = null, scroll = false) {
     history.pushState(state, document.title, href);
 
     // Force CSS :target selector to update when there is a new #hash.
-    // (Hackaround, CSS :target does not follow the a state of the 
+    // (Hackaround, CSS :target does not follow the a state of the
     // #hash without this)
     if (url.hash !== hash) {
-        // Move forward to the old url and back to the current location, causing  
+        // Move forward to the old url and back to the current location, causing
         // :target selector to update and a popstate event.
         history.pushState(state, document.title, oldhref);
         history.back();
@@ -75,7 +75,7 @@ export default function navigate(url, state = null, scroll = false) {
 
     const defaulted = triggerNavigate();
 
-    // If a handler has called .preventDefault() defaulted is false. That's 
+    // If a handler has called .preventDefault() defaulted is false. That's
     // a signal that we don't want the navigate to be handled by history.
     if (defaulted) {
         //console.log('WOOWOO', defaulted);
@@ -85,7 +85,7 @@ export default function navigate(url, state = null, scroll = false) {
     return !defaulted;
 }
 
-// Listen to load and popstate (and hashchange?) events to notify when 
+// Listen to load and popstate (and hashchange?) events to notify when
 // navigation has occured
 window.addEventListener('popstate', triggerNavigate);
 window.addEventListener('DOMContentLoaded', triggerNavigate);

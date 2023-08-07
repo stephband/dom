@@ -19,8 +19,7 @@
 @import "../bolt/css/states.css";
 @import "../bolt/css/respond.css";
 @import "../bolt/css/grid.css";
-@import "../bolt/classes/folder-block.css";
-@import "../bolt/classes/folder-button.css";
+@import "../bolt/classes/folder.css";
 @import "../bolt/css/device.css";
 @import "../bolt/css/var.css";
 @import "../dom/css/dom.css";

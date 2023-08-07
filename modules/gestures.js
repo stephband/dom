@@ -52,7 +52,6 @@ import get             from '../../fn/modules/get.js';
 import overload        from '../../fn/modules/overload.js';
 import Stream, { pipe, unpipe, push, stop } from '../../fn/modules/stream/stream.js';
 import px              from './parse-length.js';
-import stopPropagation from './stop-propagation.js';
 
 const A      = Array.prototype;
 const assign = Object.assign;
@@ -75,6 +74,13 @@ export const config = {
     }
 };
 
+let clickSuppressionTimestamp = -Infinity;
+
+function stopPropagation(e) {
+    if (e.timeStamp - clickSuppressionTimestamp > 60) { return; }
+    e.stopPropagation();
+    e.preventDefault();
+}
 
 /* Pointermove, pointerup and pointercancel handler */
 
@@ -143,6 +149,7 @@ assign(Pointermove.prototype, {
 
             // Suppress click event that follows pointerup
             if (this.isGesture) {
+                clickSuppressionTimestamp = e.timeStamp;
                 document.addEventListener('click', stopPropagation, {
                     capture: true,
                     once: true

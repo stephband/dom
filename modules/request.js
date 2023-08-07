@@ -218,7 +218,7 @@ The 4th parameter may be a content type string or a headers object (in which
 case it must have a `'Content-Type'` property).
 **/
 
-export default function request(method = 'GET', url, data, contenttype = 'application/json') {
+export default function request(method = 'GET', url, data = {}, contenttype = 'application/json') {
     method = method.toUpperCase();
 
     // If this is a GET and there is data, append data to the URL query string

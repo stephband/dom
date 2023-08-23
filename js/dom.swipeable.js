@@ -3,7 +3,7 @@ import { last, wrap } from '../../fn/module.js';
 import { attribute, box, events, children, classes, closest, matches, query, style } from '../module.js';
 import './dom-swipe.js';
 import './dom-touch.js';
-import './dom.switchable.js';
+//import './dom.switchable.js';
 
 var on       = events.on;
 var trigger  = events.trigger;

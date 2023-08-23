@@ -23,7 +23,6 @@ export const config = {
 
 export const matchers = [];
 
-
 function findButtons(id) {
 	return query('[href$="#' + id + '"]', document.body)
 	.filter(overload(tag, {

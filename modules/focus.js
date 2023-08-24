@@ -1,15 +1,5 @@
 
-const selector = `
-    a[href]:not([tabindex="-1"], [hidden]),
-    area[href]:not([tabindex="-1"], [hidden]),
-    input:not([disabled]):not([tabindex="-1"], [hidden], [type="hidden"]),
-    select:not([disabled]):not([tabindex="-1"], [hidden], [type="hidden"]),
-    textarea:not([disabled]):not([tabindex="-1"], [hidden], [type="hidden"]),
-    button:not([disabled]):not([tabindex="-1"], [hidden], [type="hidden"]),
-    iframe:not([tabindex="-1"], [hidden]),
-    [tabindex]:not([tabindex="-1"], [hidden]),
-    [contentEditable=true]:not([tabindex="-1"], [hidden])
-`;
+const selector = ':not([disabled], [tabindex="-1"], [hidden], [type="hidden"], [aria-hidden="true"])';
 
 export function focusClosest(element) {
     // Find the closest focusable element...
@@ -25,13 +15,28 @@ export function focusClosest(element) {
     // Ooof, what a polava
 }
 
-export function focusInside(element) {
-    const focusable = element.querySelector(selector);
+/**
+.focusInside(element)
+Moves focus to the first focusable element found inside `element`. If none are
+found, moves focus to `element`, if focusable.
+**/
 
-    if (focusable) {
-        focusable.focus();
+export function focusInside(element) {
+    const elements = element.querySelector(selector);
+    const c = elements.length;
+
+    let n = -1, node;
+    while (++n < c) {
+        node = elements[n];
+
+        // The only way to tell whether .focus() actually focuses an element
+        // is to try it and see
+        node.focus();
+        if (document.activeElement === node) {
+            return;
+        }
     }
-    else {
-        element.focus();
-    }
+
+    // If nothing inside element was focusable attempt to focus element itself
+    element.focus();
 }

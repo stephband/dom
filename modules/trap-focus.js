@@ -1,6 +1,7 @@
-import noop        from '../../fn/modules/noop.js';
-import requestTick from '../../fn/modules/request-tick.js';
-import { select }  from './select.js';
+import noop            from '../../fn/modules/noop.js';
+import requestTick     from '../../fn/modules/request-tick.js';
+import { select }      from './select.js';
+import { focusInside } from './focus.js';
 
 let untrapFocus = noop;
 
@@ -21,17 +22,12 @@ export default function trapFocus(node) {
 	// Cache the currently focused node
 	var focusNode = document.activeElement || document.body;
 
-	function resetFocus() {
-		var focusable = select('[tabindex], a, input, textarea, button', node)[0];
-		if (focusable) { focusable.focus(); }
-	}
-
 	function preventFocus(e) {
 		if (node.contains(e.target)) { return; }
 
 		// If trying to focus outside node, set the focus back
 		// to the first thing inside.
-		resetFocus();
+		focusInside(node);
 		e.preventDefault();
 		e.stopPropagation();
 	}
@@ -40,7 +36,7 @@ export default function trapFocus(node) {
 	document.addEventListener("focus", preventFocus, true);
 
 	// Move focus into node
-	requestTick(resetFocus);
+	requestTick(() => focusInside(node));
 
 	return untrapFocus = function() {
 		untrapFocus = noop;

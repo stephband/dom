@@ -90,6 +90,7 @@ function distanceThreshold(distance, x, y) {
 
 function Pointermove(stream, e, options) {
     this.stream    = stream;
+    this.target    = e.target;
     this.events    = [e];
     this.options   = options;
     this.pointerId = e.pointerId;
@@ -145,6 +146,7 @@ assign(Pointermove.prototype, {
             }
 
             this.events.push(e);
+            this.target.releasePointerCapture(this.pointerId);
             this.stop();
 
             // Suppress click event that follows pointerup
@@ -163,6 +165,7 @@ assign(Pointermove.prototype, {
             }
 
             this.events.push(e);
+            this.target.releasePointerCapture(this.pointerId);
             this.stop();
         }
     }),
@@ -180,6 +183,10 @@ assign(Pointermove.prototype, {
         // Keep a record of which pointers are currently responsible for
         // gestures - we only want one per pointer, max
         store[this.pointerId] = this;
+
+        // Encourage pointer events for this pointerId to come from this
+        // element only
+        this.target.setPointerCapture(this.pointerId);
 
         // Push a new gesture stream that uses this as producer
         this.stream.push(new Stream(this));

@@ -1,39 +1,65 @@
 
 /**
-events(type, node)
+events(type, element)
 
-Returns a mappable stream of events heard on `node`:
-
-```js
-events('click', document);
-.map(get('target'))
-.each((target) => ...);
-```
-
-The first parameter may also be an object with a `type` property. If the object
-has a `select` property that is a CSS selector, events are delegated from
-matching targets:
+Returns a mappable stream of events heard on `element`.
 
 ```js
-events({ type: 'click', select: '[name="button"]' }, document)
-.each((e) => ...)
+events('click', element)
+.map((e) => e.target.id)
 ```
 
-Other properties are passed to addEventListener options, for passive and capture
-phase event binding:
+The first parameter may alternatively be a select object. It must have a
+`.type` property.
+
+```js
+events({ type: 'click' }, element)
+.map((e) => e.target.id)
+```
+
+The object may contain a number of other properties that select the events
+received. It supports the standard addEventListener options, for passive and
+capture phase event binding.
 
 ```js
 events({ type: 'scroll', passive: true, capture true }, window)
-.each((e) => ...);
+.map((e) => window.scrollTop)
 ```
 
-Stopping an event stream removes event listeners:
+And a `.select` property, a CSS selector, that filters events to those with
+targets that match or have a `closest()` ancestor that matches the selector.
 
 ```js
-const stream = events('click', document).each((e) => ...);
-stream.stop();
+events({ type: 'click', select: '[name="button"]' }, element)
+.map((e) => e.target.id)
+```
+
+However, if you need to delegate events it is recommended to use the
+`delegate()` function, which has the added benefit of direct access to the
+delegated target.
+
+```js
+events('click', element)
+.each(delegate({
+    '[name="button"]': (target, e) => console.log(target.id),
+    '[name="remove"]': (target, e) => document.getElementById(target.value).remove(),
+    ...
+}))
+```
+
+Stopping an event stream removes its event listeners.
+
+```js
+events('click', element).stop()
 ```
 **/
+
+/*
+events(type, element, initial)
+
+Pass in an `initial` event object to have the event stream start synchronously
+with an initial value when consumed.
+*/
 
 import cache  from '../../fn/modules/cache.js';
 import Stream, { pipe, push, stop } from '../../fn/modules/stream/stream.js';
@@ -68,25 +94,32 @@ function unlisten(listener, type) {
     return listener;
 }
 
-function EventsProducer(type, options, node) {
+function EventsProducer(type, options, node, initialEvent) {
     // Potential hard-to-find error here if type has repeats, ie 'click click'.
     // Lets assume nobody is dumb enough to do this, I dont want to have to
     // check for that every time.
-    this.types   = type.split(rspaces);
-    this.options = options;
-    this.node    = node;
-    this.select  = options && options.select;
+    this.types        = type.split(rspaces);
+    this.options      = options;
+    this.node         = node;
+    this.select       = options && options.select;
+    this.initialEvent = initialEvent;
 }
 
 assign(EventsProducer.prototype, {
     pipe: function(output) {
         pipe(this, output);
         this.types.reduce(listen, this);
+
+        if (this.initialEvent) {
+            this.handleEvent(this.initialEvent);
+            delete this.initialEvent;
+        };
     },
 
     handleEvent: function(e) {
         // Ignore clicks with the same timeStamp as previous clicks –
-        // they are likely simulated by the browser.
+        // they are likely simulated by the browser, like how clicks on labels
+        // cause simulated clicks to be emitted from inputs
         if (e.type === 'click' && e.timeStamp <= clickTimeStamp) {
             return;
         }
@@ -108,7 +141,7 @@ assign(EventsProducer.prototype, {
     }
 });
 
-export default function events(type, node) {
+export default function events(type, node, initialEvent) {
     let options;
 
     if (typeof type === 'object') {
@@ -116,5 +149,5 @@ export default function events(type, node) {
         type    = options.type;
     }
 
-    return new Stream(new EventsProducer(type, options, node));
+    return new Stream(new EventsProducer(type, options, node, initialEvent));
 }

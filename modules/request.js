@@ -24,7 +24,7 @@ export const config = {
     body: id,
 
     // Takes response, returns response
-    onresponse: function(response) {
+    /*onresponse: function(response) {
         // If redirected, navigate the browser away from here. Can get
         // annoying when receiving 404s, maybe not a good default...
         if (response.redirected) {
@@ -33,7 +33,7 @@ export const config = {
         }
 
         return response;
-    }
+    }*/
 };
 
 const createHeaders = choose({
@@ -153,17 +153,6 @@ function createOptions(method, data, head, controller) {
     return options;
 }
 
-const responders = {
-    'text/plain': respondText,
-    'text/html':  respondDOM,
-    'application/json': respondJSON,
-    'multipart/form-data': respondForm,
-    'application/x-www-form-urlencoded': respondForm,
-    'audio':      respondBlob,
-    'audio/wav':  respondBlob,
-    'audio/m4a':  respondBlob
-};
-
 function respondBlob(response) {
     return response.blob();
 }
@@ -189,6 +178,17 @@ function respondDOM(response) {
             create('fragment', text)
     ));
 }
+
+const responders = {
+    'text/plain':                        respondText,
+    'text/html':                         respondDOM,
+    'application/json':                  respondJSON,
+    'multipart/form-data':               respondForm,
+    'application/x-www-form-urlencoded': respondForm,
+    'audio':                             respondBlob,
+    'audio/wav':                         respondBlob,
+    'audio/m4a':                         respondBlob
+};
 
 function respond(response) {
     if (config.onresponse) {
@@ -242,7 +242,7 @@ export function requestGet(url) {
 
 /**
 requestPatch(url, data)
-A shortcut for `request('patch', 'application/json', url, data)`
+A shortcut for `request('patch', url, data, 'application/json')`
 **/
 
 export function requestPatch(url, data) {
@@ -251,7 +251,7 @@ export function requestPatch(url, data) {
 
 /**
 requestPost(url, data)
-A shortcut for `request('post', 'application/json', url, data)`
+A shortcut for `request('post', url, data, 'application/json')`
 **/
 
 export function requestPost(url, data) {
@@ -260,7 +260,7 @@ export function requestPost(url, data) {
 
 /**
 requestDelete(url, data)
-A shortcut for `request('delete', 'application/json', url, data)`
+A shortcut for `request('delete', url, data, 'application/json')`
 **/
 
 export function requestDelete(url, data) {

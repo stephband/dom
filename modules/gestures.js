@@ -90,7 +90,7 @@ function distanceThreshold(distance, x, y) {
 
 function Pointermove(stream, e, options) {
     this.stream    = stream;
-    this.target    = e.target;
+    this.target    = e.gestureTarget;
     this.events    = [e];
     this.options   = options;
     this.pointerId = e.pointerId;
@@ -261,15 +261,20 @@ assign(PointerProducer.prototype, {
         if (isIgnoreTag(e)) { return; }
 
         // Check target matches selector
-        if (this.options.select && !e.target.closest(this.options.select)) { return; }
+        let gestureTarget = e.target;
+        if (this.options.select) {
+            gestureTarget = e.target.closest(this.options.select);
+            if (!delegateTarget) { return; }
+        }
 
         // Copy event to keep the true target around, as target is mutated on
         // the event if it passes through a shadow boundary after being handled
-        // here, resulting in a rare but very gnarly bug hunt.
+        // here, causing a rare but very gnarly bug hunt.
         var event = {
             type:          e.type,
             target:        e.target,
             currentTarget: e.currentTarget,
+            gestureTarget: gestureTarget,
             clientX:       e.clientX,
             clientY:       e.clientY,
             timeStamp:     e.timeStamp,
@@ -303,7 +308,7 @@ export default function gestures(options, node) {
         options ;
 
     if (window.DEBUG && options.selector) {
-        console.warn('gestures(options) options.selector is now options.select');
+        console.warn('gestures(options) deprecated options.selector, name changed to options.select');
     }
 
     return new Stream(new PointerProducer(node, options));

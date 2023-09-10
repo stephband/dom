@@ -18,6 +18,17 @@ export function getCookie(key) {
 	}
 }
 
+export function setCookie(name, time, value) {
+    var expires = "";
+    if (time) {
+        var date = new Date();
+        date.setTime(date.getTime() + (time * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+
 // Expose to console in DEBUG mode
 if (window.DEBUG) {
     Object.assign(window.dom || (window.dom = {}), { getCookie });

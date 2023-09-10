@@ -62,7 +62,7 @@ with an initial value when consumed.
 */
 
 import cache  from '../../fn/modules/cache.js';
-import Stream, { pipe, push, stop } from '../../fn/modules/stream/stream.js';
+import Stream, { pipe, stop } from '../../fn/modules/stream.js';
 
 const assign  = Object.assign;
 const rspaces = /\s+/;
@@ -132,7 +132,7 @@ assign(EventsProducer.prototype, {
             e.selectedTarget = selectedTarget;
         }
 
-        push(this[0], e);
+        this[0].push(e);
     },
 
     stop: function() {

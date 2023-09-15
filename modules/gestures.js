@@ -50,7 +50,7 @@ thinks you are trying to perform some native pan or scroll
 
 import get             from '../../fn/modules/get.js';
 import overload        from '../../fn/modules/overload.js';
-import Stream, { pipe, unpipe, push, stop } from '../../fn/modules/stream/stream.js';
+import Stream, { pipe, stop } from '../../fn/modules/stream/stream.js';
 import px              from './parse-length.js';
 
 const A      = Array.prototype;
@@ -200,7 +200,7 @@ assign(Pointermove.prototype, {
         while(this.events.length) {
             // Stream may be stopped during this loop so push to `this[0]`
             // rather than to `output`
-            push(this[0], A.shift.apply(this.events));
+            this[0].push(A.shift.apply(this.events));
         }
 
         // Have the output stream take over as the events buffer
@@ -224,7 +224,6 @@ assign(Pointermove.prototype, {
 
         if (this[0]) {
             const output = this[0];
-            unpipe(this, 0);
             stop(output);
         }
     }

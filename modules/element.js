@@ -291,6 +291,11 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         internals.unconnected = true;
         element[$internals] = internals;
 
+        // Fill shadow with template where one is specified. TODO: detect path to template
+        if (lifecycle.template) {
+            shadow.innerHTML = lifecycle.template;
+        }
+
         // Flag support for custom built-ins. We know this when tag exists and
         // Element constructor is called
         if (tag) {

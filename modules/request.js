@@ -87,11 +87,12 @@ const createBody = choose({
     },
 
     'multipart/form-data': function(data) {
-        // Mmmmmhmmm?
         return data.get ?
             data :
             dataToFormData(data) ;
-    }
+    },
+
+    default: id
 });
 
 function formDataToJSON(formData) {

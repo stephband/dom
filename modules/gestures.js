@@ -8,19 +8,8 @@ motion of a single finger. The types of events the stream contains is a
 or `'pointercancel'` event.
 
 ```js
-gestures({ select: '.thing', threshold: '0.5rem', device: 'mouse pen touch' }, document)
-.each(function(events) {
-    const e0 = events.shift();
-
-    events.each(function(e1) {
-        const distance = Math.pow(
-            Math.pow(e1.clientX - e0.clientX, 2),
-            Math.pow(e1.clientY - e0.clientY, 2),
-        0.5);
-
-        console.log(distance);
-    });
-});
+gestures({ select: '.thing', threshold: '0.5rem', device: 'mouse pen touch' }, document.body)
+.each(function(events) { ... });
 ```
 
 The `options` object may optionally contain any of:

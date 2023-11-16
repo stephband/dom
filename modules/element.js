@@ -64,7 +64,8 @@ Where there is a stylesheet loading, most browsers call `'slotchange'` listeners
 (asynchronously) before `load` – except Safari, where if the stylesheet is
 already cached `load` is called before `'slotchange'` listeners. (TODO: I would
 like to guarantee `slotchange` before `load`, but it is not clear how to delay
-`load`... if there is no slotted content, `slotchange` may not be called at all...)
+`load`... if there is no slotted content, `slotchange` may not be called at
+all...)
 
 Finally, `connect` and `disconnect` are called whenever the element is inserted
 into or removed from the DOM.
@@ -92,8 +93,7 @@ import capture           from '../../fn/modules/capture.js';
 import create            from './create.js';
 import toLoadPromise     from './element/to-load-promise.js';
 import toPrefetchPromise from './element/to-prefetch-promise.js';
-
-const $internals = Symbol('internals');
+import { createInternals, getInternals } from './element/internals.js';
 
 const define  = Object.defineProperties;
 const nothing = {};
@@ -130,16 +130,16 @@ const formProperties = {
 
     name: {
         set: function(name) { return this.setAttribute('name', name); },
-        get: function() { return this.getAttribute('name') || ''; }
+        get: function()     { return this.getAttribute('name') || ''; }
     },
 
-    form:              { get:   function() { return this[$internals].form; }},
-    labels:            { get:   function() { return this[$internals].labels; }},
-    validity:          { get:   function() { return this[$internals].validity; }},
-    validationMessage: { get:   function() { return this[$internals].validationMessage; }},
-    willValidate:      { get:   function() { return this[$internals].willValidate; }},
-    checkValidity:     { value: function() { return this[$internals].checkValidity(); }},
-    reportValidity:    { value: function() { return this[$internals].reportValidity(); }}
+    form:              { get:   function() { return getInternals(this).form; }},
+    labels:            { get:   function() { return getInternals(this).labels; }},
+    validity:          { get:   function() { return getInternals(this).validity; }},
+    validationMessage: { get:   function() { return getInternals(this).validationMessage; }},
+    willValidate:      { get:   function() { return getInternals(this).willValidate; }},
+    checkValidity:     { value: function() { return getInternals(this).checkValidity(); }},
+    reportValidity:    { value: function() { return getInternals(this).reportValidity(); }}
 };
 
 const shadowParameterIndex = 0;
@@ -202,38 +202,6 @@ function createShadow(elem, options, stylesheet) {
     return shadow;
 }
 
-function attachInternals(element) {
-    var internals;
-
-    // Use native attachInternals where it exists
-    if (element.attachInternals) {
-        internals = element.attachInternals();
-        if (internals.setFormValue) {
-            return internals;
-        }
-    }
-    else {
-        internals = {
-            shadowRoot: elem.shadowRoot
-        };
-    }
-
-    // Otherwise polyfill it with a pseudo internals object, actually a hidden
-    // input that we put inside element (but outside the shadow DOM). We may
-    // not yet put this in the DOM however – it violates the spec to give a
-    // custom element children before it's contents are parsed. Instead we
-    // wait until connectCallback.
-    internals.polyfillInput = create('input', { type: 'hidden', name: elem.name });
-    elem.appendChild(internals.polyfillInput);
-
-    // Polyfill internals object setFormValue
-    internals.setFormValue = function(value) {
-        this.input.value = value;
-    };
-
-    return internals;
-}
-
 function hasPropertyAttribute(option) {
     return !!option.attribute;
 }
@@ -252,10 +220,6 @@ function groupAttributeProperty(data, entry) {
     }
 
     return data;
-}
-
-export function getInternals(element) {
-    return element[$internals] = element[$internals] || {};
 }
 
 export default function element(definition, lifecycle, api, stylesheet, log = '') {
@@ -282,14 +246,12 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
             createShadow(element, lifecycle, stylesheet || lifecycle.stylesheet) :
             undefined ;
 
-        // Get access to the internal form control API
-        const internals = Element.formAssociated ?
-            attachInternals(element) :
-            { shadowRoot: shadow } ;
+        // Get access to the internals object. If form associated, internals is
+        // is the form control API internals object.
+        const internals = createInternals(Element, element, shadow);
 
         // Flag unconnected until first connect
         internals.unconnected = true;
-        element[$internals] = internals;
 
         // Fill shadow with template where one is specified. TODO: detect path to template
         if (lifecycle.template) {
@@ -397,7 +359,6 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 
     if (attributes) {
         Element.observedAttributes = Object.keys(attributes);
-
         Element.prototype.attributeChangedCallback = function(name, old, value) {
             return attributes[name].call(this, value) ;
         };
@@ -448,8 +409,7 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 
     // Log registration to console
     window.console &&
-    window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c ' + log, 'color: #3a8ab0; font-weight: 600;', 'color: #888888; font-weight: 400;');
-
+    window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c ' + log, 'color:#3a8ab0;font-weight:600;', 'color:#888888;font-weight:400;');
 
     // Define the element
     window.customElements.define(name, Element, tag && { extends: tag });
@@ -476,12 +436,14 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
                 createShadow(element, lifecycle, stylesheet || lifecycle.stylesheet) :
                 undefined ;
 
+            // Get access to the internals object
+            const internals = createInternals(Element, element, shadow);
+
             // Run constructor
             lifecycle.construct && lifecycle.construct.call(element, shadow);
 
             // Detect and run attributes
             let name;
-
             for (name in attributes) {
                 // elements.attributes is sometimes undefined... why?
                 const attribute = element.attributes[name];
@@ -490,9 +452,12 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
                 }
             }
 
+            // Run connected callback
             lifecycle.connect && lifecycle.connect.apply(element);
         });
     }
 
     return Element;
 }
+
+export { getInternals };

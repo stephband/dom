@@ -90,11 +90,13 @@ to.
 - If `content` is an object its properties are assigned as node properties or
 attributes.
 
-Where node is a fragment there is an optional third parameter `context`, which
-must be an element. The fragment parser is run in the context of the element:
+##### `create(tag, content, context)`
+
+Where `tag` is `fragment` there is an optional third parameter `context`, which
+must be an element. The fragment parser is run in the context of this element.
 
 ```
-create('fragment', '<li>', document.querySelector('ul'));
+create('fragment', '<li>', create('ul'));
 ```
 **/
 

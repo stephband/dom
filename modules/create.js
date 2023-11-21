@@ -10,7 +10,7 @@ const typeofContent = (type, content) => (content && typeof content);
 
 // Constructors
 
-function createContextFragment(context, html) {
+function createContextFragment(context, html = '') {
     const range = document.createRange();
     range.selectNode(context);
     return range.createContextualFragment(html);

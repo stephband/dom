@@ -188,7 +188,8 @@ const responders = {
     'application/x-www-form-urlencoded': respondForm,
     'audio':                             respondBlob,
     'audio/wav':                         respondBlob,
-    'audio/m4a':                         respondBlob
+    'audio/m4a':                         respondBlob,
+    'application/zip':                   respondBlob
 };
 
 function respond(response) {

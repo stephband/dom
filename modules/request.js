@@ -65,6 +65,13 @@ const createHeaders = choose({
         });
     },
 
+    'image/png': function(headers) {
+        return assign(headers, {
+            "Content-Type": 'image/png',
+            "X-Requested-With": "XMLHttpRequest"
+        });
+    },
+
     'default': function(headers) {
         return assign(headers, {
             "Content-Type": 'application/x-www-form-urlencoded',
@@ -203,9 +210,13 @@ function respond(response) {
 
     // Get mimetype from Content-Type, remembering to hoik off any
     // parameters first
-    const mimetype = response.headers
-    .get('Content-Type')
-    .replace(/\;.*$/, '');
+    const contentType = response.headers
+    .get('Content-Type');
+
+    if(!contentType) {
+        return;
+    }
+    const mimetype = contentType.replace(/\;.*$/, '');
 
     return responders[mimetype](response);
 }

@@ -1,250 +1,194 @@
 
-import Distributor from './distributor.js';
-import log from './log.js';
+import { Observer, notify } from '../../fn/observer/observer.js';
+import './navigate.js';
 
-const history  = window.history;
-const location = window.location;
+const assign = Object.assign;
 
-
-function stripHash(hash) {
-    return hash.replace(/^#/, '');
-}
-
-function updateTarget(url) {
-    const href = location.href;
-
-    // Replace the current location with the new one
-    history.replaceState(history.state, document.title, url);
-    
-    // Move forward to the old url and back to the current location, causing  
-    // :target selector to update and a popstate event.
-    history.pushState(history.state, document.title, href);
-    history.back();
-}
-
-
-/*
-Popstate distributor
-*/
-
-const distributor = new Distributor(function(e) {
-    return window.location;
-});
-
-
-/** 
-location
-
-DOMs `location` object provides an interface that combines the browsers' 
-`location` and `history` APIs.
-**/
-
-export default {
-    /** .identifier **/
-    get identifier() {
-        return stripHash(location.hash);
-    },
-
-    set identifier(id) {
-        // Replacing the hash normally does not update :target styles. It's a
-        // bad oversight on the part of browsers.
-        // https://github.com/whatwg/html/issues/639
-        //
-        // This is close to replacing the hash without changing the history.
-        // Replace the id, then add a new entry with the same id, then go back. 
-        // This appears to update :target without a hashchange event and without 
-        // scrolling in Chrome, although at the expense of creating a forward 
-        // history entry and a popstate.
-
-        const url = id ? 
-            '#' + id :
-            location.href.replace(/#.*$/, '');
-
-        updateTarget(url);
-    },
-
-    /** .params **/
-    get params() {
-        return Object.fromEntries(new URLSearchParams(location.search));
-    },
-
-    set params(params) {
-        const url = this.URL();
-        url.search = new URLSearchParams(params);
-        history.replaceState(history.state, document.title, url);
-    },
-
-    /** .params **/
-    get pathname() {
-        return location.pathname;
-    },
-
-    set pathname(path) {
-        const url = this.URL();
-        url.pathname = path;
-        history.replaceState(history.state, document.title, url);
-    },
-
-    /** .url **/
-    get url() {
-        return location.href;
-    },
-    
-    set url(url) {
-        // Replace the url without changing history
-        history.replaceState(history.state, document.title, url);
-    },
-
-    /** .state **/
-    get state() {
-        return history.state;
-    },
-    
-    set state(state) {
-        // Replace state without changing history
-        history.replaceState(state, document.title);
-    },
-
-    /**
-    .navigate(url, state, scroll) 
-
-    Takes a `url` in the form of a string or URL object. Where the origin of
-    `url` is not the same as the current location, the browser is navigated.
-    Otherwise the new `url` and/or `state` is pushed to the browser history,
-    the hash is updated in such a way that the browser updates its `:target`
-    styles
-    
-    **/
-    navigate: function navigate(url, state = null, scroll = false) {
-        // Coerce url string to URL object
-        url = typeof url === 'string' ?
-            /^https?\:\/\//.test(url) ?
-                new URL(url) :
-                new URL(url, location.href) :
-            url ;
-
-        // If not same origin navigate away from this site
-        if (url.origin !== location.origin) {
-            window.location.href = url;
-            return this;
-        }
-
-        // Make state conform to JSON serialisation - allows state to be set
-        // from objects that contain functions
-        const json = JSON.stringify(state);
-        const statechange = json !== JSON.stringify(history.state);
-
-        // If nothing has changed get on oor bike
-        if (url.href === location.href && !statechange) {
-            return;
-        }
-
-        const hash = location.hash;
-        const id = stripHash(url.hash);
-
-        log('navigate()', url,
-            /*(url.pathname !== location.pathname ? 'path: "' + url.pathname + '", ' : '') +
-            (url.search !== location.search ? 'params: "' + url.search + '", ' : '') + 
-            (url.hash !== location.hash ? 'hash: "' + url.hash + '", ' : '') + */
-            (state ? 'state: ' + json : '') 
-        );
-
-        // If only the hash has changed and state is null and scroll is true, 
-        // employ location.hash to navigate, giving us automatic scroll
-        if (
-            url.pathname === location.pathname 
-            && url.search === location.search 
-            && !statechange
-            && id
-            && id !== this.identifier
-            && scroll
-        ) {
-            location.hash = id;
-            return this;
-        }
-
-        const oldhref = location.href;
-        const href = url.pathname + url.search + (id ? url.hash : '');
-        state = json ? JSON.parse(json) : state ;
-        history.pushState(state, document.title, href);
-
-        // Force :target selector to update when there is a new #identifier
-        if (url.hash !== hash) {
-            // Move forward to the old url and back to the current location, causing  
-            // :target selector to update and a popstate event.
-            history.pushState(state, document.title, oldhref);
-            history.back();
-        }
-
-        // Where no popstate is scheduled we nonetheless want to notify 
-        // navigation change so simulate an event and pass to distributor, (and 
-        // make it async to echo the behaviour of a real popstate event)
-        else {
-            //Promise.resolve().then(function() {
-                const result = distributor.handleEvent({
-                    type: 'navigate',
-                    timeStamp: window.performance.now()
-                });
-
-                // If a handler has returned false that's a signal that we don't
-                // want the navigate to be handled by history
-                if (result !== undefined && !result) {
-                    window.location.href = url;
-                }
-            //});
-        }
-
-        return this;
-    },
-
-    /** .on(fn) **/
-    on: function on(fn) {
-        distributor.on(fn);
-        return this;
-    },
-
-    /** .off(fn) **/
-    off: function off(fn) {
-        distributor.off(fn);
-        return this;
-    },
-
-    /** .back() **/
-    back: function back() {
-        history.back();
-        return this;
-    },
-
-    /** .forward() **/
-    forward: function forward() {
-        history.forward();
-        return this;
-    },
-
-    /** .url() **/
-    URL: function url() {
-        return new URL(location.href);
-    }
+export const defaults = {
+    search: '',
+    params: {},
+    hash:   '',
+    identifier: '',
+    // Legacy
+    id:     '',
+    json:   'null',
+    state:  null
 };
 
+const config = window.config && window.config.location || {};
 
-// Listen to load and popstate (and hashchange?) events to notify when 
-// navigation has occured
-window.addEventListener('popstate', distributor);
-window.addEventListener('DOMContentLoaded', distributor);
 
-// Clean up empty hash URLs
-window.addEventListener('hashchange', function(e) {
-    /*
-    A `hashchange` is received when:
-    - navigation via browser buttons when the hash changes
-    - navigation via typing a new hash in the URL bar
-    - navigation via history.back() and .forward() when the hash changes
-    - location.hash is set to something other than its current value
-    */
+// Router scope
 
-    // Detect navigations to # and silently remove the # from the url
-    if (stripHash(location.hash) === '') {
-        history.replaceState(history.state, document.title, location.href.replace(/#$/, ''));
+const root  = assign({}, defaults);
+const scope = Observer(root);
+const names = [];
+
+function parseParam(string) {
+    var value;
+    return string === '' ? '' :
+        string === 'null' ? null :
+        string === 'true' ? true :
+        string === 'false' ? false :
+        // Number string to number
+        ((value = Number(string)) || value === 0) ? value :
+        // Comma delimited string to array
+        ((value = string.split(/\s*,\s*/)) && value.length > 1) ? value.map(parseParam) :
+        // Yer basic string
+        string ;
+}
+
+function parseSchemaValue(Type, defaultValue, value) {
+    if (value === undefined || value === '') {
+        return defaultValue;
     }
+
+    if (typeof Type === 'function') {
+        if (Type === Boolean) {
+            return Boolean(value);
+        }
+
+        if (Type === Number) {
+            return Number(value);
+        }
+
+        if (Type === String) {
+            return String(value);
+        }
+
+        if (Type === Symbol) {
+            return Symbol(value);
+        }
+
+        return new Type(value);
+    }
+
+    throw new Error('Location params schema for arrays must be of the form: [constructor], other item values not yet supported. Or even thought about.');
+}
+
+function parseSchemaKey(config, params, key) {
+    const schema = config[key];
+
+    if (!schema) {
+        throw new Error('config.location.params[' + key + '] not set');
+    }
+
+    if (!schema.type) {
+        throw new Error('config.location.params[' + key + '].type is required');
+    }
+
+//console.log(key, schema, typeof params.get(key), params.get(key));
+
+    // Is schema.type a constructor?
+    if (typeof schema.type === 'function') {
+        return parseSchemaValue(schema.type, schema.default, params.get(key));
+    }
+
+    if (schema.type.constructor === Array) {
+        if (schema.type.length > 1) {
+            // Array must match length of schema array
+            throw new Error('Location params schema Array multiple values not yet supported');
+        }
+
+        // Schema array contains a single value, which we take to mean it may
+        // contain any number of values (else why not accept a single value?)
+        return params.getAll(key)
+        .map((value) => parseSchemaValue(schema.type[0], schema.default, value));
+    }
+
+    throw new Error('config.location.params[' + key + '].schema is not a constructor and not an array');
+}
+
+function fromEntries(entries) {
+    // Keep a note of what state each param is in: single, multiple or
+    // undefined (unparsed)
+    const state  = {};
+    const object = {};
+    var key, value;
+
+    for([key, value] of entries) {
+        if (state[key] === 'multiple') {
+            // Values have already been got, ignore
+        }
+        else if (state[key] === 'single') {
+            // As soon as we encounter a second instance of key, get all values
+            // for key. We flatMap to accomodate the case where a single value
+            // is parsed as an array, ie ?v=a&v=b,c ... although I'm not convinced
+            // we should be supporting nonstandard ways of representing multiple
+            // values
+            object[key] = entries.getAll(key).flatMap(parseParam);
+            state[key] = 'multiple';
+        }
+        else {
+            // Where a schema exists in config for this key, use it to parse the
+            // value or values
+            if (config.params && config.params[key]) {
+                object[key] = parseSchemaKey(config.params, entries, key);
+                // Tell the automatic system not to look at this key again
+                state[key] = 'multiple';
+            }
+            else {
+                object[key] = parseParam(value);
+                state[key] = 'single';
+            }
+        }
+    }
+
+    return object;
+}
+
+function updateDataFromLocation(location, history, data) {
+    names.length = 0;
+
+    if (location.pathname !== data.pathname) {
+        data.pathname = location.pathname;
+        data.base = '/';
+        data.path = '';
+        data.name = location.pathname.slice(1);
+        names.push('name');
+    }
+
+    if (location.search !== data.search) {
+        data.search = location.search;
+        data.params = location.search ?
+            fromEntries(new URLSearchParams(location.search)) :
+            defaults.params ;
+        names.push('params');
+    }
+
+    if (location.hash !== data.hash) {
+        data.hash       = location.hash;
+        data.identifier = location.hash.replace(/^#/, '') || defaults.id;
+        // SUpport legacy 'id'
+        data.id         = data.id;
+        names.push('identifier', 'id');
+    }
+
+    const json = JSON.stringify(history.state);
+    if (json !== data.json) {
+        data.json  = json;
+        data.state = history.state;
+        names.push('state');
+    }
+
+    return names;
+}
+
+// Synchronise root location
+updateDataFromLocation(window.location, window.history, root);
+
+window.addEventListener('dom-navigate', function(e) {
+    const names = updateDataFromLocation(window.location, window.history, root);
+    var n = -1;
+
+    while (names[++n] !== undefined) {
+        notify(names[n], scope);
+    }
+
+    // TODO: devise some way of not preventing default when no routes have been
+    // created. This is a bit tricky because this file is not the place for such
+    // hijinks.
+    e.preventDefault();
 });
+
+export default scope;

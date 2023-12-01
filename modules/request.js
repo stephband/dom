@@ -280,63 +280,6 @@ export function requestDelete(url, data) {
     return request('DELETE', url, data, 'application/json');
 }
 
-/*
-throttledRequest(type, mimetype, url)
-*/
-
-function ignoreAbortError(error) {
-    // Swallow AbortErrors, since we generate one every time we use
-    // the AbortController.
-    if (error.name === 'AbortError') {
-        console.log('Request aborted by throttle. Nothing to worry about.');
-
-        // JS promises have no machanism to conditionally catch different
-        // types of error – throw undefined to fall through to the next
-        // catch without a value.
-        throw undefined;
-    }
-
-    // Rethrow all other errors
-    throw error;
-}
-
-export function throttledRequest(type, mimetype, url) {
-    var controller, data, promise;
-
-    function then() {
-        controller = undefined;
-    }
-
-    function send() {
-        controller = new AbortController();
-        var req = request(type, mimetype, url, data, controller);
-        req.then(then);
-        promise = undefined;
-        data    = undefined;
-        return req;
-    }
-
-    return function(object) {
-        data = object;
-
-        if (promise) {
-            return promise;
-        }
-
-        // Cancel previous request
-        if (controller) {
-            controller.abort();
-            controller = undefined;
-        }
-
-        // Batch requests to ticks
-        return promise = Promise
-        .resolve()
-        .then(send)
-        .catch(ignoreAbortError);
-    };
-}
-
 // Expose to console in DEBUG mode
 if (window.DEBUG) {
 	window.dom ? (window.dom.request = request) : (window.dom = { request });

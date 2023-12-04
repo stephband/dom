@@ -72,6 +72,20 @@ const createHeaders = choose({
         });
     },
 
+    'image/jpg': function(headers) {
+        return assign(headers, {
+            "Content-Type": 'image/jpg',
+            "X-Requested-With": "XMLHttpRequest"
+        });
+    },
+
+    'image/jpeg': function(headers) {
+        return assign(headers, {
+            "Content-Type": 'image/jpeg',
+            "X-Requested-With": "XMLHttpRequest"
+        });
+    },
+
     'default': function(headers) {
         return assign(headers, {
             "Content-Type": 'application/x-www-form-urlencoded',

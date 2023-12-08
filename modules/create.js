@@ -155,6 +155,7 @@ const create = overload(id, {
     polygon:  createSVG,
     polyline: createSVG,
     svg:      createSVG,
+    tspan:    createSVG,
 
     default:  createHTML
 });

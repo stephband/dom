@@ -1,14 +1,15 @@
 
 var mimetypes = {
-    xml: 'application/xml',
+    xml:  'application/xml',
     html: 'text/html',
-    svg: 'image/svg+xml'
+    svg:  'image/svg+xml'
 };
 
 function parse(type, string) {
     if (!string) { return; }
 
-    var mimetype = mimetypes[type.toLowerCase()];
+    // Accept 'svg' or 'SVG' or 'image/svg+xml'
+    var mimetype = mimetypes[type.toLowerCase()] || type;
     var xml;
 
     // Cludged from jQuery source...

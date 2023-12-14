@@ -1,8 +1,8 @@
 import choose  from '../../fn/modules/choose.js';
 import id      from '../../fn/modules/id.js';
 
-import create        from './create.js';
-import { parseHTML } from './parse.js';
+import create  from './create.js';
+import { parseHTML, parseSVG } from './parse.js';
 
 const assign = Object.assign;
 
@@ -195,15 +195,30 @@ function respondText(response) {
 
 function respondDOM(response) {
     return response.text().then((text) => (
+        // Is it a document?
         /^\s*<!DOCTYPE html>/.test(text) ?
             parseHTML(text) :
             create('fragment', text)
     ));
 }
 
+function respondSVG(response) {
+    return response.text().then((text) => (
+        // Is it a document?
+        /^\s*<\?xml/.test(text) ?
+            parseSVG(text) :
+            // TODO: untested, don't know if this works on partial SVG
+            // fragments, I think probably not, I think we need to maybe
+            // make a <defs> instead. You have been warned.
+            (console.warn('Untested SVG fragment parsing in request.js!'),
+            create('fragment', text))
+    ));
+}
+
 const responders = {
     'text/plain':                        respondText,
     'text/html':                         respondDOM,
+    'image/svg+xml':                     respondSVG,
     'application/json':                  respondJSON,
     'multipart/form-data':               respondForm,
     'application/x-www-form-urlencoded': respondForm,
@@ -231,6 +246,10 @@ function respond(response) {
         return;
     }
     const mimetype = contentType.replace(/\;.*$/, '');
+
+    if (window.DEBUG && !responders[mimetype]) {
+        console.warn('request() has no built-in response parser for mimetype "' + mimetype + '"');
+    }
 
     return responders[mimetype](response);
 }

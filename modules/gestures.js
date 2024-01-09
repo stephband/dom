@@ -252,7 +252,7 @@ assign(PointerProducer.prototype, {
         let gestureTarget = e.target;
         if (this.options.select) {
             gestureTarget = e.target.closest(this.options.select);
-            if (!delegateTarget) { return; }
+            if (!gestureTarget) { return; }
         }
 
         // Copy event to keep the true target around, as target is mutated on

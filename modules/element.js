@@ -6,9 +6,10 @@ Registers a custom element `tag` and returns its constructor.
 
 - `tag`: A string in the form `'custom-name'`, `'<custom-name>'`,
 `'tag is="custom-name"'` or `'<tag is="custom-name">'`
-- `lifecycle`: {
+- `lifecycle`: `{
     mode:       'open' or 'closed'
     focusable:  true or false
+    shadow:     html string or '#template-id' or fragment
 
     // Styleheet
     stylesheet: optional string path to stylesheet for shadow DOM
@@ -24,14 +25,14 @@ Registers a custom element `tag` and returns its constructor.
     disable:    called when form element disabled
     reset:      called when form element reset
     restore:    called when form element restored
-}
-- `properties`: {
+}`
+- `properties`: `{
     name: {
         attribute: fn called on `element.setAttribute('name', ...)`
         set:       fn called on setting property 'name'
         get:       fn called on getting property 'name'
     }
-}
+}`
 - `stylesheet`: url of a stylesheet to load in to the shadow DOM
 - `message`: optional debug message to logged when element is registered
 
@@ -202,6 +203,29 @@ function createShadow(elem, options, stylesheet) {
     return shadow;
 }
 
+function fillShadowFromTemplate(shadow, template) {
+    // It's a string
+    if (typeof template === 'string') {
+        // It's an id of a template
+        if (template[0] === '#') {
+            shadow.appendChild(
+                document.getElementById(template.slice(1))
+                .content.clone(true)
+            );
+        }
+        // It's html
+        else {
+            shadow.innerHTML = template;
+        }
+    }
+    // It's a <template>
+    else {
+        shadow.appendChild(template.content.clone(true));
+    }
+
+    return shadow;
+}
+
 function hasPropertyAttribute(option) {
     return !!option.attribute;
 }
@@ -241,22 +265,23 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         // Construct an instance from Constructor using the Element prototype
         const element = Reflect.construct(constructor, arguments, Element);
 
-        // Inject shadow if .construct() asks for it
-        const shadow = lifecycle.construct && lifecycle.construct.length > shadowParameterIndex ?
+        // Make shadow if mode or template have been set
+        const shadow = lifecycle.mode || lifecycle.shadow ?
             createShadow(element, lifecycle, stylesheet || lifecycle.stylesheet) :
             undefined ;
 
+        // Fill shadow with template
+        if (lifecycle.shadow) {
+            fillShadowFromTemplate(shadow, lifecycle.shadow);
+        }
+
         // Get access to the internals object. If form associated, internals is
-        // is the form control API internals object.
+        // the form control API internals object. We're gonna be rude and
+        // extend it.
         const internals = createInternals(Element, element, shadow);
 
         // Flag unconnected until first connect
         internals.unconnected = true;
-
-        // Fill shadow with template where one is specified. TODO: detect path to template
-        if (lifecycle.template) {
-            shadow.innerHTML = lifecycle.template;
-        }
 
         // Flag support for custom built-ins. We know this when tag exists and
         // Element constructor is called

@@ -1,6 +1,6 @@
 
-import overload from '../../../../fn/modules/overload.js';
-import events   from '../../../../dom/modules/events.js';
+import overload from '../../fn/modules/overload.js';
+import events   from './events.js';
 
 /**
 keyboard(keymap, element)

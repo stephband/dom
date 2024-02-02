@@ -162,8 +162,3 @@ const create = overload(id, {
 
 export default create;
 
-
-// Expose to console in DEBUG mode
-if (window.DEBUG) {
-    Object.assign(window.dom || (window.dom = {}), { create });
-}

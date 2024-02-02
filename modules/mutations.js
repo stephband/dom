@@ -76,12 +76,3 @@ export function mutations(type, element) {
     const options = typeof type === 'string' ? types[type] : type ;
     return new Stream(new MutationsProducer(element, options));
 }
-
-/*
-Expose to console in DEBUG mode
-*/
-
-// Expose to console in DEBUG mode
-if (window.DEBUG) {
-    Object.assign(window.dom || (window.dom = {}), { mutations });
-}

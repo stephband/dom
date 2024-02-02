@@ -27,9 +27,3 @@ export function setCookie(name, time, value) {
     }
     document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
-
-
-// Expose to console in DEBUG mode
-if (window.DEBUG) {
-    Object.assign(window.dom || (window.dom = {}), { getCookie });
-}

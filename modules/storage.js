@@ -103,8 +103,3 @@ Object.assign(Storage.prototype, {
         return contains(this.key, value);
     }
 });
-
-// Expose to console in DEBUG mode
-if (window.DEBUG) {
-    Object.assign(window.dom || (window.dom = {}), { Storage });
-}

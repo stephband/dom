@@ -146,9 +146,3 @@ export function vmax(n) {
             window.innerWidth
     );
 }
-
-
-// Expose to console in DEBUG mode
-if (window.DEBUG) {
-    Object.assign(window.dom || (window.dom = {}), { px, em, rem, vw, vh, vmin, vmax });
-}

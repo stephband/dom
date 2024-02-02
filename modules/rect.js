@@ -26,8 +26,3 @@ export default function rect(node) {
         // .getBoundingClientRect()
 		node.getClientRects()[0] || node.getBoundingClientRect() ;
 }
-
-// Expose to console in DEBUG mode
-if (window.DEBUG) {
-    Object.assign(window.dom || (window.dom = {}), { rect });
-}

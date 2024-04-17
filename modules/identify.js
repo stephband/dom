@@ -16,15 +16,10 @@ export default function identify(node) {
 	var id = node.id;
 
 	if (!id) {
-		do { id = Math.ceil(Math.random() * 100000); }
+		do { id = 'ID' + Math.ceil(Math.random() * 100000); }
 		while (document.getElementById(id));
 		node.id = id;
 	}
 
 	return id;
-}
-
-// Expose to console in DEBUG mode
-if (window.DEBUG) {
-    Object.assign(window.dom || (window.dom = {}), { identify });
 }

@@ -189,7 +189,7 @@ function transferProperty(elem, key) {
 function createShadow(elem, options, stylesheet) {
     // Create a shadow root. Shadows may be 'open' or 'closed'. Closed shadows
     // are not exposed via element.shadowRoot, and events propagating from
-    // inside of them report the element as target.
+    // inside of them report the element as target. Default to 'closed'.
     const shadow = elem.attachShadow({
         mode:           options.mode || 'closed',
         delegatesFocus: options.focusable || false

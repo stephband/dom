@@ -24,6 +24,17 @@ const assignProperty = overload(id, {
 	tag: noop,
 
 	data: function(name, node, object) {
+		// Strip undefined
+		for (name in object) {
+			if (object[name] === undefined) {
+				delete object[name];
+			}
+		}
+		//console.log(Object.assign({}, object));
+		Object.assign(node.dataset, object);
+	},
+
+	dataset: function(name, node, object) {
 		Object.assign(node.dataset, object);
 	},
 

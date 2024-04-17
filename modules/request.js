@@ -163,6 +163,7 @@ function createOptions(method, data, head, controller) {
 
     const options = {
         method:  method,
+        mode: "cors",
         headers: headers,
         credentials: 'same-origin',
         signal: controller && controller.signal
@@ -239,12 +240,9 @@ function respond(response) {
 
     // Get mimetype from Content-Type, remembering to hoik off any
     // parameters first
-    const contentType = response.headers
-    .get('Content-Type');
+    const contentType = response.headers.get('Content-Type');
 
-    if(!contentType) {
-        return;
-    }
+    if(!contentType) { return; }
     const mimetype = contentType.replace(/\;.*$/, '');
 
     if (window.DEBUG && !responders[mimetype]) {

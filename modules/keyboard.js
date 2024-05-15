@@ -7,7 +7,7 @@ keyboard(keymap, element)
 
 Normalises key name/actions to the pattern `modifiers-keycode:action` and calls
 corresponding functions in `keymap` on keydown, keyhold and keyup. Returns a
-stoppable. TODO: Make it a proper stream??
+stoppable. (TODO: Make it a proper stream??)
 
 ```js
 keyboard({
@@ -99,6 +99,12 @@ export default function keyboard(responses, element) {
         // Keep track of modifiers
         updateModifiers(keys, e);
 
+        // Ignore inputs
+        if (e.target.value !== undefined) {
+            console.log('Ignoring key');
+            return;
+        }
+
         // Multiple keydowns can be sent for one key when it is held down. But
         // we are already responding to this key, so dedup keydown.
         if (e.repeat || keys[e.code]) { return; }
@@ -108,7 +114,6 @@ export default function keyboard(responses, element) {
         const modifiers   = toModifiers(keys);
         const respondDown = responses[modifiers + code + ':down'] || responses[modifiers + code];
         const respondHold = responses[modifiers + code + ':hold'] || responses[modifiers + code];
-        //console.log('DOWN', modifiers + code);
 
         // Respond to key down
         if (respondDown) {

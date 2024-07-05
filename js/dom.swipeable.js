@@ -3,11 +3,11 @@ import { last, wrap } from '../../fn/module.js';
 import { attribute, box, events, children, classes, closest, matches, query, style } from '../module.js';
 import './dom-swipe.js';
 import './dom-touch.js';
-//import './dom.switchable.js';
+import './dom.switchable.js';
 
-var on       = events.on;
-var trigger  = events.trigger;
-var tau      = Math.PI * 2;
+var on      = events.on;
+var trigger = events.trigger;
+var tau     = Math.PI * 2;
 
 var elasticDistance = 800;
 
@@ -18,7 +18,7 @@ function elasticEase(n) {
 }
 
 function xMinFromChildren(node) {
-	var child = last(children(node).filter(matches('.switchable, [switchable]')));
+	var child = last(children(node).filter(matches('.switchable, [switchable], [data-switchable]')));
 
 	// Get the right-most x of the last switchable child's right-most edge
 	var w1 = child.offsetLeft + child.clientWidth;

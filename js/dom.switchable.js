@@ -5,7 +5,7 @@
 
 import { Fn } from '../../fn/module.js';
 import { events, trigger, matches, children } from '../module.js';
-import { matchers } from './dom-activate.js';
+import { behaviours } from '../../2022/bolt/events/dom-activate.js';
 
 // Define
 
@@ -44,4 +44,8 @@ function deactivate(e) {
 
 on(document, 'dom-activate', activate);
 on(document, 'dom-deactivate', deactivate);
-matchers.push(match);
+//matchers.push(match);
+
+behaviours['.switchable'] = function() {
+
+};

@@ -22,7 +22,7 @@ found, moves focus to `element`, if focusable.
 **/
 
 export function focusInside(element) {
-    const elements = element.querySelector(selector);
+    const elements = element.querySelectorAll(selector);
     const c = elements.length;
 
     let n = -1, node;

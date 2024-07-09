@@ -5,7 +5,7 @@ var mimetypes = {
     svg:  'image/svg+xml'
 };
 
-function parse(type, string) {
+export default function parse(type, string) {
     if (!string) { return; }
 
     // Accept 'svg' or 'SVG' or 'image/svg+xml'

@@ -4,6 +4,6 @@ preventDefault(e)
 Calls `e.preventDefault()`.
 **/
 
-export function preventDefault(e) {
+export default function preventDefault(e) {
     e.preventDefault();
 }

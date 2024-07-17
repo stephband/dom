@@ -16,7 +16,7 @@ export default function identify(node, prefix = 'id-') {
 	var id = node.id;
 
 	if (!id) {
-		do { id = prefix + Math.ceil(Math.random() * 10000000); }
+		do { id = prefix + Math.ceil(Math.random() * 1000000); }
 		while (document.getElementById(id));
 		node.id = id;
 	}

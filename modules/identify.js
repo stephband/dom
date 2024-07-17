@@ -12,11 +12,11 @@ select('button', document)
 ```
 */
 
-export default function identify(node) {
+export default function identify(node, prefix = 'id-') {
 	var id = node.id;
 
 	if (!id) {
-		do { id = 'ID' + Math.ceil(Math.random() * 100000); }
+		do { id = prefix + Math.ceil(Math.random() * 10000000); }
 		while (document.getElementById(id));
 		node.id = id;
 	}

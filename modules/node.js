@@ -15,12 +15,9 @@ var types = {
 	11: 'fragment'
 };
 
-export function toType(node) {
+export function toNodeType(node) {
 	return types[node.nodeType];
 }
-
-// Deprecated
-export { toType as type };
 
 
 /**

@@ -1,5 +1,4 @@
 
-import { Observer, notify } from '../../fn/observer/observer.js';
 import './navigate.js';
 
 const assign = Object.assign;
@@ -20,9 +19,9 @@ const config = window.config && window.config.location || {};
 
 // Router scope
 
-const root  = assign({}, defaults);
-const scope = Observer(root);
-const names = [];
+export default const location = assign({}, defaults);
+
+
 
 function parseParam(string) {
     var value;
@@ -44,22 +43,10 @@ function parseSchemaValue(Type, defaultValue, value) {
     }
 
     if (typeof Type === 'function') {
-        if (Type === Boolean) {
-            return Boolean(value);
-        }
-
-        if (Type === Number) {
-            return Number(value);
-        }
-
-        if (Type === String) {
-            return String(value);
-        }
-
-        if (Type === Symbol) {
-            return Symbol(value);
-        }
-
+        if (Type === Boolean) return Boolean(value);
+        if (Type === Number)  return Number(value);
+        if (Type === String)  return String(value);
+        if (Type === Symbol)  return Symbol(value);
         return new Type(value);
     }
 
@@ -137,58 +124,46 @@ function fromEntries(entries) {
     return object;
 }
 
-function updateDataFromLocation(location, history, data) {
-    names.length = 0;
+let json;
 
-    if (location.pathname !== data.pathname) {
+function updateDataFromLocation(location, history, data) {
+    const object = Data.objectOf(data);
+
+    if (location.pathname !== object.pathname) {
         data.pathname = location.pathname;
         data.base = '/';
         data.path = '';
         data.name = location.pathname.slice(1);
-        names.push('name');
     }
 
-    if (location.search !== data.search) {
+    if (location.search !== object.search) {
         data.search = location.search;
         data.params = location.search ?
             fromEntries(new URLSearchParams(location.search)) :
             defaults.params ;
-        names.push('params');
     }
 
-    if (location.hash !== data.hash) {
+    if (location.hash !== object.hash) {
         data.hash       = location.hash;
-        data.identifier = location.hash.replace(/^#/, '') || defaults.id;
-        // SUpport legacy 'id'
-        data.id         = data.id;
-        names.push('identifier', 'id');
+        data.identifier = location.hash.replace(/^#/, '') || defaults.identifier;
     }
 
-    const json = JSON.stringify(history.state);
-    if (json !== data.json) {
-        data.json  = json;
+    const state = JSON.stringify(history.state);
+
+    if (state !== json) {
+        json  = state;
         data.state = history.state;
-        names.push('state');
     }
-
-    return names;
 }
 
 // Synchronise root location
-updateDataFromLocation(window.location, window.history, root);
+updateDataFromLocation(window.location, window.history, location);
 
 window.addEventListener('dom-navigate', function(e) {
-    const names = updateDataFromLocation(window.location, window.history, root);
-    var n = -1;
-
-    while (names[++n] !== undefined) {
-        notify(names[n], scope);
-    }
+    updateDataFromLocation(window.location, window.history, location);
 
     // TODO: devise some way of not preventing default when no routes have been
     // created. This is a bit tricky because this file is not the place for such
     // hijinks.
     e.preventDefault();
 });
-
-export default scope;

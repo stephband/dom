@@ -36,9 +36,9 @@ export default function navigate(url, state = null, scroll = false) {
     }
 
     const hash = location.hash;
-    const id = stripHash(url.hash);
-
+    const id   = stripHash(url.hash);
     const path = (url.pathname + url.search + url.hash).slice(0, 96);
+
     log('navigate()', (path.length === 96 ? path + ' …' : path) + (state ? ', ' + json : ''));
 
     // If only the hash has changed and state is null and scroll is true,
@@ -59,7 +59,7 @@ export default function navigate(url, state = null, scroll = false) {
     const href = url.pathname + url.search + (id ? url.hash : '');
     state = json ? JSON.parse(json) : state ;
 
-    // Any call to replaceState or pushState in iOS opens the URL bar.
+    // Any call to replaceState or pushState in iOS opens the URL bar, unfortunately
     history.pushState(state, document.title, href);
 
     // Force CSS :target selector to update when there is a new #hash.

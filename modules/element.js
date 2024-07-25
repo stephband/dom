@@ -28,6 +28,7 @@ Registers a custom element `tag` and returns its constructor.
 }`
 - `properties`: `{
     name: {
+        construct: fn called before lifecycle.construct
         attribute: fn called on `element.setAttribute('name', ...)`
         set:       fn called on setting property 'name'
         get:       fn called on getting property 'name'
@@ -176,14 +177,18 @@ const parseNameTag = capture(/^\s*<?([a-z][\w]*-[\w-]+)>?\s*$|^\s*<?([a-z][\w]*)
     }
 }, null);
 
-function transferProperty(elem, key) {
-    if (elem.hasOwnProperty(key)) {
-        const value = elem[key];
-        delete elem[key];
-        elem[key] = value;
-    }
+function constructProperty(element, descriptor) {
+    if (descriptor.construct) descriptor.construct.apply(element);
+    return element;
+}
 
-    return elem;
+function transferProperty(element, key) {
+    if (element.hasOwnProperty(key)) {
+        const value = element[key];
+        delete element[key];
+        element[key] = value;
+    }
+    return element;
 }
 
 function createShadow(elem, options, stylesheet) {
@@ -279,17 +284,22 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         // the form control API internals object. We're gonna be rude and
         // extend it.
         const internals = createInternals(Element, element, shadow);
+        const params = internals.params = [shadow, internals];
 
         // Flag unconnected until first connect
         internals.unconnected = true;
 
         // Flag support for custom built-ins. We know this when tag exists and
         // Element constructor is called
-        if (tag) {
-            supportsCustomisedBuiltIn = true;
+        if (tag) supportsCustomisedBuiltIn = true;
+
+        if (properties) {
+            // Loop over property descriptors and call descriptor construct()
+            // function if it exists
+            Object.values(properties).reduce(constructProperty, element);
         }
 
-        lifecycle.construct && lifecycle.construct.call(element, shadow, internals);
+        if (lifecycle.construct) lifecycle.construct.apply(element, params);
 
         // At this point, if properties have been set before the element was
         // upgraded they already exist on the element itself, where we have
@@ -306,7 +316,9 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         //    them on the instance.
         //
         // Let's go with 3. I'm not happy we have to do this, though.
-        properties && Object.keys(properties).reduce(transferProperty, element);
+        if (properties) {
+            Object.keys(properties).reduce(transferProperty, element);
+        }
 
         // Avoid flash of unstyled content in shadow DOMs that must load assets.
         if (shadow) {
@@ -355,26 +367,24 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         if (lifecycle.enable || lifecycle.disable) {
             Element.prototype.formDisabledCallback = function(disabled) {
                 const internals = getInternals(this);
-                const shadow    = internals.shadowRoot;
                 return disabled ?
-                    lifecycle.disable && lifecycle.disable.call(this, shadow, internals) :
-                    lifecycle.enable && lifecycle.enable.call(this, shadow, internals) ;
+                    lifecycle.disable && lifecycle.disable.apply(this, internals.params) :
+                    lifecycle.enable && lifecycle.enable.apply(this, internals.params) ;
             };
         }
 
         if (lifecycle.reset) {
             Element.prototype.formResetCallback = function() {
                 const internals = getInternals(this);
-                const shadow    = internals.shadowRoot;
-                return lifecycle.reset.call(this, shadow, internals);
+                return lifecycle.reset.apply(this, internals.params);
             };
         }
 
         if (lifecycle.restore) {
             Element.prototype.formStateRestoreCallback = function() {
                 const internals = getInternals(this);
-                const shadow    = internals.shadowRoot;
-                return lifecycle.restore.call(this, shadow, internals);
+                const params    = internals.params;
+                return lifecycle.restore.apply(this, internals.params);
             };
         }
     }
@@ -394,7 +404,6 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 
     Element.prototype.connectedCallback = function() {
         const internals = getInternals(this);
-        const shadow    = internals.shadowRoot;
 
         // If we have simulated form internals (for Safari), append the hidden
         // input now
@@ -407,28 +416,27 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         if (internals.unconnected) {
             if (lifecycle.load && internals.stylesheetsLoadPromise) {
                 internals.stylesheetsLoadPromise.then(() =>
-                    lifecycle.load.call(this, shadow, internals)
+                    lifecycle.load.apply(this, internals.params)
                 );
             }
             else if (lifecycle.load) {
                 // Guarantee that lifecycle load is called asynchronously in
                 // cases where there is nothing to load
                 Promise.resolve().then(() =>
-                    lifecycle.load.call(this, shadow, internals)
+                    lifecycle.load.apply(this, internals.params)
                 );
             }
 
             delete internals.unconnected;
         }
 
-        lifecycle.connect && lifecycle.connect.call(this, shadow, internals);
+        lifecycle.connect && lifecycle.connect.apply(this, internals.params);
     }
 
     if (lifecycle.disconnect) {
         Element.prototype.disconnectedCallback = function() {
             const internals = getInternals(this);
-            const shadow    = internals.shadowRoot;
-            return lifecycle.disconnect.call(this, shadow, internals);
+            return lifecycle.disconnect.apply(this, internals.params);
         };
     }
 

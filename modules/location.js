@@ -19,8 +19,8 @@ const config = window.config && window.config.location || {};
 
 // Router scope
 
-export default const location = assign({}, defaults);
-
+const location = assign({}, defaults);
+export default location;
 
 
 function parseParam(string) {

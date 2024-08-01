@@ -344,9 +344,8 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
     // Prefetch stylesheet
     if (stylesheet) {
         toPrefetchPromise(stylesheet);
-
         log = window.DEBUG ?
-            '\n  Prefetches\n  ' + stylesheet + '\n  ' + log :
+            log + ' – stylesheet ' + stylesheet :
             log ;
     }
 

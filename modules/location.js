@@ -5,6 +5,24 @@ function stripHash(hash) {
     return hash.replace(/^#/, '');
 }
 
+
+
+// TODO: SHOULD THIS NOT BE RESPONSIBILITY OF navigate()
+function updateTarget(url) {
+    const href = location.href;
+
+    // Replace the current location with the new one
+    history.replaceState(history.state, document.title, url);
+
+    // Move forward to the old url and back to the current location, causing
+    // :target selector to update and a popstate event.
+    history.pushState(history.state, document.title, href);
+    history.back();
+}
+// -----------------------------------------------
+
+
+
 const defaults = {
     search:     '',
     params:     {},
@@ -35,7 +53,21 @@ const location = {
 
     /** .identifier **/
     set identifier(id) {
-        window.location.hash = id;
+        // Replacing the hash normally does not update :target styles. It's a
+        // bad oversight on the part of browsers.
+        // https://github.com/whatwg/html/issues/639
+        //
+        // This is close to replacing the hash without changing the history.
+        // Replace the id, then add a new entry with the same id, then go back.
+        // This appears to update :target without a hashchange event and without
+        // scrolling in Chrome, although at the expense of creating a forward
+        // history entry and a popstate.
+
+        const url = id ?
+            '#' + id :
+            location.href.replace(/#.*$/, '');
+
+        updateTarget(url);
     },
 
     get identifier() {

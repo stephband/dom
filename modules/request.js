@@ -272,6 +272,7 @@ export default function request(method = 'GET', url, data = {}, contenttype = 'a
 
     // param[4] is an optional abort controller
     const options = createOptions(method, data, contenttype, arguments[4]);
+
     return fetch(url, options).then(respond);
 }
 

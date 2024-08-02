@@ -1,5 +1,5 @@
 
-import Data from '../../fn/modules/data.js';
+import Signal from 'fn/signal.js';
 
 function stripHash(hash) {
     return hash.replace(/^#/, '');
@@ -13,7 +13,16 @@ const defaults = {
     state:      null
 };
 
-const location = Data.of({
+// TODO: Deno/ESBuild don't seem to know that window.location is an object
+const wh       = window.history  || {};
+const wl       = window.location || {};
+const pathname = Signal.of(wl.pathname);
+const search   = Signal.of(wl.search);
+const hash     = Signal.of(wl.has);
+const href     = Signal.of(wl.href);
+const state    = Signal.of(JSON.stringify(wh.state));
+
+const location = {
     /** .base **/
     /** .path **/
     base: '/',
@@ -21,7 +30,7 @@ const location = Data.of({
 
     /** .hash **/
     get hash() {
-        return location.hash;
+        return hash.value;
     },
 
     /** .identifier **/
@@ -38,12 +47,12 @@ const location = Data.of({
 
     /** .pathname **/
     get pathname() {
-        return location.pathname;
+        return pathname.value;
     },
 
-    /** .pathname **/
+    /** .name **/
     get name() {
-        return this.pathname.slice(1);
+        return this.pathname.slice(this.base.length);
     },
 
     /** .search **/
@@ -51,49 +60,30 @@ const location = Data.of({
         return Object.fromEntries(new URLSearchParams(location.search));
     },
 
-    /** .url **/
-    get url() {
-        return location.href;
+    /** .href **/
+    get href() {
+        return href.value;
     },
 
     /** .state **/
     get state() {
-        return history.state;
-    },
-});
+        return state.value;
+    }
+};
 
 export default location;
 
-
-
-
-const pathname = Data.signal('pathname', location);
-const search   = Data.signal('search', location);
-const hash     = Data.signal('hash', location);
-const url      = Data.signal('url', location);
-const state    = Data.signal('state', location);
-
-let json;
-
-export function update() {
-    const object = Data.objectOf(data);
-
+function update() {
     // Update signals
     pathname.value = window.location.pathname;
     search.value   = window.location.search;
     hash.value     = window.location.hash;
-    url.value      = window.location.href;
-
-    // Update state, if it has really changed
-    const json = JSON.stringify(window.history.state);
-
-    if (oldjson === json) return;
-    oldjson = json;
-    state.value = window.history.state;
+    href.value     = window.location.href;
+    state.value    = JSON.stringify(window.history.state);
 }
 
 // Synchronise root location
-update();
+//update();
 
 // Listen to load and popstate events to notify when navigation has occured
 window.addEventListener('popstate', update);

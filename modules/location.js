@@ -9,7 +9,8 @@ function stripHash(hash) {
 
 // TODO: SHOULD THIS NOT BE RESPONSIBILITY OF navigate()
 function updateTarget(url) {
-    const href = location.href;
+    const href    = window.location.href;
+    const history = window.history;
 
     // Replace the current location with the new one
     history.replaceState(history.state, document.title, url);
@@ -40,7 +41,45 @@ const hash     = Signal.of(wl.has);
 const href     = Signal.of(wl.href);
 const state    = Signal.of(JSON.stringify(wh.state));
 
-const location = {
+function update() {
+    // Update signals
+    pathname.value = window.location.pathname;
+    search.value   = window.location.search;
+    hash.value     = window.location.hash;
+    href.value     = window.location.href;
+    state.value    = JSON.stringify(window.history.state);
+}
+
+// Synchronise root location
+//update();
+
+// Listen to load and popstate events to notify when navigation has occured
+window.addEventListener('popstate', update);
+window.addEventListener('DOMContentLoaded', update);
+
+// Clean up empty hash URLs
+window.addEventListener('hashchange', function(e) {
+    /*
+    A `hashchange` is received when:
+    - navigation via browser buttons when the hash changes
+    - navigation via typing a new hash in the URL bar
+    - navigation via history.back() and .forward() when the hash changes
+    - location.hash is set to something other than its current value
+    */
+
+    const location = window.location;
+    const history  = window.history;
+
+    // Detect navigations to # and silently remove the # from the url.
+    // Any call to replaceState or pushState in iOS opens the URL bar.
+    if (stripHash(location.hash) === '') {
+        history.replaceState(history.state, document.title, location.href.replace(/#$/, ''));
+    }
+});
+
+
+
+export default {
     /** .base **/
     /** .path **/
     base: '/',
@@ -106,41 +145,3 @@ const location = {
         return state.value;
     }
 };
-
-export default location;
-
-function update() {
-    // Update signals
-    pathname.value = window.location.pathname;
-    search.value   = window.location.search;
-    hash.value     = window.location.hash;
-    href.value     = window.location.href;
-    state.value    = JSON.stringify(window.history.state);
-}
-
-// Synchronise root location
-//update();
-
-// Listen to load and popstate events to notify when navigation has occured
-window.addEventListener('popstate', update);
-window.addEventListener('DOMContentLoaded', update);
-
-// Clean up empty hash URLs
-window.addEventListener('hashchange', function(e) {
-    /*
-    A `hashchange` is received when:
-    - navigation via browser buttons when the hash changes
-    - navigation via typing a new hash in the URL bar
-    - navigation via history.back() and .forward() when the hash changes
-    - location.hash is set to something other than its current value
-    */
-
-    const location = window.location;
-    const history  = window.history;
-
-    // Detect navigations to # and silently remove the # from the url.
-    // Any call to replaceState or pushState in iOS opens the URL bar.
-    if (stripHash(location.hash) === '') {
-        history.replaceState(history.state, document.title, location.href.replace(/#$/, ''));
-    }
-});

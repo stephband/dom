@@ -71,7 +71,7 @@ const location = {
     },
 
     get identifier() {
-        return stripHash(this.hash) || defaults.identifier;
+        return this.hash && stripHash(this.hash) || defaults.identifier;
     },
 
     /** .params **/

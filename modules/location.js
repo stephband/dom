@@ -34,6 +34,10 @@ const location = {
     },
 
     /** .identifier **/
+    set identifier(id) {
+        window.location.hash = id;
+    },
+
     get identifier() {
         return stripHash(this.hash) || defaults.identifier;
     },

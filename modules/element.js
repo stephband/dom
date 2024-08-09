@@ -464,7 +464,7 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
             }
 
             // Construct an instance from Constructor using the Element prototype
-            const shadow = lifecycle.construct && lifecycle.construct.length > shadowParameterIndex ?
+            const shadow = lifecycle.mode || lifecycle.shadow ?
                 createShadow(element, lifecycle, stylesheet || lifecycle.stylesheet) :
                 undefined ;
 
@@ -472,7 +472,7 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
             const internals = createInternals(Element, element, shadow);
 
             // Run constructor
-            lifecycle.construct && lifecycle.construct.call(element, shadow);
+            lifecycle.construct && lifecycle.construct.call(element, shadow, internals);
 
             // Detect and run attributes
             let name;
@@ -485,7 +485,7 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
             }
 
             // Run connected callback
-            lifecycle.connect && lifecycle.connect.apply(element);
+            lifecycle.connect && lifecycle.connect.call(element, shadow, internals);
         });
     }
 

@@ -31,7 +31,8 @@ const defaults = {
     state:      null
 };
 
-// TODO: Deno/ESBuild don't seem to know that window.location is an object
+// TODO: Deno/ESBuild don't seem to know that window.location is an object, is
+// there a way to put it in the build scope so we don't have to...
 const wh       = window.history  || {};
 const wl       = window.location || {};
 const pathname = Signal.of(wl.pathname);
@@ -44,7 +45,6 @@ const location = {
     /** .base **/
     /** .path **/
     base: '/',
-    path: '',
 
     /** .hash **/
     get hash() {
@@ -86,8 +86,8 @@ const location = {
         return pathname.value;
     },
 
-    /** .name **/
-    get name() {
+    /** .path **/
+    get path() {
         return this.pathname.slice(this.base.length);
     },
 

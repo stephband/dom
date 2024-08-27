@@ -54,14 +54,16 @@ Calling `trapFocus(node)` again also removes the existing trap.
 */
 
 let active;
-let node;
+let element;
 
 function preventFocus(e) {
+    if (!element) debugger;
+
     // Don't prevent focus on or inside node
-    if (node.contains(e.target) || node === e.target) return;
+    if (element.contains(e.target) || element === e.target) return;
 
     // Set the focus back to the first thing inside.
-    focusInside(node);
+    focusInside(element);
 
     // Neuter any other side effects
     e.preventDefault();
@@ -69,23 +71,26 @@ function preventFocus(e) {
 }
 
 export function trapFocus(node) {
+    if (!node) debugger;
+
     // Trap focus as described by Nikolas Zachas:
     // http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
     // If there is an existing focus trap, remove it
     untrapFocus();
 
     // Cache the currently focused node
+    element = node;
     active = document.activeElement;
 
     // Prevent focus in capture phase
     document.addEventListener("focus", preventFocus, true);
 
     // Move focus into node
-    requestTick(() => focusInside(node));
+    requestTick(() => focusInside(element));
 }
 
-export function untrapFocus(node) {
-    if (!node) return;
+export function untrapFocus() {
+    if (!element) return;
 
     // Stop focus prevention
     document.removeEventListener('focus', preventFocus, true);

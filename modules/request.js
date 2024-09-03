@@ -150,7 +150,7 @@ function urlFromData(url, data) {
         url + '?' + dataToQuery(data) ;
 }
 
-function createOptions(method, data, head, controller) {
+export function createOptions(method, data, head, controller) {
     const contentType =
         typeof head === 'string' ? head :
         head && head['Content-Type'] ||

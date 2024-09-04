@@ -1,6 +1,6 @@
 
-import noop            from '../../fn/modules/noop.js';
-import requestTick     from '../../fn/modules/request-tick.js';
+import noop            from 'fn/noop.js';
+import requestTick     from 'fn/request-tick.js';
 import { select }      from './select.js';
 
 const selector = ':not([disabled], [tabindex="-1"], [hidden], [type="hidden"], [aria-hidden="true"])';

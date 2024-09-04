@@ -5,7 +5,7 @@ matches(selector, node)
 Returns `true` if `node` matches `selector`, otherwise `false`.
 */
 
-import curry from '../../fn/modules/curry.js';
+import curry from 'fn/curry.js';
 import tag   from './tag.js';
 
 export function matches(selector, node) {

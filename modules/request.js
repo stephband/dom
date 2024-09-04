@@ -1,5 +1,5 @@
-import choose  from '../../fn/modules/choose.js';
-import id      from '../../fn/modules/id.js';
+import choose  from 'fn/choose.js';
+import id      from 'fn/id.js';
 
 import create  from './create.js';
 import { parseHTML, parseSVG } from './parse.js';

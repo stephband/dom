@@ -5,7 +5,7 @@ Returns the node itself or the closest ancestor that matches `selector`.
 If no match is found, returns `undefined`.
 */
 
-import curry from '../../fn/modules/curry.js';
+import curry from 'fn/curry.js';
 import matches from './matches.js';
 
 export function closest(selector, node) {

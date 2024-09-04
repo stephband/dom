@@ -3,7 +3,7 @@ contains(element, root)
 Returns `true` where `root` contains `element`.
 **/
 
-import curry from '../../fn/modules/curry.js';
+import curry from 'fn/curry.js';
 
 export function contains(child, node) {
 	return node.contains ?

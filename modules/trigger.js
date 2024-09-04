@@ -24,7 +24,7 @@ trigger({
 ```
 **/
 
-import curry from '../../fn/modules/curry.js';
+import curry from 'fn/curry.js';
 
 const assign   = Object.assign;
 

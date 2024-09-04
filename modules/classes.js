@@ -4,8 +4,8 @@ classes(node)
 Returns the classList of `node`.
 */
 
-import curry from '../../fn/modules/curry.js';
-import get   from '../../fn/modules/get.js';
+import curry from 'fn/curry.js';
+import get   from 'fn/get.js';
 
 const classes = get('classList');
 

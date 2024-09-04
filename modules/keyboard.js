@@ -1,5 +1,5 @@
 
-import overload from '../../fn/modules/overload.js';
+import overload from 'fn/overload.js';
 import events   from './events.js';
 
 /**

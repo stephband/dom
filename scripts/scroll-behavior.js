@@ -2,7 +2,7 @@
 import '../polyfills/document.scrollingelement.js';
 //import '../polyfills/element.scrollintoview.js';
 
-import cache    from '../../fn/modules/weak-cache.js';
+import cache    from 'fn/weak-cache.js';
 import features from '../../dom/modules/features.js';
 import rect     from '../../dom/modules/rect.js';
 

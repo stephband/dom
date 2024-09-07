@@ -3,15 +3,17 @@ import '../polyfills/document.scrollingelement.js';
 //import '../polyfills/element.scrollintoview.js';
 
 import cache    from '../../fn/modules/weak-cache.js';
-import features from '../../dom/modules/features.js';
 import rect     from '../../dom/modules/rect.js';
 
 
-/* 
+/*
 Smooth scroll for browsers that do not have it
 */
 
-if (!features.scrollBehavior) {
+if (!('scrollBehavior' in document.documentElement.style)) {
+    console.log('AARG');
+
+
     const scrollOptions = {
         behavior: 'smooth',
         block: 'start'
@@ -29,7 +31,7 @@ if (!features.scrollBehavior) {
                 element = document.scrollingElement;
                 break;
             }
-    
+
             if (element.scrollHeight > element.clientHeight) {
                 break;
             }
@@ -43,8 +45,8 @@ if (!features.scrollBehavior) {
     // Keep a record of scrollTop in order to restore it
     window.addEventListener('scroll', function scroll(e) {
         const element = (e.target === document.body
-            || e.target === document.documentElement 
-            || e.target === document 
+            || e.target === document.documentElement
+            || e.target === document
             || e.target === window) ?
                 document.scrollingElement :
                 e.target;
@@ -58,7 +60,7 @@ if (!features.scrollBehavior) {
         passive: true
     });
 
-    window.addEventListener('hashchange', function hashchange(e) {        
+    window.addEventListener('hashchange', function hashchange(e) {
         const id = window.location.hash.replace(/^#/, '');
         if (!id) { return; }
 
@@ -72,8 +74,8 @@ if (!features.scrollBehavior) {
         }
 
         const element = (target.parentNode === document.body
-            || target.parentNode === document.documentElement 
-            || target.parentNode === document 
+            || target.parentNode === document.documentElement
+            || target.parentNode === document
             || target.parentNode === window) ?
                 document.scrollingElement :
                 target.parentNode;
@@ -112,7 +114,7 @@ if (!features.scrollBehavior) {
 
         //console.log('hashchange', window.location.hash.replace(/^#/, ''));
 
-        // In Safari, hashchange is preceeded by scroll jump - restore 
+        // In Safari, hashchange is preceeded by scroll jump - restore
         // previous scrollTop.
         restoreScroll(target);
 

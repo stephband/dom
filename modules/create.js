@@ -138,9 +138,9 @@ const create = overload(id, {
         default: () => document.createDocumentFragment()
     }),
 
-    text: function (tag, text) {
+    /*text: function (tag, text) {
         return document.createTextNode(text || '');
-    },
+    },*/
 
     circle:   createSVG,
     ellipse:  createSVG,
@@ -156,6 +156,7 @@ const create = overload(id, {
     polyline: createSVG,
     svg:      createSVG,
     tspan:    createSVG,
+    text:     createSVG,
 
     default:  createHTML
 });

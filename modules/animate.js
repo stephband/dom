@@ -17,8 +17,8 @@ fn        - optional function to call on completion
 ```
 */
 
-import pipe        from '../../fn/modules/pipe.js';
-import denormalise from '../../fn/modules/denormalise.js';
+import pipe        from 'fn/pipe.js';
+import denormalise from 'fn/denormalise.js';
 import transition  from './transition.js';
 
 export default function animate(duration, transform, name, object, stopValue, fn) {

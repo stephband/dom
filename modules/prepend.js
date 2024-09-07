@@ -8,7 +8,7 @@ if (!Element.prototype.prepend) {
     throw new Error('A polyfill for Element.prepend() is needed (https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/prepend)');
 }
 
-import curry from '../../fn/modules/curry.js';
+import curry from 'fn/curry.js';
 
 export function prepend(target, node) {
     target.prepend(node);

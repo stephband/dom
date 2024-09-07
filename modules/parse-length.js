@@ -1,9 +1,9 @@
 // Units
 
-import id         from '../../fn/modules/id.js';
-import overload   from '../../fn/modules/overload.js';
-import toType     from '../../fn/modules/to-type.js';
-import parseValue from '../../fn/modules/parse-value.js';
+import id         from 'fn/id.js';
+import overload   from 'fn/overload.js';
+import toType     from 'fn/to-type.js';
+import parseValue from 'fn/parse-value.js';
 import style      from './style.js';
 
 

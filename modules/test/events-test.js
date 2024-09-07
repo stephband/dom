@@ -1,5 +1,5 @@
 
-import run    from '../../../fn/modules/test.js';
+import run    from 'fn/test.js';
 import events from '../events.js';
 import { trigger } from '../trigger.js';
 

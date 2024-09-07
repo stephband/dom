@@ -32,7 +32,7 @@ route(window.location);
 ```
 **/
 
-import overload from '../../fn/modules/overload.js';
+import overload from 'fn/overload.js';
 import Distributor from './distributor-2.js';
 
 const assign  = Object.assign;

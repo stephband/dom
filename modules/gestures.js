@@ -37,9 +37,9 @@ thinks you are trying to perform some native pan or scroll
 ([MDN touch-action](https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action))
 */
 
-import get             from '../../fn/modules/get.js';
-import overload        from '../../fn/modules/overload.js';
-import Stream, { pipe, stop } from '../../fn/modules/stream/stream.js';
+import get             from 'fn/get.js';
+import overload        from 'fn/overload.js';
+import Stream, { pipe, stop } from 'fn/stream/stream.js';
 import px              from './parse-length.js';
 
 const A      = Array.prototype;

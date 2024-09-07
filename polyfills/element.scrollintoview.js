@@ -5,8 +5,8 @@ Monkey patches Element.scrollIntoView to support smooth scrolling options.
 https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
 **/
 
-import expOut   from '../../fn/modules/maths/exponential-out.js';
-import noop     from '../../fn/modules/noop.js';
+import expOut   from 'fn/maths/exponential-out.js';
+import noop     from 'fn/noop.js';
 import animate  from '../modules/animate.js';
 import rect     from '../modules/rect.js';
 import features from '../modules/features.js';

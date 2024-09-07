@@ -4,7 +4,7 @@
 
 console.warn('scrollends() deprecated in favour of scrolls()');
 
-import Stream from '../../fn/stream/stream.js';
+import Stream from 'fn/stream/stream.js';
 
 const assign = Object.assign;
 

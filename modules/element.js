@@ -91,7 +91,7 @@ shadow DOM. Mileage will vary. Managing focus can be problematic without browser
 support.
 */
 
-import capture           from '../../fn/modules/capture.js';
+import capture           from 'fn/capture.js';
 import create            from './create.js';
 import toLoadPromise     from './element/to-load-promise.js';
 import toPrefetchPromise from './element/to-prefetch-promise.js';

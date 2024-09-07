@@ -1,6 +1,6 @@
 
-import id       from '../../fn/modules/id.js';
-import overload from '../../fn/modules/overload.js';
+import id       from 'fn/id.js';
+import overload from 'fn/overload.js';
 import assign   from './assign.js';
 
 const svgNamespace = 'http://www.w3.org/2000/svg';

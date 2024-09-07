@@ -1,6 +1,6 @@
 
-import get        from '../../fn/modules/get.js';
-import last       from '../../fn/modules/last.js';
+import get        from 'fn/get.js';
+import last       from 'fn/last.js';
 import select     from '../../dom/modules/select.js';
 import isTextNode from '../../dom/modules/is-text-node.js';
 

@@ -1,5 +1,5 @@
 
-import Stream from '../../fn/modules/stream.js';
+import Stream from 'fn/stream.js';
 
 export function frames() {
     var timer;

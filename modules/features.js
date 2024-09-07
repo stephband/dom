@@ -1,4 +1,4 @@
-import cache from '../../fn/modules/cache.js';
+import cache from 'fn/cache.js';
 import prefix from './prefix.js';
 
 const define = Object.defineProperties;

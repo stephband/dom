@@ -5,7 +5,7 @@ Returns the computed style `property` of `node`.
     style('transform', node);  // returns transform
 */
 
-import parseAngle from '../../fn/modules/parse-angle.js';
+import parseAngle from 'fn/parse-angle.js';
 
 var rpx    = /px$/;
 var rangle = /deg$|turn$|rad$/;

@@ -3,7 +3,7 @@ find(selector, element)
 Returns the first element matching `selector`.
 **/
 
-import curry from '../../fn/modules/curry.js';
+import curry from 'fn/curry.js';
 
 export function find(selector, node) {
 	return node.querySelector(selector);

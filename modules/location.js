@@ -1,35 +1,12 @@
 
 import Signal from 'fn/signal.js';
 
-function stripHash(hash) {
-    return hash.replace(/^#/, '');
-}
-
-
-
-// TODO: SHOULD THIS NOT BE RESPONSIBILITY OF navigate()
-function updateTarget(url) {
-    const href    = window.location.href;
-    const history = window.history;
-
-    // Replace the current location with the new one
-    history.replaceState(history.state, document.title, url);
-
-    // Move forward to the old url and back to the current location, causing
-    // :target selector to update and a popstate event.
-    history.pushState(history.state, document.title, href);
-    history.back();
-}
-// -----------------------------------------------
-
-
-
 const defaults = {
-    search:     '',
-    params:     {},
-    hash:       '',
-    identifier: '',
-    state:      null
+    search:   '',
+    params:   {},
+    hash:     '',
+    fragment: '',
+    state:    null
 };
 
 // TODO: Deno/ESBuild don't seem to know that window.location is an object, is
@@ -42,75 +19,38 @@ const hash     = Signal.of(wl.has);
 const href     = Signal.of(wl.href);
 const state    = Signal.of(JSON.stringify(wh.state));
 
-function update() {
-    // Update signals
-    pathname.value = window.location.pathname;
-    search.value   = window.location.search;
-    hash.value     = window.location.hash;
-    href.value     = window.location.href;
-    state.value    = JSON.stringify(window.history.state);
-}
-
-// Synchronise root location
-//update();
-
-// Listen to load and popstate events to notify when navigation has occured
-window.addEventListener('popstate', update);
-window.addEventListener('DOMContentLoaded', update);
-
-// Clean up empty hash URLs
-window.addEventListener('hashchange', function(e) {
-    /*
-    A `hashchange` is received when:
-    - navigation via browser buttons when the hash changes
-    - navigation via typing a new hash in the URL bar
-    - navigation via history.back() and .forward() when the hash changes
-    - location.hash is set to something other than its current value
-    */
-
-    const location = window.location;
-    const history  = window.history;
-
-    // Detect navigations to # and silently remove the # from the url.
-    // Any call to replaceState or pushState in iOS opens the URL bar.
-    if (stripHash(location.hash) === '') {
-        history.replaceState(history.state, document.title, location.href.replace(/#$/, ''));
-    }
-});
-
-
-
 export default {
     /** .base **/
     /** .path **/
     base: '/',
 
     /** .hash **/
+    set hash(string) {
+        // Warning: replacing the hash does not update :target styles unless the
+        // document scrolls. It's a bad oversight on the part of browsers and
+        // they refuse to do anything about it.
+        // https://github.com/whatwg/html/issues/639
+
+        if (string === hash.value) return;
+
+        const url = string ?
+            string :
+            window.location.href.replace(/#.*$/, '');
+
+        history.replaceState(history.state, document.title, url);
+
+        // That did not trigger a popstate event so we need to notify that
+        // hash has been updated
+        hash.value = window.location.hash;
+    },
+
     get hash() {
         return hash.value;
     },
 
-    /** .identifier **/
-    set identifier(id) {
-        // Replacing the hash normally does not update :target styles. It's a
-        // bad oversight on the part of browsers.
-        // https://github.com/whatwg/html/issues/639
-        //
-        // This is close to replacing the hash without changing the history.
-        // Replace the id, then add a new entry with the same id, then go back.
-        // This appears to update :target without a hashchange event and without
-        // scrolling in Chrome, although at the expense of creating a forward
-        // history entry and a popstate.
-
-        const url = id ?
-            '#' + id :
-            location.href.replace(/#.*$/, '');
-
-        updateTarget(url);
-    },
-
-    get identifier() {
-        return this.hash && stripHash(this.hash) || defaults.identifier;
+    /** .fragment **/
+    get fragment() {
+        return this.hash && stripHash(this.hash) || defaults.fragment;
     },
 
     /** .params **/
@@ -145,3 +85,30 @@ export default {
         return state.value;
     }
 };
+
+
+/* Keep location up-to-date */
+
+function update() {
+    // Update signals
+    pathname.value = window.location.pathname;
+    search.value   = window.location.search;
+    hash.value     = window.location.hash;
+    href.value     = window.location.href;
+    state.value    = JSON.stringify(window.history.state);
+}
+
+// Listen to load and popstate events to notify when navigation has occured
+window.addEventListener('popstate', update);
+window.addEventListener('DOMContentLoaded', update);
+window.addEventListener('hashchange', function(e) {
+    /*
+    A `hashchange` is received when:
+    - navigation via browser buttons when the hash changes
+    - navigation via typing a new hash in the URL bar
+    - navigation via history.back() and .forward() when the hash changes
+    - location.hash is set to something other than its current value
+    */
+
+    hash.value = window.location.hash;
+});

@@ -1,5 +1,5 @@
-import is       from '../../fn/modules/is.js';
-import matches  from '../../fn/modules/matches.js';
+import is       from 'fn/is.js';
+import matches  from 'fn/matches.js';
 
 const assign      = Object.assign;
 const define      = Object.defineProperties;

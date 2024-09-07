@@ -1,5 +1,5 @@
-import choose  from '../../fn/modules/choose.js';
-import id      from '../../fn/modules/id.js';
+import choose  from 'fn/choose.js';
+import id      from 'fn/id.js';
 
 import create  from './create.js';
 import { parseHTML, parseSVG } from './parse.js';
@@ -150,7 +150,7 @@ function urlFromData(url, data) {
         url + '?' + dataToQuery(data) ;
 }
 
-function createOptions(method, data, head, controller) {
+export function createOptions(method, data, head, controller) {
     const contentType =
         typeof head === 'string' ? head :
         head && head['Content-Type'] ||

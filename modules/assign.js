@@ -46,6 +46,11 @@ const assignProperty = overload(id, {
 		node.textContent = content;
 	},
 
+	style: overload((name, node, content) => typeof content, {
+		string: (name, node, content) => node.style = content,
+		object: (name, node, content) => Object.assign(node.style, content)
+	}),
+
 	children: function(name, node, content) {
 		// Empty the node and append children
 		node.innerHTML = '';

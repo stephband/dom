@@ -1,9 +1,8 @@
 /**
-isFragmentNode(node)
-
+isFragment(node)
 Returns `true` if `node` is a fragment.
 **/
 
-export default function isFragmentNode(node) {
+export default function isFragment(node) {
     return node.nodeType === 11;
 }

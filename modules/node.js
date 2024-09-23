@@ -19,6 +19,10 @@ export function toNodeType(node) {
 	return types[node.nodeType];
 }
 
+export { default as isComment }  from './is-comment.js';
+export { default as isElement }  from './is-element.js';
+export { default as isFragment } from './is-fragment.js';
+export { default as isTextNode } from './is-text-node.js';
 
 /**
 isNode(node)
@@ -29,42 +33,6 @@ export function isNode(node) {
 	return typeof node === 'object' && !!node.nodeType;
 }
 
-/**
-isElementNode(node)
-Returns `true` if `node` is an element node.
-**/
-
-export function isElementNode(node) {
-	return node.nodeType === 1;
-}
-
-/**
-isTextNode(node)
-Returns `true` if `node` is a text node.
-**/
-
-export function isTextNode(node) {
-	return node.nodeType === 3;
-}
-
-/**
-isCommentNode(node)
-Returns `true` if `node` is a comment.
-**/
-
-export function isCommentNode(node) {
-	return node.nodeType === 8;
-}
-
-/**
-isFragmentNode(node)
-
-Returns `true` if `node` is a fragment.
-**/
-
-export function isFragmentNode(node) {
-	return node.nodeType === 11;
-}
 
 /**
 isDocumentLink(node)

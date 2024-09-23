@@ -3,29 +3,17 @@ import noop            from 'fn/noop.js';
 import requestTick     from 'fn/request-tick.js';
 import { select }      from './select.js';
 
+//const selector = 'input, textarea, select, button, [tabindex]:not([tabindex="-1"])';
 const selector = ':not([disabled], [tabindex="-1"], [hidden], [type="hidden"], [aria-hidden="true"])';
 
-export function focusClosest(element) {
-    // Find the closest focusable element...
-    let focusable = element;
-    while (focusable.tabIndex === -1) {
-        focusable = focusable.parentNode;
-    }
-
-    // focusable may be a shadowRoot, get the host
-    focusable = focusable.host || focusable;
-    // It may be document, which does not have a .focus() method
-    focusable.focus && focusable.focus();
-    // Ooof, what a polava
-}
 
 /**
-.focusInside(element)
+.focus(element)
 Moves focus to the first focusable element found inside `element`. If none are
 found, moves focus to `element`, if focusable.
 **/
 
-export function focusInside(element) {
+export default function focus(element) {
     const elements = element.querySelectorAll(selector);
     const c = elements.length;
 
@@ -33,15 +21,14 @@ export function focusInside(element) {
     while (++n < c) {
         node = elements[n];
 
-        // The only way to tell whether .focus() actually focuses an element
-        // is to try it and see
+        // The only sure way to tell whether .focus() actually focuses an
+        // element is to try it and see.
         node.focus();
-        if (document.activeElement === node) {
-            return;
-        }
+        if (document.activeElement === node) return;
     }
 
-    // If nothing inside element was focusable attempt to focus element itself
+    // If nothing inside element was focusable attempt to focus element itself...
+    // Should we do this first??
     element.focus();
 }
 
@@ -51,7 +38,7 @@ trapFocus(node)
 Constrains focus to focusable elements inside `node`.
 Returns a function that removes the trap.
 Calling `trapFocus(node)` again also removes the existing trap.
-*/
+**/
 
 let active;
 let element;
@@ -63,7 +50,7 @@ function preventFocus(e) {
     if (element.contains(e.target) || element === e.target) return;
 
     // Set the focus back to the first thing inside.
-    focusInside(element);
+    focus(element);
 
     // Neuter any other side effects
     e.preventDefault();
@@ -71,8 +58,6 @@ function preventFocus(e) {
 }
 
 export function trapFocus(node) {
-    if (!node) debugger;
-
     // Trap focus as described by Nikolas Zachas:
     // http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
     // If there is an existing focus trap, remove it
@@ -86,7 +71,7 @@ export function trapFocus(node) {
     document.addEventListener("focus", preventFocus, true);
 
     // Move focus into node
-    requestTick(() => focusInside(element));
+    requestTick(() => focus(element));
 }
 
 export function untrapFocus() {

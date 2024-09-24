@@ -1,5 +1,7 @@
 /**
 identify(node)
+identify(node, prefix)
+identify(node, prefix, root)
 
 Returns the id of `node`, or where `node` has no id, a random id is generated,
 checked against the root node (document or shadowRoot) for uniqueness, set on

@@ -2,7 +2,7 @@
 import clamp  from 'fn/clamp.js';
 import Signal from 'fn/signal.js';
 
-createProperty(fn, default) {
+export default createProperty(fn, default) {
     const symbol = Symbol();
 
     const descriptor = {
@@ -32,4 +32,8 @@ export function createBoolean(default = false) {
 
 export function createNumber(min = -Infinity, max = Infinity, default = clamp(min, max, 0)) {
     return createProperty((value) => clamp(min, max, Number(value)), default);
+}
+
+export function createString(default = '') {
+    return createProperty((value) => '' + value, default);
 }

@@ -13,23 +13,26 @@ Moves focus to the first focusable element found inside `element`. If none are
 found, moves focus to `element`, if focusable.
 **/
 
-export default function focus(element) {
-    const elements = element.querySelectorAll(selector);
+const focusOptions = { preventScroll:true };
+
+export default function focus(parent) {
+    const elements = parent.querySelectorAll(selector);
     const c = elements.length;
 
-    let n = -1, node;
+    let n = -1;
+    let element;
     while (++n < c) {
-        node = elements[n];
+        element = elements[n];
 
         // The only sure way to tell whether .focus() actually focuses an
         // element is to try it and see.
-        node.focus();
-        if (document.activeElement === node) return;
+        element.focus(focusOptions);
+        if (document.activeElement === element) return;
     }
 
     // If nothing inside element was focusable attempt to focus element itself...
     // Should we do this first??
-    element.focus();
+    parent.focus(focusOptions);
 }
 
 

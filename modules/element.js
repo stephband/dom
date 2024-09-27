@@ -100,6 +100,7 @@ import { createInternals, getInternals } from './element/internals.js';
 const define  = Object.defineProperties;
 const nothing = {};
 
+/*
 const constructors = {
     // List only those elements whose constructor names do not match their tag
     'a':        HTMLAnchorElement,
@@ -127,6 +128,7 @@ const constructors = {
     'tfoot':    HTMLTableSectionElement,
     'ul':       HTMLUListElement
 };
+*/
 
 const formProperties = {
     // These properties echo those provided by native form controls.
@@ -152,19 +154,14 @@ const shadowParameterIndex = 0;
 let supportsCustomisedBuiltIn = false;
 
 function getElementConstructor(tag) {
-        // Return a constructor from the known list of tag names – not all tags
-        // have constructor names that match their tags
-    return constructors[tag]
-        // Or assemble the tag name in the form "HTMLTagElement" and return
-        // that property of the window object
-        || window['HTML' + tag[0].toUpperCase() + tag.slice(1) + 'Element']
-        // Or use HTMLElement, which is the constructor for <figure> and various
-        // other elements
-        || HTMLELement ;
+    if (constructors[tag]) return constructors[tag];
 
-        (() => {
-            throw new Error('Constructor not found for tag "' + tag + '"');
-        })();
+    const constructor = document.createElement(tag).constructor;
+    if (constructor === HTMLUnknownElement) {
+        throw new Error('Cannot define customised built-in - constructor for <' + tag + '> is HTMLUnknownElement');
+    }
+
+    return constructors[tag] = constructor;
 }
 
 // Capture name and tag from <element-name> or <tag is="element-name">, syntax

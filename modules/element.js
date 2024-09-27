@@ -101,9 +101,13 @@ const define  = Object.defineProperties;
 const nothing = {};
 
 const constructors = {
-    // We need list only those whose constructor names do not match their tag
+    // List only those elements whose constructor names do not match their tag
     'a':        HTMLAnchorElement,
-    'article':  HTMLElement,
+    'caption':  HTMLTableCaptionElement,
+    'col':      HTMLTableColElement,
+    'colgroup': HTMLTableColElement,
+    'datalist': HTMLDataListElement,
+    'dir':      HTMLDirectoryElement,
     'dl':       HTMLDListElement,
     'p':        HTMLParagraphElement,
     'br':       HTMLBRElement,
@@ -114,7 +118,6 @@ const constructors = {
     'ol':       HTMLOListElement,
     'optgroup': HTMLOptGroupElement,
     'q':        HTMLQuoteElement,
-    'section':  HTMLElement,
     'textarea': HTMLTextAreaElement,
     'td':       HTMLTableCellElement,
     'th':       HTMLTableCellElement,
@@ -155,7 +158,11 @@ function getElementConstructor(tag) {
         // Or assemble the tag name in the form "HTMLTagElement" and return
         // that property of the window object
         || window['HTML' + tag[0].toUpperCase() + tag.slice(1) + 'Element']
-        || (() => {
+        // Or use HTMLElement, which is the constructor for <figure> and various
+        // other elements
+        || HTMLELement ;
+
+        (() => {
             throw new Error('Constructor not found for tag "' + tag + '"');
         })();
 }

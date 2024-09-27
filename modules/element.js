@@ -99,6 +99,7 @@ import { createInternals, getInternals } from './element/internals.js';
 
 const define  = Object.defineProperties;
 const nothing = {};
+const constructors = {};
 
 /*
 const constructors = {
@@ -148,8 +149,6 @@ const formProperties = {
     checkValidity:     { value: function() { return getInternals(this).checkValidity(); }},
     reportValidity:    { value: function() { return getInternals(this).reportValidity(); }}
 };
-
-const shadowParameterIndex = 0;
 
 let supportsCustomisedBuiltIn = false;
 

@@ -92,48 +92,23 @@ support.
 */
 
 import capture           from 'fn/capture.js';
+import overload          from 'fn/overload.js';
 import create            from './create.js';
+import Renderer          from './element/renderer.js';
 import toLoadPromise     from './element/to-load-promise.js';
 import toPrefetchPromise from './element/to-prefetch-promise.js';
 import { createInternals, getInternals } from './element/internals.js';
+import { createBoolean, createNumber, createString, createTokenList } from './element/create-property.js';
 
-const define  = Object.defineProperties;
-const nothing = {};
-const constructors = {};
 
-/*
-const constructors = {
-    // List only those elements whose constructor names do not match their tag
-    'a':        HTMLAnchorElement,
-    'caption':  HTMLTableCaptionElement,
-    'col':      HTMLTableColElement,
-    'colgroup': HTMLTableColElement,
-    'datalist': HTMLDataListElement,
-    'dir':      HTMLDirectoryElement,
-    'dl':       HTMLDListElement,
-    'p':        HTMLParagraphElement,
-    'br':       HTMLBRElement,
-    'fieldset': HTMLFieldSetElement,
-    'hr':       HTMLHRElement,
-    'img':      HTMLImageElement,
-    'li':       HTMLLIElement,
-    'ol':       HTMLOListElement,
-    'optgroup': HTMLOptGroupElement,
-    'q':        HTMLQuoteElement,
-    'textarea': HTMLTextAreaElement,
-    'td':       HTMLTableCellElement,
-    'th':       HTMLTableCellElement,
-    'tr':       HTMLTableRowElement,
-    'tbody':    HTMLTableSectionElement,
-    'thead':    HTMLTableSectionElement,
-    'tfoot':    HTMLTableSectionElement,
-    'ul':       HTMLUListElement
-};
-*/
-
+const define         = Object.defineProperties;
+const nothing        = {};
+const constructors   = {};
 const formProperties = {
-    // These properties echo those provided by native form controls.
-    // They are not strictly required, but provided for consistency.
+    // These properties echo those provided by native form controls. They are
+    // not strictly required, but provided for consistency with standard form
+    // elements.
+
     //type: { value: 'text' },
 
     name: {
@@ -150,18 +125,9 @@ const formProperties = {
     reportValidity:    { value: function() { return getInternals(this).reportValidity(); }}
 };
 
+
 let supportsCustomisedBuiltIn = false;
 
-function getElementConstructor(tag) {
-    if (constructors[tag]) return constructors[tag];
-
-    const constructor = document.createElement(tag).constructor;
-    if (constructor === HTMLUnknownElement) {
-        throw new Error('Cannot define customised built-in - constructor for <' + tag + '> is HTMLUnknownElement');
-    }
-
-    return constructors[tag] = constructor;
-}
 
 // Capture name and tag from <element-name> or <tag is="element-name">, syntax
 // brackets and quotes optional
@@ -180,9 +146,19 @@ const parseNameTag = capture(/^\s*<?([a-z][\w]*-[\w-]+)>?\s*$|^\s*<?([a-z][\w]*)
     }
 }, null);
 
-function constructProperty(element, descriptor) {
-    if (descriptor.construct) descriptor.construct.apply(element);
-    return element;
+function stop(object) {
+    object.stop();
+}
+
+function getElementConstructor(tag) {
+    if (constructors[tag]) return constructors[tag];
+
+    const constructor = document.createElement(tag).constructor;
+    if (constructor === HTMLUnknownElement) {
+        throw new Error('Cannot define customised built-in - constructor for <' + tag + '> is HTMLUnknownElement');
+    }
+
+    return constructors[tag] = constructor;
 }
 
 function transferProperty(element, key) {
@@ -194,7 +170,7 @@ function transferProperty(element, key) {
     return element;
 }
 
-function createShadow(elem, options, stylesheet) {
+function createShadow(elem, options) {
     // Create a shadow root. Shadows may be 'open' or 'closed'. Closed shadows
     // are not exposed via element.shadowRoot, and events propagating from
     // inside of them report the element as target. Default to 'closed'.
@@ -203,8 +179,8 @@ function createShadow(elem, options, stylesheet) {
         delegatesFocus: options.focusable || false
     });
 
-    if (stylesheet) {
-        const link = create('link', { rel: 'stylesheet', href: stylesheet });
+    if (options.stylesheet) {
+        const link = create('link', { rel: 'stylesheet', href: options.stylesheet });
         shadow.append(link);
     }
 
@@ -234,27 +210,22 @@ function fillShadowFromTemplate(shadow, template) {
     return shadow;
 }
 
-function hasPropertyAttribute(option) {
-    return !!option.attribute;
-}
-
-function hasPropertyDefinition(option) {
-    return option.set || option.get || option.hasOwnProperty('value');
-}
-
-function groupAttributeProperty(data, entry) {
-    if (hasPropertyAttribute(entry[1])) {
-        data.attributes[entry[0]] = entry[1].attribute;
+const createDescriptor = overload((name, options) => typeof options, {
+    object: overload((name, options) => options.type, {
+        boolean: (name, options) => createBoolean(name),
+        number:  (name, options) => createNumber(name, options.min, options.max, options.default),
+        string:  (name, options) => createString(name, options.pattern),
+        tokens:  (name, options) => createTokenList(name, options.tokens),
+        default: (name, options) => options
+    }),
+    function: (name, fn) => ({ value: fn }),
+    string:   (name, type) => createDescriptor(name, { type }),
+    default:  (name, options) => {
+        throw new TypeError('element() does not accept property descriptor of type ' + typeof options);
     }
+});
 
-    if (hasPropertyDefinition(entry[1])) {
-        data.properties[entry[0]] = entry[1];
-    }
-
-    return data;
-}
-
-export default function element(definition, lifecycle, api, stylesheet, log = '') {
+export default function element(definition, lifecycle = {}, properties = {}, log = '') {
     const { name, tag } = parseNameTag(definition);
 
     // Get the element constructor or the base HTMLElement constructor
@@ -262,45 +233,46 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         getElementConstructor(tag) :
         HTMLElement ;
 
-    const { attributes, properties } = api ?
-        Object.entries(api).reduce(groupAttributeProperty, {
-            attributes: {},
-            properties: {}
-        }) :
-        nothing ;
+    // Split properties into attributes and property descriptors
+    const attributes  = [];
+    const descriptors = {};
 
+    let propname, descriptor;
+    for (propname in properties) {
+        descriptor = createDescriptor(propname, properties[propname]);
+
+        // Add name to list of observed attributes
+        if (descriptor.attribute) attributes.push(propname);
+
+        // Add descriptor to properties to be defined
+        if (descriptor.set || descriptor.get || 'value' in descriptor) descriptors[propname] = descriptor;
+
+        // Override property descriptor
+        properties[propname] = descriptor;
+    }
+
+    // Declare constructor
     function Element() {
-        // Construct an instance from Constructor using the Element prototype
+        // Construct an instance from Constructor using Element prototype
         const element = Reflect.construct(constructor, arguments, Element);
 
-        // Make shadow if mode or template have been set
+        // Make shadow if mode or shadow have been set
         const shadow = lifecycle.mode || (typeof lifecycle.shadow === 'string') ?
-            createShadow(element, lifecycle, stylesheet || lifecycle.stylesheet) :
+            createShadow(element, lifecycle) :
             undefined ;
 
         // Fill shadow with template
-        if (lifecycle.shadow) {
-            fillShadowFromTemplate(shadow, lifecycle.shadow);
-        }
+        if (lifecycle.shadow) fillShadowFromTemplate(shadow, lifecycle.shadow);
 
         // Get access to the internals object. If form associated, internals is
         // the form control API internals object. We're gonna be rude and
         // extend it.
         const internals = createInternals(Element, element, shadow);
-        const params = internals.params = [shadow, internals];
-
-        // Flag unconnected until first connect
-        internals.unconnected = true;
+        const params    = internals.params = [shadow, internals];
 
         // Flag support for custom built-ins. We know this when tag exists and
         // Element constructor is called
         if (tag) supportsCustomisedBuiltIn = true;
-
-        if (properties) {
-            // Loop over property descriptors and call descriptor construct()
-            // function if it exists
-            Object.values(properties).reduce(constructProperty, element);
-        }
 
         if (lifecycle.construct) lifecycle.construct.apply(element, params);
 
@@ -332,34 +304,35 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
                 // have loaded. We keep the default slot visible as that content
                 // was visible before upgrade and we do not want it to momentarily
                 // disappear.
-                const style = create('style', '*:not(:has(slot:not([name]))) { display: none !important; }');
+                const style = create('style', '*:not(slot), slot:not([name]) { display: none !important; }');
                 shadow.append(style);
 
                 internals.stylesheetsLoadPromise = Promise
                 .all(Array.from(links, toLoadPromise))
-                .finally(() => style.remove());
+                .then(() => {
+                    if (lifecycle.load) lifecycle.load.apply(this, internals.params)
+                })
+                .finally(() => {
+                    style.remove()
+                });
             }
         }
 
         return element;
     }
 
-    // Prefetch stylesheet
-    if (stylesheet) {
+    // Set prototype and define properties
+    Element.prototype = Object.create(constructor.prototype, descriptors);
+
+    // Prefetch stylesheet ??
+    /*if (stylesheet) {
         toPrefetchPromise(stylesheet);
         log = window.DEBUG ?
             log + ' – stylesheet ' + stylesheet :
             log ;
-    }
+    }*/
 
-    // Properties
-
-    // Must be defined before attributeChangedCallback, but I cannot figure out
-    // why. Where one of the properties is `value`, the element is set up as a
-    // form element.
-    Element.prototype = Object.create(constructor.prototype, properties) ;
-
-    if (properties && properties.value) {
+    if (properties.value) {
         // Flag the Element class as formAssociated
         Element.formAssociated = true;
 
@@ -391,54 +364,26 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
         }
     }
 
-
     // Attributes
-
-    if (attributes) {
-        Element.observedAttributes = Object.keys(attributes);
+    if (attributes.length) {
+        Element.observedAttributes = attributes;
         Element.prototype.attributeChangedCallback = function(name, old, value) {
-            return attributes[name].call(this, value) ;
+            return properties[name].attribute.call(this, value) ;
         };
     }
 
-
     // Lifecycle
-
-    Element.prototype.connectedCallback = function() {
-        const internals = getInternals(this);
-
-        // If we have simulated form internals (for Safari), append the hidden
-        // input now
-        if (internals.polyfillInput) {
-            elem.appendChild(internals.polyfillInput);
+    if (lifecycle.connect) {
+        Element.prototype.connectedCallback = function() {
+            const internals = getInternals(this);
+            lifecycle.connect.apply(this, internals.params);
         }
-
-        // If this is the first connect and there is a lifecycle.load fn,
-        // unconnected is true
-        if (internals.unconnected) {
-            if (lifecycle.load && internals.stylesheetsLoadPromise) {
-                internals.stylesheetsLoadPromise.then(() =>
-                    lifecycle.load.apply(this, internals.params)
-                );
-            }
-            else if (lifecycle.load) {
-                // Guarantee that lifecycle load is called asynchronously in
-                // cases where there is nothing to load
-                Promise.resolve().then(() =>
-                    lifecycle.load.apply(this, internals.params)
-                );
-            }
-
-            delete internals.unconnected;
-        }
-
-        lifecycle.connect && lifecycle.connect.apply(this, internals.params);
     }
 
     if (lifecycle.disconnect) {
         Element.prototype.disconnectedCallback = function() {
             const internals = getInternals(this);
-            return lifecycle.disconnect.apply(this, internals.params);
+            lifecycle.disconnect.apply(this, internals.params);
         };
     }
 
@@ -468,7 +413,7 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 
             // Construct an instance from Constructor using the Element prototype
             const shadow = lifecycle.mode || lifecycle.shadow ?
-                createShadow(element, lifecycle, stylesheet || lifecycle.stylesheet) :
+                createShadow(element, lifecycle) :
                 undefined ;
 
             // Get access to the internals object
@@ -478,12 +423,12 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
             lifecycle.construct && lifecycle.construct.call(element, shadow, internals);
 
             // Detect and run attributes
-            let name;
-            for (name in attributes) {
+            let n = -1, name;
+            while (name = attributes[++n]) {
                 // elements.attributes is sometimes undefined... why?
                 const attribute = element.attributes[name];
                 if (attribute) {
-                    attributes[name].call(element, attribute.value);
+                    properties[name].attribute.call(element, attribute.value);
                 }
             }
 
@@ -496,3 +441,4 @@ export default function element(definition, lifecycle, api, stylesheet, log = ''
 }
 
 export { getInternals };
+export const render = Renderer.from;

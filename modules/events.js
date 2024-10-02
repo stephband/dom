@@ -61,8 +61,8 @@ Pass in an `initial` event object to have the event stream start synchronously
 with an initial value when consumed.
 */
 
-import cache  from 'fn/cache.js';
-import Stream, { pipe, stop } from 'fn/stream.js';
+import cache from 'fn/cache.js';
+import Stream, { pipe, stop } from 'fn/stream/stream.js';
 
 const assign  = Object.assign;
 const rspaces = /\s+/;

@@ -305,16 +305,13 @@ export default function element(definition, lifecycle = {}, properties = {}, log
                 // was visible before upgrade and we do not want it to momentarily
                 // disappear.
                 const style = create('style', '*:not(slot), slot:not([name]) { display: none !important; }');
-                shadow.append(style);
+                shadow.prepend(style);
 
-                internals.stylesheetsLoadPromise = Promise
+                const promise = Promise
                 .all(Array.from(links, toLoadPromise))
-                .then(() => {
-                    if (lifecycle.load) lifecycle.load.apply(this, internals.params)
-                })
-                .finally(() => {
-                    style.remove()
-                });
+                .finally(() => style.remove());
+
+                if (lifecycle.load) promise.then(() => lifecycle.load.apply(this, internals.params));
             }
         }
 

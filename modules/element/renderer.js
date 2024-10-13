@@ -61,8 +61,7 @@ assign(Renderer.prototype, {
         while (input = this[--n]) {
             let m = -1, output;
             while (output = input[++m]) if (output === this) break;
-            while (output = input[++m]) input[m - 1] = input[m];
-            input[m] = undefined;
+            while (output = input[m++]) input[m - 1] = input[m];
             this[n]  = undefined;
         }
 

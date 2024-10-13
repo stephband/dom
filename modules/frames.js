@@ -1,21 +1,31 @@
 
 import Stream from 'fn/stream.js';
 
-export function frames() {
-    var timer;
-    return new Stream((control) => {
-        function frame(t) {
-            timer = window.requestAnimationFrame(frame);
-            control.push(t);
-        }
+const assign = Object.assign;
 
-        timer = window.requestAnimationFrame(frame);
 
-        control.done({
-            stop: function() {
-                timer && cancelAnimationFrame(timer);
-                timer = undefined;
-            }
-        });
-    });
+/** frames() **/
+
+function Frames() {}
+
+assign(Frames.prototype, {
+    start: function() {
+        const frame = (time) => {
+            this.timer = window.requestAnimationFrame(frame);
+            Stream.push(this, time);
+        };
+
+        this.timer = window.requestAnimationFrame(frame);
+        return this;
+    },
+
+    stop: function() {
+        this.timer && cancelAnimationFrame(this.timer);
+        this.timer = undefined;
+        return Stream.stop(this);
+    }
+});
+
+export default function frames() {
+    return new Frames();
 }

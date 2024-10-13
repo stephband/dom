@@ -59,13 +59,13 @@ function update(source, e) {
     times.length = 0;
 }
 
-function ScrollsProducer(element) {
+function Scrolls(element) {
     this.element = element;
     this.times   = [];
 }
 
-assign(ScrollsProducer.prototype, {
-    pipe: function(stream) {
+assign(Scrolls.prototype, {
+    start: function(stream) {
         this.stream = stream;
 
         // Method may be used once only
@@ -79,6 +79,7 @@ assign(ScrollsProducer.prototype, {
         */
 
         this.element.addEventListener('scroll', this, captureOptions);
+        return this;
     },
 
     handleEvent: function(e) {
@@ -110,7 +111,7 @@ assign(ScrollsProducer.prototype, {
         }
         else {
             this.value = Stream.of(e);
-            this.stream.push(this.value);
+            Stream.push(this, this.value);
         }
 
         // Update only when there is a trackingInterval second pause in scrolling
@@ -119,10 +120,10 @@ assign(ScrollsProducer.prototype, {
 
     stop: function() {
         this.element.removeEventListener('scroll', this);
-        stop(this.stream);
+        return Stream.prototype.stop.apply(this);
     }
 });
 
 export default function scrolls(element) {
-    return new Stream(new ScrollsProducer(element));
+    return new Scrolls(element);
 }

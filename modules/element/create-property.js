@@ -4,8 +4,28 @@ import nothing   from 'fn/nothing.js';
 import Signal    from 'fn/signal.js';
 import TokenList, { update } from './token-list-2.js';
 
+const symbols = {};
+
+export function createProperty(name, initial) {
+    const symbol = symbols[name] || (symbols[name] = Symbol(name));
+
+    return {
+        get: function() {
+            const signal = this[symbol] || (this[symbol] = Signal.of(initial));
+            return signal.value;
+        },
+
+        set: function(value) {
+            const signal = this[symbol] || (this[symbol] = Signal.of(value));
+            signal.value = value;
+        },
+
+        enumerable: true
+    };
+}
+
 export function createBoolean(name) {
-    const symbol = Symbol(name);
+    const symbol = symbols[name] || (symbols[name] = Symbol(name));
 
     return {
         // Use the attribute as the source of truth, so that boolean
@@ -33,7 +53,7 @@ export function createBoolean(name) {
 }
 
 export function createNumber(name, min = -Infinity, max = Infinity, initial = clamp(min, max, 0)) {
-    const symbol = Symbol(name);
+    const symbol = symbols[name] || (symbols[name] = Symbol(name));
 
     return {
         attribute: function(value) {
@@ -61,7 +81,7 @@ export function createNumber(name, min = -Infinity, max = Infinity, initial = cl
 }
 
 export function createString(name, pattern) {
-    const symbol = Symbol(name);
+    const symbol = symbols[name] || (symbols[name] = Symbol(name));
 
     return {
         attribute: function(value) {
@@ -85,7 +105,7 @@ export function createString(name, pattern) {
 }
 
 export function createTokenList(name, tokens = nothing) {
-    const symbol = Symbol(name);
+    const symbol = symbols[name] || (symbols[name] = Symbol(name));
 
     return {
         // Use the attribute as the source of truth rather than the property,

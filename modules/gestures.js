@@ -37,10 +37,10 @@ thinks you are trying to perform some native pan or scroll
 ([MDN touch-action](https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action))
 */
 
-import get             from 'fn/get.js';
-import overload        from 'fn/overload.js';
-import Stream, { pipe, stop } from 'fn/stream/stream.js';
-import px              from './parse-length.js';
+import get      from 'fn/get.js';
+import overload from 'fn/overload.js';
+import Stream   from 'fn/stream/stream.js';
+import px       from './parse-length.js';
 
 const A      = Array.prototype;
 const assign = Object.assign;
@@ -178,18 +178,18 @@ assign(Pointermove.prototype, {
         this.target.setPointerCapture(this.pointerId);
 
         // Push a new gesture stream that uses this as producer
-        this.stream.push(new Stream(this));
+        Stream.push(this, Stream.from(this));
     },
 
     pipe: function(output) {
         // Sets this[0] and listens to stops on output
-        pipe(this, output);
+        Stream.prototype.pipe.call(this, output);
 
         // Empty buffer into stream
         while(this.events.length) {
             // Stream may be stopped during this loop so push to `this[0]`
             // rather than to `output`
-            this[0].push(A.shift.apply(this.events));
+            Stream.push(this, A.shift.apply(this.events));
         }
 
         // Have the output stream take over as the events buffer
@@ -226,18 +226,12 @@ function isIgnoreTag(e) {
     return tag && (!!config.ignoreTags[tag.toLowerCase()] || e.target.draggable);
 }
 
-function PointerProducer(node, options) {
+function Gestures(node, options) {
     this.node    = node;
     this.options = options;
 }
 
-assign(PointerProducer.prototype, {
-    pipe: function(output) {
-        this[0] = output;
-        this.node.addEventListener('pointerdown', this);
-        return output;
-    },
-
+assign(Gestures.prototype, Stream.prototype, {
     handleEvent: function(e) {
         // Ignore non-primary buttons
         if (e.button !== 0) { return; }
@@ -269,17 +263,22 @@ assign(PointerProducer.prototype, {
             pointerId:     e.pointerId
         };
 
-        new Pointermove(this[0], event, this.options);
+        new Pointermove(this, event, this.options);
+    },
+
+    start: function() {
+        this.node.addEventListener('pointerdown', this);
+        return this;
     },
 
     // Stop the gestures stream
     stop: function() {
+        // Check this is consumed
         if (this[0]) {
             this.node.removeEventListener('pointerdown', this);
-            stop(this[0]);
         }
 
-        return this;
+        return Stream.stop(this);
     }
 });
 
@@ -299,5 +298,5 @@ export default function gestures(options, node) {
         console.warn('gestures(options) deprecated options.selector, name changed to options.select');
     }
 
-    return new Stream(new PointerProducer(node, options));
+    return new Gestures(node, options);
 }

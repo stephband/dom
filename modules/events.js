@@ -61,8 +61,8 @@ Pass in an `initial` event object to have the event stream start synchronously
 with an initial value when consumed.
 */
 
-import cache from 'fn/cache.js';
-import Stream, { pipe, stop } from 'fn/stream/stream.js';
+import cache  from 'fn/cache.js';
+import Stream from 'fn/stream/stream.js';
 
 const assign  = Object.assign;
 const rspaces = /\s+/;
@@ -94,7 +94,7 @@ function unlisten(listener, type) {
     return listener;
 }
 
-function EventsProducer(type, options, node, initialEvent) {
+function Events(type, options, node, initialEvent) {
     // Potential hard-to-find error here if type has repeats, ie 'click click'.
     // Lets assume nobody is dumb enough to do this, I dont want to have to
     // check for that every time.
@@ -105,24 +105,23 @@ function EventsProducer(type, options, node, initialEvent) {
     this.initialEvent = initialEvent;
 }
 
-assign(EventsProducer.prototype, {
-    pipe: function(output) {
-        pipe(this, output);
+assign(Events.prototype, Stream.prototype, {
+    start: function() {
         this.types.reduce(listen, this);
 
         if (this.initialEvent) {
             this.handleEvent(this.initialEvent);
             delete this.initialEvent;
         };
+
+        return this;
     },
 
     handleEvent: function(e) {
         // Ignore clicks with the same timeStamp as previous clicks –
         // they are likely simulated by the browser, like how clicks on labels
         // cause simulated clicks to be emitted from inputs
-        if (e.type === 'click' && e.timeStamp <= clickTimeStamp) {
-            return;
-        }
+        if (e.type === 'click' && e.timeStamp <= clickTimeStamp) return;
 
         // If there is a selector and the target doesn't match, shoofty
         // outta here
@@ -132,12 +131,12 @@ assign(EventsProducer.prototype, {
             e.selectedTarget = selectedTarget;
         }
 
-        this[0].push(e);
+        Stream.push(this, e);
     },
 
     stop: function() {
         this.types.reduce(unlisten, this);
-        stop(this[0]);
+        return Stream.prototype.stop.apply(this);
     }
 });
 
@@ -149,5 +148,5 @@ export default function events(type, node, initialEvent) {
         type    = options.type;
     }
 
-    return new Stream(new EventsProducer(type, options, node, initialEvent));
+    return new Events(type, options, node, initialEvent);
 }

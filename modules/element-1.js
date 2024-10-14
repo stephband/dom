@@ -93,13 +93,15 @@ support.
 
 import capture           from 'fn/capture.js';
 import create            from './create.js';
-import toLoadPromise     from './element/to-load-promise.js';
-import toPrefetchPromise from './element/to-prefetch-promise.js';
-import { createInternals, getInternals } from './element/internals.js';
+import toLoadPromise     from './element-1/to-load-promise.js';
+import toPrefetchPromise from './element-1/to-prefetch-promise.js';
+import { createInternals, getInternals } from './element-1/internals.js';
 
 const define  = Object.defineProperties;
 const nothing = {};
 const constructors = {};
+
+console.warn('element() function at element-1.js deprecated, import from element.js');
 
 /*
 const constructors = {

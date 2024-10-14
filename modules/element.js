@@ -91,13 +91,17 @@ shadow DOM. Mileage will vary. Managing focus can be problematic without browser
 support.
 */
 
-import capture           from 'fn/capture.js';
-import overload          from 'fn/overload.js';
-import create            from './create.js';
-import Renderer          from './element/renderer.js';
-//import toPrefetchPromise from './element/to-prefetch-promise.js';
+import capture  from 'fn/capture.js';
+import id       from 'fn/id.js';
+import overload from 'fn/overload.js';
+import Signal   from 'fn/signal.js';
+import create   from './create.js';
 import { createInternals, getInternals } from './element/internals.js';
-import { createProperty, createBoolean, createNumber, createString, createTokenList } from './element/create-property.js';
+//import createProperty  from './element/create-property.js';
+//import createBoolean   from './element/create-boolean-property.js';
+//import createNumber    from './element/create-number-property.js';
+//import createString    from './element/create-string-property.js';
+//import createTokenList from './element/create-tokenlist-property.js';
 
 
 const define         = Object.defineProperties;
@@ -219,16 +223,8 @@ function fillShadowFromTemplate(shadow, template) {
 }
 
 const createDescriptor = overload((name, options) => typeof options, {
-    object: overload((name, options) => options.type, {
-        property: (name, options) => createProperty(name, options.default),
-        boolean:  (name, options) => createBoolean(name),
-        number:   (name, options) => createNumber(name, options.min, options.max, options.default),
-        string:   (name, options) => createString(name, options.pattern),
-        tokens:   (name, options) => createTokenList(name, options.tokens),
-        default:  (name, options) => options
-    }),
+    object:   (name, descriptor) => descriptor,
     function: (name, fn) => ({ value: fn }),
-    string:   (name, type) => createDescriptor(name, { type }),
     default:  (name, options) => {
         throw new TypeError('element() does not accept property descriptor of type ' + typeof options);
     }
@@ -447,4 +443,4 @@ export default function element(definition, lifecycle = {}, properties = {}, log
 }
 
 export { getInternals };
-export const render = Renderer.from;
+export const render = Signal.frame;

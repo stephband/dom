@@ -262,7 +262,7 @@ export default function element(definition, lifecycle = {}, properties = {}, log
         const element = Reflect.construct(constructor, arguments, Element);
 
         // Make shadow if mode or shadow have been set
-        const shadow = lifecycle.mode || (typeof lifecycle.shadow === 'string') ?
+        const shadow = (lifecycle.mode || (typeof lifecycle.shadow === 'string')) ?
             createShadow(element, lifecycle) :
             undefined ;
 
@@ -273,13 +273,11 @@ export default function element(definition, lifecycle = {}, properties = {}, log
         // the form control API internals object. We're gonna be rude and
         // extend it.
         const internals = createInternals(Element, element, shadow);
-        const params    = internals.params = [shadow, internals];
 
         // Flag support for custom built-ins. We know this when tag exists and
         // Element constructor is called
         if (tag) supportsCustomisedBuiltIn = true;
-
-        if (lifecycle.construct) lifecycle.construct.apply(element, params);
+        if (lifecycle.construct) lifecycle.construct.call(element, shadow, internals);
 
         // At this point, if properties have been set before the element was
         // upgraded they already exist on the element itself, where we have
@@ -316,7 +314,7 @@ export default function element(definition, lifecycle = {}, properties = {}, log
                 .all(Array.from(links, toLoadPromise))
                 .finally(() => {
                     style.remove();
-                    if (lifecycle.load) lifecycle.load.apply(this, internals.params);
+                    if (lifecycle.load) lifecycle.load.call(element, shadow, internals);
                 });
             }
         }
@@ -346,23 +344,22 @@ export default function element(definition, lifecycle = {}, properties = {}, log
             Element.prototype.formDisabledCallback = function(disabled) {
                 const internals = getInternals(this);
                 return disabled ?
-                    lifecycle.disable && lifecycle.disable.apply(this, internals.params) :
-                    lifecycle.enable && lifecycle.enable.apply(this, internals.params) ;
+                    lifecycle.disable && lifecycle.disable.call(this, internals.shadowRoot, internals) :
+                    lifecycle.enable && lifecycle.enable.call(this, internals.shadowRoot, internals) ;
             };
         }
 
         if (lifecycle.reset) {
             Element.prototype.formResetCallback = function() {
                 const internals = getInternals(this);
-                return lifecycle.reset.apply(this, internals.params);
+                return lifecycle.reset.call(this, internals.shadowRoot, internals);
             };
         }
 
         if (lifecycle.restore) {
             Element.prototype.formStateRestoreCallback = function() {
                 const internals = getInternals(this);
-                const params    = internals.params;
-                return lifecycle.restore.apply(this, internals.params);
+                return lifecycle.restore.call(this, internals.shadowRoot, internals);
             };
         }
     }
@@ -379,14 +376,14 @@ export default function element(definition, lifecycle = {}, properties = {}, log
     if (lifecycle.connect) {
         Element.prototype.connectedCallback = function() {
             const internals = getInternals(this);
-            internals.renderers = lifecycle.connect.apply(this, internals.params);
+            internals.renderers = lifecycle.connect.call(this, internals.shadowRoot, internals);
         }
     }
 
     Element.prototype.disconnectedCallback = function() {
         const internals = getInternals(this);
         if (internals.renderers)  internals.renderers.forEach(stop);
-        if (lifecycle.disconnect) lifecycle.disconnect.apply(this, internals.params);
+        if (lifecycle.disconnect) lifecycle.disconnect.call(this, internals.shadowRoot, internals);
     };
 
     // Log registration to console

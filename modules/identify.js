@@ -18,7 +18,7 @@ This will return useless results if `node` is in a fragment, as root node is
 the fragment so ids will not be checked against a document or shadowRoot.
 **/
 
-export default function identify(node, prefix = 'id-', root = (node.getRootNode() || document)) {
+export default function identify(node, prefix = 'id-', root = (node.getRootNode && node.getRootNode() || document)) {
 	let id = node.id;
 
 	if (!id) {

@@ -2,7 +2,7 @@
 import clamp  from 'fn/clamp.js';
 import Signal from 'fn/signal.js';
 
-export default function createNumberProperty(min = -Infinity, max = Infinity, parse = Number, initial = clamp(min, max, 0)) {
+export default function createNumberProperty(initial = 0, min = -Infinity, max = Infinity, parse = Number) {
     const symbol = Symbol();
     const descriptor = {
         attribute: function(value) {
@@ -10,7 +10,7 @@ export default function createNumberProperty(min = -Infinity, max = Infinity, pa
         },
 
         get: function() {
-            const signal = this[symbol] || (this[symbol] = Signal.of(initial));
+            const signal = this[symbol] || (this[symbol] = Signal.of(clamp(min, max, initial)));
             return signal.value;
         },
 

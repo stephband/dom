@@ -1,7 +1,7 @@
 
 import Signal from 'fn/signal.js';
 
-export default function createString(pattern) {
+export default function createStringProperty(default = '', pattern) {
     const symbol = Symbol();
     const descriptor = {
         attribute: function(value) {
@@ -9,15 +9,16 @@ export default function createString(pattern) {
         },
 
         get: function() {
-            const signal = this[symbol] || (this[symbol] = Signal.of(''));
+            const signal = this[symbol] || (this[symbol] = Signal.of(default));
             return signal.value;
         },
 
         set: function(value) {
-            const signal = this[symbol] || (this[symbol] = Signal.of(value));
+            const signal = this[symbol] || (this[symbol] = Signal.of());
             // Where pattern exists check string matches pattern
-            if (pattern && !pattern.test('' + value)) return;
-            signal.value = '' + value;
+            signal.value = (pattern && !pattern.test('' + value)) ?
+                default :
+                '' + value ;
         },
 
         enumerable: true

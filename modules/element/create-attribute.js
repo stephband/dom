@@ -15,11 +15,11 @@ function getSignal(element, name, initial) {
     );
 }
 
-export function createAttribute(name, parse = id) {
+export function createAttribute(name, initial, parse = id) {
     return {
         attribute: function(value) {
             const signal = getSignal(this, name);
-            signal.value = parse(value);
+            signal.value = value === null ? initial : parse(value) ;
         }
     };
 }

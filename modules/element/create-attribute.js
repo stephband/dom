@@ -43,7 +43,7 @@ export function createProperty(name, initial, parse = id) {
 export function createAttributeProperty(name, initial, parse = id) {
     return assign(createProperty(name, initial, parse), {
         attribute: function(value) {
-            this[name] = value === null ? undefined : value ;
+            this[name] = value === null ? undefined : value.trim() ;
         }
     });
 }
@@ -68,8 +68,8 @@ export function createStringAttribute(name, parse = id) {
     });
 }
 
-export function createNumberAttribute(name, min, max, parse = id) {
-    return createAttrProp(name, 0, (value) => {
+export function createNumberAttribute(name, initial, min, max, parse = id) {
+    return createAttrProp(name, initial, (value) => {
         const number = parse(value);
 
         if (Number.isNaN(number)) {

@@ -1,4 +1,5 @@
 
+import clamp    from 'fn/clamp.js';
 import id       from 'fn/id.js';
 import overload from 'fn/overload.js';
 import toType   from 'fn/to-type.js';
@@ -15,11 +16,11 @@ function getSignal(element, name, initial) {
     );
 }
 
-export function createAttribute(name, parse = id) {
+export function createAttribute(name, initial, parse = id) {
     return {
         attribute: function(value) {
             const signal = getSignal(this, name);
-            signal.value = parse(value);
+            signal.value = value === null ? initial : parse(value) ;
         }
     };
 }
@@ -43,7 +44,7 @@ export function createProperty(name, initial, parse = id) {
 export function createAttributeProperty(name, initial, parse = id) {
     return assign(createProperty(name, initial, parse), {
         attribute: function(value) {
-            this[name] = value === null ? undefined : value ;
+            this[name] = value === null ? undefined : value.trim() ;
         }
     });
 }
@@ -68,8 +69,8 @@ export function createStringAttribute(name, parse = id) {
     });
 }
 
-export function createNumberAttribute(name, min, max, parse = id) {
-    return createAttributeProperty(name, 0, (value) => {
+export function createNumberAttribute(name, initial, min, max, parse = id) {
+    return createAttributeProperty(name, initial, (value) => {
         const number = parse(value);
 
         if (Number.isNaN(number)) {

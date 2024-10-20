@@ -63,13 +63,13 @@ export function createBooleanAttribute(name) {
 }
 
 export function createStringAttribute(name, parse = id) {
-    return createAttrProp(name, '', (value) => {
+    return createAttributeProperty(name, '', (value) => {
         return value ? parse(value) : '' ;
     });
 }
 
 export function createNumberAttribute(name, min, max, parse = id) {
-    return createAttrProp(name, 0, (value) => {
+    return createAttributeProperty(name, 0, (value) => {
         const number = parse(value);
 
         if (Number.isNaN(number)) {
@@ -81,7 +81,7 @@ export function createNumberAttribute(name, min, max, parse = id) {
 }
 
 export function createObjectAttribute(name) {
-    return createAttrProp(name, null, overload(toType, {
+    return createAttributeProperty(name, null, overload(toType, {
         string: JSON.parse,
         object: id,
         initial: (value) => {

@@ -294,9 +294,7 @@ export default function element(definition, lifecycle = {}, properties = {}, log
         //    them on the instance.
         //
         // Let's go with 3. I'm not happy we have to do this, though.
-        if (properties) {
-            Object.keys(properties).reduce(transferProperty, element);
-        }
+        Object.keys(descriptors).reduce(transferProperty, element);
 
         // Avoid flash of unstyled content in shadow DOMs that must load assets.
         if (shadow) {
@@ -406,9 +404,7 @@ export default function element(definition, lifecycle = {}, properties = {}, log
 
         document.querySelectorAll('[is="' + name + '"]').forEach((element) => {
             // Define properties on element
-            if (properties) {
-                define(element, properties);
-            }
+            define(element, descriptors);
 
             // Construct an instance from Constructor using the Element prototype
             const shadow = lifecycle.mode || lifecycle.shadow ?

@@ -285,10 +285,12 @@ export default function element(definition, lifecycle = {}, properties = {}, log
         // definitions will never be reached. Either:
         //
         // 1. Define properties on the instance instead of the prototype, as in
-        //    Object.defineProperties(element, properties);
+        //    Object.defineProperties(element, descriptors) here in the
+        //    constructor. Won't actually solve the problem.
         //
         // 2. Take a great deal of care when authoring not to set properties
-        //    before an element is upgraded. We can't impose a restriction like that.
+        //    before an element is upgraded. We can't impose a restriction like
+        //    that on Joe Bloggs front end developer.
         //
         // 3. Copy defined properties to their prototype handlers and delete
         //    them on the instance.

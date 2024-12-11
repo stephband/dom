@@ -152,10 +152,14 @@ const parseNameTag = capture(/^\s*<?([a-z][\w]*-[\w-]+)>?\s*$|^\s*<?([a-z][\w]*)
 const onceEvent = { once: true };
 
 function toLoadPromise(element) {
-    return new Promise((resolve, reject) => {
-        element.addEventListener('load', resolve, onceEvent);
-        element.addEventListener('error', reject, onceEvent);
-    });
+    return !!element.sheet ?
+        // Link has already loaded
+        Promise.resolve({ target: element }) :
+        // Wait for load
+        new Promise((resolve, reject) => {
+            element.addEventListener('load', resolve, onceEvent);
+            element.addEventListener('error', reject, onceEvent);
+        }) ;
 }
 
 function stop(object) {
@@ -313,7 +317,10 @@ export default function element(definition, lifecycle = {}, properties = {}, log
                 const promise = Promise
                 .all(Array.from(links, toLoadPromise))
                 .finally(() => {
+                    if (window.DEBUG) window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c load \n' + Array.from(links).map((link) => link.href.replace(/https?:\/\//, '')).join('\n'), 'color:#3a8ab0;font-weight:400;', 'color:#888888;font-weight:400;');
+                    // Remove hide style
                     style.remove();
+                    // and call the load() callback
                     if (lifecycle.load) lifecycle.load.call(element, shadow, internals);
                 });
             }

@@ -4,15 +4,16 @@ import create from '../create.js';
 
 const $internals = Symbol('internals');
 
+// TODO: No longer needed polyfill for Safari... ??
+/*
 function attachInternals(element) {
     var internals;
 
-    // Use native attachInternals where it exists
-    if (element.attachInternals) {
-        internals = element.attachInternals();
-        if (internals.setFormValue) {
-            return internals;
-        }
+    // Use native attachInternals where it exists and we have the right to use
+    // it - you cannot attachInternals to customised built-ins
+    if (element.attachInternals && !element.getAttribute('is')) {
+        return element.attachInternals();
+        //if (internals.setFormValue) return internals;
     }
     else {
         internals = {
@@ -25,13 +26,12 @@ function attachInternals(element) {
     // not yet put this in the DOM however – it violates the spec to give a
     // custom element children before it's contents are parsed. Instead we
     // wait until connectCallback.
-    internals.polyfillInput = create('input', { type: 'hidden', name: elem.name });
-    elem.appendChild(internals.polyfillInput);
-
+    //internals.polyfillInput = create('input', { type: 'hidden', name: elem.name });
+    //elem.appendChild(internals.polyfillInput);
     // Polyfill internals object setFormValue
-    internals.setFormValue = function(value) {
-        this.input.value = value;
-    };
+    //internals.setFormValue = function(value) {
+    //    this.input.value = value;
+    //};
 
     return internals;
 }
@@ -42,8 +42,14 @@ export function createInternals(Element, element, shadow) {
         { shadowRoot: shadow }
     );
 }
+*/
+
+export function createInternals(Element, element, shadow) {
+    return element[$internals] = (element.attachInternals && !element.getAttribute('is')) ?
+        element.attachInternals() :
+        { shadowRoot: shadow } ;
+}
 
 export function getInternals(element) {
-    // Default to an empty object
-    return element[$internals];// || (element[$internals] = {});
+    return element[$internals];
 }

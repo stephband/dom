@@ -203,10 +203,7 @@ assign(PointerStream.prototype, Stream.prototype, {
             delete store[this.pointerId];
         }
 
-        if (this[0]) {
-            const output = this[0];
-            stop(output);
-        }
+        return Stream.stop(this);
     }
 });
 

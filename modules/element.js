@@ -451,7 +451,6 @@ export default function element(definition, lifecycle = {}, properties = {}, log
         }
 
         function polyfillByRoot(root) {
-            console.log(root);
             findByIs(root, name).forEach(upgrade)
             const observer = new MutationObserver(() => findByIs(root, name).forEach(upgrade));
             observer.observe(root, { childList: true, subtree: true });

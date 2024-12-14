@@ -93,15 +93,11 @@ support.
 
 import capture  from 'fn/capture.js';
 import id       from 'fn/id.js';
+import noop     from 'fn/noop.js';
 import overload from 'fn/overload.js';
 import Signal   from 'fn/signal.js';
 import create   from './create.js';
 import { createInternals, getInternals } from './element/internals.js';
-//import createProperty  from './element/create-property.js';
-//import createBoolean   from './element/create-boolean-property.js';
-//import createNumber    from './element/create-number-property.js';
-//import createString    from './element/create-string-property.js';
-//import createTokenList from './element/create-tokenlist-property.js';
 
 
 const define         = Object.defineProperties;
@@ -224,6 +220,19 @@ function fillShadowFromTemplate(shadow, template) {
     }
 
     return shadow;
+}
+
+function isNotUpgraded(element) {
+    /* Detect marked as upgraded, mark if not */
+    const upgraded = element.isUpgraded;
+    element.isUpgraded = true;
+    return !upgraded;
+}
+
+function findByIs(root, name) {
+    return Array
+    .from(root.querySelectorAll('[is="' + name + '"]'))
+    .filter(isNotUpgraded);
 }
 
 const createDescriptor = overload((name, options) => typeof options, {
@@ -400,6 +409,7 @@ export default function element(definition, lifecycle = {}, properties = {}, log
     // Define the element
     window.customElements.define(name, Element, tag && { extends: tag });
 
+
     // Safari partial polyfill.
     // Where tag is supplied, element should have been registered as a customised
     // built-in and the constructor would have run if any were in the DOM already.
@@ -411,7 +421,7 @@ export default function element(definition, lifecycle = {}, properties = {}, log
             console.warn('Browser does not support customised built-in elements, polyfilling <' + tag + ' is="' + name + '">');
         }
 
-        document.querySelectorAll('[is="' + name + '"]').forEach((element) => {
+        function upgrade(element) {
             // Define properties on element
             define(element, descriptors);
 
@@ -438,7 +448,23 @@ export default function element(definition, lifecycle = {}, properties = {}, log
 
             // Run connected callback
             lifecycle.connect && lifecycle.connect.call(element, shadow, internals);
-        });
+        }
+
+        function polyfillByRoot(root) {
+            console.log(root);
+            findByIs(root, name).forEach(upgrade)
+            const observer = new MutationObserver(() => findByIs(root, name).forEach(upgrade));
+            observer.observe(root, { childList: true, subtree: true });
+        }
+
+        // Expose on element for use in shadow DOMs
+        Element.polyfillByRoot = polyfillByRoot;
+
+        // Run on document automatically
+        polyfillByRoot(document);
+    }
+    else {
+        Element.polyfillByRoot = noop;
     }
 
     return Element;

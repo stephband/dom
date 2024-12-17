@@ -65,7 +65,7 @@ export function createBooleanAttribute(name) {
 
 export function createStringAttribute(name, initial = '', parse = id) {
     return createAttributeProperty(name, initial, (value) => {
-        return value ? parse(value) : initial ;
+        return value ? '' + parse(value) : initial ;
     });
 }
 

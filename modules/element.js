@@ -417,50 +417,63 @@ export default function element(definition, lifecycle = {}, properties = {}, log
     // go some way towards filling in support by searching for elements and
     // assigning their intended APIs to them.
     if (tag && !supportsCustomisedBuiltIn) {
-        if (window.DEBUG) {
-            console.warn('Browser does not support customised built-in elements, polyfilling <' + tag + ' is="' + name + '">');
-        }
+        // It may be there were none in the DOM, in which case we must run a
+        // test. Not ideal.
+        const div = document.createElement('div');
+        div.style.position = 'fixed';
+        div.style.left = '-1000px';
+        div.style.top  = '-1000px';
+        div.innerHTML = '<' + tag + ' is="' + name + '"></' + tag + '>';
+        document.body.append(div);
+        div.remove();
 
-        function upgrade(element) {
-            // Define properties on element
-            define(element, descriptors);
-
-            // Construct an instance from Constructor using the Element prototype
-            const shadow = lifecycle.mode || lifecycle.shadow ?
-                createShadow(element, lifecycle) :
-                undefined ;
-
-            // Get access to the internals object
-            const internals = createInternals(Element, element, shadow);
-
-            // Run constructor
-            lifecycle.construct && lifecycle.construct.call(element, shadow, internals);
-
-            // Detect and run attributes
-            let n = -1, name;
-            while (name = attributes[++n]) {
-                // elements.attributes is sometimes undefined... why?
-                const attribute = element.attributes[name];
-                if (attribute) {
-                    properties[name].attribute.call(element, attribute.value);
-                }
+        if (!supportsCustomisedBuiltIn) {
+            if (window.DEBUG) {
+                console.warn('Browser does not support customised built-in elements, polyfilling <' + tag + ' is="' + name + '">');
             }
 
-            // Run connected callback
-            lifecycle.connect && lifecycle.connect.call(element, shadow, internals);
+            function upgrade(element) {
+                // Define properties on element
+                define(element, descriptors);
+
+                // Construct an instance from Constructor using the Element prototype
+                const shadow = lifecycle.mode || lifecycle.shadow ?
+                    createShadow(element, lifecycle) :
+                    undefined ;
+
+                // Get access to the internals object
+                const internals = createInternals(Element, element, shadow);
+
+                // Run constructor
+                lifecycle.construct && lifecycle.construct.call(element, shadow, internals);
+
+                // Detect and run attributes
+                let n = -1, name;
+                while (name = attributes[++n]) {
+                    // elements.attributes is sometimes undefined... why?
+                    const attribute = element.attributes[name];
+                    if (attribute) properties[name].attribute.call(element, attribute.value);
+                }
+
+                // Run connected callback
+                lifecycle.connect && lifecycle.connect.call(element, shadow, internals);
+            }
+
+            function polyfillByRoot(root) {
+                findByIs(root, name).forEach(upgrade)
+                const observer = new MutationObserver(() => findByIs(root, name).forEach(upgrade));
+                observer.observe(root, { childList: true, subtree: true });
+            }
+
+            // Expose on element for use in shadow DOMs
+            Element.polyfillByRoot = polyfillByRoot;
+
+            // Run on document automatically
+            polyfillByRoot(document);
         }
-
-        function polyfillByRoot(root) {
-            findByIs(root, name).forEach(upgrade)
-            const observer = new MutationObserver(() => findByIs(root, name).forEach(upgrade));
-            observer.observe(root, { childList: true, subtree: true });
+        else {
+            Element.polyfillByRoot = noop;
         }
-
-        // Expose on element for use in shadow DOMs
-        Element.polyfillByRoot = polyfillByRoot;
-
-        // Run on document automatically
-        polyfillByRoot(document);
     }
     else {
         Element.polyfillByRoot = noop;

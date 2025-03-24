@@ -25,6 +25,17 @@ export function createAttribute(name, initial, parse = id) {
     };
 }
 
+export function createReadonlyProperty(name, initial) {
+    return {
+        get: function() {
+            const signal = getSignal(this, name, initial);
+            return signal.value;
+        },
+
+        enumerable: true
+    };
+}
+
 export function createProperty(name, initial, parse = id) {
     return {
         get: function() {

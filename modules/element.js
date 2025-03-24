@@ -95,7 +95,6 @@ import capture  from 'fn/capture.js';
 import id       from 'fn/id.js';
 import noop     from 'fn/noop.js';
 import overload from 'fn/overload.js';
-import Signal   from 'fn/signal.js';
 import create   from './create.js';
 import { createInternals, getInternals } from './element/internals.js';
 
@@ -392,13 +391,18 @@ export default function element(definition, lifecycle = {}, properties = {}, log
     if (lifecycle.connect) {
         Element.prototype.connectedCallback = function() {
             const internals = getInternals(this);
-            internals.renderers = lifecycle.connect.call(this, internals.shadowRoot, internals);
+            internals.stopable = lifecycle.connect.call(this, internals.shadowRoot, internals);
         }
     }
 
     Element.prototype.disconnectedCallback = function() {
         const internals = getInternals(this);
-        if (internals.renderers)  internals.renderers.forEach(stop);
+        if (internals.stopable) {
+            // Support a stopable...
+            if (internals.stopable.stop) { internals.stopable.stop(); }
+            // or an array of stopables
+            else { internals.stopable.forEach(stop); }
+        }
         if (lifecycle.disconnect) lifecycle.disconnect.call(this, internals.shadowRoot, internals);
     };
 
@@ -433,6 +437,12 @@ export default function element(definition, lifecycle = {}, properties = {}, log
             }
 
             function upgrade(element) {
+                // Store values of properties we are about to define
+                const store = {};
+                Object.keys(descriptors).forEach((key) => {
+                    if (element[key] !== undefined) store[key] = element[key];
+                });
+
                 // Define properties on element
                 define(element, descriptors);
 
@@ -446,6 +456,19 @@ export default function element(definition, lifecycle = {}, properties = {}, log
 
                 // Run constructor
                 lifecycle.construct && lifecycle.construct.call(element, shadow, internals);
+
+                if (window.DEBUG) {
+                    // Assign stored properties back onto element
+                    try {
+                        Object.assign(element, store);
+                    }
+                    catch(e) {
+                        console.warn(e.message, tag, Object.keys(store));
+                    }
+                }
+                else {
+                    Object.assign(element, store);
+                }
 
                 // Detect and run attributes
                 let n = -1, name;
@@ -483,4 +506,3 @@ export default function element(definition, lifecycle = {}, properties = {}, log
 }
 
 export { getInternals };
-export const render = Signal.frame;

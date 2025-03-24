@@ -102,6 +102,7 @@ function Events(type, options, node, initialEvent) {
     this.options      = options;
     this.node         = node;
     this.select       = options && options.select;
+    this.modifiers    = options && options.modifiers;
     this.initialEvent = initialEvent;
 }
 
@@ -119,9 +120,19 @@ assign(Events.prototype, Stream.prototype, {
 
     handleEvent: function(e) {
         // Ignore clicks with the same timeStamp as previous clicks –
-        // they are likely simulated by the browser, like how clicks on labels
+        // they are likely simulated by the browser, eg. clicks on labels
         // cause simulated clicks to be emitted from inputs
         if (e.type === 'click' && e.timeStamp <= clickTimeStamp) return;
+
+        // Inspect modifier keys
+        if (this.modifiers) {
+            const modifiers = typeof this.modifiers === 'string' ?
+                this.modifiers.split(/\s+/) :
+                this.modifiers ;
+
+            let n = modifiers.length;
+            while (n--) if (!e[modifiers[n] + 'Key']) return;
+        }
 
         // If there is a selector and the target doesn't match, shoofty
         // outta here

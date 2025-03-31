@@ -1,5 +1,5 @@
 
-import { remove } from 'fn/remove.js';
+import remove from 'fn/remove.js';
 
 const assign = Object.assign;
 

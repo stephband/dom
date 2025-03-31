@@ -71,16 +71,16 @@ function stopPropagation(e) {
     e.preventDefault();
 }
 
-/* Pointermove, pointerup and pointercancel handler */
+/* PointerStream, pointerup and pointercancel handler */
 
 function distanceThreshold(distance, x, y) {
     return (x * x + y * y) >= (distance * distance);
 }
 
-function Pointermove(stream, e, options) {
+function PointerStream(stream, target, e, options) {
     this.stream    = stream;
-    this.target    = e.gestureTarget;
-    this.events    = [e];
+    this.target    = target;
+    this.buffer    = [e];
     this.options   = options;
     this.pointerId = e.pointerId;
 
@@ -99,42 +99,44 @@ function Pointermove(stream, e, options) {
     document.addEventListener('pointercancel', this);
 }
 
-assign(Pointermove.prototype, {
+assign(PointerStream.prototype, Stream.prototype, {
     handleEvent: overload(get('type'), {
         'pointermove': function(e) {
             // If it's not a move from this gesture's pointer we're not interested
-            if (this.pointerId !== e.pointerId) {
-                return;
-            }
+            if (this.pointerId !== e.pointerId) return;
 
             // If pointer is already gesturing don't allow it to start another
-            if (this.pointerId in store && this !== store[this.pointerId]) {
-                this.stop();
-                return;
-            }
+            if (this.pointerId in store && this !== store[this.pointerId]) return this.stop();
 
-            this.events.push(e);
+            // We are still buffering
+            if (this.buffer) this.buffer.push(e);
 
+            // We are actively observing
+            else Stream.push(this, e);
+
+            // Not yet pushed to gestures
             if (!this.isGesture) {
                 // Check to see if we have satisfied the threshold check for
                 // x, y and time, if so start the gesture
-                const e0 = this.events[0];
+                const e0 = this.buffer[0];
                 const x  = e.clientX - e0.clientX;
                 const y  = e.clientY - e0.clientY;
                 const t  = (e.timeStamp - e0.timeStamp) / 1000;
 
-                if (this.checkThreshold(x, y, t)) {
-                    this.createGesture();
-                }
+                if (this.checkThreshold(x, y, t)) this.createGesture();
             }
         },
 
         'pointerup': function(e) {
-            if (this.pointerId !== e.pointerId) {
-                return;
-            }
+            // Pointer ids do not match
+            if (this.pointerId !== e.pointerId) return;
 
-            this.events.push(e);
+            // We are still buffering
+            if (this.buffer) this.buffer.push(e);
+
+            // We are actively observing
+            else Stream.push(this, e);
+
             this.target.releasePointerCapture(this.pointerId);
             this.stop();
 
@@ -149,11 +151,8 @@ assign(Pointermove.prototype, {
         },
 
         'default': function(e) {
-            if (this.pointerId !== e.pointerId) {
-                return;
-            }
-
-            this.events.push(e);
+            if (this.pointerId !== e.pointerId) return;
+            this.buffer.push(e);
             this.target.releasePointerCapture(this.pointerId);
             this.stop();
         }
@@ -177,23 +176,16 @@ assign(Pointermove.prototype, {
         // element only
         this.target.setPointerCapture(this.pointerId);
 
-        // Push a new gesture stream that uses this as producer
-        Stream.push(this, Stream.from(this));
+        // Push this pointer stream to gestures
+        Stream.push(this.stream, this);
     },
 
-    pipe: function(output) {
-        // Sets this[0] and listens to stops on output
-        Stream.prototype.pipe.call(this, output);
-
+    start: function() {
         // Empty buffer into stream
-        while(this.events.length) {
-            // Stream may be stopped during this loop so push to `this[0]`
-            // rather than to `output`
-            Stream.push(this, A.shift.apply(this.events));
-        }
+        while(this.buffer.length) Stream.push(this, this.buffer.shift());
 
-        // Have the output stream take over as the events buffer
-        this.events = output;
+        // Remove buffer
+        this.buffer = undefined;
     },
 
     stop: function() {
@@ -211,10 +203,7 @@ assign(Pointermove.prototype, {
             delete store[this.pointerId];
         }
 
-        if (this[0]) {
-            const output = this[0];
-            stop(output);
-        }
+        return Stream.stop(this);
     }
 });
 
@@ -234,19 +223,19 @@ function Gestures(node, options) {
 assign(Gestures.prototype, Stream.prototype, {
     handleEvent: function(e) {
         // Ignore non-primary buttons
-        if (e.button !== 0) { return; }
+        if (e.button !== 0) return;
 
         // Check pointer type is in options
-        if (this.options.device && !this.options.device.includes(e.pointerType)) { return; }
+        if (this.options.device && !this.options.device.includes(e.pointerType)) return;
 
         // Ignore form and interactive elements
-        if (isIgnoreTag(e)) { return; }
+        if (isIgnoreTag(e)) return;
 
         // Check target matches selector
-        let gestureTarget = e.target;
+        let target = e.target;
         if (this.options.select) {
-            gestureTarget = e.target.closest(this.options.select);
-            if (!gestureTarget) { return; }
+            target = e.target.closest(this.options.select);
+            if (!target) return;
         }
 
         // Copy event to keep the true target around, as target is mutated on
@@ -256,14 +245,13 @@ assign(Gestures.prototype, Stream.prototype, {
             type:          e.type,
             target:        e.target,
             currentTarget: e.currentTarget,
-            gestureTarget: gestureTarget,
             clientX:       e.clientX,
             clientY:       e.clientY,
             timeStamp:     e.timeStamp,
             pointerId:     e.pointerId
         };
 
-        new Pointermove(this, event, this.options);
+        new PointerStream(this, target, event, this.options);
     },
 
     start: function() {
@@ -273,11 +261,7 @@ assign(Gestures.prototype, Stream.prototype, {
 
     // Stop the gestures stream
     stop: function() {
-        // Check this is consumed
-        if (this[0]) {
-            this.node.removeEventListener('pointerdown', this);
-        }
-
+        this.node.removeEventListener('pointerdown', this);
         return Stream.stop(this);
     }
 });

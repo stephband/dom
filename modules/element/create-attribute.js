@@ -25,6 +25,17 @@ export function createAttribute(name, initial, parse = id) {
     };
 }
 
+export function createReadonlyProperty(name, initial) {
+    return {
+        get: function() {
+            const signal = getSignal(this, name, initial);
+            return signal.value;
+        },
+
+        enumerable: true
+    };
+}
+
 export function createProperty(name, initial, parse = id) {
     return {
         get: function() {
@@ -50,7 +61,7 @@ export function createAttributeProperty(name, initial, parse = id) {
 }
 
 export function createBooleanAttribute(name) {
-    return assign(createProperty(name, initial), {
+    return assign(createProperty(name, false), {
         attribute: function(value) {
             const signal = getSignal(this, name);
             signal.value = value !== null;
@@ -63,20 +74,16 @@ export function createBooleanAttribute(name) {
     });
 }
 
-export function createStringAttribute(name, parse = id) {
-    return createAttributeProperty(name, '', (value) => {
-        return value ? parse(value) : '' ;
+export function createStringAttribute(name, initial = '', parse = id) {
+    return createAttributeProperty(name, initial, (value) => {
+        return value ? '' + parse(value) : initial ;
     });
 }
 
 export function createNumberAttribute(name, initial, min, max, parse = id) {
     return createAttributeProperty(name, initial, (value) => {
         const number = parse(value);
-
-        if (Number.isNaN(number)) {
-            throw new TypeError('Attempt to set ' + typeof value + ' on property, expects a number');
-        }
-
+        if (Number.isNaN(number)) throw new TypeError('element() – Attempt to set "' + value + '" on property, expects a number');
         return clamp(min, max, number);
     });
 }

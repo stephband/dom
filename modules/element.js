@@ -93,15 +93,10 @@ support.
 
 import capture  from 'fn/capture.js';
 import id       from 'fn/id.js';
+import noop     from 'fn/noop.js';
 import overload from 'fn/overload.js';
-import Signal   from 'fn/signal.js';
 import create   from './create.js';
 import { createInternals, getInternals } from './element/internals.js';
-//import createProperty  from './element/create-property.js';
-//import createBoolean   from './element/create-boolean-property.js';
-//import createNumber    from './element/create-number-property.js';
-//import createString    from './element/create-string-property.js';
-//import createTokenList from './element/create-tokenlist-property.js';
 
 
 const define         = Object.defineProperties;
@@ -152,10 +147,14 @@ const parseNameTag = capture(/^\s*<?([a-z][\w]*-[\w-]+)>?\s*$|^\s*<?([a-z][\w]*)
 const onceEvent = { once: true };
 
 function toLoadPromise(element) {
-    return new Promise((resolve, reject) => {
-        element.addEventListener('load', resolve, onceEvent);
-        element.addEventListener('error', reject, onceEvent);
-    });
+    return !!element.sheet ?
+        // Link has already loaded
+        Promise.resolve({ target: element }) :
+        // Wait for load
+        new Promise((resolve, reject) => {
+            element.addEventListener('load', resolve, onceEvent);
+            element.addEventListener('error', reject, onceEvent);
+        }) ;
 }
 
 function stop(object) {
@@ -222,6 +221,19 @@ function fillShadowFromTemplate(shadow, template) {
     return shadow;
 }
 
+function isNotUpgraded(element) {
+    /* Detect marked as upgraded, mark if not */
+    const upgraded = element.isUpgraded;
+    element.isUpgraded = true;
+    return !upgraded;
+}
+
+function findByIs(root, name) {
+    return Array
+    .from(root.querySelectorAll('[is="' + name + '"]'))
+    .filter(isNotUpgraded);
+}
+
 const createDescriptor = overload((name, options) => typeof options, {
     object:   (name, descriptor) => descriptor,
     function: (name, fn) => ({ value: fn }),
@@ -285,18 +297,18 @@ export default function element(definition, lifecycle = {}, properties = {}, log
         // definitions will never be reached. Either:
         //
         // 1. Define properties on the instance instead of the prototype, as in
-        //    Object.defineProperties(element, properties);
+        //    Object.defineProperties(element, descriptors) here in the
+        //    constructor. Won't actually solve the problem.
         //
         // 2. Take a great deal of care when authoring not to set properties
-        //    before an element is upgraded. We can't impose a restriction like that.
+        //    before an element is upgraded. We can't impose a restriction like
+        //    that on Joe Bloggs front end developer.
         //
         // 3. Copy defined properties to their prototype handlers and delete
         //    them on the instance.
         //
         // Let's go with 3. I'm not happy we have to do this, though.
-        if (properties) {
-            Object.keys(properties).reduce(transferProperty, element);
-        }
+        Object.keys(descriptors).reduce(transferProperty, element);
 
         // Avoid flash of unstyled content in shadow DOMs that must load assets.
         if (shadow) {
@@ -313,7 +325,10 @@ export default function element(definition, lifecycle = {}, properties = {}, log
                 const promise = Promise
                 .all(Array.from(links, toLoadPromise))
                 .finally(() => {
+                    if (window.DEBUG) window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c load \n' + Array.from(links).map((link) => link.href.replace(/https?:\/\//, '')).join('\n'), 'color:#3a8ab0;font-weight:400;', 'color:#888888;font-weight:400;');
+                    // Remove hide style
                     style.remove();
+                    // and call the load() callback
                     if (lifecycle.load) lifecycle.load.call(element, shadow, internals);
                 });
             }
@@ -376,13 +391,18 @@ export default function element(definition, lifecycle = {}, properties = {}, log
     if (lifecycle.connect) {
         Element.prototype.connectedCallback = function() {
             const internals = getInternals(this);
-            internals.renderers = lifecycle.connect.call(this, internals.shadowRoot, internals);
+            internals.stopable = lifecycle.connect.call(this, internals.shadowRoot, internals);
         }
     }
 
     Element.prototype.disconnectedCallback = function() {
         const internals = getInternals(this);
-        if (internals.renderers)  internals.renderers.forEach(stop);
+        if (internals.stopable) {
+            // Support a stopable...
+            if (internals.stopable.stop) { internals.stopable.stop(); }
+            // or an array of stopables
+            else { internals.stopable.forEach(stop); }
+        }
         if (lifecycle.disconnect) lifecycle.disconnect.call(this, internals.shadowRoot, internals);
     };
 
@@ -393,6 +413,7 @@ export default function element(definition, lifecycle = {}, properties = {}, log
     // Define the element
     window.customElements.define(name, Element, tag && { extends: tag });
 
+
     // Safari partial polyfill.
     // Where tag is supplied, element should have been registered as a customised
     // built-in and the constructor would have run if any were in the DOM already.
@@ -400,44 +421,88 @@ export default function element(definition, lifecycle = {}, properties = {}, log
     // go some way towards filling in support by searching for elements and
     // assigning their intended APIs to them.
     if (tag && !supportsCustomisedBuiltIn) {
-        if (window.DEBUG) {
-            console.warn('Browser does not support customised built-in elements, polyfilling <' + tag + ' is="' + name + '">');
-        }
+        // It may be there were none in the DOM, in which case we must run a
+        // test. Not ideal.
+        const div = document.createElement('div');
+        div.style.position = 'fixed';
+        div.style.left = '-1000px';
+        div.style.top  = '-1000px';
+        div.innerHTML = '<' + tag + ' is="' + name + '"></' + tag + '>';
+        document.body.append(div);
+        div.remove();
 
-        document.querySelectorAll('[is="' + name + '"]').forEach((element) => {
-            // Define properties on element
-            if (properties) {
-                define(element, properties);
+        if (!supportsCustomisedBuiltIn) {
+            if (window.DEBUG) {
+                console.warn('Browser does not support customised built-in elements, polyfilling <' + tag + ' is="' + name + '">');
             }
 
-            // Construct an instance from Constructor using the Element prototype
-            const shadow = lifecycle.mode || lifecycle.shadow ?
-                createShadow(element, lifecycle) :
-                undefined ;
+            function upgrade(element) {
+                // Store values of properties we are about to define
+                const store = {};
+                Object.keys(descriptors).forEach((key) => {
+                    if (element[key] !== undefined) store[key] = element[key];
+                });
 
-            // Get access to the internals object
-            const internals = createInternals(Element, element, shadow);
+                // Define properties on element
+                define(element, descriptors);
 
-            // Run constructor
-            lifecycle.construct && lifecycle.construct.call(element, shadow, internals);
+                // Construct an instance from Constructor using the Element prototype
+                const shadow = lifecycle.mode || lifecycle.shadow ?
+                    createShadow(element, lifecycle) :
+                    undefined ;
 
-            // Detect and run attributes
-            let n = -1, name;
-            while (name = attributes[++n]) {
-                // elements.attributes is sometimes undefined... why?
-                const attribute = element.attributes[name];
-                if (attribute) {
-                    properties[name].attribute.call(element, attribute.value);
+                // Get access to the internals object
+                const internals = createInternals(Element, element, shadow);
+
+                // Run constructor
+                lifecycle.construct && lifecycle.construct.call(element, shadow, internals);
+
+                if (window.DEBUG) {
+                    // Assign stored properties back onto element
+                    try {
+                        Object.assign(element, store);
+                    }
+                    catch(e) {
+                        console.warn(e.message, tag, Object.keys(store));
+                    }
                 }
+                else {
+                    Object.assign(element, store);
+                }
+
+                // Detect and run attributes
+                let n = -1, name;
+                while (name = attributes[++n]) {
+                    // elements.attributes is sometimes undefined... why?
+                    const attribute = element.attributes[name];
+                    if (attribute) properties[name].attribute.call(element, attribute.value);
+                }
+
+                // Run connected callback
+                lifecycle.connect && lifecycle.connect.call(element, shadow, internals);
             }
 
-            // Run connected callback
-            lifecycle.connect && lifecycle.connect.call(element, shadow, internals);
-        });
+            function polyfillByRoot(root) {
+                findByIs(root, name).forEach(upgrade)
+                const observer = new MutationObserver(() => findByIs(root, name).forEach(upgrade));
+                observer.observe(root, { childList: true, subtree: true });
+            }
+
+            // Expose on element for use in shadow DOMs
+            Element.polyfillByRoot = polyfillByRoot;
+
+            // Run on document automatically
+            polyfillByRoot(document);
+        }
+        else {
+            Element.polyfillByRoot = noop;
+        }
+    }
+    else {
+        Element.polyfillByRoot = noop;
     }
 
     return Element;
 }
 
 export { getInternals };
-export const render = Signal.frame;

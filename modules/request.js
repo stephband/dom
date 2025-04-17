@@ -96,19 +96,19 @@ const createHeaders = choose({
 
 const createBody = choose({
     'application/json': function(data) {
-        return data.get ?
+        return data instanceof FormData ?
             formDataToJSON(data) :
             JSON.stringify(data);
     },
 
     'application/x-www-form-urlencoded': function(data) {
-        return data.get ?
+        return data instanceof FormData ?
             formDataToQuery(data) :
             dataToQuery(data) ;
     },
 
     'multipart/form-data': function(data) {
-        return data.get ?
+        return data instanceof FormData ?
             data :
             dataToFormData(data) ;
     },

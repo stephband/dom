@@ -367,10 +367,15 @@ export default function element(definition, lifecycle = {}, properties = {}, log
     if (lifecycle.connect) {
         Element.prototype.connectedCallback = function() {
             const internals = getInternals(this);
-            const shdaow = internals.shadowRoot;
-            internals.stopable = lifecycle.connect.call(this, internals.shadowRoot, internals);
+            const shadow    = internals.shadowRoot;
+
+            // Connect
+            internals.stopable = lifecycle.connect.call(this, shadow, internals);
 
             // Avoid flash of unstyled content in shadow DOMs that must load assets.
+            // Now, it's debatable whether this code should be here or in the constructor.
+            // Whether links in the shadow may have already emitted load events by connect
+            // time. They'd have to have done it synchronously, so I don't think so.
             if (shadow) {
                 const links = shadow.querySelectorAll('link[rel="stylesheet"]');
 

@@ -1,6 +1,7 @@
 
 /**
 events(type, element)
+events(type, element, initial)
 
 Returns a mappable stream of events heard on `element`.
 
@@ -9,8 +10,8 @@ events('click', element)
 .map((e) => e.target.id)
 ```
 
-The first parameter may alternatively be a select object. It must have a
-`.type` property.
+The first parameter may alternatively be an options object, in which case it
+must have a `.type` property.
 
 ```js
 events({ type: 'click' }, element)
@@ -52,14 +53,14 @@ Stopping an event stream removes its event listeners.
 ```js
 events('click', element).stop()
 ```
-**/
 
-/*
+Pass in an `initial` object to have the event stream start synchronously
+with the initial object when consumed.
+
+```js
 events(type, element, initial)
-
-Pass in an `initial` event object to have the event stream start synchronously
-with an initial value when consumed.
-*/
+```
+**/
 
 import cache  from 'fn/cache.js';
 import Stream from 'fn/stream/stream.js';
@@ -94,31 +95,22 @@ function unlisten(listener, type) {
     return listener;
 }
 
-function Events(type, options, node, initialEvent) {
-    // Potential hard-to-find error here if type has repeats, ie 'click click'.
-    // Lets assume nobody is dumb enough to do this, I dont want to have to
-    // check for that every time.
-    this.types        = type.split(rspaces);
-    this.options      = options;
-    this.node         = node;
-    this.select       = options && options.select;
-    this.modifiers    = options && options.modifiers;
-    this.initialEvent = initialEvent;
-}
+class Events extends Stream {
+    constructor(type, options, node, initialEvent) {
+        super();
 
-assign(Events.prototype, Stream.prototype, {
-    start: function() {
-        this.types.reduce(listen, this);
+        // Potential hard-to-find error here if type has repeats, ie 'click click'.
+        // Lets assume nobody is dumb enough to do this, I dont want to have to
+        // check for that every time.
+        this.types        = type.split(rspaces);
+        this.options      = options;
+        this.node         = node;
+        this.select       = options && options.select;
+        this.modifiers    = options && options.modifiers;
+        this.initialEvent = initialEvent;
+    }
 
-        if (this.initialEvent) {
-            this.handleEvent(this.initialEvent);
-            delete this.initialEvent;
-        };
-
-        return this;
-    },
-
-    handleEvent: function(e) {
+    handleEvent(e) {
         // Ignore clicks with the same timeStamp as previous clicks –
         // they are likely simulated by the browser, eg. clicks on labels
         // cause simulated clicks to be emitted from inputs
@@ -138,22 +130,32 @@ assign(Events.prototype, Stream.prototype, {
         // outta here
         if (this.select) {
             const selectedTarget = e.target.closest(this.select);
-            if (!selectedTarget) { return; }
+            if (!selectedTarget) return;
             e.selectedTarget = selectedTarget;
         }
 
         Stream.push(this, e);
-    },
-
-    stop: function() {
-        this.types.reduce(unlisten, this);
-        return Stream.prototype.stop.apply(this);
     }
-});
+
+    start() {
+        this.types.reduce(listen, this);
+
+        if (this.initialEvent) {
+            this.handleEvent(this.initialEvent);
+            delete this.initialEvent;
+        };
+
+        return this;
+    }
+
+    stop() {
+        this.types.reduce(unlisten, this);
+        return super.stop();
+    }
+}
 
 export default function events(type, node, initialEvent) {
     let options;
-
     if (typeof type === 'object') {
         options = type;
         type    = options.type;

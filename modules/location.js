@@ -15,7 +15,7 @@ const wh       = window.history  || {};
 const wl       = window.location || {};
 const pathname = Signal.of(wl.pathname);
 const search   = Signal.of(wl.search);
-const hash     = Signal.of(wl.has);
+const hash     = Signal.of(wl.hash);
 const href     = Signal.of(wl.href);
 const state    = Signal.of(JSON.stringify(wh.state));
 
@@ -72,7 +72,7 @@ export default {
 
     /** .search **/
     get search() {
-        return Object.fromEntries(new URLSearchParams(location.search));
+        return Object.fromEntries(new URLSearchParams(window.location.search));
     },
 
     /** .href **/
@@ -85,6 +85,7 @@ export default {
         return state.value;
     }
 };
+
 
 
 /* Keep location up-to-date */

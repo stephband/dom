@@ -30,11 +30,18 @@ const assignProperty = overload(id, {
 				delete object[name];
 			}
 		}
-		//console.log(Object.assign({}, object));
+
 		Object.assign(node.dataset, object);
 	},
 
 	dataset: function(name, node, object) {
+        // Strip undefined
+        for (name in object) {
+            if (object[name] === undefined) {
+                delete object[name];
+            }
+        }
+
 		Object.assign(node.dataset, object);
 	},
 
@@ -60,6 +67,15 @@ const assignProperty = overload(id, {
 	// SVG elements have a read-only properties, and must be set as string
 	// attributes. Todo: explore the SVG property API to make these take
 	// advantage of it
+    href: function(name, node, content) {
+        if (node instanceof SVGElement) {
+            node.setAttribute('href', content);
+        }
+        else {
+            node.href = content;
+        }
+    },
+
 	points:    setAttribute,
     cx:        setAttribute,
     cy:        setAttribute,
@@ -89,11 +105,7 @@ function setAttribute(name, node, content) {
 export function assign(node, attributes) {
 	var names = Object.keys(attributes);
 	var n = names.length;
-
-	while (n--) {
-		assignProperty(names[n], node, attributes[names[n]]);
-	}
-
+    while (n--) assignProperty(names[n], node, attributes[names[n]]);
 	return node;
 }
 

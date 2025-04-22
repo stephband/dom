@@ -394,9 +394,10 @@ export default function element(definition, lifecycle = {}, properties = {}, log
                         // Remove hide style
                         style.remove();
                         // and call the load() callback
-                        if (lifecycle.load) lifecycle.load.call(element, shadow, internals);
+                        if (lifecycle.load) lifecycle.load.call(this, shadow, internals);
                     });
                 }
+                else if (lifecycle.load) lifecycle.load.call(this, shadow, internals);
             }
         }
     }

@@ -376,28 +376,38 @@ export default function element(definition, lifecycle = {}, properties = {}, log
             // Now, it's debatable whether this code should be here or in the constructor.
             // Whether links in the shadow may have already emitted load events by connect
             // time. They'd have to have done it synchronously, so I don't think so.
-            if (shadow) {
-                const links = shadow.querySelectorAll('link[rel="stylesheet"]');
+            if (!shadow) return;
 
-                if (links.length) {
-                    // Hide all content other than the default slot until stylesheets
-                    // have loaded. We keep the default slot visible as that content
-                    // was visible before upgrade and we do not want it to momentarily
-                    // disappear.
-                    const style = create('style', '*:not(slot), slot:not([name]) { display: none !important; }');
-                    shadow.prepend(style);
+            const links = shadow.querySelectorAll('link[rel="stylesheet"]');
 
-                    const promise = Promise
-                    .all(Array.from(links, toLoadPromise))
-                    .finally(() => {
-                        if (window.DEBUG) window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c load \n' + Array.from(links).map((link) => link.href.replace(/https?:\/\//, '')).join('\n'), 'color:#3a8ab0;font-weight:400;', 'color:#888888;font-weight:400;');
-                        // Remove hide style
-                        style.remove();
-                        // and call the load() callback
-                        if (lifecycle.load) lifecycle.load.call(this, shadow, internals);
-                    });
+            if (links.length) {
+                // Hide all content other than the default slot until stylesheets
+                // have loaded. We keep the default slot visible as that content
+                // was visible before upgrade and we do not want it to momentarily
+                // disappear.
+                const style = create('style', '*:not(slot), slot:not([name]) { display: none !important; }');
+                shadow.prepend(style);
+
+                let promise;
+                if (!internals.loadPromise) {
+                    // Wait for stylesheets to load
+                    promise = internals.loadPromise = Promise.all(Array.from(links, toLoadPromise));
                 }
-                else if (lifecycle.load) lifecycle.load.call(this, shadow, internals);
+                else {
+                    // Insert an animation frame to avoid flash on reconnect
+                    promise = internals.loadPromise.then(() => new Promise(requestAnimationFrame));
+                }
+
+                promise.finally(() => {
+                    if (window.DEBUG) window.console.log('%c<' + (tag ? tag + ' is=' + name + '' : name) + '>%c load \n' + Array.from(links).map((link) => link.href.replace(/https?:\/\//, '')).join('\n'), 'color:#3a8ab0;font-weight:400;', 'color:#888888;font-weight:400;');
+                    // Remove hide style
+                    style.remove();
+                    // and call the load() callback
+                    if (lifecycle.load) lifecycle.load.call(this, shadow, internals);
+                });
+            }
+            else if (lifecycle.load) {
+                lifecycle.load.call(this, shadow, internals);
             }
         }
     }

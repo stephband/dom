@@ -77,29 +77,79 @@ function distanceThreshold(distance, x, y) {
     return (x * x + y * y) >= (distance * distance);
 }
 
-function PointerStream(stream, target, e, options) {
-    this.stream    = stream;
-    this.target    = target;
-    this.buffer    = [e];
-    this.options   = options;
-    this.pointerId = e.pointerId;
+class PointerStream extends Stream {
+    constructor(stream, target, e, options) {
+        this.stream    = stream;
+        this.target    = target;
+        this.buffer    = [e];
+        this.options   = options;
+        this.pointerId = e.pointerId;
 
-    if (typeof options.threshold === 'function') {
-        // options.threshold is a function
-        this.checkThreshold = options.threshold;
-    }
-    else {
-        // options.threshold is a string or number
-        const distance = px(options.threshold);
-        this.checkThreshold = (x, y, t) => distanceThreshold(distance, x, y, t);
+        if (typeof options.threshold === 'function') {
+            // options.threshold is a function
+            this.checkThreshold = options.threshold;
+        }
+        else {
+            // options.threshold is a string or number
+            const distance = px(options.threshold);
+            this.checkThreshold = (x, y, t) => distanceThreshold(distance, x, y, t);
+        }
+
+        document.addEventListener('pointermove', this);
+        document.addEventListener('pointerup', this);
+        document.addEventListener('pointercancel', this);
     }
 
-    document.addEventListener('pointermove', this);
-    document.addEventListener('pointerup', this);
-    document.addEventListener('pointercancel', this);
+    createGesture() {
+        // We are gesturing! Let's go
+        this.isGesture = true;
+
+        // For the duration of us dragging the pointer around we need to
+        // prevent text selection on the document. Note doing this does not
+        // deselect any text that has already been selected.
+        this.userSelectState = document.body.style[userSelect];
+        document.body.style[userSelect] = 'none';
+
+        // Keep a record of which pointers are currently responsible for
+        // gestures - we only want one per pointer, max
+        store[this.pointerId] = this;
+
+        // Encourage pointer events for this pointerId to come from this
+        // element only
+        this.target.setPointerCapture(this.pointerId);
+
+        // Push this pointer stream to gestures
+        Stream.push(this.stream, this);
+    }
+
+    start() {
+        // Empty buffer into stream
+        while(this.buffer.length) Stream.push(this, this.buffer.shift());
+
+        // Remove buffer
+        this.buffer = undefined;
+    }
+
+    stop() {
+        // Remove the listeners
+        document.removeEventListener('pointermove', this);
+        document.removeEventListener('pointerup', this);
+        document.removeEventListener('pointercancel', this);
+
+        // Is it already stopped?
+        if (this.isGesture) {
+            // Reset text selectability
+            document.body.style[userSelect] = this.userSelectState;
+
+            // Remove record that keeps this pointerId bound to this gesture
+            delete store[this.pointerId];
+        }
+
+        return Stream.stop(this);
+    }
 }
 
-assign(PointerStream.prototype, Stream.prototype, {
+assign(PointerStream.prototype, {
     handleEvent: overload(get('type'), {
         'pointermove': function(e) {
             // If it's not a move from this gesture's pointer we're not interested
@@ -156,55 +206,7 @@ assign(PointerStream.prototype, Stream.prototype, {
             this.target.releasePointerCapture(this.pointerId);
             this.stop();
         }
-    }),
-
-    createGesture: function() {
-        // We are gesturing! Let's go
-        this.isGesture = true;
-
-        // For the duration of us dragging the pointer around we need to
-        // prevent text selection on the document. Note doing this does not
-        // deselect any text that has already been selected.
-        this.userSelectState = document.body.style[userSelect];
-        document.body.style[userSelect] = 'none';
-
-        // Keep a record of which pointers are currently responsible for
-        // gestures - we only want one per pointer, max
-        store[this.pointerId] = this;
-
-        // Encourage pointer events for this pointerId to come from this
-        // element only
-        this.target.setPointerCapture(this.pointerId);
-
-        // Push this pointer stream to gestures
-        Stream.push(this.stream, this);
-    },
-
-    start: function() {
-        // Empty buffer into stream
-        while(this.buffer.length) Stream.push(this, this.buffer.shift());
-
-        // Remove buffer
-        this.buffer = undefined;
-    },
-
-    stop: function() {
-        // Remove the listeners
-        document.removeEventListener('pointermove', this);
-        document.removeEventListener('pointerup', this);
-        document.removeEventListener('pointercancel', this);
-
-        // Is it already stopped?
-        if (this.isGesture) {
-            // Reset text selectability
-            document.body.style[userSelect] = this.userSelectState;
-
-            // Remove record that keeps this pointerId bound to this gesture
-            delete store[this.pointerId];
-        }
-
-        return Stream.stop(this);
-    }
+    })
 });
 
 
@@ -215,13 +217,13 @@ function isIgnoreTag(e) {
     return tag && (!!config.ignoreTags[tag.toLowerCase()] || e.target.draggable);
 }
 
-function Gestures(node, options) {
-    this.node    = node;
-    this.options = options;
-}
+class Gestures extends Stream {
+    constructor(node, options) {
+        this.node    = node;
+        this.options = options;
+    }
 
-assign(Gestures.prototype, Stream.prototype, {
-    handleEvent: function(e) {
+    handleEvent(e) {
         // Ignore non-primary buttons
         if (e.button !== 0) return;
 
@@ -252,19 +254,19 @@ assign(Gestures.prototype, Stream.prototype, {
         };
 
         new PointerStream(this, target, event, this.options);
-    },
+    }
 
-    start: function() {
+    start() {
         this.node.addEventListener('pointerdown', this);
         return this;
-    },
+    }
 
     // Stop the gestures stream
-    stop: function() {
+    stop() {
         this.node.removeEventListener('pointerdown', this);
         return Stream.stop(this);
     }
-});
+}
 
 
 /* Gestures */

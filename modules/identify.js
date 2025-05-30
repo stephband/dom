@@ -18,10 +18,24 @@ This will return useless results if `node` is in a fragment, as root node is
 the fragment so ids will not be checked against a document or shadowRoot.
 **/
 
-export default function identify(node, prefix = 'id-', root = (node.getRootNode && node.getRootNode() || document)) {
+export default function identify(node, prefix = 'id-', root) {
 	let id = node.id;
 
 	if (!id) {
+        // Get root. *sigh*.
+        let root;
+        if (!root) {
+            if (node.getRootNode) {
+                root = node.getRootNode();
+                if (!root.getElementById) {
+                    root = document;
+                }
+            }
+            else {
+                root = document;
+            }
+        }
+
 		do { id = prefix + Math.ceil(Math.random() * 1000000); }
 		while (root.getElementById(id));
 		node.id = id;

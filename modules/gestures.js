@@ -79,6 +79,8 @@ function distanceThreshold(distance, x, y) {
 
 class PointerStream extends Stream {
     constructor(stream, target, e, options) {
+        super();
+
         this.stream    = stream;
         this.target    = target;
         this.buffer    = [e];
@@ -219,6 +221,8 @@ function isIgnoreTag(e) {
 
 class Gestures extends Stream {
     constructor(node, options) {
+        super();
+
         this.node    = node;
         this.options = options;
     }

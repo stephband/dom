@@ -105,7 +105,12 @@ function setAttribute(name, node, content) {
 export function assign(node, attributes) {
 	var names = Object.keys(attributes);
 	var n = names.length;
-    while (n--) assignProperty(names[n], node, attributes[names[n]]);
+
+    // Avoid setting undefined
+    while (n--) if (attributes[names[n]] !== undefined) {
+        assignProperty(names[n], node, attributes[names[n]]);
+    }
+
 	return node;
 }
 

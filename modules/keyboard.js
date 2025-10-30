@@ -115,7 +115,7 @@ export default function keyboard(responses, element) {
         const modifiers = code === 'shift' || code === 'alt' || code === 'ctrl' || code === 'meta' ?
             '' :
             toModifiers(keys) ;
-
+console.log('KEY', modifiers + code + ':down');
         const respondDown = responses[modifiers + code + ':down'] || responses[modifiers + code];
         const respondHold = responses[modifiers + code + ':hold'] || responses[modifiers + code];
 

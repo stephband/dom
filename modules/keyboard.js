@@ -31,7 +31,7 @@ const keynames = {
     'ArrowRight': 'right',
     'ArrowUp':    'up',
     'Shift':      'shift',
-    'Control':    'control',
+    'Control':    'ctrl',
     'Alt':        'alt',
     'Meta':       'meta',
     'Fn':         'fn'
@@ -111,15 +111,16 @@ export default function keyboard(responses, element) {
         const code = toCode(e);
         keys[code] = e;
 
-        const modifiers   = toModifiers(keys);
+        // If key is a modifier don't prepend modifier string
+        const modifiers = code === 'shift' || code === 'alt' || code === 'ctrl' || code === 'meta' ?
+            '' :
+            toModifiers(keys) ;
+
         const respondDown = responses[modifiers + code + ':down'] || responses[modifiers + code];
         const respondHold = responses[modifiers + code + ':hold'] || responses[modifiers + code];
 
         // Respond to key down
-        if (respondDown) {
-            e.preventDefault();
-            respondDown(e, code);
-        }
+        if (respondDown && respondDown(e, code) !== true) e.preventDefault();
         else if (responses.default) {
             responses.default(e, code);
         }
@@ -141,7 +142,11 @@ export default function keyboard(responses, element) {
         const code = toCode(e);
         delete keys[code];
 
-        const modifiers = toModifiers(keys);
+        // If key is a modifier don't prepend modifier string
+        const modifiers = code === 'shift' || code === 'alt' || code === 'ctrl' || code === 'meta' ?
+            '' :
+            toModifiers(keys) ;
+
         const respondUp = responses[modifiers + code + ':up'];
         //console.log('UP  ', code, Object.keys(keys).length, Object.keys(keys).join(', '));
 

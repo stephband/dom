@@ -18,7 +18,7 @@ keyboard({
     'A':      (e) => { ... },
     // Prefix modifiers
     'shift-A': (e) => { ... },
-    'shift-ctrl-opt-cmd-A:down': (e) => { ... },
+    'shift-ctrl-alt-meta-A:down': (e) => { ... },
 }, document.body);
 ```
 
@@ -67,8 +67,8 @@ function toModifiers(keys) {
     return (keys.shift  ? 'shift-' : '')
         + (keys.fn      ? 'fn-' : '')
         + (keys.control ? 'ctrl-' : '')
-        + (keys.alt     ? 'opt-' : '')
-        + (keys.meta    ? 'cmd-' : '') ;
+        + (keys.alt     ? 'alt-' : '')
+        + (keys.meta    ? 'meta-' : '') ;
 }
 
 export default function keyboard(responses, element) {

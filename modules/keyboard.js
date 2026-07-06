@@ -25,7 +25,7 @@ keyboard({
 Browser keyboard events are very finicky, mileage may vary.
 **/
 
-const DEBUG = global.DEBUG;
+const DEBUG = window.DEBUG;
 
 const isConsumedByInput = overload((e) => e.target.type, {
     // Not an input

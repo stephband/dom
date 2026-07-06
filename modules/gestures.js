@@ -32,7 +32,7 @@ The `options` object may optionally contain any of:
 ```
 
 It is a Very Good Idea to style whatever element is being gestured with
-`touch-action` to avoid the browser sending `pointercancel` events when it
+`touch-action: none` to avoid the browser sending `pointercancel` events when it
 thinks you are trying to perform some native pan or scroll
 ([MDN touch-action](https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action))
 */

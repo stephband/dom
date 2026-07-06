@@ -25,6 +25,27 @@ keyboard({
 Browser keyboard events are very finicky, mileage may vary.
 **/
 
+const DEBUG = global.DEBUG;
+
+const isConsumedByInput = overload((e) => e.target.type, {
+    // Not an input
+    undefined:         (e, code) =>
+        e.target.isContentEditable ? code !== 'escape' :
+        e.target.href ? code === 'enter' :
+        e.target.tagName === 'SUMMARY' ? code === 'enter' || code === 'space' :
+        false ,
+    // Different input types consume different sets of keys
+    button:            (e, code) => ['up', 'down', 'left', 'right', 'tab', 'space', 'enter'].includes(code),
+    checkbox:          (e, code) => ['up', 'down', 'left', 'right', 'tab', 'space', 'enter'].includes(code),
+    radio:             (e, code) => ['up', 'down', 'left', 'right', 'tab', 'space', 'enter'].includes(code),
+    range:             (e, code) => ['up', 'down', 'left', 'right', 'tab', 'enter', 'home', 'end', 'pageup', 'pagedown'].includes(code),
+    'select-one':      (e, code) => code !== 'escape',
+    'select-multiple': (e, code) => code !== 'escape',
+    submit:            (e, code) => ['up', 'down', 'left', 'right', 'tab', 'space', 'enter'].includes(code),
+    // Handle other text types: text, textarea, password, url, etc.
+    default:           (e, code) => code !== 'escape'
+});
+
 const keynames = {
     'ArrowDown':  'down',
     'ArrowLeft':  'left',
@@ -64,11 +85,11 @@ function updateModifiers(keys, e) {
 }
 
 function toModifiers(keys) {
-    return (keys.shift  ? 'shift-' : '')
-        + (keys.fn      ? 'fn-' : '')
-        + (keys.control ? 'ctrl-' : '')
-        + (keys.alt     ? 'alt-' : '')
-        + (keys.meta    ? 'meta-' : '') ;
+    return (keys.shift ? 'shift-' : '')
+        + (keys.fn     ? 'fn-' : '')
+        + (keys.ctrl   ? 'ctrl-' : '')
+        + (keys.alt    ? 'alt-' : '')
+        + (keys.meta   ? 'meta-' : '') ;
 }
 
 export default function keyboard(responses, element) {
@@ -80,7 +101,7 @@ export default function keyboard(responses, element) {
 
         for (let code in keys) {
             // Don't respond to held modifiers
-            if (/^(?:shift|control|alt|meta)$/.test(code)) {
+            if (/^(?:shift|ctrl|alt|meta)$/.test(code)) {
                 continue;
             }
 
@@ -99,23 +120,31 @@ export default function keyboard(responses, element) {
         // Keep track of modifiers
         updateModifiers(keys, e);
 
+        const code = toCode(e);
+
         // Ignore inputs
-        if (e.target.value !== undefined) {
-            console.log('Ignoring key');
+        if (isConsumedByInput(e, code)) {
+            if (DEBUG) console.log(`Key "${ code }" consumed by focused ${ e.target.tagName.toLowerCase() } type "${ e.target.type }"`);
+            return;
+        }
+
+        if (code === 'escape' && e.target.closest('dialog:modal:not([closedby="none"])')) {
+            if (DEBUG) console.log(`Key "escape" consumed by dialog closedby="${ e.target.getAttribute('closedby') }"`);
             return;
         }
 
         // Multiple keydowns can be sent for one key when it is held down. But
         // we are already responding to this key, so dedup keydown.
-        if (e.repeat || keys[e.code]) { return; }
-        const code = toCode(e);
+        if (e.repeat || keys[code]) { return; }
         keys[code] = e;
 
         // If key is a modifier don't prepend modifier string
         const modifiers = code === 'shift' || code === 'alt' || code === 'ctrl' || code === 'meta' ?
             '' :
             toModifiers(keys) ;
-console.log('KEY', modifiers + code + ':down');
+
+        if (DEBUG) console.log('keyboard', modifiers + code + ':down');
+
         const respondDown = responses[modifiers + code + ':down'] || responses[modifiers + code];
         const respondHold = responses[modifiers + code + ':hold'] || responses[modifiers + code];
 

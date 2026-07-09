@@ -197,6 +197,11 @@ export default function keyboard(responses, element) {
     // Return a pseudo stoppable 'stream'. TODO: work out a sensible way of
     // returning a merged stream?
     return {
+        // A quick and dirty hack to get swappable key maps
+        set keymap(keymap) {
+            responses = keymap;
+        },
+
         stop: function() {
             keydowns.stop();
             keyups.stop();

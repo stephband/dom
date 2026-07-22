@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Test</title>
+    <script>
+    document.documentElement.className = 'js';
+    window.DEBUG = false;
+    </script>
+    <script type="importmap">{
+        "imports": {
+            "fn/": "/fn/modules/"
+        }
+    }</script>
+    <script type="module">
+    import { setDataTransfer, getDataTransfer } from '../modules/data-transfer.js';
+
+    document.addEventListener('cut', (e) => {
+        const dataTransfer = e.clipboardData;
+
+        setDataTransfer(dataTransfer, {
+            'application/json': JSON.stringify({ arse: true }),
+            'text/plain': 'true arse'
+        });
+
+        // Prevent default cut behavior
+        e.preventDefault();
+    });
+
+    document.addEventListener('copy', (e) => {
+        const dataTransfer = e.clipboardData;
+
+        setDataTransfer(dataTransfer, {
+            'application/json': JSON.stringify({ arse: true }),
+            'text/plain': 'true arse'
+        });
+
+        // Prevent default copy behavior
+        e.preventDefault();
+    });
+
+    document.addEventListener('paste', (e) => {
+        const dataTransfer = e.clipboardData;
+        const data = getDataTransfer(dataTransfer, ['application/json', 'text/plain']);
+        console.log('PASTE', data);
+
+        // Prevent default paste behavior
+        e.preventDefault();
+    });
+
+    navigator.clipboard.addEventListener('clipboardchange', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            console.log('Clipboard changed. New content: ', text);
+        }
+        catch (err) {
+            console.error('Could not read clipboard change: ', err);
+        }
+    });
+    </script>
+</head>
+<body>
+    <h1>Test</h1>
+</body>
+</html>
